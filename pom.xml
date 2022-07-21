@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.keycloak</groupId>
+    <artifactId>keycloak-group-management</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <organization>
+        <name>GRNet</name>
+        <url>https://grnet.gr</url>
+    </organization>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <keycloak.version>18.0.1</keycloak.version>
+
+        <frontend-src-dir>${project.basedir}/src/main/app</frontend-src-dir>
+        <node.version>v17.0.0</node.version>
+        <yarn.version>v1.16.0</yarn.version>
+        <frontend-maven-plugin.version>1.12.0</frontend-maven-plugin.version>
+    </properties>
+
+    <dependencies>
+
+        <!-- Keycloak -->
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-server-spi</artifactId>
+            <version>${keycloak.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-server-spi-private</artifactId>
+            <version>${keycloak.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.keycloak</groupId>
+            <artifactId>keycloak-services</artifactId>
+            <version>${keycloak.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+<!--        <plugins>-->
+<!--            <plugin>-->
+<!--                <groupId>com.github.eirslett</groupId>-->
+<!--                <artifactId>frontend-maven-plugin</artifactId>-->
+<!--                <version>${frontend-maven-plugin.version}</version>-->
+
+<!--                <configuration>-->
+<!--                    <nodeVersion>${node.version}</nodeVersion>-->
+<!--                    <yarnVersion>${yarn.version}</yarnVersion>-->
+<!--                    <workingDirectory>${frontend-src-dir}</workingDirectory>-->
+<!--                    <installDirectory>${project.build.directory}</installDirectory>-->
+<!--                </configuration>-->
+
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>install-frontend-tools</id>-->
+<!--                        <goals>-->
+<!--                            <goal>install-node-and-yarn</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+
+<!--                    <execution>-->
+<!--                        <id>yarn-install</id>-->
+<!--                        <goals>-->
+<!--                            <goal>yarn</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <arguments>install</arguments>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+
+<!--                    <execution>-->
+<!--                        <id>build-frontend</id>-->
+<!--                        <goals>-->
+<!--                            <goal>yarn</goal>-->
+<!--                        </goals>-->
+<!--                        <phase>prepare-package</phase>-->
+<!--                        <configuration>-->
+<!--                            <arguments>build</arguments>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+
+<!--            <plugin>-->
+<!--                <artifactId>maven-resources-plugin</artifactId>-->
+<!--                <version>3.0.1</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>position-react-build</id>-->
+<!--                        <goals>-->
+<!--                            <goal>copy-resources</goal>-->
+<!--                        </goals>-->
+<!--                        <phase>prepare-package</phase>-->
+<!--                        <configuration>-->
+<!--                            <outputDirectory>${project.build.outputDirectory}/webapp</outputDirectory>-->
+<!--                            <resources>-->
+<!--                                <resource>-->
+<!--                                    <directory>${frontend-src-dir}/build</directory>-->
+<!--                                    <filtering>false</filtering>-->
+<!--                                </resource>-->
+<!--                            </resources>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+
+<!--        </plugins>-->
+
+        <finalName>${artifactId}</finalName>
+    </build>
+
+</project>
