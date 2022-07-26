@@ -53,14 +53,14 @@ public class ResourcesProvider implements RealmResourceProvider {
 
     @Path("groups")
     public GroupsService getGroupsService() {
-        GroupsService service = new GroupsService();
+        GroupsService service = new GroupsService(session);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
 
     @Path("ui")
     public UserInterfaceService getUserInterfaceService() {
-        UserInterfaceService service = new UserInterfaceService();
+        UserInterfaceService service = new UserInterfaceService(session);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

@@ -40,25 +40,11 @@ public class UserInterfaceService {
 
     private static final String BASE_FOLDER = "webapp";
 
-
-    @Context
-    private HttpRequest request;
-
-    @Context
-    protected HttpHeaders headers;
-
-    @Context
-    private ClientConnection clientConnection;
-
-    @Context
-    protected Providers providers;
-
-    @Context
     protected KeycloakSession session;
 
 
-    public UserInterfaceService() {
-
+    public UserInterfaceService(KeycloakSession session) {
+        this.session = session;
     }
 
     @Path("{any: .*}")

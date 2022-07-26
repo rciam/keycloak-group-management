@@ -2,11 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>keycloak-parent</artifactId>
+        <groupId>org.keycloak</groupId>
+        <version>18.0.1</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.keycloak</groupId>
     <artifactId>keycloak-group-management</artifactId>
-    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <organization>
@@ -15,14 +18,9 @@
     </organization>
 
     <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <keycloak.version>18.0.1</keycloak.version>
-
-        <frontend-src-dir>${project.basedir}/src/main/app</frontend-src-dir>
-        <node.version>v17.0.0</node.version>
-        <yarn.version>v1.16.0</yarn.version>
-        <frontend-maven-plugin.version>1.12.0</frontend-maven-plugin.version>
+<!--        <keycloak.version>18.0.1</keycloak.version>-->
+        <dir.account2>src/main/resources/theme/groups/account/src</dir.account2>
+        <args.npm.install>ci --no-optional --ignore-scripts</args.npm.install>
     </properties>
 
     <dependencies>
@@ -31,96 +29,146 @@
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-server-spi</artifactId>
-            <version>${keycloak.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-server-spi-private</artifactId>
-            <version>${keycloak.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-services</artifactId>
-            <version>${keycloak.version}</version>
             <scope>provided</scope>
         </dependency>
 
     </dependencies>
 
     <build>
-<!--        <plugins>-->
-<!--            <plugin>-->
-<!--                <groupId>com.github.eirslett</groupId>-->
-<!--                <artifactId>frontend-maven-plugin</artifactId>-->
-<!--                <version>${frontend-maven-plugin.version}</version>-->
 
-<!--                <configuration>-->
-<!--                    <nodeVersion>${node.version}</nodeVersion>-->
-<!--                    <yarnVersion>${yarn.version}</yarnVersion>-->
-<!--                    <workingDirectory>${frontend-src-dir}</workingDirectory>-->
-<!--                    <installDirectory>${project.build.directory}</installDirectory>-->
-<!--                </configuration>-->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>**/node_modules/rcue/**</exclude>
+                    <exclude>**/node_modules/**/node_modules/**</exclude>
+                    <exclude>**/minimist/**</exclude>
+                    <exclude>**/mkdirp/**</exclude>
+                    <exclude>**/package.json</exclude>
+                    <exclude>**/package-lock.json</exclude>
+                    <exclude>**/component.json</exclude>
+                    <exclude>**/composer.json</exclude>
+                    <exclude>**/npm-shrinkwrap.json</exclude>
+                    <exclude>**/select2.jquery.json</exclude>
+                    <exclude>**/*.markdown</exclude>
+                    <exclude>**/*.swf</exclude>
+                    <exclude>**/*.sh</exclude>
+                    <exclude>**/.bin/**</exclude>
+                    <exclude>**/bin/**</exclude>
+                    <exclude>**/build/**</exclude>
+                    <exclude>**/docs/**</exclude>
+                    <exclude>**/demo/**</exclude>
+                    <exclude>**/devtools/**</exclude>
+                    <exclude>**/example/**</exclude>
+                    <exclude>**/examples/**</exclude>
+                    <exclude>**/grunt/**</exclude>
+                    <exclude>**/less/**</exclude>
+                    <exclude>**/sass/**</exclude>
+                    <exclude>**/scss/**</exclude>
+                    <exclude>**/jquery/src/**</exclude>
+                    <exclude>**/angular-treeview/src/**</exclude>
+                    <exclude>**/test/**</exclude>
+                    <exclude>**/tests/**</exclude>
+                    <exclude>**/_config.yml</exclude>
+                    <exclude>**/api.md</exclude>
+                    <exclude>**/AUTHORS.txt</exclude>
+                    <exclude>**/CHANGELOG.md</exclude>
+                    <exclude>**/CONTRIBUTING.md</exclude>
+                    <exclude>**/HELP-US-OUT.txt</exclude>
+                    <exclude>**/README.md</exclude>
+                    <exclude>**/Gruntfile.js</exclude>
+                    <exclude>**/Gemfile*</exclude>
+                    <exclude>**/.*</exclude>
 
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>install-frontend-tools</id>-->
-<!--                        <goals>-->
-<!--                            <goal>install-node-and-yarn</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
+                    <!-- Remove once rcue stops shipping this file -->
+                    <exclude>**/git-Logo.svg</exclude>
 
-<!--                    <execution>-->
-<!--                        <id>yarn-install</id>-->
-<!--                        <goals>-->
-<!--                            <goal>yarn</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <arguments>install</arguments>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
+                    <exclude>**/groups/account/src/**</exclude>
+                </excludes>
+            </resource>
+        </resources>
 
-<!--                    <execution>-->
-<!--                        <id>build-frontend</id>-->
-<!--                        <goals>-->
-<!--                            <goal>yarn</goal>-->
-<!--                        </goals>-->
-<!--                        <phase>prepare-package</phase>-->
-<!--                        <configuration>-->
-<!--                            <arguments>build</arguments>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-
-<!--            <plugin>-->
-<!--                <artifactId>maven-resources-plugin</artifactId>-->
-<!--                <version>3.0.1</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>position-react-build</id>-->
-<!--                        <goals>-->
-<!--                            <goal>copy-resources</goal>-->
-<!--                        </goals>-->
-<!--                        <phase>prepare-package</phase>-->
-<!--                        <configuration>-->
-<!--                            <outputDirectory>${project.build.outputDirectory}/webapp</outputDirectory>-->
-<!--                            <resources>-->
-<!--                                <resource>-->
-<!--                                    <directory>${frontend-src-dir}/build</directory>-->
-<!--                                    <filtering>false</filtering>-->
-<!--                                </resource>-->
-<!--                            </resources>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-
-<!--        </plugins>-->
-
-        <finalName>${artifactId}</finalName>
+        <finalName>${project.artifactId}</finalName>
     </build>
+
+
+    <profiles>
+        <profile>
+            <id>account2</id>
+            <activation>
+                <property>
+                    <name>!skipAccount2</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>${dir.account2}/web_modules</directory>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <executions>
+                            <!-- Download NPM tools -->
+                            <execution>
+                                <id>setup-node</id>
+                                <goals>
+                                    <goal>install-node-and-npm</goal>
+                                </goals>
+                                <phase>initialize</phase>
+                            </execution>
+                            <!-- Compile stuff -->
+                            <execution>
+                                <id>compile-account2</id>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <phase>generate-resources</phase>
+                                <configuration>
+                                    <workingDirectory>${dir.account2}</workingDirectory>
+                                    <arguments>run build --scripts-prepend-node-path</arguments>
+                                </configuration>
+                            </execution>
+                            <!-- Download NPM packages -->
+                            <execution>
+                                <id>npm-install-account2</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>npm</goal>
+                                </goals>
+                                <configuration>
+                                    <workingDirectory>${dir.account2}</workingDirectory>
+                                    <arguments>${args.npm.install}</arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <nodeVersion>${node.version}</nodeVersion>
+                            <installDirectory>${project.basedir}</installDirectory>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
 
 </project>
