@@ -21,12 +21,23 @@ import org.jboss.logging.Logger;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.UserModel;
+import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
+import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
 import org.keycloak.plugins.groups.services.GroupsService;
+import org.keycloak.plugins.groups.stubs.ErrorResponse;
 import org.keycloak.plugins.groups.ui.UserInterfaceService;
+import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.resource.RealmResourceProvider;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ResourcesProvider implements RealmResourceProvider {
 
@@ -58,13 +69,13 @@ public class ResourcesProvider implements RealmResourceProvider {
         return service;
     }
 
+    //PLEASE REMOVE THIS FUNCTION
+    @Deprecated
     @Path("ui")
     public UserInterfaceService getUserInterfaceService() {
         UserInterfaceService service = new UserInterfaceService(session);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
-
-
 
 }

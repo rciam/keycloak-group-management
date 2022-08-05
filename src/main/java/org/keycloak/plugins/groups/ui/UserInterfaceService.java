@@ -32,6 +32,8 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+//PLEASE REMOVE THIS CLASS
+@Deprecated
 public class UserInterfaceService {
 
     private static final Logger logger = Logger.getLogger(UserInterfaceService.class);
