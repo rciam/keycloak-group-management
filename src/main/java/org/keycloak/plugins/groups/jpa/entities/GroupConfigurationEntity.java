@@ -35,6 +35,35 @@ public class GroupConfigurationEntity {
     protected GroupAupEntity aupEntity;
 
 
+    public GroupEntity getGroup() {
+        return group;
+    }
 
+    public void setGroup(GroupEntity group) {
+        this.group = group;
+    }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public GroupEnrollmentFlowEntity getEnrollmentFlow() {
+        return enrollmentFlow;
+    }
+
+    public void setEnrollmentFlow(GroupEnrollmentFlowEntity enrollmentFlow) {
+        this.enrollmentFlow = enrollmentFlow;
+    }
+
+    public GroupAupEntity getAupEntity() {
+        return aupEntity;
+    }
+
+    public void setAupEntity(GroupAupEntity aupEntity) {
+        this.aupEntity = aupEntity;
+    }
 }

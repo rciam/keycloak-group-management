@@ -18,7 +18,6 @@ public class GroupEnrollmentFlowPropsEntity {
     private String value;
 
 
-
     public String getFlowId() {
         return flowId;
     }
@@ -42,4 +41,8 @@ public class GroupEnrollmentFlowPropsEntity {
     public void setValue(String value) {
         this.value = value;
     }
+
+
+
+
 }

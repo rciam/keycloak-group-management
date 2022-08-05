@@ -44,4 +44,36 @@ public class GroupEnrollmentEntity {
             mappedBy="fb")
     protected Collection<GroupEnrollmentStateEntity> enrollmentState;
 
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public void setUser(UserEntity user) {
+        this.user = user;
+    }
+
+    public GroupEntity getGroup() {
+        return group;
+    }
+
+    public void setGroup(GroupEntity group) {
+        this.group = group;
+    }
+
+    public Collection<GroupEnrollmentStateEntity> getEnrollmentState() {
+        return enrollmentState;
+    }
+
+    public void setEnrollmentState(Collection<GroupEnrollmentStateEntity> enrollmentState) {
+        this.enrollmentState = enrollmentState;
+    }
 }

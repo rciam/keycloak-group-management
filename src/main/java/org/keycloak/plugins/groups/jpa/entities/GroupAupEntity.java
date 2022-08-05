@@ -1,10 +1,14 @@
 package org.keycloak.plugins.groups.jpa.entities;
 
+import org.keycloak.models.jpa.entities.UserEntity;
+
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -22,10 +26,40 @@ public class GroupAupEntity {
     @Column(name="CONTENT")
     protected Object content;
 
-    @Column(name="EDITOR")
-    protected String editor;
+    @ManyToOne()
+    @JoinColumn(name = "EDITOR")
+    protected UserEntity editor;
 
 
+    public String getId() {
+        return id;
+    }
 
+    public void setId(String id) {
+        this.id = id;
+    }
 
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public Object getContent() {
+        return content;
+    }
+
+    public void setContent(Object content) {
+        this.content = content;
+    }
+
+    public UserEntity getEditor() {
+        return editor;
+    }
+
+    public void setEditor(UserEntity editor) {
+        this.editor = editor;
+    }
 }
