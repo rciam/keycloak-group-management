@@ -1,13 +1,16 @@
 package org.keycloak.plugins.groups.services;
 
 import org.jboss.logging.Logger;
+import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.stubs.ErrorResponse;
 import org.keycloak.representations.idm.GroupRepresentation;
 
+import javax.persistence.EntityManager;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -54,6 +57,17 @@ public class UserGroups {
 //        return Response.ok().type(MediaType.APPLICATION_JSON).entity(userGroups).build();
 //    }
 
+    @GET
+    @Path("/enroll/request")
+    @Produces("application/json")
+    public List<GroupEnrollmentEntity> getMyEnrollments() {
+        UserModel user = authHelper.authenticateUserRequest();
+        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+        List<GroupEnrollmentEntity> groupEnrollmentEntities = em.createNamedQuery("getAllUserGroupEnrollments", GroupEnrollmentEntity.class)
+                .setParameter("userId", user.getId())
+                .getResultList();
+        return groupEnrollmentEntities;
+    }
 
 
 }
