@@ -3,10 +3,12 @@ package org.keycloak.plugins.groups.services;
 import org.jboss.logging.Logger;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
+import org.keycloak.plugins.groups.jpa.repositories.GroupConfigurationRepository;
 import org.keycloak.plugins.groups.stubs.ErrorResponse;
 import org.keycloak.representations.idm.GroupRepresentation;
 
@@ -25,12 +27,16 @@ public class UserGroups {
     private static final Logger logger = Logger.getLogger(UserGroups.class);
 
     protected KeycloakSession session;
+    private RealmModel realm;
 
     private AuthenticationHelper authHelper;
+    private GroupConfigurationRepository groupConfigurationRepository;
 
     public UserGroups(KeycloakSession session) {
         this.session = session;
+        this.realm =  session.getContext().getRealm();
         this.authHelper = new AuthenticationHelper(session);
+        this.groupConfigurationRepository =  new GroupConfigurationRepository(session, realm);
     }
 
 
