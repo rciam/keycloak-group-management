@@ -5,13 +5,10 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentFlowEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentFlowPropsEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentStateEntity;
+import org.keycloak.plugins.groups.jpa.entities.UserVoGroupMembershipEntity;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class GroupManagementEntityProvider implements JpaEntityProvider {
@@ -29,9 +26,8 @@ public class GroupManagementEntityProvider implements JpaEntityProvider {
                 GroupAupEntity.class,
                 GroupConfigurationEntity.class,
                 GroupEnrollmentEntity.class,
-                GroupEnrollmentFlowEntity.class,
-                GroupEnrollmentFlowPropsEntity.class,
-                GroupEnrollmentStateEntity.class
+                GroupEnrollmentStateEntity.class,
+                UserVoGroupMembershipEntity.class
         );
     }
 

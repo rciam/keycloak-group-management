@@ -13,7 +13,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="KEYCLOAK_GROUP_CONFIGURATION")
+@Table(name="GROUP_CONFIGURATION")
 public class GroupConfigurationEntity {
 
 //    @Id
@@ -24,15 +24,19 @@ public class GroupConfigurationEntity {
     @Column(name="DESCRIPTION")
     protected String description;
 
-//    @Column(name="ENROLLMENT_FLOW")
-    @ManyToOne()
-    @JoinColumn(name = "ENROLLMENT_FLOW")
-    protected GroupEnrollmentFlowEntity enrollmentFlow;
-
 //    @Column(name="AUP_ID")
     @ManyToOne()
     @JoinColumn(name = "AUP_ID")
     protected GroupAupEntity aupEntity;
+
+    @Column(name="REQUIRE_AUP_ACCEPTANCE")
+    protected Boolean requireAupAcceptance;
+
+    @Column(name="REQUIRE_APPROVAL")
+    protected Boolean requireApproval;
+
+    @Column(name="AUP_EXPIRY")
+    protected Long aupExpiry;
 
 
     public GroupEntity getGroup() {
@@ -51,19 +55,35 @@ public class GroupConfigurationEntity {
         this.description = description;
     }
 
-    public GroupEnrollmentFlowEntity getEnrollmentFlow() {
-        return enrollmentFlow;
-    }
-
-    public void setEnrollmentFlow(GroupEnrollmentFlowEntity enrollmentFlow) {
-        this.enrollmentFlow = enrollmentFlow;
-    }
-
     public GroupAupEntity getAupEntity() {
         return aupEntity;
     }
 
     public void setAupEntity(GroupAupEntity aupEntity) {
         this.aupEntity = aupEntity;
+    }
+
+    public Boolean getRequireAupAcceptance() {
+        return requireAupAcceptance;
+    }
+
+    public void setRequireAupAcceptance(Boolean requireAupAcceptance) {
+        this.requireAupAcceptance = requireAupAcceptance;
+    }
+
+    public Boolean getRequireApproval() {
+        return requireApproval;
+    }
+
+    public void setRequireApproval(Boolean requireApproval) {
+        this.requireApproval = requireApproval;
+    }
+
+    public Long getAupExpiry() {
+        return aupExpiry;
+    }
+
+    public void setAupExpiry(Long aupExpiry) {
+        this.aupExpiry = aupExpiry;
     }
 }

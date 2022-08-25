@@ -12,7 +12,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="KEYCLOAK_GROUP_ENROLLMENT_STATE")
+@Table(name="GROUP_ENROLLMENT_STATE")
 public class GroupEnrollmentStateEntity {
 
 //    @Id

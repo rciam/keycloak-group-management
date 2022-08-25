@@ -21,7 +21,7 @@ import javax.persistence.Table;
 import java.util.Collection;
 
 @Entity
-@Table(name="KEYCLOAK_GROUP_ENROLLMENT")
+@Table(name="GROUP_ENROLLMENT")
 @NamedQueries({
         @NamedQuery(name="getAllUserGroupEnrollments", query="from GroupEnrollmentEntity ge where ge.user.id = :userId")
 })
@@ -47,8 +47,6 @@ public class GroupEnrollmentEntity {
 //            cascade = CascadeType.REMOVE,
 //            orphanRemoval = true,
             mappedBy="fb")
-    protected Collection<GroupEnrollmentStateEntity> enrollmentState;
-
 
     public String getId() {
         return id;
@@ -74,11 +72,4 @@ public class GroupEnrollmentEntity {
         this.group = group;
     }
 
-    public Collection<GroupEnrollmentStateEntity> getEnrollmentState() {
-        return enrollmentState;
-    }
-
-    public void setEnrollmentState(Collection<GroupEnrollmentStateEntity> enrollmentState) {
-        this.enrollmentState = enrollmentState;
-    }
 }

@@ -3,16 +3,63 @@
 
     <changeSet author="laskarisn@grnet.gr" id="advanced-group-management-plugin-v1.0">
 
-        <createTable tableName="KEYCLOAK_GROUP_CONFIGURATION">
+        <createTable tableName="USER_VO_GROUP_MEMBERSHIP">
+            <column name="ID" type="VARCHAR(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="GROUP_ID" type="VARCHAR(36)" />
+            <column name="USER_ID" type="VARCHAR(36)"/>
+            <column name="STATUS" type="VARCHAR(255)" />
+            <column name="CHANGED_BY" type="VARCHAR(36)" >
+                <constraints nullable="true"/>
+            </column>
+            <column name="MEMBERSHIP_EXPIRES_AT" type="timestamp" />
+            <column name="AUP_EXPIRES_AT" type="timestamp" />
+            <column name="JUSTIFICATION" type="text" />
+        </createTable>
+
+        <createIndex indexName="USER_VO_GROUP_MEMBERSHIP_GID" tableName="USER_VO_GROUP_MEMBERSHIP">
+            <column name="GROUP_ID"/>
+        </createIndex>
+
+        <createIndex indexName="USER_VO_GROUP_MEMBERSHIP_UID" tableName="USER_VO_GROUP_MEMBERSHIP">
+            <column name="USER_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint
+                constraintName="fk_kc_usr_vo_grp_mb_gid"
+                baseTableName="USER_VO_GROUP_MEMBERSHIP"
+                baseColumnNames="GROUP_ID"
+                referencedTableName="keycloak_group"
+                referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint
+                constraintName="fk_kc_usr_vo_grp_mb_uid"
+                baseTableName="USER_VO_GROUP_MEMBERSHIP"
+                baseColumnNames="USER_ID"
+                referencedTableName="user_entity"
+                referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint
+                constraintName="fk_kc_usr_vo_grp_mb_cb"
+                baseTableName="USER_VO_GROUP_MEMBERSHIP"
+                baseColumnNames="CHANGED_BY"
+                referencedTableName="user_entity"
+                referencedColumnNames="id"
+        />
+
+        <createTable tableName="GROUP_CONFIGURATION">
             <column name="GROUP_ID" type="VARCHAR(36)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="DESCRIPTION" type="TEXT"/>
-            <column name="ENROLLMENT_FLOW" type="VARCHAR(36)"/>
             <column name="AUP_ID" type="VARCHAR(36)"/>
+            <column name="REQUIRE_AUP_ACCEPTANCE" type="boolean"/>
+            <column name="REQUIRE_APPROVAL" type="boolean"/>
+            <column name="AUP_EXPIRY" type="timestamp"/>
         </createTable>
 
-        <createTable tableName="KEYCLOAK_GROUP_AUP">
+        <createTable tableName="GROUP_AUP">
             <column name="ID" type="VARCHAR(36)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -27,7 +74,7 @@
             </column>
         </createTable>
 
-        <createTable tableName="KEYCLOAK_GROUP_ENROLLMENT">
+        <createTable tableName="GROUP_ENROLLMENT">
             <column name="ID" type="VARCHAR(36)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -39,7 +86,7 @@
             </column>
         </createTable>
 
-        <createTable tableName="KEYCLOAK_GROUP_ENROLLMENT_STATE">
+        <createTable tableName="GROUP_ENROLLMENT_STATE">
             <column name="ENROLLMENT_ID" type="VARCHAR(36)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -55,89 +102,56 @@
             </column>
         </createTable>
 
-        <createTable tableName="KEYCLOAK_GROUP_ENROLLMENT_FLOW">
-            <column name="ID" type="VARCHAR(36)">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="GROUP_ID" type="VARCHAR(36)"/>
-            <column name="DESCRIPTION" type="TEXT"/>
-        </createTable>
 
-        <createTable tableName="KEYCLOAK_GROUP_ENROLLMENT_FLOW_PROPS">
-            <column name="FLOW_ID" type="VARCHAR(36)">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="PROPERTY" type="VARCHAR(255)">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="VALUE" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-
-
-        <createIndex indexName="KC_GROUP_CONFIG_IDX" tableName="KEYCLOAK_GROUP_CONFIGURATION">
-            <column name="ENROLLMENT_FLOW"/>
+        <createIndex indexName="KC_GROUP_CONFIG_IDX" tableName="GROUP_CONFIGURATION">
             <column name="AUP_ID"/>
         </createIndex>
 
-        <createIndex indexName="KC_GROUP_CONFIG_EF_IDX" tableName="KEYCLOAK_GROUP_CONFIGURATION">
-            <column name="ENROLLMENT_FLOW"/>
-        </createIndex>
-
-        <createIndex indexName="KC_GROUP_CONFIG_AID_IDX" tableName="KEYCLOAK_GROUP_CONFIGURATION">
+        <createIndex indexName="KC_GROUP_CONFIG_AID_IDX" tableName="GROUP_CONFIGURATION">
             <column name="AUP_ID"/>
         </createIndex>
 
         <addForeignKeyConstraint
                 constraintName="fk_kc_grp_cfg_gid"
-                baseTableName="KEYCLOAK_GROUP_CONFIGURATION"
+                baseTableName="GROUP_CONFIGURATION"
                 baseColumnNames="GROUP_ID"
                 referencedTableName="keycloak_group"
                 referencedColumnNames="id"
         />
 
         <addForeignKeyConstraint
-                constraintName="fk_kc_grp_cfg_ef"
-                baseTableName="KEYCLOAK_GROUP_CONFIGURATION"
-                baseColumnNames="enrollment_flow"
-                referencedTableName="keycloak_group_enrollment_flow"
-                referencedColumnNames="id"
-        />
-
-        <addForeignKeyConstraint
                 constraintName="fk_kc_grp_cfg_aid"
-                baseTableName="KEYCLOAK_GROUP_CONFIGURATION"
+                baseTableName="GROUP_CONFIGURATION"
                 baseColumnNames="aup_id"
-                referencedTableName="keycloak_group_aup"
+                referencedTableName="group_aup"
                 referencedColumnNames="id"
         />
 
-        <createIndex indexName="KC_GROUP_AUP_ED_IDX" tableName="KEYCLOAK_GROUP_AUP">
+        <createIndex indexName="KC_GROUP_AUP_ED_IDX" tableName="GROUP_AUP">
             <column name="EDITOR"/>
         </createIndex>
 
 
         <addForeignKeyConstraint
                 constraintName="fk_kc_grp_aup_editor"
-                baseTableName="KEYCLOAK_GROUP_AUP"
+                baseTableName="GROUP_AUP"
                 baseColumnNames="editor"
                 referencedTableName="user_entity"
                 referencedColumnNames="id"
         />
 
-        <createIndex indexName="KC_GROUP_ENROL_UID_IDX" tableName="KEYCLOAK_GROUP_ENROLLMENT">
+        <createIndex indexName="KC_GROUP_ENROL_UID_IDX" tableName="GROUP_ENROLLMENT">
             <column name="USER_ID"/>
         </createIndex>
 
-        <createIndex indexName="KC_GROUP_ENROL_GID_IDX" tableName="KEYCLOAK_GROUP_ENROLLMENT">
+        <createIndex indexName="KC_GROUP_ENROL_GID_IDX" tableName="GROUP_ENROLLMENT">
             <column name="GROUP_ID"/>
         </createIndex>
 
 
         <addForeignKeyConstraint
                 constraintName="fk_kc_grp_enrol_uid"
-                baseTableName="KEYCLOAK_GROUP_ENROLLMENT"
+                baseTableName="GROUP_ENROLLMENT"
                 baseColumnNames="user_id"
                 referencedTableName="user_entity"
                 referencedColumnNames="id"
@@ -145,57 +159,49 @@
 
         <addForeignKeyConstraint
                 constraintName="fk_kc_grp_enrol_gid"
-                baseTableName="KEYCLOAK_GROUP_ENROLLMENT"
+                baseTableName="GROUP_ENROLLMENT"
                 baseColumnNames="group_id"
                 referencedTableName="keycloak_group"
                 referencedColumnNames="id"
         />
 
-        <createIndex indexName="KC_GROUP_ENROL_STATE_UID_IDX" tableName="KEYCLOAK_GROUP_ENROLLMENT_STATE">
+        <createIndex indexName="KC_GROUP_ENROL_STATE_UID_IDX" tableName="GROUP_ENROLLMENT_STATE">
             <column name="USER_ID"/>
         </createIndex>
 
 
         <addForeignKeyConstraint
                 constraintName="fk_kc_grp_enrol_state_eid"
-                baseTableName="KEYCLOAK_GROUP_ENROLLMENT_STATE"
+                baseTableName="GROUP_ENROLLMENT_STATE"
                 baseColumnNames="enrollment_id"
-                referencedTableName="keycloak_group_enrollment"
+                referencedTableName="group_enrollment"
                 referencedColumnNames="id"
         />
 
         <addForeignKeyConstraint
                 constraintName="fk_kc_grp_enrol_state_uid"
-                baseTableName="KEYCLOAK_GROUP_ENROLLMENT_STATE"
+                baseTableName="GROUP_ENROLLMENT_STATE"
                 baseColumnNames="user_id"
                 referencedTableName="user_entity"
                 referencedColumnNames="id"
         />
 
-        <createIndex indexName="KC_GROUP_ENROL_FLOW_GID_IDX" tableName="KEYCLOAK_GROUP_ENROLLMENT_FLOW">
-            <column name="GROUP_ID"/>
+
+    </changeSet>
+
+    <changeSet author="laskarisn@grnet.gr" id="realm-group-enhancements">
+
+        <createIndex indexName="KC_GROUP_REALMID_IDX" tableName="keycloak_group">
+            <column name="REALM_ID"/>
         </createIndex>
 
         <addForeignKeyConstraint
-                constraintName="fk_kc_grp_enrol_flow_gid"
-                baseTableName="KEYCLOAK_GROUP_ENROLLMENT_FLOW"
-                baseColumnNames="group_id"
-                referencedTableName="keycloak_group"
+                constraintName="fk_kc_group_realm_rid"
+                baseTableName="keycloak_group"
+                baseColumnNames="realm_id"
+                referencedTableName="realm"
                 referencedColumnNames="id"
         />
-
-        <createIndex indexName="KC_GROUP_ENROL_FLOW_PROPS_FID_IDX" tableName="KEYCLOAK_GROUP_ENROLLMENT_FLOW_PROPS">
-            <column name="FLOW_ID"/>
-        </createIndex>
-
-        <addForeignKeyConstraint
-                constraintName="fk_kc_grp_enrol_flow_props_fid"
-                baseTableName="KEYCLOAK_GROUP_ENROLLMENT_FLOW_PROPS"
-                baseColumnNames="flow_id"
-                referencedTableName="keycloak_group_enrollment_flow"
-                referencedColumnNames="id"
-        />
-
     </changeSet>
 
 

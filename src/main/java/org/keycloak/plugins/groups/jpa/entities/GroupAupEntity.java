@@ -12,7 +12,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="KEYCLOAK_GROUP_AUP")
+@Table(name="GROUP_AUP")
 public class GroupAupEntity {
 
     @Id
