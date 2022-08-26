@@ -35,8 +35,8 @@ public class GroupConfigurationEntity {
     @Column(name="REQUIRE_APPROVAL")
     protected Boolean requireApproval;
 
-    @Column(name="AUP_EXPIRY")
-    protected Long aupExpiry;
+    @Column(name="AUP_EXPIRY_SEC")
+    protected Long aupExpirySec;
 
 
     public GroupEntity getGroup() {
@@ -80,10 +80,10 @@ public class GroupConfigurationEntity {
     }
 
     public Long getAupExpiry() {
-        return aupExpiry;
+        return aupExpirySec;
     }
 
-    public void setAupExpiry(Long aupExpiry) {
-        this.aupExpiry = aupExpiry;
+    public void setAupExpiry(Long aupExpirySec) {
+        this.aupExpirySec = aupExpirySec;
     }
 }
