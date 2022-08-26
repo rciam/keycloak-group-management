@@ -63,9 +63,10 @@
             <column name="ID" type="VARCHAR(36)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="MIMETYPE" type="VARCHAR(255)">
+            <column name="TYPE" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
+            <column name="MIMETYPE" type="VARCHAR(255)"/>
             <column name="CONTENT" type="BLOB">
                 <constraints nullable="false"/>
             </column>

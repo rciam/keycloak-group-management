@@ -20,6 +20,9 @@ public class GroupAupEntity {
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
     protected String id;
 
+    @Column(name="TYPE")
+    protected String type;
+
     @Column(name="MIMETYPE")
     protected String mimeType;
 
@@ -37,6 +40,14 @@ public class GroupAupEntity {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getMimeType() {
