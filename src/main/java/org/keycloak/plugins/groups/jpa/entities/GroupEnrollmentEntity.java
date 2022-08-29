@@ -1,6 +1,8 @@
 package org.keycloak.plugins.groups.jpa.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
 import org.keycloak.models.jpa.entities.GroupAttributeEntity;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.RealmEntity;
@@ -11,6 +13,7 @@ import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -40,11 +43,14 @@ public class GroupEnrollmentEntity {
     @JoinColumn(name = "GROUP_ID")
     protected GroupEntity group;
 
-//    @BatchSize(size = 50)
-//    @OneToMany(
-////            cascade = CascadeType.REMOVE,
-////            orphanRemoval = true,
-//            mappedBy="fb")
+    @JsonManagedReference
+    @BatchSize(size = 50)
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true,
+            mappedBy="enrollmentEntity")
+    protected Collection<GroupEnrollmentStateEntity> enrollmentStates;
 
     public String getId() {
         return id;
@@ -70,4 +76,11 @@ public class GroupEnrollmentEntity {
         this.group = group;
     }
 
+    public Collection<GroupEnrollmentStateEntity> getEnrollmentStates() {
+        return enrollmentStates;
+    }
+
+    public void setEnrollmentStates(Collection<GroupEnrollmentStateEntity> enrollmentStates) {
+        this.enrollmentStates = enrollmentStates;
+    }
 }
