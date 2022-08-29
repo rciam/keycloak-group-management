@@ -42,3 +42,9 @@
 # Maven #
 #########
 target
+
+# react #
+#########
+node
+src/main/resources/theme/groups/account/src/web_modules
+src/main/resources/theme/groups/account/src/node_modules

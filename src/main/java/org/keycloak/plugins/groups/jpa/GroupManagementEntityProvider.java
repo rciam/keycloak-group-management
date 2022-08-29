@@ -26,7 +26,7 @@ public class GroupManagementEntityProvider implements JpaEntityProvider {
                 GroupAupEntity.class,
                 GroupConfigurationEntity.class,
                 GroupEnrollmentEntity.class,
-                GroupEnrollmentStateEntity.class,
+             //   GroupEnrollmentStateEntity.class,
                 UserVoGroupMembershipEntity.class
         );
     }

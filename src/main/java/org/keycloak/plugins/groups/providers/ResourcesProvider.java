@@ -20,18 +20,24 @@ package org.keycloak.plugins.groups.providers;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
+import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
+import org.keycloak.plugins.groups.services.AdminGroups;
 import org.keycloak.plugins.groups.services.GroupsService;
 import org.keycloak.plugins.groups.stubs.ErrorResponse;
 import org.keycloak.plugins.groups.ui.UserInterfaceService;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.resource.RealmResourceProvider;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -47,9 +53,11 @@ public class ResourcesProvider implements RealmResourceProvider {
     protected ClientConnection clientConnection;
 
     private KeycloakSession session;
+    private final RealmModel realm;
 
     public ResourcesProvider(KeycloakSession session) {
         this.session = session;
+        this.realm = session.getContext().getRealm();
         this.clientConnection = session.getContext().getConnection();
     }
 
@@ -64,7 +72,21 @@ public class ResourcesProvider implements RealmResourceProvider {
 
     @Path("groups")
     public GroupsService getGroupsService() {
-        GroupsService service = new GroupsService(session);
+        GroupsService service = new GroupsService(session, realm);
+        ResteasyProviderFactory.getInstance().injectProperties(service);
+        return service;
+    }
+
+    @Path("/admin/group/{groupId}")
+    public AdminGroups adminGroups(@PathParam("groupId") String groupId) {
+        GroupModel group = realm.getGroupById(groupId);
+        if (group == null) {
+            throw new NotFoundException("Could not find group by id");
+        }
+        AuthenticationHelper authHelper = new AuthenticationHelper(session);
+        AdminPermissionEvaluator realmAuth = authHelper.authenticateRealmAdminRequest();
+        realmAuth.groups().requireView(group);
+        AdminGroups service = new AdminGroups(session, realmAuth, group, realm);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

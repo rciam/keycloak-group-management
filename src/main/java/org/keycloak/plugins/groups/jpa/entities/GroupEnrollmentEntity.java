@@ -32,21 +32,19 @@ public class GroupEnrollmentEntity {
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
     protected String id;
 
-//    @Column(name="USER_ID")
     @ManyToOne()
     @JoinColumn(name = "USER_ID")
     protected UserEntity user;
 
-//    @Column(name="GROUP_ID")
     @ManyToOne()
     @JoinColumn(name = "GROUP_ID")
     protected GroupEntity group;
 
-    @BatchSize(size = 50)
-    @OneToMany(
-//            cascade = CascadeType.REMOVE,
-//            orphanRemoval = true,
-            mappedBy="fb")
+//    @BatchSize(size = 50)
+//    @OneToMany(
+////            cascade = CascadeType.REMOVE,
+////            orphanRemoval = true,
+//            mappedBy="fb")
 
     public String getId() {
         return id;

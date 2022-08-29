@@ -1,0 +1,12 @@
+<jboss-deployment-structure>
+    <deployment>
+        <dependencies>
+            <module name="org.hibernate" />
+            <module name="org.keycloak.keycloak-core" export="true"/>
+            <module name="org.keycloak.keycloak-server-spi" export="true"/>
+            <module name="org.keycloak.keycloak-server-spi-private" export="true"/>
+            <module name="org.keycloak.keycloak-model-jpa" export="true"/>
+            <module name="org.keycloak.keycloak-services" export="true"/>
+        </dependencies>
+    </deployment>
+</jboss-deployment-structure>

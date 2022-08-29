@@ -32,9 +32,9 @@ public class UserGroups {
     private AuthenticationHelper authHelper;
     private GroupConfigurationRepository groupConfigurationRepository;
 
-    public UserGroups(KeycloakSession session) {
+    public UserGroups(KeycloakSession session, RealmModel realm) {
         this.session = session;
-        this.realm =  session.getContext().getRealm();
+        this.realm =  realm;
         this.authHelper = new AuthenticationHelper(session);
         this.groupConfigurationRepository =  new GroupConfigurationRepository(session, realm);
     }

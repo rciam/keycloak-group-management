@@ -13,6 +13,8 @@ import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.resources.admin.AdminAuth;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
+import org.keycloak.services.resources.admin.permissions.AdminPermissions;
 
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
@@ -37,7 +39,6 @@ public class AuthenticationHelper {
      */
     public UserModel authenticateUserRequest() {
         HttpHeaders headers = session.getContext().getRequestHeaders();
-        RealmModel originalRealm = session.getContext().getRealm();
         String tokenString = AppAuthManager.extractAuthorizationHeaderToken(headers);
         if (tokenString == null) throw new NotAuthorizedException("Bearer");
         AccessToken token;
@@ -72,8 +73,6 @@ public class AuthenticationHelper {
 
         }
 
-        session.getContext().setRealm(originalRealm);
-
         return authResult.getUser();
     }
 
@@ -81,9 +80,8 @@ public class AuthenticationHelper {
     /**
      * This snippet is from AdminRoot.authenticateRealmAdminRequest()
      */
-    public AdminAuth authenticateRealmAdminRequest() {
+    public AdminPermissionEvaluator authenticateRealmAdminRequest() {
         HttpHeaders headers = session.getContext().getRequestHeaders();
-        RealmModel originalRealm = session.getContext().getRealm();
         String tokenString = AppAuthManager.extractAuthorizationHeaderToken(headers);
         if (tokenString == null) throw new NotAuthorizedException("Bearer");
         AccessToken token;
@@ -119,8 +117,8 @@ public class AuthenticationHelper {
         }
 
         AdminAuth adminAuth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), client);
-        session.getContext().setRealm(originalRealm);
-        return adminAuth;
+        AdminPermissionEvaluator realmAuth = AdminPermissions.evaluator(session, realm, adminAuth);
+        return realmAuth;
     }
 
 }

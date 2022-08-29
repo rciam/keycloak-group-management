@@ -7,12 +7,16 @@
             <column name="ID" type="VARCHAR(36)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="GROUP_ID" type="VARCHAR(36)" />
-            <column name="USER_ID" type="VARCHAR(36)"/>
-            <column name="STATUS" type="VARCHAR(255)" />
-            <column name="CHANGED_BY" type="VARCHAR(36)" >
-                <constraints nullable="true"/>
+            <column name="GROUP_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
             </column>
+            <column name="USER_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="STATUS" type="VARCHAR(255)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="CHANGED_BY" type="VARCHAR(36)"/>
             <column name="MEMBERSHIP_EXPIRES_AT" type="timestamp" />
             <column name="AUP_EXPIRES_AT" type="timestamp" />
             <column name="JUSTIFICATION" type="text" />
@@ -54,8 +58,13 @@
             </column>
             <column name="DESCRIPTION" type="TEXT"/>
             <column name="AUP_ID" type="VARCHAR(36)"/>
-            <column name="REQUIRE_AUP_ACCEPTANCE" type="boolean"/>
-            <column name="REQUIRE_APPROVAL" type="boolean"/>
+            <column name="REQUIRE_AUP_ACCEPTANCE" type="boolean"  defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REQUIRE_APPROVAL" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MEMBERSHIP_EXPIRATION_SEC" type="bigint" />
             <column name="AUP_EXPIRY_SEC" type="bigint"/>
         </createTable>
 
