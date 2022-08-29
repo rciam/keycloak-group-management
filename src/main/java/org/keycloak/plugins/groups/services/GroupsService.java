@@ -27,7 +27,7 @@ public class GroupsService {
         this.realm = realm;
     }
 
-    @Path("/groups/user")
+    @Path("/user")
     public UserGroups userGroups() {
         UserGroups service = new UserGroups(session, realm);
         ResteasyProviderFactory.getInstance().injectProperties(service);
