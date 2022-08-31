@@ -97,11 +97,14 @@
         </createTable>
 
         <createTable tableName="GROUP_ENROLLMENT_STATE">
+            <column name="id" type="varchar(36)" >
+                <constraints nullable="false" primaryKey="true" />
+            </column>
             <column name="ENROLLMENT_ID" type="VARCHAR(36)">
-                <constraints primaryKey="true" nullable="false"/>
+                <constraints nullable="false"/>
             </column>
             <column name="STATE" type="VARCHAR(255)">
-                <constraints primaryKey="true" nullable="false"/>
+                <constraints nullable="false"/>
             </column>
             <column name="TIMESTAMP" type="TIMESTAMP">
                 <constraints nullable="false"/>
@@ -177,6 +180,10 @@
 
         <createIndex indexName="KC_GROUP_ENROL_STATE_UID_IDX" tableName="GROUP_ENROLLMENT_STATE">
             <column name="USER_ID"/>
+        </createIndex>
+
+        <createIndex indexName="KC_GROUP_ENROL_STATE_ENROLID_IDX" tableName="GROUP_ENROLLMENT_STATE">
+            <column name="ENROLLMENT_ID"/>
         </createIndex>
 
 

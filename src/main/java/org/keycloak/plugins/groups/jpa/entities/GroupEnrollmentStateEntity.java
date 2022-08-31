@@ -3,6 +3,8 @@ package org.keycloak.plugins.groups.jpa.entities;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -15,7 +17,12 @@ import javax.persistence.Table;
 @Table(name="GROUP_ENROLLMENT_STATE")
 public class GroupEnrollmentStateEntity {
 
-//    @Id
+
+    @Id
+    @Column(name="ID")
+    @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
+    protected String id;
+
     @ManyToOne()
     @JoinColumn(name = "ENROLLMENT_ID")
     protected GroupEnrollmentEntity enrollmentEntity;
@@ -33,6 +40,14 @@ public class GroupEnrollmentStateEntity {
     @JoinColumn(name = "USER_ID")
     protected UserEntity editor;
 
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public GroupEnrollmentEntity getEnrollmentEntity() {
         return enrollmentEntity;

@@ -6,9 +6,11 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
+import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupConfigurationRepository;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
 import org.keycloak.plugins.groups.stubs.ErrorResponse;
 import org.keycloak.representations.idm.GroupRepresentation;
 
@@ -75,5 +77,19 @@ public class UserGroups {
         return groupEnrollmentEntities;
     }
 
+
+    //REMOVE THIS ONE, IT'S FOR TESTING PURPOSES
+    @GET
+    @Path("/test/get-all")
+    @Produces("application/json")
+    public List<GroupEnrollmentRepresentation> getAll() {
+//        UserModel user = authHelper.authenticateUserRequest();
+        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+        List<GroupEnrollmentRepresentation> res = em.createQuery("select ge from GroupEnrollmentEntity ge", GroupEnrollmentEntity.class)
+                .getResultStream()
+                .map(EntityToRepresentation::toRepresentation)
+                .collect(Collectors.toList());
+        return res;
+    }
 
 }
