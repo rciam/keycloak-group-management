@@ -38,6 +38,7 @@ public class EntityToRepresentation {
 
     public static GroupEnrollmentStateRepresentation toRepresentation(GroupEnrollmentStateEntity entity) {
         GroupEnrollmentStateRepresentation rep = new GroupEnrollmentStateRepresentation();
+        rep.setId(entity.getId());
         rep.setEnrollmentId(entity.getEnrollmentEntity().getId());
         rep.setJustification(entity.getJustification());
         rep.setState(entity.getState());

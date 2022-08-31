@@ -12,6 +12,13 @@ public class GroupEnrollmentRepresentation {
     protected GroupRepresentation group;
     protected Collection<GroupEnrollmentStateRepresentation> enrollmentStates;
 
+    public GroupEnrollmentRepresentation() {
+    }
+
+    public GroupEnrollmentRepresentation(String id) {
+        this.id = id;
+    }
+
     public String getId() {
         return id;
     }
