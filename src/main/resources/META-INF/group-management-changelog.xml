@@ -221,5 +221,26 @@
         />
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="vo-admin">
+
+        <addColumn tableName="USER_VO_GROUP_MEMBERSHIP">
+            <column name="IS_ADMIN" type="boolean"  defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="GROUP_AUP">
+            <column name="URL" type="VARCHAR(255)"/>
+        </addColumn>
+        <dropNotNullConstraint tableName="GROUP_AUP" columnName="CONTENT" columnDataType="BLOB"/>
+        <dropColumn  tableName="USER_VO_GROUP_MEMBERSHIP" columnName="MEMBERSHIP_EXPIRES_AT"/>
+        <dropColumn  tableName="USER_VO_GROUP_MEMBERSHIP" columnName="AUP_EXPIRES_AT"/>
+        <addColumn tableName="USER_VO_GROUP_MEMBERSHIP">
+            <column name="MEMBERSHIP_EXPIRES_AT" type="bigint" />
+        </addColumn>
+        <addColumn tableName="USER_VO_GROUP_MEMBERSHIP">
+            <column name="AUP_EXPIRES_AT" type="bigint" />
+        </addColumn>
+    </changeSet>
+
 
 </databaseChangeLog>

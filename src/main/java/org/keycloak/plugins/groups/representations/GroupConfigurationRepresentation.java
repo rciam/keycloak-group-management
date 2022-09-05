@@ -10,6 +10,7 @@ public class GroupConfigurationRepresentation {
     private Boolean requireApproval;
     private Long aupExpirySec;
     private Long membershipExpirationSec;
+    private GroupAupRepresentation aup;
 
     public GroupConfigurationRepresentation(String groupId){
         this.groupId = groupId;
@@ -64,5 +65,13 @@ public class GroupConfigurationRepresentation {
 
     public void setMembershipExpirationSec(Long membershipExpirationSec) {
         this.membershipExpirationSec = membershipExpirationSec;
+    }
+
+    public GroupAupRepresentation getAup() {
+        return aup;
+    }
+
+    public void setAup(GroupAupRepresentation aup) {
+        this.aup = aup;
     }
 }
