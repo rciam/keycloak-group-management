@@ -8,6 +8,7 @@ import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentStateEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserVoGroupMembershipEntity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,16 +20,14 @@ public class GroupManagementEntityProvider implements JpaEntityProvider {
         this.session = session;
     }
 
+    /**
+     * This is not called anymore in the quarkus based keycloak. Please, load the entities through the beans.xml and the persistence.xml instead
+     * @return
+     */
+    @Deprecated
     @Override
     public List<Class<?>> getEntities() {
-        System.out.println("GroupManagementEntityProvider: LOADING THE ENTITIES");
-        return Arrays.asList(
-                GroupAupEntity.class,
-                GroupConfigurationEntity.class,
-                GroupEnrollmentEntity.class,
-                GroupEnrollmentStateEntity.class,
-                UserVoGroupMembershipEntity.class
-        );
+        return new ArrayList<>();
     }
 
     @Override
