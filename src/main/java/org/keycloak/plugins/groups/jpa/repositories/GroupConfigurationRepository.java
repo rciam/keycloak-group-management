@@ -1,8 +1,9 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
+import java.util.stream.Stream;
+
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
-import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
@@ -31,6 +32,10 @@ public class GroupConfigurationRepository extends GeneralRepository<GroupConfigu
     public void update( GroupConfigurationEntity entity, GroupConfigurationRepresentation rep, String editorId){
         toEntity(entity, rep, editorId);
         update(entity);
+    }
+
+    public Stream<GroupConfigurationEntity> getVoAdminGroups(String userId) {
+        return em.createNamedQuery("getVoAdminGroups").setParameter("userId",userId).getResultStream();
     }
 
     private void toEntity(GroupConfigurationEntity entity, GroupConfigurationRepresentation rep, String editorId) {

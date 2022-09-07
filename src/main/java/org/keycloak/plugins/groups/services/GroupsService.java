@@ -34,6 +34,13 @@ public class GroupsService {
         return service;
     }
 
+    @Path("/vo-admin")
+    public VoAdminService voAdminService() {
+        VoAdminService service = new VoAdminService(session, realm);
+        ResteasyProviderFactory.getInstance().injectProperties(service);
+        return service;
+    }
+
 
 
 
