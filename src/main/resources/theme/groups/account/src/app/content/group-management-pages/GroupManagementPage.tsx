@@ -8,6 +8,7 @@ import {
 
 import { MyGroups } from './MyGroups';
 import { EnrollmentProgress } from './EnrollmentProgress';
+import { EnrollmentRequest } from './EnrollmentRequest';
 
 
 interface State {
@@ -57,7 +58,10 @@ export class GroupsManagementPage extends React.Component<Props, State> {
                 <Tab eventKey={1} title={<TabTitleText>Enrollment progress<Badge key={1}>7 new</Badge> </TabTitleText>}>
                   <EnrollmentProgress></EnrollmentProgress>
                 </Tab>
-                <Tab eventKey={2} title={<TabTitleText>Disabled</TabTitleText>} isDisabled>
+                <Tab eventKey={2} title={<TabTitleText>Request to join a group</TabTitleText>}>
+                  <EnrollmentRequest></EnrollmentRequest>
+                </Tab>
+                <Tab eventKey={3} title={<TabTitleText>Disabled</TabTitleText>} isDisabled>
                   Disabled
                 </Tab>
 
