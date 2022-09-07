@@ -35,11 +35,11 @@ public class AdminGroups {
 
     private KeycloakSession session;
     private final RealmModel realm;
-    private AdminPermissionEvaluator realmAuth;
-    private GroupModel group;
-    private GroupConfigurationRepository groupConfigurationRepository;
-    private UserVoGroupMembershipRepository userVoGroupMembershipRepository;
-    private CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
+    private final AdminPermissionEvaluator realmAuth;
+    private final GroupModel group;
+    private final GroupConfigurationRepository groupConfigurationRepository;
+    private final UserVoGroupMembershipRepository userVoGroupMembershipRepository;
+    private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
 
     public AdminGroups(KeycloakSession session, AdminPermissionEvaluator realmAuth, GroupModel group,  RealmModel realm) {
         this.session = session;
