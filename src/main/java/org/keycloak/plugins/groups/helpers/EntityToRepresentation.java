@@ -49,7 +49,7 @@ public class EntityToRepresentation {
     public static GroupEnrollmentRepresentation toRepresentation(GroupEnrollmentEntity entity, RealmModel realm) {
         GroupEnrollmentRepresentation rep = new GroupEnrollmentRepresentation();
         rep.setId(entity.getId());
-        rep.setGroup(toBriefRepresentation(entity.getGroup()));
+        rep.setGroups(entity.getGroups().stream().map(g->toBriefRepresentation(g)).collect(Collectors.toList()));
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
         rep.setEnrollmentStates(entity.getEnrollmentStates().stream().map(es->toRepresentation(es)).collect(Collectors.toList()));
         return rep;

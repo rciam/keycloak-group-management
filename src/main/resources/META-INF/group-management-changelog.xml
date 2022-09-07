@@ -243,4 +243,45 @@
     </changeSet>
 
 
+    <changeSet author="laskarisn@grnet.gr" id="allow_multigroup_enrollment">
+
+        <dropColumn tableName="GROUP_ENROLLMENT" columnName="GROUP_ID"/>
+
+        <createTable tableName="ENROLLMENT_GROUPS">
+            <column name="ENROLLMENT_ID" type="varchar(36)" >
+                <constraints nullable="false" primaryKey="true" />
+            </column>
+            <column name="GROUP_ID" type="VARCHAR(36)">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                constraintName="fk_kc_enrollment_groups_gid"
+                baseTableName="ENROLLMENT_GROUPS"
+                baseColumnNames="ENROLLMENT_ID"
+                referencedTableName="GROUP_ENROLLMENT"
+                referencedColumnNames="ID"
+        />
+
+        <addForeignKeyConstraint
+                constraintName="fk_kc_enrollment_groups_eid"
+                baseTableName="ENROLLMENT_GROUPS"
+                baseColumnNames="GROUP_ID"
+                referencedTableName="KEYCLOAK_GROUP"
+                referencedColumnNames="ID"
+        />
+
+        <createIndex indexName="KC_ENROLLMENT_GROUPS_EID_IDX" tableName="ENROLLMENT_GROUPS">
+            <column name="ENROLLMENT_ID"/>
+        </createIndex>
+
+        <createIndex indexName="KC_ENROLLMENT_GROUPS_GID_IDX" tableName="ENROLLMENT_GROUPS">
+            <column name="GROUP_ID"/>
+        </createIndex>
+
+
+
+    </changeSet>
+
 </databaseChangeLog>

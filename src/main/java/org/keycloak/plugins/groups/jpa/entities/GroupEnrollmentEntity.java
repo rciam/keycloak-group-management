@@ -16,12 +16,15 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name="GROUP_ENROLLMENT")
@@ -39,9 +42,13 @@ public class GroupEnrollmentEntity {
     @JoinColumn(name = "USER_ID")
     protected UserEntity user;
 
-    @ManyToOne()
-    @JoinColumn(name = "GROUP_ID")
-    protected GroupEntity group;
+    @ManyToMany
+    @JoinTable(name = "ENROLLMENT_GROUPS", joinColumns = {@JoinColumn(name = "ENROLLMENT_ID")}, inverseJoinColumns = {@JoinColumn(name = "GROUP_ID")})
+    private List<GroupEntity> groups;
+
+//    @ManyToOne()
+//    @JoinColumn(name = "GROUP_ID")
+//    protected GroupEntity group;
 
     @JsonManagedReference
     @BatchSize(size = 50)
@@ -60,20 +67,20 @@ public class GroupEnrollmentEntity {
         this.id = id;
     }
 
+    public List<GroupEntity> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<GroupEntity> groups) {
+        this.groups = groups;
+    }
+
     public UserEntity getUser() {
         return user;
     }
 
     public void setUser(UserEntity user) {
         this.user = user;
-    }
-
-    public GroupEntity getGroup() {
-        return group;
-    }
-
-    public void setGroup(GroupEntity group) {
-        this.group = group;
     }
 
     public Collection<GroupEnrollmentStateEntity> getEnrollmentStates() {

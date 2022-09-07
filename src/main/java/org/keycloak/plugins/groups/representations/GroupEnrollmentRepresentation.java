@@ -4,12 +4,13 @@ import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import java.util.Collection;
+import java.util.List;
 
 public class GroupEnrollmentRepresentation {
 
     protected String id;
     protected UserRepresentation user;
-    protected GroupRepresentation group;
+    protected List<GroupRepresentation> groups;
     protected Collection<GroupEnrollmentStateRepresentation> enrollmentStates;
 
     public GroupEnrollmentRepresentation() {
@@ -35,12 +36,12 @@ public class GroupEnrollmentRepresentation {
         this.user = user;
     }
 
-    public GroupRepresentation getGroup() {
-        return group;
+    public List<GroupRepresentation> getGroups() {
+        return groups;
     }
 
-    public void setGroup(GroupRepresentation group) {
-        this.group = group;
+    public void setGroups(List<GroupRepresentation> groups) {
+        this.groups = groups;
     }
 
     public Collection<GroupEnrollmentStateRepresentation> getEnrollmentStates() {
