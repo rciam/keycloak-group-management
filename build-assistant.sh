@@ -1,6 +1,4 @@
-#! usr/bin/bash
-
-#echo $#
+#!/bin/bash
 
 if [[ $# -eq 0 ]]
 then

@@ -63,7 +63,7 @@
     "path": "group-management",
     "label": "groupManagementSidebarTitle",
     "descriptionLabel": "groupsManagementIntroMessage",
-    "modulePath": "/content/group-management-page/GroupManagementPage.js",
+    "modulePath": "/content/group-management-pages/GroupManagementPage.js",
     "componentName": "GroupsManagementPage"
   }
 ]
