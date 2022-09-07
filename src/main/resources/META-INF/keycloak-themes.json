@@ -2,7 +2,7 @@
     "themes": [
         {
             "name" : "groups",
-            "types": [ "account" ]
+            "types": [ "account" , "email"]
         }
     ]
 }

@@ -87,7 +87,7 @@ public class UserGroups {
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         List<GroupEnrollmentRepresentation> res = em.createQuery("select ge from GroupEnrollmentEntity ge", GroupEnrollmentEntity.class)
                 .getResultStream()
-                .map(EntityToRepresentation::toRepresentation)
+                .map(entity -> EntityToRepresentation.toRepresentation(entity, realm))
                 .collect(Collectors.toList());
         return res;
     }

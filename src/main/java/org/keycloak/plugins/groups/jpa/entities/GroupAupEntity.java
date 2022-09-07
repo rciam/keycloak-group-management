@@ -1,6 +1,7 @@
 package org.keycloak.plugins.groups.jpa.entities;
 
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.plugins.groups.enums.GroupAupTypeEnum;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -22,7 +23,7 @@ public class GroupAupEntity {
     protected String id;
 
     @Column(name="TYPE")
-    protected String type;
+    protected GroupAupTypeEnum type;
 
     @Column(name="MIMETYPE")
     protected String mimeType;
@@ -30,6 +31,9 @@ public class GroupAupEntity {
     @Column(name="CONTENT")
     @Lob
     protected Object content;
+
+    @Column(name="URL")
+    protected String url;
 
     @ManyToOne()
     @JoinColumn(name = "EDITOR")
@@ -44,11 +48,11 @@ public class GroupAupEntity {
         this.id = id;
     }
 
-    public String getType() {
+    public GroupAupTypeEnum getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(GroupAupTypeEnum type) {
         this.type = type;
     }
 
@@ -74,5 +78,13 @@ public class GroupAupEntity {
 
     public void setEditor(UserEntity editor) {
         this.editor = editor;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

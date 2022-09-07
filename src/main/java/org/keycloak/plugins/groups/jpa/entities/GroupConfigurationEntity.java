@@ -24,10 +24,6 @@ public class GroupConfigurationEntity {
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
     private String id;
 
-//    @PrimaryKeyJoinColumn
-//    @OneToOne(mappedBy="group")
-//    protected GroupEntity group;
-
     @Column(name="DESCRIPTION")
     protected String description;
 
@@ -46,14 +42,6 @@ public class GroupConfigurationEntity {
 
     @Column(name="MEMBERSHIP_EXPIRATION_SEC")
     protected Long membershipExpirationSec;
-//
-//    public GroupEntity getGroup() {
-//        return group;
-//    }
-//
-//    public void setGroup(GroupEntity group) {
-//        this.group = group;
-//    }
 
     public String getDescription() {
         return description;
