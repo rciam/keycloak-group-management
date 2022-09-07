@@ -7,6 +7,7 @@ import {
 } from '@patternfly/react-core';
 
 import { MyGroups } from './MyGroups';
+import { EnrollmentProgress } from './EnrollmentProgress';
 
 
 interface State {
@@ -53,8 +54,8 @@ export class GroupsManagementPage extends React.Component<Props, State> {
                 <Tab eventKey={0} title={<TabTitleText>My groups</TabTitleText>} aria-label="Show my groups">
                   <MyGroups></MyGroups>
                 </Tab>
-                <Tab eventKey={1} title={<TabTitleText>Join requests <Badge key={1}>7 new</Badge> </TabTitleText>}>
-                  Disabled
+                <Tab eventKey={1} title={<TabTitleText>Enrollment progress<Badge key={1}>7 new</Badge> </TabTitleText>}>
+                  <EnrollmentProgress></EnrollmentProgress>
                 </Tab>
                 <Tab eventKey={2} title={<TabTitleText>Disabled</TabTitleText>} isDisabled>
                   Disabled
