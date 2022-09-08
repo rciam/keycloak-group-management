@@ -58,11 +58,9 @@ public class AdminGroups {
         GroupConfigurationEntity groupConfiguration = groupConfigurationRepository.getEntity(group.getId());
         //if not exist, group have only created from main Keycloak
         if(groupConfiguration == null) {
-            GroupConfigurationRepresentation rep = new GroupConfigurationRepresentation(group.getId());
-            return rep;
+            return new GroupConfigurationRepresentation(group.getId());
         } else {
-            GroupConfigurationRepresentation rep = EntityToRepresentation.toRepresentation(groupConfiguration, realm);
-            return rep;
+            return EntityToRepresentation.toRepresentation(groupConfiguration, realm);
         }
     }
 
