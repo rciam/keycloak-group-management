@@ -11,12 +11,17 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 @Entity
 @Table(name="GROUP_CONFIGURATION")
+@NamedQueries({
+        @NamedQuery(name="getVoAdminGroups", query="select g from GroupConfigurationEntity g, UserVoGroupMembershipEntity m where m.group.id = g.id and m.user.id = :userId and m.isAdmin = true")
+})
 public class GroupConfigurationEntity {
 
     @Id

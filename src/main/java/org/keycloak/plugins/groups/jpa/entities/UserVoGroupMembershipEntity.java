@@ -17,7 +17,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name="USER_VO_GROUP_MEMBERSHIP")
 @NamedQueries({
-        @NamedQuery(name="getByUserAndGroup", query="from UserVoGroupMembershipEntity f where f.group.id = :groupId and f.user.id = :userId")
+        @NamedQuery(name="getByUserAndGroup", query="from UserVoGroupMembershipEntity f where f.group.id = :groupId and f.user.id = :userId"),
+        @NamedQuery(name="countVoAdmin", query="select count(f) from UserVoGroupMembershipEntity f where f.group.id = :groupId and f.user.id = :userId and f.isAdmin = true")
 })
 public class UserVoGroupMembershipEntity {
 

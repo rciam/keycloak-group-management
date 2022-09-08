@@ -2,6 +2,8 @@ package org.keycloak.plugins.groups.jpa.repositories;
 
 import java.util.List;
 
+import javax.persistence.TypedQuery;
+
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.plugins.groups.jpa.entities.GroupConfigurationEntity;
@@ -21,6 +23,11 @@ public class UserVoGroupMembershipRepository extends GeneralRepository<UserVoGro
     public UserVoGroupMembershipEntity getByUserAndGroup(String groupId, String userId){
         List<UserVoGroupMembershipEntity> results = em.createNamedQuery("getByUserAndGroup").setParameter("groupId",groupId).setParameter("userId",userId).getResultList();
         return results.isEmpty() ? null : results.get(0);
+    }
+
+    public boolean isVoAdmin(String groupId, String userId){
+       Long result = em.createNamedQuery("countVoAdmin", Long.class).setParameter("groupId",groupId).setParameter("userId",userId).getSingleResult();
+       return  result > 0;
     }
 
 }
