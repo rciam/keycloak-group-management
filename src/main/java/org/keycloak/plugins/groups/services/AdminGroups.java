@@ -9,29 +9,40 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
+import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
+import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserVoGroupMembershipEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserVoGroupMembershipRepository;
 import org.keycloak.plugins.groups.representations.GroupConfigurationRepresentation;
+import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ServicesLogger;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.services.resources.admin.GroupResource;
+import org.keycloak.services.resources.admin.GroupsResource;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.theme.FreeMarkerUtil;
 
 public class AdminGroups {
 
     private static final Logger logger = Logger.getLogger(AdminGroups.class);
+
+    @Context
+    protected ClientConnection clientConnection;
 
     private KeycloakSession session;
     private final RealmModel realm;
@@ -58,7 +69,7 @@ public class AdminGroups {
         GroupConfigurationEntity groupConfiguration = groupConfigurationRepository.getEntity(group.getId());
         //if not exist, group have only created from main Keycloak
         if(groupConfiguration == null) {
-            return new GroupConfigurationRepresentation(group.getId());
+            throw new NotFoundException("Could not find this Group");
         } else {
             return EntityToRepresentation.toRepresentation(groupConfiguration, realm);
         }
@@ -72,8 +83,7 @@ public class AdminGroups {
         if ( entity != null) {
             groupConfigurationRepository.update(entity, rep, realmAuth.adminAuth().getUser().getId());
         } else {
-            //only group exists
-            groupConfigurationRepository.create(rep, group.getId(), realmAuth.adminAuth().getUser().getId());
+            throw new NotFoundException("Could not find this Group");
         }
         //aup change action
         return Response.noContent().build();
@@ -104,6 +114,28 @@ public class AdminGroups {
     }
 
 
+    @POST
+    @Path("children")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addChild(GroupRepresentation rep) {
+        AuthenticationHelper authHelper = new AuthenticationHelper(session);
+        AdminPermissionEvaluator realmAuth = authHelper.authenticateRealmAdminRequest();
+        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
+        adminEvent.realm(realm).resource(ResourceType.REALM);
+        GroupResource groupResource = new GroupResource(realm, group, session, realmAuth,adminEvent);
+        Response response = groupResource.addChild(rep);
+        if (response.getStatus() >= 400) {
+            //error response from client creation
+            return response;
+        } else  {
+            //group creation
+            //get id from GroupRepresentation (response body)
+            String groupId = response.readEntity(GroupRepresentation.class).getId();
+            groupConfigurationRepository.createDefault(groupId);
+        }
+        return Response.noContent().build();
+    }
 
 
 }

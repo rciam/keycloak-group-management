@@ -29,6 +29,14 @@ public class GroupConfigurationRepository extends GeneralRepository<GroupConfigu
         create(entity);
     }
 
+    public void createDefault(String groupId){
+        GroupConfigurationEntity entity = new GroupConfigurationEntity();
+        entity.setId(groupId);
+        entity.setRequireApproval(true);
+        entity.setRequireAupAcceptance(false);
+        create(entity);
+    }
+
     public void update( GroupConfigurationEntity entity, GroupConfigurationRepresentation rep, String editorId){
         toEntity(entity, rep, editorId);
         update(entity);

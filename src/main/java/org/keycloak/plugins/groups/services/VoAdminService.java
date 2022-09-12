@@ -36,7 +36,7 @@ public class VoAdminService {
         this.session = session;
         this.realm =  realm;
         AuthenticationHelper authHelper = new AuthenticationHelper(session);
-        this.voAdmin = authHelper.authenticateUserRequest();
+        this.voAdmin = authHelper.authenticateUserRequest().getUser();
         this.groupConfigurationRepository =  new GroupConfigurationRepository(session, session.getContext().getRealm());
         this.userVoGroupMembershipRepository =  new UserVoGroupMembershipRepository(session, session.getContext().getRealm());
     }
@@ -59,4 +59,5 @@ public class VoAdminService {
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
+
 }
