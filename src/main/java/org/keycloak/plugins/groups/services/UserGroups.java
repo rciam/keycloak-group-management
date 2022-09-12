@@ -46,7 +46,7 @@ public class UserGroups {
     @GET
     @Produces("application/json")
     public Response getAllUserGroups() {
-        UserModel user = authHelper.authenticateUserRequest();
+        UserModel user = authHelper.authenticateUserRequest().getUser();
         if(user == null)
             return Response.status(Response.Status.UNAUTHORIZED).entity(new ErrorResponse("Could not identify logged in user.")).build();
 //        RealmModel realm = session.getContext().getRealm();
@@ -69,7 +69,7 @@ public class UserGroups {
     @Path("/enroll/request")
     @Produces("application/json")
     public List<GroupEnrollmentEntity> getMyEnrollments() {
-        UserModel user = authHelper.authenticateUserRequest();
+        UserModel user = authHelper.authenticateUserRequest().getUser();
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         List<GroupEnrollmentEntity> groupEnrollmentEntities = em.createNamedQuery("getAllUserGroupEnrollments", GroupEnrollmentEntity.class)
                 .setParameter("userId", user.getId())

@@ -26,6 +26,7 @@ public class AuthenticationHelper {
 
     private KeycloakSession session;
     private ClientConnection clientConnection;
+    private RealmModel realm;
 
     public AuthenticationHelper(KeycloakSession session){
         this.session = session;
@@ -37,7 +38,7 @@ public class AuthenticationHelper {
     /**
      * This snippet is a modification of AdminRoot.authenticateRealmAdminRequest()
      */
-    public UserModel authenticateUserRequest() {
+    public AuthenticationManager.AuthResult authenticateUserRequest() {
         HttpHeaders headers = session.getContext().getRequestHeaders();
         String tokenString = AppAuthManager.extractAuthorizationHeaderToken(headers);
         if (tokenString == null) throw new NotAuthorizedException("Bearer");
@@ -50,7 +51,7 @@ public class AuthenticationHelper {
         }
         String realmName = token.getIssuer().substring(token.getIssuer().lastIndexOf('/') + 1);
         RealmManager realmManager = new RealmManager(session);
-        RealmModel realm = realmManager.getRealmByName(realmName);
+        realm = realmManager.getRealmByName(realmName);
         if (realm == null) {
             throw new NotAuthorizedException("Unknown realm in token");
         }
@@ -73,7 +74,7 @@ public class AuthenticationHelper {
 
         }
 
-        return authResult.getUser();
+        return authResult;
     }
 
 
@@ -81,42 +82,9 @@ public class AuthenticationHelper {
      * This snippet is from AdminRoot.authenticateRealmAdminRequest()
      */
     public AdminPermissionEvaluator authenticateRealmAdminRequest() {
-        HttpHeaders headers = session.getContext().getRequestHeaders();
-        String tokenString = AppAuthManager.extractAuthorizationHeaderToken(headers);
-        if (tokenString == null) throw new NotAuthorizedException("Bearer");
-        AccessToken token;
-        try {
-            JWSInput input = new JWSInput(tokenString);
-            token = input.readJsonContent(AccessToken.class);
-        } catch (JWSInputException e) {
-            throw new NotAuthorizedException("Bearer token format error");
-        }
-        String realmName = token.getIssuer().substring(token.getIssuer().lastIndexOf('/') + 1);
-        RealmManager realmManager = new RealmManager(session);
-        RealmModel realm = realmManager.getRealmByName(realmName);
-        if (realm == null) {
-            throw new NotAuthorizedException("Unknown realm in token");
-        }
-        session.getContext().setRealm(realm);
 
-        AuthenticationManager.AuthResult authResult = new AppAuthManager.BearerTokenAuthenticator(session)
-                .setRealm(realm)
-                .setConnection(clientConnection)
-                .setHeaders(headers)
-                .authenticate();
-
-        if (authResult == null) {
-            logger.debug("Token not valid");
-            throw new NotAuthorizedException("Bearer");
-        }
-
-        ClientModel client = realm.getClientByClientId(token.getIssuedFor());
-        if (client == null) {
-            throw new NotFoundException("Could not find client for authorization");
-
-        }
-
-        AdminAuth adminAuth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), client);
+        AuthenticationManager.AuthResult authResult = authenticateUserRequest();
+        AdminAuth adminAuth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), authResult.getClient());
         AdminPermissionEvaluator realmAuth = AdminPermissions.evaluator(session, realm, adminAuth);
         return realmAuth;
     }

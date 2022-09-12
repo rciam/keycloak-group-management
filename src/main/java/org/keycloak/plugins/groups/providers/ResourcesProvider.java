@@ -20,22 +20,30 @@ package org.keycloak.plugins.groups.providers;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
+import org.keycloak.plugins.groups.jpa.entities.GroupConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.repositories.GroupConfigurationRepository;
 import org.keycloak.plugins.groups.services.AdminGroups;
 import org.keycloak.plugins.groups.services.GroupsService;
 import org.keycloak.plugins.groups.stubs.ErrorResponse;
 import org.keycloak.plugins.groups.ui.UserInterfaceService;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.resource.RealmResourceProvider;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.services.resources.admin.GroupsResource;
+import org.keycloak.services.resources.admin.RealmAdminResource;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -54,11 +62,13 @@ public class ResourcesProvider implements RealmResourceProvider {
 
     private KeycloakSession session;
     private final RealmModel realm;
+    private final GroupConfigurationRepository groupConfigurationRepository;
 
     public ResourcesProvider(KeycloakSession session) {
         this.session = session;
         this.realm = session.getContext().getRealm();
         this.clientConnection = session.getContext().getConnection();
+        this.groupConfigurationRepository =  new GroupConfigurationRepository(session, session.getContext().getRealm());
     }
 
     @Override
@@ -90,6 +100,32 @@ public class ResourcesProvider implements RealmResourceProvider {
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
+
+    @POST
+    @Path("/admin/group")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addTopLevelGroup(GroupRepresentation rep) {
+        AuthenticationHelper authHelper = new AuthenticationHelper(session);
+        AdminPermissionEvaluator realmAuth = authHelper.authenticateRealmAdminRequest();
+        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
+        adminEvent.realm(realm).resource(ResourceType.REALM);
+        GroupsResource groupsResource = new GroupsResource(realm, session, realmAuth,adminEvent);
+        Response response = groupsResource.addTopLevelGroup(rep);
+        logger.info("group have been created with status"+response.getStatus());
+        if (response.getStatus() >= 400) {
+            //error response from client creation
+            return response;
+        } else if (groupConfigurationRepository.getEntity(rep.getId()) == null) {
+            //group creation - group configuration no exist
+            logger.info("Create group with groupId === "+rep.getId());
+            groupConfigurationRepository.createDefault(rep.getId());
+        }
+        //if rep.getId() != null => mean that group has been moved( not created)
+        logger.info("group move. No groupconfiguration with id ==== "+rep.getId());
+
+        return Response.noContent().build();
+    }
+
 
     //PLEASE REMOVE THIS FUNCTION
     @Deprecated
