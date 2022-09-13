@@ -7,6 +7,8 @@ import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
@@ -23,6 +25,7 @@ public class GroupAupEntity {
     protected String id;
 
     @Column(name="TYPE")
+    @Enumerated(EnumType.STRING)
     protected GroupAupTypeEnum type;
 
     @Column(name="MIMETYPE")
