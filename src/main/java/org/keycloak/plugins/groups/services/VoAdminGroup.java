@@ -24,6 +24,8 @@ import org.keycloak.plugins.groups.jpa.entities.UserVoGroupMembershipEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserVoGroupMembershipRepository;
 import org.keycloak.plugins.groups.representations.GroupConfigurationRepresentation;
+import org.keycloak.plugins.groups.representations.UserVoGroupMembershipRepresentation;
+import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.theme.FreeMarkerUtil;
@@ -96,6 +98,30 @@ public class VoAdminGroup {
             }
             return Response.noContent().build();
         }
+
+    @POST
+    @Path("/member")
+    @Produces("application/json")
+    @Consumes("application/json")
+    public Response addGroupMember(UserVoGroupMembershipRepresentation rep) {
+        UserVoGroupMembershipEntity member = userVoGroupMembershipRepository.getByUserAndGroup(group.getId(), rep.getUserId());
+        if ( member != null ) {
+            return ErrorResponse.error("This user is already member of this group!", Response.Status.BAD_REQUEST);
+        }
+        UserModel user = session.users().getUserById(realm, rep.getUserId());
+        if ( user == null ) {
+            throw new NotFoundException("Could not find this User");
+        }
+        rep.setGroupId(group.getId());
+        userVoGroupMembershipRepository.create(rep, voAdmin.getId() );
+        try {
+            customFreeMarkerEmailTemplateProvider.setUser(user);
+            customFreeMarkerEmailTemplateProvider.sendGroupActionEmail(group.getName(), true);
+        } catch (EmailException e) {
+            ServicesLogger.LOGGER.failedToSendEmail(e);
+        }
+        return Response.noContent().build();
+    }
 
 
 
