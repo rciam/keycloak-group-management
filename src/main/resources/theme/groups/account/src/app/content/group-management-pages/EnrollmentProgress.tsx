@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 
-import { DataList, DataListItem, DataListItemRow, DataListItemCells, DataListCell, Divider } from '@patternfly/react-core';
+import { DataList, DataListItem, DataListItemRow, DataListItemCells, DataListCell, Divider, Label } from '@patternfly/react-core';
 
 
 
@@ -26,7 +26,7 @@ export class EnrollmentProgress extends React.Component<Props, State> {
     constructor(props : Props){
         super(props);
         this.state = {
-            data: null
+            data: []
         };
         this.fetchData();
     }
@@ -39,22 +39,70 @@ export class EnrollmentProgress extends React.Component<Props, State> {
       this.groupsService!.doGet("/groups/user/enroll/request")
         .then((resp: any) => {
           if(resp.ok)
-            this.showData(resp.data);
+            this.setState({data: resp.data});
         }).catch((err: any) => {
           console.log(err);
         });
     }
+    
 
-    private showData(data: any){
-      console.log(data);
-      //transform data here (if needed before fitting them into the state)
-
-      this.setState({data: data});
+    private toDate(timestamp: number){
+      let dateTimeFormat = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      return dateTimeFormat.format(timestamp);
     }
-
 
     public render(): React.ReactNode {
 
+      return (
+        <>
+          <DataList aria-label="Simple data list example" isCompact>
+          {
+            this.state.data.map( (d: any) => (
+              <DataListItem>
+                <DataListItemRow>
+                  <DataListItemCells
+                    dataListCells={[
+                      <DataListCell>
+                        <span>{d.group.name}</span>
+                      </DataListCell>,
+                      <DataListCell>
+                        <DataList aria-label="internal" isCompact>
+                        {
+                          d.enrollmentStates.map((es: any) => (
+                          <DataListItem>
+                            <DataListItemRow>
+                              <DataListItemCells
+                                dataListCells={[
+                                  <DataListCell>
+                                    <Label>{es.state}</Label>
+                                  </DataListCell>,
+                                  <DataListCell>
+                                    <span>{this.toDate(es.timestamp)}</span>
+                                  </DataListCell>,
+                                  <DataListCell>
+                                    <span>{es.justification}</span>
+                                  </DataListCell>
+                                ]}
+                              />
+                            </DataListItemRow>
+                          </DataListItem>
+                          ))
+                        }
+                        </DataList>
+                      </DataListCell>
+                    ]}
+                  />
+                </DataListItemRow>
+              </DataListItem>
+
+            ))
+          }
+          </DataList>
+        </>
+
+      );
+
+/*
         return (
             <>
               <DataList aria-label="Simple data list example" isCompact>
@@ -87,5 +135,7 @@ export class EnrollmentProgress extends React.Component<Props, State> {
               </DataList>
             </>
         );
+*/
+
     }
 };

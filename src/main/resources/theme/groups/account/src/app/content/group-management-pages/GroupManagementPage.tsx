@@ -1,19 +1,41 @@
 
 import * as React from 'react';
 
+import {HashRouter, Route, Link, Switch} from 'react-router-dom';
+
 
 import {
-    Tabs, Tab, TabTitleText, Checkbox, Tooltip, Badge
+    Tabs, Tab, TabTitleText,
+    Checkbox,
+    Button,
+    Tooltip,
+    Badge,
+    Breadcrumb, BreadcrumbItem,
+    Flex, FlexItem,
+    Card, CardTitle, CardBody, CardFooter,
+    Divider,
+    Grid, GridItem
 } from '@patternfly/react-core';
+
+
+
 
 import { MyGroups } from './MyGroups';
 import { EnrollmentProgress } from './EnrollmentProgress';
 import { EnrollmentRequest } from './EnrollmentRequest';
 
+import { AccordionSample } from '../../group-widgets/AccordionSample';
+
+
+enum Menus {
+  main,
+  show_groups,
+  join_groups,
+  enrollment_progress
+}
 
 interface State {
-  activeTabKey: number,
-  isBox: boolean
+  menu: Menus
 }
 
 
@@ -26,48 +48,109 @@ export class GroupsManagementPage extends React.Component<Props, State> {
     constructor(props : Props){
         super(props);
         this.state = {
-          activeTabKey: 0,
-          isBox: false
+          menu: Menus.main,
         };
     }
 
     public componentDidMount(): void {
 
+      let navItem = document.getElementById('nav-link-group-management');
+      if(navItem==null)
+        return;
+      navItem.onclick = (event) => {
+        this.setState({menu:Menus.main});
+      }
+
     }
-
-
-
-    private handleTabClick = (event: any, tabIndex: number):void => {
-      this.setState({
-        activeTabKey: tabIndex
-      });
-    }
-
 
 
     public render(): React.ReactNode {
 
+      return (
+          <>
+            {this.state.menu==Menus.main && this.showMainMenu()}
+            {this.state.menu==Menus.show_groups && this.showGroupsMenu()}
+            {this.state.menu==Menus.join_groups && this.showJoinGroupMenu()}
+            {this.state.menu==Menus.enrollment_progress && this.showEnrollmentProgressMenu()}
+          </>
+      );
 
-        return (
-            <>
-
-              <Tabs activeKey={this.state.activeTabKey} onSelect={this.handleTabClick} isBox={this.state.isBox} aria-label="Tabs in the default example" role="region">
-                <Tab eventKey={0} title={<TabTitleText>My groups</TabTitleText>} aria-label="Show my groups">
-                  <MyGroups></MyGroups>
-                </Tab>
-                <Tab eventKey={1} title={<TabTitleText>Enrollment progress<Badge key={1}>7 new</Badge> </TabTitleText>}>
-                  <EnrollmentProgress></EnrollmentProgress>
-                </Tab>
-                <Tab eventKey={2} title={<TabTitleText>Request to join a group</TabTitleText>}>
-                  <EnrollmentRequest></EnrollmentRequest>
-                </Tab>
-                <Tab eventKey={3} title={<TabTitleText>Disabled</TabTitleText>} isDisabled>
-                  Disabled
-                </Tab>
-
-              </Tabs>
-
-            </>
-        );
     }
+
+
+    public showMainMenu(): React.ReactNode {
+
+      return (
+        <>
+          <Grid className="top-bottom-margin-10 centered-text">
+            <GridItem span={12}>What would you like to do?</GridItem>
+          </Grid>
+
+          <Flex>
+            <FlexItem>
+              <Card
+                id="show-groups"
+                onClick={() => this.setState({menu:Menus.show_groups})}
+                isRounded
+                isSelectable
+              >
+                <CardTitle>Show my groups</CardTitle>
+                <CardBody>Here you can see which groups you have already joined into</CardBody>
+              </Card>
+            </FlexItem>
+            <FlexItem>
+              <Card
+                id="enroll-groups"
+                onClick={() => this.setState({menu:Menus.join_groups})}
+                isRounded
+                isSelectable
+              >
+                <CardTitle>Join group(s)</CardTitle>
+                <CardBody>Here you can ask to join a ne group</CardBody>
+              </Card>
+            </FlexItem>
+            <FlexItem>
+              <Card
+                id="enroll-groups"
+                onClick={() => this.setState({menu:Menus.enrollment_progress})}
+                isRounded
+                isSelectable
+              >
+                <CardTitle>View enrollment progress</CardTitle>
+                <CardBody>Here you can view the progress of your group enrollment requests</CardBody>
+              </Card>
+            </FlexItem>
+          </Flex>
+        </>
+      )
+
+    }
+
+
+    public showGroupsMenu(): React.ReactNode {
+
+      return (
+        <MyGroups></MyGroups>
+      );
+
+    }
+
+
+    public showJoinGroupMenu(): React.ReactNode {
+
+      return (
+        <EnrollmentRequest></EnrollmentRequest>
+      );
+
+    }
+
+    public showEnrollmentProgressMenu(): React.ReactNode {
+
+      return (
+        <EnrollmentProgress></EnrollmentProgress>
+      );
+
+    }
+
+
 };
