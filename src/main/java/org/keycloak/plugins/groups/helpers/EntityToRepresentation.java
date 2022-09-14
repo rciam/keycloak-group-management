@@ -11,10 +11,12 @@ import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentStateEntity;
+import org.keycloak.plugins.groups.jpa.entities.UserVoGroupMembershipEntity;
 import org.keycloak.plugins.groups.representations.GroupAupRepresentation;
 import org.keycloak.plugins.groups.representations.GroupConfigurationRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentStateRepresentation;
+import org.keycloak.plugins.groups.representations.UserVoGroupMembershipRepresentation;
 import org.keycloak.representations.idm.FederatedIdentityRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -43,6 +45,19 @@ public class EntityToRepresentation {
         rep.setMimeType(entity.getMimeType());
         rep.setUrl(entity.getUrl());
         rep.setEditor(toBriefRepresentation(entity.getEditor(), realm));
+        return rep;
+    }
+
+    public static UserVoGroupMembershipRepresentation toRepresentation(UserVoGroupMembershipEntity entity, RealmModel realm) {
+        UserVoGroupMembershipRepresentation rep = new UserVoGroupMembershipRepresentation();
+        rep.setId(entity.getId());
+        rep.setGroupId(entity.getGroup().getId());
+        rep.setUser(toBriefRepresentation(entity.getUser(), realm));
+        rep.setAdmin(entity.getIsAdmin());
+        rep.setJustification(entity.getJustification());
+        rep.setAupExpiresAt(entity.getAupExpiresAt());
+        rep.setMembershipExpiresAt(entity.getMembershipExpiresAt());
+        rep.setStatus(entity.getStatus());
         return rep;
     }
 

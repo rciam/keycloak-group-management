@@ -10,12 +10,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.enums.StatusEnum;
+import org.keycloak.representations.idm.UserRepresentation;
 
 public class UserVoGroupMembershipRepresentation {
 
     protected String id;
     protected String groupId;
-    protected String userId;
+    protected UserRepresentation user;
     protected StatusEnum status;
     protected String changedByUserId;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
@@ -43,12 +44,12 @@ public class UserVoGroupMembershipRepresentation {
         this.groupId = groupId;
     }
 
-    public String getUserId() {
-        return userId;
+    public UserRepresentation getUser() {
+        return user;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setUser(UserRepresentation user) {
+        this.user = user;
     }
 
     public StatusEnum getStatus() {
