@@ -48,6 +48,9 @@ public class GroupConfigurationEntity {
     @Column(name="MEMBERSHIP_EXPIRATION_SEC")
     protected Long membershipExpirationSec;
 
+    @Column(name="IS_VO")
+    protected Boolean isVO;
+
     public String getDescription() {
         return description;
     }
@@ -94,6 +97,14 @@ public class GroupConfigurationEntity {
 
     public void setMembershipExpirationSec(Long membershipExpirationSec) {
         this.membershipExpirationSec = membershipExpirationSec;
+    }
+
+    public Boolean getVO() {
+        return isVO;
+    }
+
+    public void setVO(Boolean VO) {
+        isVO = VO;
     }
 
     public String getId() {

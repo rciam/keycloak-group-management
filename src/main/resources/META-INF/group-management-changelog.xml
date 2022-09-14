@@ -235,4 +235,13 @@
     </changeSet>
 
 
+    <changeSet author="laskarisn@grnet.gr" id="group_config_isVO">
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="IS_VO" type="boolean"  defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+
 </databaseChangeLog>
