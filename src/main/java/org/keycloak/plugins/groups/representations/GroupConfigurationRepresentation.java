@@ -1,10 +1,13 @@
 package org.keycloak.plugins.groups.representations;
 
+import org.keycloak.representations.idm.GroupRepresentation;
+
 import javax.persistence.Column;
 
 public class GroupConfigurationRepresentation {
 
     private String groupId;
+    private GroupRepresentation group;
     private String description;
     private Boolean requireAupAcceptance;
     private Boolean requireApproval;
@@ -25,6 +28,14 @@ public class GroupConfigurationRepresentation {
 
     public void setGroupId(String groupId) {
         this.groupId = groupId;
+    }
+
+    public GroupRepresentation getGroup() {
+        return group;
+    }
+
+    public void setGroup(GroupRepresentation group) {
+        this.group = group;
     }
 
     public String getDescription() {

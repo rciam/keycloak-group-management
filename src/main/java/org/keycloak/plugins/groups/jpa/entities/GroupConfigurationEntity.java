@@ -1,5 +1,6 @@
 package org.keycloak.plugins.groups.jpa.entities;
 
+import org.hibernate.annotations.Fetch;
 import org.keycloak.models.jpa.entities.GroupEntity;
 
 import javax.persistence.Access;
@@ -7,6 +8,7 @@ import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -20,7 +22,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name="GROUP_CONFIGURATION")
 @NamedQueries({
-        @NamedQuery(name="getVoAdminGroups", query="select g from GroupConfigurationEntity g, UserVoGroupMembershipEntity m where m.group.id = g.id and m.user.id = :userId and m.isAdmin = true")
+        @NamedQuery(name="getVoAdminGroups", query="select g from GroupConfigurationEntity g, UserVoGroupMembershipEntity m where m.group.id = g.id and m.user.id = :userId and m.isAdmin = true"),
+        @NamedQuery(name="getAllRealmVOs", query="select gc from GroupConfigurationEntity gc, GroupEntity g where gc.id = g.id and g.realm = :realmId")
 })
 public class GroupConfigurationEntity {
 
@@ -28,6 +31,10 @@ public class GroupConfigurationEntity {
     @Column(name="GROUP_ID")
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
     private String id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "GROUP_ID")
+    protected GroupEntity group;
 
     @Column(name="DESCRIPTION")
     protected String description;
@@ -102,5 +109,13 @@ public class GroupConfigurationEntity {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public GroupEntity getGroup() {
+        return group;
+    }
+
+    public void setGroup(GroupEntity group) {
+        this.group = group;
     }
 }

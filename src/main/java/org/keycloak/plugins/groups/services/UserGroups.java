@@ -5,11 +5,14 @@ import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
+import org.keycloak.plugins.groups.jpa.entities.GroupConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupConfigurationRepository;
+import org.keycloak.plugins.groups.representations.GroupConfigurationRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
 import org.keycloak.plugins.groups.stubs.ErrorResponse;
 import org.keycloak.representations.idm.GroupRepresentation;
@@ -18,6 +21,7 @@ import javax.persistence.EntityManager;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -77,6 +81,19 @@ public class UserGroups {
         return groupEnrollmentEntities;
     }
 
+    @GET
+    @Path("/vo")
+    @Produces("application/json")
+    public List<GroupConfigurationRepresentation> getAllVOs() {
+        UserModel user = authHelper.authenticateUserRequest().getUser();
+        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+        List<GroupConfigurationRepresentation> groupConfigurationRepresentations = em.createNamedQuery("getAllRealmVOs", GroupConfigurationEntity.class)
+                .setParameter("realmId", realm.getId())
+                .getResultStream()
+                .map(entity -> EntityToRepresentation.toRepresentation(entity, realm))
+                .collect(Collectors.toList());
+        return groupConfigurationRepresentations;
+    }
 
     //REMOVE THIS ONE, IT'S FOR TESTING PURPOSES
     @GET
