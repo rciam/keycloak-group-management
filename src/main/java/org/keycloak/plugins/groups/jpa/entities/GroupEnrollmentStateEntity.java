@@ -12,6 +12,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import java.util.Date;
 
 @Entity
 @Table(name="GROUP_ENROLLMENT_STATE")
@@ -31,7 +34,8 @@ public class GroupEnrollmentStateEntity {
     protected String state;
 
     @Column(name="TIMESTAMP")
-    protected Long timestamp;
+    @Temporal(TemporalType.TIMESTAMP)
+    protected Date timestamp;
 
     @Column(name="JUSTIFICATION")
     protected String justification;
@@ -65,11 +69,11 @@ public class GroupEnrollmentStateEntity {
         this.state = state;
     }
 
-    public Long getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Long timestamp) {
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 
