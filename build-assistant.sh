@@ -8,7 +8,7 @@ fi
 
 if [[ $1 == "--compile-only" ]]
 then
-  tsc --noImplicitAny --strictNullChecks --jsx react -p ./src/main/resources/theme/groups/account/src
+  tsc --strictNullChecks --jsx react -p ./src/main/resources/theme/groups/account/src
   exit 0;
 fi
 

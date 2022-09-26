@@ -58,9 +58,14 @@ export class GroupsManagementPage extends React.Component<Props, State> {
       if(navItem==null)
         return;
       navItem.onclick = (event) => {
-        this.setState({menu:Menus.main});
+        this.goToMainMenu();
       }
 
+    }
+
+
+    goToMainMenu = () =>{
+        this.setState({menu:Menus.main});
     }
 
 
@@ -68,17 +73,17 @@ export class GroupsManagementPage extends React.Component<Props, State> {
 
       return (
           <>
-            {this.state.menu==Menus.main && this.showMainMenu()}
-            {this.state.menu==Menus.show_groups && this.showGroupsMenu()}
-            {this.state.menu==Menus.join_groups && this.showJoinGroupMenu()}
-            {this.state.menu==Menus.enrollment_progress && this.showEnrollmentProgressMenu()}
+            {this.state.menu==Menus.main && this.renderMainMenu()}
+            {this.state.menu==Menus.show_groups && this.renderGroupsMenu()}
+            {this.state.menu==Menus.join_groups && this.renderJoinGroupMenu()}
+            {this.state.menu==Menus.enrollment_progress && this.renderEnrollmentProgressMenu()}
           </>
       );
 
     }
 
 
-    public showMainMenu(): React.ReactNode {
+    public renderMainMenu(): React.ReactNode {
 
       return (
         <>
@@ -106,7 +111,7 @@ export class GroupsManagementPage extends React.Component<Props, State> {
                 isSelectable
               >
                 <CardTitle>Join group(s)</CardTitle>
-                <CardBody>Here you can ask to join a ne group</CardBody>
+                <CardBody>Here you can ask to join a new group</CardBody>
               </Card>
             </FlexItem>
             <FlexItem>
@@ -127,7 +132,7 @@ export class GroupsManagementPage extends React.Component<Props, State> {
     }
 
 
-    public showGroupsMenu(): React.ReactNode {
+    public renderGroupsMenu(): React.ReactNode {
 
       return (
         <MyGroups></MyGroups>
@@ -136,15 +141,15 @@ export class GroupsManagementPage extends React.Component<Props, State> {
     }
 
 
-    public showJoinGroupMenu(): React.ReactNode {
+    public renderJoinGroupMenu(): React.ReactNode {
 
       return (
-        <EnrollmentRequest></EnrollmentRequest>
+        <EnrollmentRequest goToMainMenu = {this.goToMainMenu}></EnrollmentRequest>
       );
 
     }
 
-    public showEnrollmentProgressMenu(): React.ReactNode {
+    public renderEnrollmentProgressMenu(): React.ReactNode {
 
       return (
         <EnrollmentProgress></EnrollmentProgress>

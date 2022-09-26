@@ -4,14 +4,21 @@ import { GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 
 import { DataList, DataListItem, DataListItemRow, DataListItemCells, DataListCell, Divider, Wizard, WizardStep } from '@patternfly/react-core';
 
+import { VOSelect } from '../../group-widgets/VOSelect';
+import { GroupSelect } from '../../group-widgets/GroupSelect';
+import { GroupSelectAlt } from '../../group-widgets/GroupSelectAlt';
+
+
 
 interface State {
-  currentStep: number
+  currentStep: number,
+  selectedVO: any,
+  selectedGroup: any
 }
 
 
 interface Props {
-
+  goToMainMenu: any
 }
 
 
@@ -19,11 +26,12 @@ export class EnrollmentRequest extends React.Component<Props, State> {
 
     groupsService = new GroupsServiceClient();
 
-
     constructor(props : Props){
         super(props);
         this.state = {
-          currentStep: 1
+          currentStep: 1,
+          selectedVO: null,
+          selectedGroup: null
         };
     }
 
@@ -32,36 +40,42 @@ export class EnrollmentRequest extends React.Component<Props, State> {
     }
 
     onNext = ( step: WizardStep) => {
-      console.log("initial value:", this.state.currentStep);
       this.setState({
         currentStep: this.state.currentStep < Number(step.id) ? Number(step.id) : this.state.currentStep
       });
-      console.log("setting value:", step);
-      console.log("new value:", this.state.currentStep);
     };
 
+    getVOSelection = (selection: any) => {
+      console.log("selected VO: ", selection);
+      this.setState({
+        selectedVO: selection.group.id
+      });
+    }
 
-
-    closeWizard = () => {
-      console.log('close wizard');
-    };
+    getGroupSelection = (selection: any) => {
+      console.log("selected group: ", selection);
+    }
 
     public render(): React.ReactNode {
 
 
 
         const steps = [
-          { id: '1', name: 'First step', component: <p>Step 1 content</p> },
+          {
+            id: '1',
+            name: 'Select VO',
+            component: <VOSelect getVOSelection={this.getVOSelection}></VOSelect>
+          },
           {
             id: '2',
-            name: 'Second step',
-            component: <p>Step 2 content</p>,
+            name: 'Select group(s)',
+            component: <GroupSelect getGroupSelection={this.getGroupSelection} vo_id={this.state.selectedVO}> </GroupSelect>,
             canJumpTo: this.state.currentStep >= 2
           },
           {
             id: '3',
-            name: 'Third step',
-            component: <p>Step 3 content</p>,
+            name: 'Acceptable use policy',
+            component: <p>Has no special use policies</p>,
             canJumpTo: this.state.currentStep >= 3
           },
           {
@@ -79,14 +93,13 @@ export class EnrollmentRequest extends React.Component<Props, State> {
           }
         ];
 
-        const title = 'Incrementally enabled wizard';
-
+        const title = 'VO/group enrollment wizard';
 
         return (
           <Wizard
             navAriaLabel={`${title} steps`}
             mainAriaLabel={`${title} content`}
-            onClose={this.closeWizard}
+            onClose={this.props.goToMainMenu}
             steps={steps}
             onNext={this.onNext}
 
