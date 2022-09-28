@@ -42,25 +42,6 @@ public class VoAdminGroupMember {
     }
 
     @POST
-    @Path("/admin")
-    @Produces("application/json")
-    public Response addOrRemoveVoAdmin(@QueryParam("addVoMember") Boolean addVoMember) {
-        UserModel user = userVoGroupMembershipRepository.getUserModel(session, member.getUser());
-        if (user == null) {
-            throw new NotFoundException("Could not find this User");
-        }
-        member.setIsAdmin(addVoMember);
-        userVoGroupMembershipRepository.update(member);
-        try {
-            customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendVoAdminEmail(group.getName(), addVoMember);
-        } catch (EmailException e) {
-            ServicesLogger.LOGGER.failedToSendEmail(e);
-        }
-        return Response.noContent().build();
-    }
-
-    @POST
     @Path("/suspend")
     public Response suspendUser(@QueryParam("justification") String justification) {
         UserModel user = userVoGroupMembershipRepository.getUserModel(session, member.getUser());
