@@ -41,10 +41,11 @@ public class VoAdminService {
         this.userVoGroupMembershipRepository =  new UserVoGroupMembershipRepository(session, session.getContext().getRealm());
     }
 
-    @GET
-    public List<GroupConfigurationRepresentation> getVoAdminGroups(){
-        return groupConfigurationRepository.getVoAdminGroups(voAdmin.getId()).map(entity -> EntityToRepresentation.toRepresentation(entity,realm)).collect(Collectors.toList());
-    }
+    //this will be different based on VoAdmin entity
+//    @GET
+//    public List<GroupConfigurationRepresentation> getVoAdminGroups(){
+//        return groupConfigurationRepository.getVoAdminGroups(voAdmin.getId()).map(entity -> EntityToRepresentation.toRepresentation(entity,realm)).collect(Collectors.toList());
+//    }
 
     @Path("/group/{groupId}")
     public VoAdminGroup group(@PathParam("groupId") String groupId) {

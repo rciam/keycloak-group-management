@@ -20,14 +20,19 @@ import javax.persistence.Table;
 @Entity
 @Table(name="GROUP_CONFIGURATION")
 @NamedQueries({
-        @NamedQuery(name="getVoAdminGroups", query="select g from GroupConfigurationEntity g, UserVoGroupMembershipEntity m where m.group.id = g.id and m.user.id = :userId and m.isAdmin = true")
+        @NamedQuery(name="getVoAdminGroups", query="select g from GroupConfigurationEntity g, UserVoGroupMembershipEntity m where m.group.id = g.id and m.user.id = :userId and m.isAdmin = true"),
+        @NamedQuery(name="getByGroup", query="select g from GroupConfigurationEntity g where g.group.id = :groupId")
 })
 public class GroupConfigurationEntity {
 
     @Id
-    @Column(name="GROUP_ID")
+    @Column(name="ID")
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
     private String id;
+
+    @ManyToOne()
+    @JoinColumn(name = "GROUP_ID")
+    protected GroupEntity group;
 
     @Column(name="DESCRIPTION")
     protected String description;
@@ -102,5 +107,13 @@ public class GroupConfigurationEntity {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public GroupEntity getGroup() {
+        return group;
+    }
+
+    public void setGroup(GroupEntity group) {
+        this.group = group;
     }
 }

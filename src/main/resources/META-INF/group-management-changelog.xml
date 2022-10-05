@@ -234,5 +234,14 @@
         <dropNotNullConstraint tableName="GROUP_AUP" columnName="CONTENT" columnDataType="BLOB"/>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="configuration">
+        <dropPrimaryKey tableName="GROUP_CONFIGURATION"/>
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="ID" type="varchar(36)" >
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 
 </databaseChangeLog>

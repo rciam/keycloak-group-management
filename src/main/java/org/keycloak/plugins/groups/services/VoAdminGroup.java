@@ -1,5 +1,9 @@
 package org.keycloak.plugins.groups.services;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
@@ -49,26 +53,38 @@ public class VoAdminGroup {
     }
 
     @GET
+    @Path("/configuration/all")
     @Produces("application/json")
-    public GroupConfigurationRepresentation getGroupConfiguration() {
-        GroupConfigurationEntity groupConfiguration = groupConfigurationRepository.getEntity(group.getId());
+    public List<GroupConfigurationRepresentation> getGroupConfigurationsByGroup() {
+       return groupConfigurationRepository.getByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf, realm)).collect(Collectors.toList());
+    }
+
+    @GET
+    @Path("/configuration/{id}")
+    @Produces("application/json")
+    public GroupConfigurationRepresentation getGroupConfiguration(@PathParam("id") String id) {
+        GroupConfigurationEntity groupConfiguration = groupConfigurationRepository.getEntity(id);
         //if not exist, group have only created from main Keycloak
         if (groupConfiguration == null) {
-            return new GroupConfigurationRepresentation(group.getId());
+            throw new NotFoundException("Could not find this group configuration");
         } else {
             return EntityToRepresentation.toRepresentation(groupConfiguration, realm);
         }
     }
 
     @POST
+    @Path("/configuration")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response saveGroupConfiguration(GroupConfigurationRepresentation rep) {
-        GroupConfigurationEntity entity = groupConfigurationRepository.getEntity(group.getId());
-        if (entity != null) {
-            groupConfigurationRepository.update(entity, rep, voAdmin.getId());
-        } else {
-            //only group exists
+        if (rep.getId() == null ) {
             groupConfigurationRepository.create(rep, group.getId(), voAdmin.getId());
+        } else {
+            GroupConfigurationEntity entity = groupConfigurationRepository.getEntity(rep.getId());
+            if (entity != null) {
+                groupConfigurationRepository.update(entity, rep, voAdmin.getId());
+            } else {
+                throw new NotFoundException("Could not find this group configuration");
+            }
         }
         //aup change action
         return Response.noContent().build();
