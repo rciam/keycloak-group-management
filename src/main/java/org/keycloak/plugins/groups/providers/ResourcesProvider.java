@@ -121,7 +121,7 @@ public class ResourcesProvider implements RealmResourceProvider {
             groupConfigurationRepository.createDefault(rep.getId());
         }
         //if rep.getId() != null => mean that group has been moved( not created)
-        logger.info("group move. No groupconfiguration with id ==== "+rep.getId());
+        logger.info("group configuration exists ==== "+rep.getId());
 
         return Response.noContent().build();
     }

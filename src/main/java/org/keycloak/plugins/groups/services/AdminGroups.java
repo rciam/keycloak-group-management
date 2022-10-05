@@ -64,26 +64,32 @@ public class AdminGroups {
   }
 
     @GET
+    @Path("/configuration/{id}}")
     @Produces("application/json")
-    public GroupConfigurationRepresentation getGroupConfiguration() {
-        GroupConfigurationEntity groupConfiguration = groupConfigurationRepository.getEntity(group.getId());
+    public GroupConfigurationRepresentation getGroupConfiguration(@PathParam("id") String id) {
+        GroupConfigurationEntity groupConfiguration = groupConfigurationRepository.getEntity(id);
         //if not exist, group have only created from main Keycloak
         if(groupConfiguration == null) {
-            throw new NotFoundException("Could not find this Group");
+            throw new NotFoundException("Could not find this Group Configuration");
         } else {
             return EntityToRepresentation.toRepresentation(groupConfiguration, realm);
         }
     }
 
     @POST
+    @Path("/configuration")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response saveGroupConfiguration(GroupConfigurationRepresentation rep) {
         realmAuth.groups().requireManage(group);
-        GroupConfigurationEntity entity = groupConfigurationRepository.getEntity(group.getId());
-        if ( entity != null) {
-            groupConfigurationRepository.update(entity, rep, realmAuth.adminAuth().getUser().getId());
+        if (rep.getId() == null ) {
+            groupConfigurationRepository.create(rep, group.getId(), realmAuth.adminAuth().getUser().getId());
         } else {
-            throw new NotFoundException("Could not find this Group");
+            GroupConfigurationEntity entity = groupConfigurationRepository.getEntity(rep.getId());
+            if (entity != null) {
+                groupConfigurationRepository.update(entity, rep, realmAuth.adminAuth().getUser().getId());
+            } else {
+                throw new NotFoundException("Could not find this group configuration");
+            }
         }
         //aup change action
         return Response.noContent().build();

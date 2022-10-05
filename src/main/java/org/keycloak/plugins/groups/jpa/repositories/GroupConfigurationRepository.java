@@ -2,8 +2,10 @@ package org.keycloak.plugins.groups.jpa.repositories;
 
 import java.util.stream.Stream;
 
+import liquibase.pro.packaged.G;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
@@ -24,14 +26,20 @@ public class GroupConfigurationRepository extends GeneralRepository<GroupConfigu
 
     public void create(GroupConfigurationRepresentation rep, String groupId, String editorId){
         GroupConfigurationEntity entity = new GroupConfigurationEntity();
-        entity.setId(groupId);
+        entity.setId(KeycloakModelUtils.generateId());
+        GroupEntity group = new GroupEntity();
+        group.setId(groupId);
+        entity.setGroup(group);
         toEntity(entity, rep, editorId);
         create(entity);
     }
 
     public void createDefault(String groupId){
         GroupConfigurationEntity entity = new GroupConfigurationEntity();
-        entity.setId(groupId);
+        entity.setId(KeycloakModelUtils.generateId());
+        GroupEntity group = new GroupEntity();
+        group.setId(groupId);
+        entity.setGroup(group);
         entity.setRequireApproval(true);
         entity.setRequireAupAcceptance(false);
         create(entity);
@@ -44,6 +52,10 @@ public class GroupConfigurationRepository extends GeneralRepository<GroupConfigu
 
     public Stream<GroupConfigurationEntity> getVoAdminGroups(String userId) {
         return em.createNamedQuery("getVoAdminGroups").setParameter("userId",userId).getResultStream();
+    }
+
+    public Stream<GroupConfigurationEntity> getByGroup(String groupId) {
+        return em.createNamedQuery("getByGroup").setParameter("groupId",groupId).getResultStream();
     }
 
     private void toEntity(GroupConfigurationEntity entity, GroupConfigurationRepresentation rep, String editorId) {

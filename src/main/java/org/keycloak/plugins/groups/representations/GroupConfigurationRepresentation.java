@@ -4,6 +4,7 @@ import javax.persistence.Column;
 
 public class GroupConfigurationRepresentation {
 
+    private String id;
     private String groupId;
     private String description;
     private Boolean requireAupAcceptance;
@@ -12,12 +13,19 @@ public class GroupConfigurationRepresentation {
     private Long membershipExpirationSec;
     private GroupAupRepresentation aup;
 
-    public GroupConfigurationRepresentation(String groupId){
-        this.groupId = groupId;
+    public GroupConfigurationRepresentation(String id){
+        this.id = id;
     }
 
     public GroupConfigurationRepresentation(){  }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getGroupId() {
         return groupId;

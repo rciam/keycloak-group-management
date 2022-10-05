@@ -27,6 +27,7 @@ public class EntityToRepresentation {
 
     public static GroupConfigurationRepresentation toRepresentation(GroupConfigurationEntity entity, RealmModel realm) {
         GroupConfigurationRepresentation rep = new GroupConfigurationRepresentation(entity.getId());
+        rep.setGroupId(entity.getGroup().getId());
         rep.setDescription(entity.getDescription());
         rep.setRequireApproval(entity.getRequireApproval());
         rep.setRequireAupAcceptance(entity.getRequireAupAcceptance());
