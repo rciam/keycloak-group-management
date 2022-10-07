@@ -28,6 +28,7 @@ public abstract class GeneralRepository<T> {
 
     public void create(T entity) {
         em.persist(entity);
+        em.flush();
     }
 
     public void update(T entity) {

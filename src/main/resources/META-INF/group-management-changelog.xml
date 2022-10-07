@@ -243,5 +243,44 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="groupadmin">
+        <createTable tableName="GROUP_ADMIN">
+            <column name="ID" type="VARCHAR(36)">
+               <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="GROUP_ID" type="VARCHAR(36)" >
+               <constraints nullable="false"/>
+            </column>
+            <column name="USER_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint columnNames="GROUP_ID, USER_ID" constraintName="UK_GROUP_ADMIN" tableName="GROUP_ADMIN"/>
+        <addUniqueConstraint columnNames="GROUP_ID, USER_ID" constraintName="UK_GROUP_MEMBER" tableName="USER_VO_GROUP_MEMBERSHIP"/>
+
+        <createIndex indexName="GROUP_ADMIN_IDX1" tableName="GROUP_ADMIN">
+            <column name="GROUP_ID"/>
+            <column name="USER_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint
+                constraintName="fk_group_admin_group"
+                baseTableName="GROUP_ADMIN"
+                baseColumnNames="GROUP_ID"
+                referencedTableName="keycloak_group"
+                referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint
+                constraintName="fk_group_admin_user"
+                baseTableName="GROUP_ADMIN"
+                baseColumnNames="USER_ID"
+                referencedTableName="user_entity"
+                referencedColumnNames="id"
+        />
+
+        <dropColumn tableName="USER_VO_GROUP_MEMBERSHIP" columnName="IS_ADMIN" />
+    </changeSet>
+
 
 </databaseChangeLog>

@@ -74,11 +74,6 @@ public class UserVoGroupMembershipRepository extends GeneralRepository<UserVoGro
         return new UserVoGroupMembershipRepresentationPager(results.map(x-> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList()), count);
     }
 
-    public boolean isVoAdmin(String groupId, String userId){
-       Long result = em.createNamedQuery("countVoAdmin", Long.class).setParameter("groupId",groupId).setParameter("userId",userId).getSingleResult();
-       return  result > 0;
-    }
-
     @Transactional
     public void suspendUser(UserModel user, UserVoGroupMembershipEntity member, String justification, GroupModel group){
         member.setStatus(StatusEnum.SUSPENDED);
@@ -111,7 +106,6 @@ public class UserVoGroupMembershipRepository extends GeneralRepository<UserVoGro
         UserEntity editorUser = new UserEntity();
         editorUser.setId(editor);
         entity.setChangedBy(editorUser);
-        entity.setIsAdmin(rep.getAdmin());
         entity.setJustification(rep.getJustification());
         entity.setStatus(rep.getStatus());
         create(entity);

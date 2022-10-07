@@ -54,7 +54,6 @@ public class EntityToRepresentation {
         rep.setId(entity.getId());
         rep.setGroupId(entity.getGroup().getId());
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
-        rep.setAdmin(entity.getIsAdmin());
         rep.setJustification(entity.getJustification());
         rep.setAupExpiresAt(entity.getAupExpiresAt());
         rep.setMembershipExpiresAt(entity.getMembershipExpiresAt());
