@@ -18,13 +18,9 @@ import {
 } from '@patternfly/react-core';
 
 
-
-
 import { MyGroups } from './MyGroups';
 import { EnrollmentProgress } from './EnrollmentProgress';
 import { EnrollmentRequest } from './EnrollmentRequest';
-
-import { AccordionSample } from '../../group-widgets/AccordionSample';
 
 
 enum Menus {

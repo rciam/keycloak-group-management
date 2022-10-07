@@ -6,7 +6,6 @@ import { DataList, DataListItem, DataListItemRow, DataListItemCells, DataListCel
 
 import { VOSelect } from '../../group-widgets/VOSelect';
 import { GroupSelect } from '../../group-widgets/GroupSelect';
-import { GroupSelectAlt } from '../../group-widgets/GroupSelectAlt';
 
 
 
