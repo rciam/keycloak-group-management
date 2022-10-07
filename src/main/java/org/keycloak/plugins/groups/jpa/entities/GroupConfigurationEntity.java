@@ -34,8 +34,11 @@ public class GroupConfigurationEntity {
     @JoinColumn(name = "GROUP_ID")
     protected GroupEntity group;
 
-    @Column(name="DESCRIPTION")
-    protected String description;
+    @Column(name="NAME")
+    protected String name;
+
+    @Column(name="ACTIVE")
+    protected Boolean active;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "AUP_ID")
@@ -53,12 +56,35 @@ public class GroupConfigurationEntity {
     @Column(name="MEMBERSHIP_EXPIRATION_SEC")
     protected Long membershipExpirationSec;
 
-    public String getDescription() {
-        return description;
+    @Column(name="ENROLLMENT_INTRODUCTION")
+    protected String enrollmentIntroduction;
+
+    @Column(name="INVITATION_INTRODUCTION")
+    protected String invitationIntroduction;
+
+    @Column(name="ENROLLMENT_CONCLUSION")
+    protected String enrollmentConclusion;
+
+    @Column(name="INVITATION_CONCLUSION")
+    protected String invitationConclusion;
+
+    @Column(name="HIDE_CONFIGURATION")
+    protected Boolean hideConfiguration;
+
+    public String getName() {
+        return name;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Boolean isActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public GroupAupEntity getAupEntity() {
@@ -115,5 +141,45 @@ public class GroupConfigurationEntity {
 
     public void setGroup(GroupEntity group) {
         this.group = group;
+    }
+
+    public String getEnrollmentIntroduction() {
+        return enrollmentIntroduction;
+    }
+
+    public void setEnrollmentIntroduction(String enrollmentIntroduction) {
+        this.enrollmentIntroduction = enrollmentIntroduction;
+    }
+
+    public String getInvitationIntroduction() {
+        return invitationIntroduction;
+    }
+
+    public void setInvitationIntroduction(String invitationIntroduction) {
+        this.invitationIntroduction = invitationIntroduction;
+    }
+
+    public String getEnrollmentConclusion() {
+        return enrollmentConclusion;
+    }
+
+    public void setEnrollmentConclusion(String enrollmentConclusion) {
+        this.enrollmentConclusion = enrollmentConclusion;
+    }
+
+    public String getInvitationConclusion() {
+        return invitationConclusion;
+    }
+
+    public void setInvitationConclusion(String invitationConclusion) {
+        this.invitationConclusion = invitationConclusion;
+    }
+
+    public Boolean isHideConfiguration() {
+        return hideConfiguration;
+    }
+
+    public void setHideConfiguration(Boolean hideConfiguration) {
+        this.hideConfiguration = hideConfiguration;
     }
 }

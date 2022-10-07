@@ -28,11 +28,17 @@ public class EntityToRepresentation {
     public static GroupConfigurationRepresentation toRepresentation(GroupConfigurationEntity entity, RealmModel realm) {
         GroupConfigurationRepresentation rep = new GroupConfigurationRepresentation(entity.getId());
         rep.setGroupId(entity.getGroup().getId());
-        rep.setDescription(entity.getDescription());
+        rep.setName(entity.getName());
+        rep.setActive(entity.isActive());
+        rep.setHideConfiguration(entity.isHideConfiguration());
         rep.setRequireApproval(entity.getRequireApproval());
         rep.setRequireAupAcceptance(entity.getRequireAupAcceptance());
         rep.setAupExpirySec(entity.getAupExpirySec());
         rep.setMembershipExpirationSec(entity.getMembershipExpirationSec());
+        rep.setEnrollmentConclusion(entity.getEnrollmentConclusion());
+        rep.setEnrollmentIntroduction(entity.getEnrollmentIntroduction());
+        rep.setInvitationConclusion(entity.getInvitationConclusion());
+        rep.setInvitationIntroduction(entity.getInvitationIntroduction());
         if ( entity.getAupEntity() != null)
             rep.setAup(toRepresentation(entity.getAupEntity(), realm));
         return rep;

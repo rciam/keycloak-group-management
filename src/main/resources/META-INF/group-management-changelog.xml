@@ -282,5 +282,36 @@
         <dropColumn tableName="USER_VO_GROUP_MEMBERSHIP" columnName="IS_ADMIN" />
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="groupconfiguration">
+        <dropColumn tableName="GROUP_CONFIGURATION" columnName="DESCRIPTION" />
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="NAME" type="VARCHAR(256)" >
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="ACTIVE" type="boolean"  defaultValueBoolean="true" >
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="ENROLLMENT_INTRODUCTION" type="TEXT" />
+        </addColumn>
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="INVITATION_INTRODUCTION" type="TEXT" />
+        </addColumn>
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="ENROLLMENT_CONCLUSION" type="TEXT" />
+        </addColumn>
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="INVITATION_CONCLUSION" type="TEXT" />
+        </addColumn>
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="HIDE_CONFIGURATION" type="boolean"  defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 
 </databaseChangeLog>

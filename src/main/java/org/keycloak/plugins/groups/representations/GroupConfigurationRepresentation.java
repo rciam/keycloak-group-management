@@ -6,12 +6,18 @@ public class GroupConfigurationRepresentation {
 
     private String id;
     private String groupId;
-    private String description;
+    private String name;
+    private Boolean active;
     private Boolean requireAupAcceptance;
     private Boolean requireApproval;
     private Long aupExpirySec;
     private Long membershipExpirationSec;
     private GroupAupRepresentation aup;
+    private String enrollmentIntroduction;
+    private String invitationIntroduction;
+    private String enrollmentConclusion;
+    private String invitationConclusion;
+    private Boolean hideConfiguration;
 
     public GroupConfigurationRepresentation(String id){
         this.id = id;
@@ -35,12 +41,20 @@ public class GroupConfigurationRepresentation {
         this.groupId = groupId;
     }
 
-    public String getDescription() {
-        return description;
+    public String getName() {
+        return name;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Boolean isActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public Boolean getRequireAupAcceptance() {
@@ -81,5 +95,45 @@ public class GroupConfigurationRepresentation {
 
     public void setAup(GroupAupRepresentation aup) {
         this.aup = aup;
+    }
+
+    public String getEnrollmentIntroduction() {
+        return enrollmentIntroduction;
+    }
+
+    public void setEnrollmentIntroduction(String enrollmentIntroduction) {
+        this.enrollmentIntroduction = enrollmentIntroduction;
+    }
+
+    public String getInvitationIntroduction() {
+        return invitationIntroduction;
+    }
+
+    public void setInvitationIntroduction(String invitationIntroduction) {
+        this.invitationIntroduction = invitationIntroduction;
+    }
+
+    public String getEnrollmentConclusion() {
+        return enrollmentConclusion;
+    }
+
+    public void setEnrollmentConclusion(String enrollmentConclusion) {
+        this.enrollmentConclusion = enrollmentConclusion;
+    }
+
+    public String getInvitationConclusion() {
+        return invitationConclusion;
+    }
+
+    public void setInvitationConclusion(String invitationConclusion) {
+        this.invitationConclusion = invitationConclusion;
+    }
+
+    public Boolean isHideConfiguration() {
+        return hideConfiguration;
+    }
+
+    public void setHideConfiguration(Boolean hideConfiguration) {
+        this.hideConfiguration = hideConfiguration;
     }
 }

@@ -34,14 +34,18 @@ public class GroupConfigurationRepository extends GeneralRepository<GroupConfigu
         create(entity);
     }
 
-    public void createDefault(String groupId){
+    public void createDefault(String groupId, String groupName){
+        //default values, hide by default
         GroupConfigurationEntity entity = new GroupConfigurationEntity();
         entity.setId(KeycloakModelUtils.generateId());
         GroupEntity group = new GroupEntity();
         group.setId(groupId);
         entity.setGroup(group);
+        entity.setName(groupName);
         entity.setRequireApproval(true);
         entity.setRequireAupAcceptance(false);
+        entity.setActive(true);
+        entity.setHideConfiguration(true);
         create(entity);
     }
 
@@ -59,11 +63,17 @@ public class GroupConfigurationRepository extends GeneralRepository<GroupConfigu
     }
 
     private void toEntity(GroupConfigurationEntity entity, GroupConfigurationRepresentation rep, String editorId) {
-        entity.setDescription(rep.getDescription());
+        entity.setName(rep.getName());
+        entity.setActive(rep.isActive());
+        entity.setHideConfiguration(rep.isHideConfiguration());
         entity.setRequireApproval(rep.getRequireApproval());
         entity.setRequireAupAcceptance(rep.getRequireAupAcceptance());
         entity.setAupExpirySec(rep.getAupExpirySec());
         entity.setMembershipExpirationSec(rep.getMembershipExpirationSec());
+        entity.setEnrollmentConclusion(rep.getEnrollmentConclusion());
+        entity.setEnrollmentIntroduction(rep.getEnrollmentIntroduction());
+        entity.setInvitationConclusion(rep.getInvitationConclusion());
+        entity.setInvitationIntroduction(rep.getInvitationIntroduction());
         if ( rep.getAup() != null)
             entity.setAupEntity(toEntity(rep.getAup(), editorId));
     }

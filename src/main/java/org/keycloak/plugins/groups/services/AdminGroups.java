@@ -162,7 +162,7 @@ public class AdminGroups {
             //group creation
             //get id from GroupRepresentation (response body)
             String groupId = response.readEntity(GroupRepresentation.class).getId();
-            groupConfigurationRepository.createDefault(groupId);
+            groupConfigurationRepository.createDefault(groupId, rep.getName());
         }
         return Response.noContent().build();
     }

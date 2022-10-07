@@ -118,7 +118,7 @@ public class ResourcesProvider implements RealmResourceProvider {
         } else if (groupConfigurationRepository.getEntity(rep.getId()) == null) {
             //group creation - group configuration no exist
             logger.info("Create group with groupId === "+rep.getId());
-            groupConfigurationRepository.createDefault(rep.getId());
+            groupConfigurationRepository.createDefault(rep.getId(), rep.getName());
         }
         //if rep.getId() != null => mean that group has been moved( not created)
         logger.info("group configuration exists ==== "+rep.getId());
