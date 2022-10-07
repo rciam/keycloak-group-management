@@ -1,7 +1,9 @@
 package org.keycloak.plugins.groups.services;
 
 
+import javax.persistence.PersistenceException;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -19,21 +21,21 @@ import org.keycloak.email.EmailException;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.ModelDuplicateException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupConfigurationEntity;
-import org.keycloak.plugins.groups.jpa.entities.UserVoGroupMembershipEntity;
+import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupConfigurationRepository;
-import org.keycloak.plugins.groups.jpa.repositories.UserVoGroupMembershipRepository;
 import org.keycloak.plugins.groups.representations.GroupConfigurationRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.GroupResource;
-import org.keycloak.services.resources.admin.GroupsResource;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.theme.FreeMarkerUtil;
 
@@ -49,7 +51,7 @@ public class AdminGroups {
     private final AdminPermissionEvaluator realmAuth;
     private final GroupModel group;
     private final GroupConfigurationRepository groupConfigurationRepository;
-    private final UserVoGroupMembershipRepository userVoGroupMembershipRepository;
+    private final GroupAdminRepository groupAdminRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
 
     public AdminGroups(KeycloakSession session, AdminPermissionEvaluator realmAuth, GroupModel group,  RealmModel realm) {
@@ -58,7 +60,7 @@ public class AdminGroups {
         this.realmAuth = realmAuth;
         this.group = group;
         this.groupConfigurationRepository =  new GroupConfigurationRepository(session, session.getContext().getRealm());
-        this.userVoGroupMembershipRepository =  new UserVoGroupMembershipRepository(session, session.getContext().getRealm());
+        this.groupAdminRepository =  new GroupAdminRepository(session, session.getContext().getRealm());
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
   }
@@ -96,25 +98,47 @@ public class AdminGroups {
     }
 
     @POST
-    @Path("/member/{userId}/admin")
-    @Produces("application/json")
-    public Response addOrRemoveVoAdmin(@PathParam("userId") String userId, @QueryParam("addVoMember") Boolean addVoMember) {
+    @Path("/admin/{userId}")
+    public Response addVoAdmin(@PathParam("userId") String userId) {
         UserModel user = session.users().getUserById(realm, userId);
         if ( user == null ) {
             throw new NotFoundException("Could not find this User");
         }
         realmAuth.users().requireManageGroupMembership(user);
-        UserVoGroupMembershipEntity member = userVoGroupMembershipRepository.getByUserAndGroup(group.getId(), user.getId());
-        if ( member == null ) {
-            throw new NotFoundException("Could not find this Group member");
-        }
-        member.setIsAdmin(addVoMember);
-        userVoGroupMembershipRepository.update(member);
         try {
-            customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendVoAdminEmail(group.getName(), addVoMember);
-        } catch (EmailException e) {
-            ServicesLogger.LOGGER.failedToSendEmail(e);
+            groupAdminRepository.addGroupAdmin(userId, group.getId());
+
+            try {
+                customFreeMarkerEmailTemplateProvider.setUser(user);
+                customFreeMarkerEmailTemplateProvider.sendVoAdminEmail(group.getName(), true);
+            } catch (EmailException e) {
+                ServicesLogger.LOGGER.failedToSendEmail(e);
+            }
+            return Response.noContent().build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(ModelDuplicateException.class.equals(e.getClass()) ? "Admin has already been existed" : "Problem during admin save").build();
+        }
+    }
+
+    @DELETE
+    @Path("/admin/{userId}")
+    public Response removeVoAdmin(@PathParam("userId") String userId) {
+        UserModel user = session.users().getUserById(realm, userId);
+        if ( user == null ) {
+            throw new NotFoundException("Could not find this User");
+        }
+        realmAuth.users().requireManageGroupMembership(user);
+        GroupAdminEntity admin = groupAdminRepository.getGroupAdminByUserAndGroup(userId, group.getId());
+        if (admin != null) {
+            groupAdminRepository.deleteEntity(admin.getId());
+            try {
+                customFreeMarkerEmailTemplateProvider.setUser(user);
+                customFreeMarkerEmailTemplateProvider.sendVoAdminEmail(group.getName(), false);
+            } catch (EmailException e) {
+                ServicesLogger.LOGGER.failedToSendEmail(e);
+            }
+        } else {
+            throw new NotFoundException("This admin does not exist");
         }
         return Response.noContent().build();
     }

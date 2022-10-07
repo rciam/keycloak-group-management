@@ -17,6 +17,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserVoGroupMembershipRepository;
 import org.keycloak.plugins.groups.representations.GroupConfigurationRepresentation;
@@ -31,6 +32,7 @@ public class VoAdminService {
     private final UserModel voAdmin;
     private final GroupConfigurationRepository groupConfigurationRepository;
     private final UserVoGroupMembershipRepository userVoGroupMembershipRepository;
+    private final GroupAdminRepository groupAdminRepository;
 
     public VoAdminService(KeycloakSession session, RealmModel realm) {
         this.session = session;
@@ -39,6 +41,7 @@ public class VoAdminService {
         this.voAdmin = authHelper.authenticateUserRequest().getUser();
         this.groupConfigurationRepository =  new GroupConfigurationRepository(session, session.getContext().getRealm());
         this.userVoGroupMembershipRepository =  new UserVoGroupMembershipRepository(session, session.getContext().getRealm());
+        this.groupAdminRepository =  new GroupAdminRepository(session, session.getContext().getRealm());
     }
 
     //this will be different based on VoAdmin entity
@@ -49,13 +52,14 @@ public class VoAdminService {
 
     @Path("/group/{groupId}")
     public VoAdminGroup group(@PathParam("groupId") String groupId) {
-        if (!userVoGroupMembershipRepository.isVoAdmin(groupId, voAdmin.getId())){
-            throw new ForbiddenException();
-        }
         GroupModel group = realm.getGroupById(groupId);
         if (group == null) {
             throw new NotFoundException("Could not find group by id");
         }
+        if (!groupAdminRepository.isVoAdmin(voAdmin.getId(), group)){
+            throw new ForbiddenException();
+        }
+
         VoAdminGroup service = new VoAdminGroup(session, realm, voAdmin, groupConfigurationRepository, userVoGroupMembershipRepository, group);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;

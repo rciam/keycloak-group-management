@@ -24,7 +24,6 @@ public class UserVoGroupMembershipRepresentation {
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
     protected Date aupExpiresAt;
     protected String justification;
-    protected Boolean admin;
 
     public UserVoGroupMembershipRepresentation(){}
 
@@ -92,11 +91,4 @@ public class UserVoGroupMembershipRepresentation {
         this.justification = justification;
     }
 
-    public Boolean getAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(Boolean admin) {
-        this.admin = admin;
-    }
 }

@@ -22,8 +22,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name="USER_VO_GROUP_MEMBERSHIP")
 @NamedQueries({
-        @NamedQuery(name="getByUserAndGroup", query="from UserVoGroupMembershipEntity f where f.group.id = :groupId and f.user.id = :userId"),
-        @NamedQuery(name="countVoAdmin", query="select count(f) from UserVoGroupMembershipEntity f where f.group.id = :groupId and f.user.id = :userId and f.isAdmin = true")
+        @NamedQuery(name="getByUserAndGroup", query="from UserVoGroupMembershipEntity f where f.group.id = :groupId and f.user.id = :userId")
 })
 public class UserVoGroupMembershipEntity {
 
@@ -56,9 +55,6 @@ public class UserVoGroupMembershipEntity {
 
     @Column(name="JUSTIFICATION")
     protected String justification;
-
-    @Column(name="IS_ADMIN")
-    protected Boolean isAdmin;
 
     public String getId() {
         return id;
@@ -124,11 +120,4 @@ public class UserVoGroupMembershipEntity {
         this.justification = justification;
     }
 
-    public Boolean getIsAdmin() {
-        return isAdmin;
-    }
-
-    public void setIsAdmin(Boolean isAdmin) {
-        this.isAdmin = isAdmin;
-    }
 }
