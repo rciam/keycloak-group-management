@@ -46,13 +46,13 @@ public class VoAdminGroup {
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final GroupAdminRepository groupAdminRepository;
 
-    public VoAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupConfigurationRepository groupConfigurationRepository, UserVoGroupMembershipRepository userVoGroupMembershipRepository, GroupModel group) {
+    public VoAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupModel group) {
         this.session = session;
         this.realm = realm;
         this.voAdmin = voAdmin;
         this.group = group;
-        this.groupConfigurationRepository = groupConfigurationRepository;
-        this.userVoGroupMembershipRepository = userVoGroupMembershipRepository;
+        this.groupConfigurationRepository =  new GroupConfigurationRepository(session, session.getContext().getRealm());
+        this.userVoGroupMembershipRepository =  new UserVoGroupMembershipRepository(session, session.getContext().getRealm());
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         this.groupAdminRepository = new GroupAdminRepository(session, realm);

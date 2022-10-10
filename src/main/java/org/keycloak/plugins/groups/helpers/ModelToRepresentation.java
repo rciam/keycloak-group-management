@@ -1,50 +1,55 @@
 package org.keycloak.plugins.groups.helpers;
 
-import org.keycloak.models.ClientModel;
 import org.keycloak.models.GroupModel;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.RoleModel;
-import org.keycloak.representations.idm.GroupRepresentation;
+import org.keycloak.plugins.groups.representations.GroupRepresentation;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ModelToRepresentation extends org.keycloak.models.utils.ModelToRepresentation {
 
 
-    public static GroupRepresentation toRepresentation(GroupModel group, boolean full) {
+    /**
+     * change logic from Keycloak ModelToRepresentation
+     * We do not want all related groups lists
+     * based on full create or not the path
+     * @param group
+     * @param full
+     * @return
+     */
+    public static GroupRepresentation toRepresentation(GroupModel group, boolean full, boolean hasRights) {
         GroupRepresentation rep = new GroupRepresentation();
         rep.setId(group.getId());
         rep.setName(group.getName());
-        rep.setPath(buildGroupPath(group));
-        if (!full) return rep;
-        // Role mappings
-        Set<RoleModel> roles = group.getRoleMappingsStream().collect(Collectors.toSet());
-        List<String> realmRoleNames = new ArrayList<>();
-        Map<String, List<String>> clientRoleNames = new HashMap<>();
-        for (RoleModel role : roles) {
-            if (role.getContainer() instanceof RealmModel) {
-                realmRoleNames.add(role.getName());
-            } else {
-                ClientModel client = (ClientModel)role.getContainer();
-                String clientId = client.getClientId();
-                List<String> currentClientRoles = clientRoleNames.computeIfAbsent(clientId, k -> new ArrayList<>());
-                currentClientRoles.add(role.getName());
-            }
-        }
-        rep.setRealmRoles(realmRoleNames);
-        rep.setClientRoles(clientRoleNames);
-        Map<String, List<String>> attributes = group.getAttributes();
-        rep.setAttributes(attributes);
-        //TODO: maybe add subgroups
-
-//        rep.setSubGroups();
+        rep.setHasRights(hasRights);
+        if ( full)
+           rep.setPath(buildGroupPath(group));
         return rep;
     }
+
+    public static GroupRepresentation toGroupHierarchy(GroupModel group, boolean full) {
+        GroupRepresentation rep = toSimpleGroupHierarchy(group, full);
+        if ( group.getParent() != null ) {
+            GroupModel parentGroup = group.getParent();
+            do {
+                GroupRepresentation repChild = rep;
+                rep = toRepresentation(parentGroup, full, false);
+                rep.setExtraSubGroups(Stream.of(repChild).collect(Collectors.toList()));
+                parentGroup = parentGroup.getParent();
+            } while(parentGroup != null);
+        }
+        return rep;
+    }
+
+    public static GroupRepresentation toSimpleGroupHierarchy(GroupModel group, boolean full) {
+        GroupRepresentation rep = toRepresentation(group, full, true);
+        List<GroupRepresentation> subGroups = group.getSubGroupsStream()
+                .map(subGroup -> toSimpleGroupHierarchy(subGroup, full)).collect(Collectors.toList());
+        rep.setExtraSubGroups(subGroups);
+        return rep;
+    }
+
 
 
 }
