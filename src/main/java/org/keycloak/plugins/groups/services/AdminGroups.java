@@ -106,15 +106,19 @@ public class AdminGroups {
         }
         realmAuth.users().requireManageGroupMembership(user);
         try {
-            groupAdminRepository.addGroupAdmin(userId, group.getId());
+            if (!groupAdminRepository.isVoAdmin(user.getId(), group)) {
+                groupAdminRepository.addGroupAdmin(userId, group.getId());
 
-            try {
-                customFreeMarkerEmailTemplateProvider.setUser(user);
-                customFreeMarkerEmailTemplateProvider.sendVoAdminEmail(group.getName(), true);
-            } catch (EmailException e) {
-                ServicesLogger.LOGGER.failedToSendEmail(e);
+                try {
+                    customFreeMarkerEmailTemplateProvider.setUser(user);
+                    customFreeMarkerEmailTemplateProvider.sendVoAdminEmail(group.getName(), true);
+                } catch (EmailException e) {
+                    ServicesLogger.LOGGER.failedToSendEmail(e);
+                }
+                return Response.noContent().build();
+            } else {
+                return Response.status(Response.Status.BAD_REQUEST).entity(user.getUsername() + " is already group admin for the "+group.getName()+" group or one of its parent.").build();
             }
-            return Response.noContent().build();
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ModelDuplicateException.class.equals(e.getClass()) ? "Admin has already been existed" : "Problem during admin save").build();
         }
