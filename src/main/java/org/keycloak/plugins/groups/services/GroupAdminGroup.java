@@ -2,7 +2,6 @@ package org.keycloak.plugins.groups.services;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -12,7 +11,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -24,35 +22,34 @@ import org.keycloak.models.ModelDuplicateException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
-import org.keycloak.plugins.groups.enums.StatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
-import org.keycloak.plugins.groups.jpa.entities.UserVoGroupMembershipEntity;
+import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
-import org.keycloak.plugins.groups.jpa.repositories.UserVoGroupMembershipRepository;
+import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.theme.FreeMarkerUtil;
 
-public class VoAdminGroup {
+public class GroupAdminGroup {
     private final KeycloakSession session;
     private final RealmModel realm;
     private final UserModel voAdmin;
     private GroupModel group;
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
-    private final UserVoGroupMembershipRepository userVoGroupMembershipRepository;
+    private final UserGroupMembershipRepository userGroupMembershipRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final GroupAdminRepository groupAdminRepository;
 
-    public VoAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupModel group) {
+    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupModel group) {
         this.session = session;
         this.realm = realm;
         this.voAdmin = voAdmin;
         this.group = group;
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, session.getContext().getRealm());
-        this.userVoGroupMembershipRepository =  new UserVoGroupMembershipRepository(session, session.getContext().getRealm());
+        this.userGroupMembershipRepository =  new UserGroupMembershipRepository(session, session.getContext().getRealm());
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         this.groupAdminRepository = new GroupAdminRepository(session, realm);
@@ -97,26 +94,26 @@ public class VoAdminGroup {
     }
 
     @Path("/members")
-    public VoAdminGroupMembers addGroupMember() {
-        VoAdminGroupMembers service = new VoAdminGroupMembers(session, realm, voAdmin, userVoGroupMembershipRepository, group, customFreeMarkerEmailTemplateProvider);
+    public GroupAdminGroupMembers addGroupMember() {
+        GroupAdminGroupMembers service = new GroupAdminGroupMembers(session, realm, voAdmin, userGroupMembershipRepository, group, customFreeMarkerEmailTemplateProvider);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
 
     @Path("/member/{memberId}")
-    public VoAdminGroupMember addGroupMember(@PathParam("memberId") String memberId) {
-        UserVoGroupMembershipEntity member = userVoGroupMembershipRepository.getEntity(memberId);
+    public GroupAdminGroupMember addGroupMember(@PathParam("memberId") String memberId) {
+        UserGroupMembershipEntity member = userGroupMembershipRepository.getEntity(memberId);
         if (member == null) {
             throw new NotFoundException("Could not find this group member");
         }
-        VoAdminGroupMember service = new VoAdminGroupMember(session, realm, voAdmin, userVoGroupMembershipRepository, group, customFreeMarkerEmailTemplateProvider, member);
+        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipRepository, group, customFreeMarkerEmailTemplateProvider, member);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
 
     @POST
     @Path("/admin/{userId}")
-    public Response addVoAdmin(@PathParam("userId") String userId) {
+    public Response addGroupAdmin(@PathParam("userId") String userId) {
         UserModel user = session.users().getUserById(realm, userId);
         if ( user == null ) {
             throw new NotFoundException("Could not find this User");
@@ -126,7 +123,7 @@ public class VoAdminGroup {
 
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(user);
-                customFreeMarkerEmailTemplateProvider.sendVoAdminEmail(group.getName(), true);
+                customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
             } catch (EmailException e) {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
             }
@@ -138,7 +135,7 @@ public class VoAdminGroup {
 
     @DELETE
     @Path("/admin/{userId}")
-    public Response removeVoAdmin(@PathParam("userId") String userId) {
+    public Response removeGroupAdmin(@PathParam("userId") String userId) {
         UserModel user = session.users().getUserById(realm, userId);
         if ( user == null ) {
             throw new NotFoundException("Could not find this User");
@@ -148,7 +145,7 @@ public class VoAdminGroup {
             groupAdminRepository.deleteEntity(admin.getId());
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(user);
-                customFreeMarkerEmailTemplateProvider.sendVoAdminEmail(group.getName(), false);
+                customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), false);
             } catch (EmailException e) {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
             }

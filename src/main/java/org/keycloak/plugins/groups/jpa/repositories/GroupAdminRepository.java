@@ -26,7 +26,7 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
         return GroupAdminEntity.class;
     }
 
-    public boolean isVoAdmin(String userId, GroupModel group){
+    public boolean isGroupAdmin(String userId, GroupModel group){
        List<String> groupIds = new ArrayList<>();
        groupIds.add(group.getId());
        while ( group.getParent() != null){

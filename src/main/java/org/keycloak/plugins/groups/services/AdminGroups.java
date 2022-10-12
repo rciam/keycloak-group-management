@@ -97,7 +97,7 @@ public class AdminGroups {
 
     @POST
     @Path("/admin/{userId}")
-    public Response addVoAdmin(@PathParam("userId") String userId) {
+    public Response addGroupAdmin(@PathParam("userId") String userId) {
         UserModel user = session.users().getUserById(realm, userId);
         if ( user == null ) {
             throw new NotFoundException("Could not find this User");
@@ -108,7 +108,7 @@ public class AdminGroups {
 
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(user);
-                customFreeMarkerEmailTemplateProvider.sendVoAdminEmail(group.getName(), true);
+                customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
             } catch (EmailException e) {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
             }
@@ -120,7 +120,7 @@ public class AdminGroups {
 
     @DELETE
     @Path("/admin/{userId}")
-    public Response removeVoAdmin(@PathParam("userId") String userId) {
+    public Response removeGroupAdmin(@PathParam("userId") String userId) {
         UserModel user = session.users().getUserById(realm, userId);
         if ( user == null ) {
             throw new NotFoundException("Could not find this User");
@@ -131,7 +131,7 @@ public class AdminGroups {
             groupAdminRepository.deleteEntity(admin.getId());
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(user);
-                customFreeMarkerEmailTemplateProvider.sendVoAdminEmail(group.getName(), false);
+                customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), false);
             } catch (EmailException e) {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
             }

@@ -1,0 +1,30 @@
+package org.keycloak.plugins.groups.representations;
+
+import java.util.List;
+
+public class UserGroupMembershipRepresentationPager {
+
+    private List<UserGroupMembershipRepresentation> results;
+    private long count;
+
+    public UserGroupMembershipRepresentationPager(List<UserGroupMembershipRepresentation> results, long count){
+        this.results = results;
+        this.count = count;
+    }
+
+    public List<UserGroupMembershipRepresentation> getResults() {
+        return results;
+    }
+
+    public void setResults(List<UserGroupMembershipRepresentation> results) {
+        this.results = results;
+    }
+
+    public long getCount() {
+        return count;
+    }
+
+    public void setCount(long count) {
+        this.count = count;
+    }
+}
