@@ -42,6 +42,7 @@ public class VoAdminGroupMembers {
     }
 
 
+    @Deprecated
     @POST
     @Produces("application/json")
     @Consumes("application/json")

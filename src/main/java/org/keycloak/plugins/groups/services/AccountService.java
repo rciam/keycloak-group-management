@@ -30,7 +30,7 @@ public class AccountService {
         return service;
     }
 
-    @Path("/vo-admin")
+    @Path("/group-admin")
     public VoAdminService voAdminService() {
         VoAdminService service = new VoAdminService(session, realm);
         ResteasyProviderFactory.getInstance().injectProperties(service);
