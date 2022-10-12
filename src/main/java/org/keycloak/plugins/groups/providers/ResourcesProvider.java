@@ -27,7 +27,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.services.AdminGroups;
-import org.keycloak.plugins.groups.services.GroupsService;
+import org.keycloak.plugins.groups.services.AccountService;
 import org.keycloak.plugins.groups.ui.UserInterfaceService;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.resource.RealmResourceProvider;
@@ -71,9 +71,9 @@ public class ResourcesProvider implements RealmResourceProvider {
     public void close() {
     }
 
-    @Path("groups")
-    public GroupsService getGroupsService() {
-        GroupsService service = new GroupsService(session, realm);
+    @Path("account")
+    public AccountService getAccountService() {
+        AccountService service = new AccountService(session, realm);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
