@@ -10,20 +10,18 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapsId;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="GROUP_CONFIGURATION")
+@Table(name="GROUP_ENROLLMENT_CONFIGURATION")
 @NamedQueries({
-        @NamedQuery(name="getVoAdminGroups", query="select g from GroupConfigurationEntity g, UserVoGroupMembershipEntity m where m.group.id = g.id and m.user.id = :userId and m.isAdmin = true"),
-        @NamedQuery(name="getByGroup", query="select g from GroupConfigurationEntity g where g.group.id = :groupId")
+        @NamedQuery(name="getVoAdminGroups", query="select g from GroupEnrollmentConfigurationEntity g, UserVoGroupMembershipEntity m where m.group.id = g.id and m.user.id = :userId and m.isAdmin = true"),
+        @NamedQuery(name="getByGroup", query="select g from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId")
 })
-public class GroupConfigurationEntity {
+public class GroupEnrollmentConfigurationEntity {
 
     @Id
     @Column(name="ID")
@@ -34,8 +32,11 @@ public class GroupConfigurationEntity {
     @JoinColumn(name = "GROUP_ID")
     protected GroupEntity group;
 
-    @Column(name="DESCRIPTION")
-    protected String description;
+    @Column(name="NAME")
+    protected String name;
+
+    @Column(name="ACTIVE")
+    protected Boolean active;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "AUP_ID")
@@ -53,12 +54,35 @@ public class GroupConfigurationEntity {
     @Column(name="MEMBERSHIP_EXPIRATION_SEC")
     protected Long membershipExpirationSec;
 
-    public String getDescription() {
-        return description;
+    @Column(name="ENROLLMENT_INTRODUCTION")
+    protected String enrollmentIntroduction;
+
+    @Column(name="INVITATION_INTRODUCTION")
+    protected String invitationIntroduction;
+
+    @Column(name="ENROLLMENT_CONCLUSION")
+    protected String enrollmentConclusion;
+
+    @Column(name="INVITATION_CONCLUSION")
+    protected String invitationConclusion;
+
+    @Column(name="HIDE_CONFIGURATION")
+    protected Boolean hideConfiguration;
+
+    public String getName() {
+        return name;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Boolean isActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     public GroupAupEntity getAupEntity() {
@@ -115,5 +139,45 @@ public class GroupConfigurationEntity {
 
     public void setGroup(GroupEntity group) {
         this.group = group;
+    }
+
+    public String getEnrollmentIntroduction() {
+        return enrollmentIntroduction;
+    }
+
+    public void setEnrollmentIntroduction(String enrollmentIntroduction) {
+        this.enrollmentIntroduction = enrollmentIntroduction;
+    }
+
+    public String getInvitationIntroduction() {
+        return invitationIntroduction;
+    }
+
+    public void setInvitationIntroduction(String invitationIntroduction) {
+        this.invitationIntroduction = invitationIntroduction;
+    }
+
+    public String getEnrollmentConclusion() {
+        return enrollmentConclusion;
+    }
+
+    public void setEnrollmentConclusion(String enrollmentConclusion) {
+        this.enrollmentConclusion = enrollmentConclusion;
+    }
+
+    public String getInvitationConclusion() {
+        return invitationConclusion;
+    }
+
+    public void setInvitationConclusion(String invitationConclusion) {
+        this.invitationConclusion = invitationConclusion;
+    }
+
+    public Boolean isHideConfiguration() {
+        return hideConfiguration;
+    }
+
+    public void setHideConfiguration(Boolean hideConfiguration) {
+        this.hideConfiguration = hideConfiguration;
     }
 }

@@ -1,7 +1,6 @@
 package org.keycloak.plugins.groups.services;
 
 
-import javax.persistence.PersistenceException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -10,7 +9,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -28,10 +26,10 @@ import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupConfigurationRepository;
-import org.keycloak.plugins.groups.representations.GroupConfigurationRepresentation;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
@@ -50,7 +48,7 @@ public class AdminGroups {
     private final RealmModel realm;
     private final AdminPermissionEvaluator realmAuth;
     private final GroupModel group;
-    private final GroupConfigurationRepository groupConfigurationRepository;
+    private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final GroupAdminRepository groupAdminRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
 
@@ -59,7 +57,7 @@ public class AdminGroups {
         this.realm =  realm;
         this.realmAuth = realmAuth;
         this.group = group;
-        this.groupConfigurationRepository =  new GroupConfigurationRepository(session, session.getContext().getRealm());
+        this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, session.getContext().getRealm());
         this.groupAdminRepository =  new GroupAdminRepository(session, session.getContext().getRealm());
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
@@ -68,27 +66,27 @@ public class AdminGroups {
     @GET
     @Path("/configuration/{id}}")
     @Produces("application/json")
-    public GroupConfigurationRepresentation getGroupConfiguration(@PathParam("id") String id) {
-        GroupConfigurationEntity groupConfiguration = groupConfigurationRepository.getEntity(id);
+    public GroupEnrollmentConfigurationRepresentation getGroupConfiguration(@PathParam("id") String id) {
+        GroupEnrollmentConfigurationEntity groupConfiguration = groupEnrollmentConfigurationRepository.getEntity(id);
         //if not exist, group have only created from main Keycloak
         if(groupConfiguration == null) {
             throw new NotFoundException("Could not find this Group Configuration");
         } else {
-            return EntityToRepresentation.toRepresentation(groupConfiguration, realm);
+            return EntityToRepresentation.toRepresentation(groupConfiguration);
         }
     }
 
     @POST
     @Path("/configuration")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response saveGroupConfiguration(GroupConfigurationRepresentation rep) {
+    public Response saveGroupEnrollmentConfiguration(GroupEnrollmentConfigurationRepresentation rep) {
         realmAuth.groups().requireManage(group);
         if (rep.getId() == null ) {
-            groupConfigurationRepository.create(rep, group.getId(), realmAuth.adminAuth().getUser().getId());
+            groupEnrollmentConfigurationRepository.create(rep, group.getId());
         } else {
-            GroupConfigurationEntity entity = groupConfigurationRepository.getEntity(rep.getId());
+            GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(rep.getId());
             if (entity != null) {
-                groupConfigurationRepository.update(entity, rep, realmAuth.adminAuth().getUser().getId());
+                groupEnrollmentConfigurationRepository.update(entity, rep);
             } else {
                 throw new NotFoundException("Could not find this group configuration");
             }
@@ -162,7 +160,7 @@ public class AdminGroups {
             //group creation
             //get id from GroupRepresentation (response body)
             String groupId = response.readEntity(GroupRepresentation.class).getId();
-            groupConfigurationRepository.createDefault(groupId);
+            groupEnrollmentConfigurationRepository.createDefault(groupId, rep.getName());
         }
         return Response.noContent().build();
     }

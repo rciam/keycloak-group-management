@@ -19,7 +19,6 @@ import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserVoGroupMembershipRepository;
 import org.keycloak.plugins.groups.representations.GroupsPager;
 import org.keycloak.services.ForbiddenException;

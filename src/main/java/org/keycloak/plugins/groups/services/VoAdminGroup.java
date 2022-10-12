@@ -27,12 +27,12 @@ import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.StatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserVoGroupMembershipEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupConfigurationRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserVoGroupMembershipRepository;
-import org.keycloak.plugins.groups.representations.GroupConfigurationRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.theme.FreeMarkerUtil;
 
@@ -41,7 +41,7 @@ public class VoAdminGroup {
     private final RealmModel realm;
     private final UserModel voAdmin;
     private GroupModel group;
-    private final GroupConfigurationRepository groupConfigurationRepository;
+    private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final UserVoGroupMembershipRepository userVoGroupMembershipRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final GroupAdminRepository groupAdminRepository;
@@ -51,7 +51,7 @@ public class VoAdminGroup {
         this.realm = realm;
         this.voAdmin = voAdmin;
         this.group = group;
-        this.groupConfigurationRepository =  new GroupConfigurationRepository(session, session.getContext().getRealm());
+        this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, session.getContext().getRealm());
         this.userVoGroupMembershipRepository =  new UserVoGroupMembershipRepository(session, session.getContext().getRealm());
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
@@ -61,33 +61,33 @@ public class VoAdminGroup {
     @GET
     @Path("/configuration/all")
     @Produces("application/json")
-    public List<GroupConfigurationRepresentation> getGroupConfigurationsByGroup() {
-       return groupConfigurationRepository.getByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf, realm)).collect(Collectors.toList());
+    public List<GroupEnrollmentConfigurationRepresentation> getGroupEnrollmentConfigurationsByGroup() {
+       return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf)).collect(Collectors.toList());
     }
 
     @GET
     @Path("/configuration/{id}")
     @Produces("application/json")
-    public GroupConfigurationRepresentation getGroupConfiguration(@PathParam("id") String id) {
-        GroupConfigurationEntity groupConfiguration = groupConfigurationRepository.getEntity(id);
+    public GroupEnrollmentConfigurationRepresentation getGroupEnrollmentConfiguration(@PathParam("id") String id) {
+        GroupEnrollmentConfigurationEntity groupConfiguration = groupEnrollmentConfigurationRepository.getEntity(id);
         //if not exist, group have only created from main Keycloak
         if (groupConfiguration == null) {
             throw new NotFoundException("Could not find this group configuration");
         } else {
-            return EntityToRepresentation.toRepresentation(groupConfiguration, realm);
+            return EntityToRepresentation.toRepresentation(groupConfiguration);
         }
     }
 
     @POST
     @Path("/configuration")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response saveGroupConfiguration(GroupConfigurationRepresentation rep) {
+    public Response saveGroupEnrollmentConfiguration(GroupEnrollmentConfigurationRepresentation rep) {
         if (rep.getId() == null ) {
-            groupConfigurationRepository.create(rep, group.getId(), voAdmin.getId());
+            groupEnrollmentConfigurationRepository.create(rep, group.getId());
         } else {
-            GroupConfigurationEntity entity = groupConfigurationRepository.getEntity(rep.getId());
+            GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(rep.getId());
             if (entity != null) {
-                groupConfigurationRepository.update(entity, rep, voAdmin.getId());
+                groupEnrollmentConfigurationRepository.update(entity, rep);
             } else {
                 throw new NotFoundException("Could not find this group configuration");
             }

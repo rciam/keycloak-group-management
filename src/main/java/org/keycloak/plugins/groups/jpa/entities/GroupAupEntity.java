@@ -38,10 +38,6 @@ public class GroupAupEntity {
     @Column(name="URL")
     protected String url;
 
-    @ManyToOne()
-    @JoinColumn(name = "EDITOR")
-    protected UserEntity editor;
-
 
     public String getId() {
         return id;
@@ -73,14 +69,6 @@ public class GroupAupEntity {
 
     public void setContent(Object content) {
         this.content = content;
-    }
-
-    public UserEntity getEditor() {
-        return editor;
-    }
-
-    public void setEditor(UserEntity editor) {
-        this.editor = editor;
     }
 
     public String getUrl() {
