@@ -31,8 +31,8 @@ public class AccountService {
     }
 
     @Path("/group-admin")
-    public VoAdminService voAdminService() {
-        VoAdminService service = new VoAdminService(session, realm);
+    public GroupAdminService voAdminService() {
+        GroupAdminService service = new GroupAdminService(session, realm);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
