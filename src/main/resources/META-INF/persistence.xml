@@ -9,10 +9,10 @@
 
         <class>org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentStateEntity</class>
-        <class>org.keycloak.plugins.groups.jpa.entities.GroupConfigurationEntity</class>
+        <class>org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.GroupAupEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.UserVoGroupMembershipEntity</class>
-
+        <class>org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity</class>
 
 
         <!-- KEYCLOAK's CORE MODEL ENTITIES-->

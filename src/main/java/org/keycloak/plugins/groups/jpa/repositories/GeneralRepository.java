@@ -6,6 +6,9 @@ import javax.ws.rs.NotFoundException;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.models.jpa.entities.UserEntity;
 
 public abstract class GeneralRepository<T> {
 
@@ -25,13 +28,13 @@ public abstract class GeneralRepository<T> {
 
     public void create(T entity) {
         em.persist(entity);
+        em.flush();
     }
 
     public void update(T entity) {
         em.merge(entity);
         em.flush();
     }
-
 
     public void deleteEntity(String id) throws NotFoundException {
         T entity = getEntity(id);
@@ -41,5 +44,7 @@ public abstract class GeneralRepository<T> {
         em.flush();
     }
 
-
+    public UserModel getUserModel(KeycloakSession session, UserEntity user){
+        return new UserAdapter(session, realm, em, user);
+    }
 }

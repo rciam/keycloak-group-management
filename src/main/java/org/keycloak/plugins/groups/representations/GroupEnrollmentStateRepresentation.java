@@ -6,13 +6,14 @@ import org.keycloak.representations.idm.UserRepresentation;
 
 import javax.persistence.Column;
 import java.util.Collection;
+import java.util.Date;
 
 public class GroupEnrollmentStateRepresentation {
 
     protected String id;
     protected String enrollmentId;
     protected String state;
-    protected Long timestamp;
+    protected Date timestamp;
     protected String justification;
 
     public GroupEnrollmentStateRepresentation() {
@@ -46,11 +47,11 @@ public class GroupEnrollmentStateRepresentation {
         this.state = state;
     }
 
-    public Long getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Long timestamp) {
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 

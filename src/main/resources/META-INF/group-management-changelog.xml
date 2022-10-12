@@ -232,14 +232,88 @@
             <column name="URL" type="VARCHAR(255)"/>
         </addColumn>
         <dropNotNullConstraint tableName="GROUP_AUP" columnName="CONTENT" columnDataType="BLOB"/>
-        <dropColumn  tableName="USER_VO_GROUP_MEMBERSHIP" columnName="MEMBERSHIP_EXPIRES_AT"/>
-        <dropColumn  tableName="USER_VO_GROUP_MEMBERSHIP" columnName="AUP_EXPIRES_AT"/>
-        <addColumn tableName="USER_VO_GROUP_MEMBERSHIP">
-            <column name="MEMBERSHIP_EXPIRES_AT" type="bigint" />
+    </changeSet>
+
+    <changeSet author="cgeorgilakis@grnet.gr" id="configuration">
+        <dropPrimaryKey tableName="GROUP_CONFIGURATION"/>
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="ID" type="varchar(36)" >
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
         </addColumn>
-        <addColumn tableName="USER_VO_GROUP_MEMBERSHIP">
-            <column name="AUP_EXPIRES_AT" type="bigint" />
+    </changeSet>
+
+    <changeSet author="cgeorgilakis@grnet.gr" id="groupadmin">
+        <createTable tableName="GROUP_ADMIN">
+            <column name="ID" type="VARCHAR(36)">
+               <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="GROUP_ID" type="VARCHAR(36)" >
+               <constraints nullable="false"/>
+            </column>
+            <column name="USER_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint columnNames="GROUP_ID, USER_ID" constraintName="UK_GROUP_ADMIN" tableName="GROUP_ADMIN"/>
+        <addUniqueConstraint columnNames="GROUP_ID, USER_ID" constraintName="UK_GROUP_MEMBER" tableName="USER_VO_GROUP_MEMBERSHIP"/>
+
+        <createIndex indexName="GROUP_ADMIN_IDX1" tableName="GROUP_ADMIN">
+            <column name="GROUP_ID"/>
+            <column name="USER_ID"/>
+        </createIndex>
+
+        <addForeignKeyConstraint
+                constraintName="fk_group_admin_group"
+                baseTableName="GROUP_ADMIN"
+                baseColumnNames="GROUP_ID"
+                referencedTableName="keycloak_group"
+                referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint
+                constraintName="fk_group_admin_user"
+                baseTableName="GROUP_ADMIN"
+                baseColumnNames="USER_ID"
+                referencedTableName="user_entity"
+                referencedColumnNames="id"
+        />
+
+        <dropColumn tableName="USER_VO_GROUP_MEMBERSHIP" columnName="IS_ADMIN" />
+    </changeSet>
+
+    <changeSet author="cgeorgilakis@grnet.gr" id="groupconfiguration">
+        <dropColumn tableName="GROUP_CONFIGURATION" columnName="DESCRIPTION" />
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="NAME" type="VARCHAR(256)" >
+                <constraints nullable="false"/>
+            </column>
         </addColumn>
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="ACTIVE" type="boolean"  defaultValueBoolean="true" >
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="ENROLLMENT_INTRODUCTION" type="TEXT" />
+        </addColumn>
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="INVITATION_INTRODUCTION" type="TEXT" />
+        </addColumn>
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="ENROLLMENT_CONCLUSION" type="TEXT" />
+        </addColumn>
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="INVITATION_CONCLUSION" type="TEXT" />
+        </addColumn>
+        <addColumn tableName="GROUP_CONFIGURATION">
+            <column name="HIDE_CONFIGURATION" type="boolean"  defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <dropForeignKeyConstraint baseTableName="GROUP_AUP" constraintName="fk_kc_grp_aup_editor"/>
+        <dropColumn tableName="GROUP_AUP" columnName="EDITOR" />
+        <renameTable newTableName="GROUP_ENROLLMENT_CONFIGURATION" oldTableName="GROUP_CONFIGURATION"/>
     </changeSet>
 
 

@@ -17,7 +17,6 @@ public class GroupAupRepresentation {
     private Object content;
 
     private String url;
-    private UserRepresentation editor;
 
     public GroupAupRepresentation(){}
 
@@ -51,13 +50,6 @@ public class GroupAupRepresentation {
 
     public void setContent(Object content) {
         this.content = content;
-    }
-
-    public UserRepresentation getEditor() {
-        return editor;
-    }
-    public void setEditor(UserRepresentation editor) {
-        this.editor = editor;
     }
 
     public String getUrl() {

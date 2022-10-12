@@ -2,14 +2,8 @@ package org.keycloak.plugins.groups.jpa;
 
 import org.keycloak.connections.jpa.entityprovider.JpaEntityProvider;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupConfigurationEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentStateEntity;
-import org.keycloak.plugins.groups.jpa.entities.UserVoGroupMembershipEntity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class GroupManagementEntityProvider implements JpaEntityProvider {

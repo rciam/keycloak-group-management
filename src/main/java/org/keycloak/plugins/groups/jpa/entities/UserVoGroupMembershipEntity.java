@@ -1,12 +1,17 @@
 package org.keycloak.plugins.groups.jpa.entities;
 
+import java.util.Date;
+
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.plugins.groups.enums.StatusEnum;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -35,23 +40,21 @@ public class UserVoGroupMembershipEntity {
     protected UserEntity user;
 
     @Column(name="STATUS")
-    protected String status;
+    @Enumerated(EnumType.STRING)
+    protected StatusEnum status;
 
     @ManyToOne()
     @JoinColumn(name = "CHANGED_BY")
     protected UserEntity changedBy;
 
     @Column(name="MEMBERSHIP_EXPIRES_AT")
-    protected Long membershipExpiresAt;
+    protected Date membershipExpiresAt;
 
     @Column(name="AUP_EXPIRES_AT")
-    protected Long aupExpiresAt;
+    protected Date aupExpiresAt;
 
     @Column(name="JUSTIFICATION")
     protected String justification;
-
-    @Column(name="IS_ADMIN")
-    protected Boolean isAdmin;
 
     public String getId() {
         return id;
@@ -77,11 +80,11 @@ public class UserVoGroupMembershipEntity {
         this.user = user;
     }
 
-    public String getStatus() {
+    public StatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(StatusEnum status) {
         this.status = status;
     }
 
@@ -93,19 +96,19 @@ public class UserVoGroupMembershipEntity {
         this.changedBy = changedBy;
     }
 
-    public Long getMembershipExpiresAt() {
+    public Date getMembershipExpiresAt() {
         return membershipExpiresAt;
     }
 
-    public void setMembershipExpiresAt(Long membershipExpiresAt) {
+    public void setMembershipExpiresAt(Date membershipExpiresAt) {
         this.membershipExpiresAt = membershipExpiresAt;
     }
 
-    public Long getAupExpiresAt() {
+    public Date getAupExpiresAt() {
         return aupExpiresAt;
     }
 
-    public void setAupExpiresAt(Long aupExpiresAt) {
+    public void setAupExpiresAt(Date aupExpiresAt) {
         this.aupExpiresAt = aupExpiresAt;
     }
 
@@ -117,11 +120,4 @@ public class UserVoGroupMembershipEntity {
         this.justification = justification;
     }
 
-    public Boolean getIsAdmin() {
-        return isAdmin;
-    }
-
-    public void setIsAdmin(Boolean isAdmin) {
-        this.isAdmin = isAdmin;
-    }
 }
