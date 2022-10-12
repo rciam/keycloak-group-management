@@ -10,14 +10,14 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     public CustomFreeMarkerEmailTemplateProvider(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
     }
-    public void sendVoAdminEmail(String groupName, boolean isAdded) throws EmailException {
-        String title = isAdded ? "addVoAdminSubject" : "removeVoAdminSubject";
+    public void sendGroupAdminEmail(String groupName, boolean isAdded) throws EmailException {
+        String title = isAdded ? "addGroupAdminSubject" : "removeGroupAdminSubject";
         String text1 = isAdded ? "added" : "removed";
         String text2 = isAdded ? "to" : "from";
         attributes.put("text1", text1);
         attributes.put("text2", text2);
         attributes.put("groupname", groupName);
-        send(title, "add-remove-vo-admin.ftl", attributes);
+        send(title, "add-remove-group-admin.ftl", attributes);
     }
 
     public void sendSuspensionEmail(String groupName,String justification) throws EmailException, EmailException {

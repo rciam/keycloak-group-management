@@ -2,17 +2,11 @@ package org.keycloak.plugins.groups.representations;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.keycloak.models.jpa.entities.GroupEntity;
-import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.enums.StatusEnum;
 import org.keycloak.representations.idm.UserRepresentation;
 
-public class UserVoGroupMembershipRepresentation {
+public class UserGroupMembershipRepresentation {
 
     protected String id;
     protected String groupId;
@@ -25,7 +19,7 @@ public class UserVoGroupMembershipRepresentation {
     protected Date aupExpiresAt;
     protected String justification;
 
-    public UserVoGroupMembershipRepresentation(){}
+    public UserGroupMembershipRepresentation(){}
 
     public String getId() {
         return id;

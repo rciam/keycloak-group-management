@@ -316,5 +316,9 @@
         <renameTable newTableName="GROUP_ENROLLMENT_CONFIGURATION" oldTableName="GROUP_CONFIGURATION"/>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="rename-table">
+        <renameTable newTableName="USER_VO_GROUP_MEMBERSHIP" oldTableName="USER_GROUP_MEMBERSHIP"/>
+    </changeSet>
+
 
 </databaseChangeLog>

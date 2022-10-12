@@ -25,7 +25,7 @@ import org.keycloak.services.resource.RealmResourceProviderFactory;
 
 public class ResourcesProviderFactory implements RealmResourceProviderFactory {
 
-    public static final String ID = "groups-management";
+    public static final String ID = "agm";
 
     @Override
     public String getId() {

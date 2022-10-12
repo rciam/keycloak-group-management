@@ -52,8 +52,8 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         update(entity);
     }
 
-    public Stream<GroupEnrollmentConfigurationEntity> getVoAdminGroups(String userId) {
-        return em.createNamedQuery("getVoAdminGroups").setParameter("userId",userId).getResultStream();
+    public Stream<GroupEnrollmentConfigurationEntity> getGroupAdminGroups(String userId) {
+        return em.createNamedQuery("getAdminGroups").setParameter("userId",userId).getResultStream();
     }
 
     public Stream<GroupEnrollmentConfigurationEntity> getByGroup(String groupId) {
