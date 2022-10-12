@@ -316,5 +316,37 @@
         <renameTable newTableName="GROUP_ENROLLMENT_CONFIGURATION" oldTableName="GROUP_CONFIGURATION"/>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="group-enrollmnet-attributes">
+        <createTable tableName="GROUP_ENROLLMENT_ATTRIBUTES">
+            <column name="ID" type="VARCHAR(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="GROUP_ENROLLMENT__ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="ATTRIBUTE" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LABEL" type="VARCHAR(255)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="ORDER" type="INT"/>
+            <column name="DEFAULT_VALUE" type="TEXT" />
+            <column name="HIDDEN" type="boolean" defaultValueBoolean="false" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="MODIFIABLE" type="boolean" defaultValueBoolean="true" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                constraintName="fk_kc_usr_vo_grp_mb_gid"
+                baseTableName="USER_VO_GROUP_MEMBERSHIP"
+                baseColumnNames="GROUP_ID"
+                referencedTableName="keycloak_group"
+                referencedColumnNames="id"
+        />
+    </changeSet>
+
 
 </databaseChangeLog>
