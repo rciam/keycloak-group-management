@@ -1,10 +1,5 @@
 package org.keycloak.plugins.groups.services;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -14,23 +9,18 @@ import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
-import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupConfigurationRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserVoGroupMembershipRepository;
-import org.keycloak.plugins.groups.representations.GroupConfigurationRepresentation;
 import org.keycloak.services.ForbiddenException;
-import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
-import org.keycloak.theme.FreeMarkerUtil;
 
 public class VoAdminService {
 
     private KeycloakSession session;
     private final RealmModel realm;
     private final UserModel voAdmin;
-    private final GroupConfigurationRepository groupConfigurationRepository;
+    private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final UserVoGroupMembershipRepository userVoGroupMembershipRepository;
     private final GroupAdminRepository groupAdminRepository;
 
@@ -39,16 +29,10 @@ public class VoAdminService {
         this.realm =  realm;
         AuthenticationHelper authHelper = new AuthenticationHelper(session);
         this.voAdmin = authHelper.authenticateUserRequest().getUser();
-        this.groupConfigurationRepository =  new GroupConfigurationRepository(session, session.getContext().getRealm());
+        this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, session.getContext().getRealm());
         this.userVoGroupMembershipRepository =  new UserVoGroupMembershipRepository(session, session.getContext().getRealm());
         this.groupAdminRepository =  new GroupAdminRepository(session, session.getContext().getRealm());
     }
-
-    //this will be different based on VoAdmin entity
-//    @GET
-//    public List<GroupConfigurationRepresentation> getVoAdminGroups(){
-//        return groupConfigurationRepository.getVoAdminGroups(voAdmin.getId()).map(entity -> EntityToRepresentation.toRepresentation(entity,realm)).collect(Collectors.toList());
-//    }
 
     @Path("/group/{groupId}")
     public VoAdminGroup group(@PathParam("groupId") String groupId) {
@@ -60,7 +44,7 @@ public class VoAdminService {
             throw new ForbiddenException();
         }
 
-        VoAdminGroup service = new VoAdminGroup(session, realm, voAdmin, groupConfigurationRepository, userVoGroupMembershipRepository, group);
+        VoAdminGroup service = new VoAdminGroup(session, realm, voAdmin, groupEnrollmentConfigurationRepository, userVoGroupMembershipRepository, group);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

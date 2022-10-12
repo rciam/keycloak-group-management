@@ -10,20 +10,18 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapsId;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="GROUP_CONFIGURATION")
+@Table(name="GROUP_ENROLLMENT_CONFIGURATION")
 @NamedQueries({
-        @NamedQuery(name="getVoAdminGroups", query="select g from GroupConfigurationEntity g, UserVoGroupMembershipEntity m where m.group.id = g.id and m.user.id = :userId and m.isAdmin = true"),
-        @NamedQuery(name="getByGroup", query="select g from GroupConfigurationEntity g where g.group.id = :groupId")
+        @NamedQuery(name="getVoAdminGroups", query="select g from GroupEnrollmentConfigurationEntity g, UserVoGroupMembershipEntity m where m.group.id = g.id and m.user.id = :userId and m.isAdmin = true"),
+        @NamedQuery(name="getByGroup", query="select g from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId")
 })
-public class GroupConfigurationEntity {
+public class GroupEnrollmentConfigurationEntity {
 
     @Id
     @Column(name="ID")

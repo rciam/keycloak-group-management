@@ -311,6 +311,9 @@
                 <constraints nullable="false"/>
             </column>
         </addColumn>
+        <dropForeignKeyConstraint baseTableName="GROUP_AUP" constraintName="fk_kc_grp_aup_editor"/>
+        <dropColumn tableName="GROUP_AUP" columnName="EDITOR" />
+        <renameTable newTableName="GROUP_ENROLLMENT_CONFIGURATION" oldTableName="GROUP_CONFIGURATION"/>
     </changeSet>
 
 

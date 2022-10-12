@@ -9,14 +9,13 @@ import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
-import org.keycloak.plugins.groups.jpa.repositories.GroupConfigurationRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
 import org.keycloak.plugins.groups.stubs.ErrorResponse;
 import org.keycloak.representations.idm.GroupRepresentation;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -32,13 +31,13 @@ public class UserGroups {
     private RealmModel realm;
 
     private AuthenticationHelper authHelper;
-    private GroupConfigurationRepository groupConfigurationRepository;
+    private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
 
     public UserGroups(KeycloakSession session, RealmModel realm) {
         this.session = session;
         this.realm =  realm;
         this.authHelper = new AuthenticationHelper(session);
-        this.groupConfigurationRepository =  new GroupConfigurationRepository(session, realm);
+        this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
     }
 
 

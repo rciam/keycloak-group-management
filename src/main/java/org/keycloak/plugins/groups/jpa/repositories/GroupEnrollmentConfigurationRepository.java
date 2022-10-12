@@ -2,41 +2,39 @@ package org.keycloak.plugins.groups.jpa.repositories;
 
 import java.util.stream.Stream;
 
-import liquibase.pro.packaged.G;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
-import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.representations.GroupAupRepresentation;
-import org.keycloak.plugins.groups.representations.GroupConfigurationRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 
-public class GroupConfigurationRepository extends GeneralRepository<GroupConfigurationEntity> {
+public class GroupEnrollmentConfigurationRepository extends GeneralRepository<GroupEnrollmentConfigurationEntity> {
 
-    public GroupConfigurationRepository(KeycloakSession session, RealmModel realm) {
+    public GroupEnrollmentConfigurationRepository(KeycloakSession session, RealmModel realm) {
         super(session, realm);
     }
 
     @Override
-    protected Class<GroupConfigurationEntity> getTClass() {
-        return GroupConfigurationEntity.class;
+    protected Class<GroupEnrollmentConfigurationEntity> getTClass() {
+        return GroupEnrollmentConfigurationEntity.class;
     }
 
-    public void create(GroupConfigurationRepresentation rep, String groupId, String editorId){
-        GroupConfigurationEntity entity = new GroupConfigurationEntity();
+    public void create(GroupEnrollmentConfigurationRepresentation rep, String groupId){
+        GroupEnrollmentConfigurationEntity entity = new GroupEnrollmentConfigurationEntity();
         entity.setId(KeycloakModelUtils.generateId());
         GroupEntity group = new GroupEntity();
         group.setId(groupId);
         entity.setGroup(group);
-        toEntity(entity, rep, editorId);
+        toEntity(entity, rep);
         create(entity);
     }
 
     public void createDefault(String groupId, String groupName){
         //default values, hide by default
-        GroupConfigurationEntity entity = new GroupConfigurationEntity();
+        GroupEnrollmentConfigurationEntity entity = new GroupEnrollmentConfigurationEntity();
         entity.setId(KeycloakModelUtils.generateId());
         GroupEntity group = new GroupEntity();
         group.setId(groupId);
@@ -49,20 +47,20 @@ public class GroupConfigurationRepository extends GeneralRepository<GroupConfigu
         create(entity);
     }
 
-    public void update( GroupConfigurationEntity entity, GroupConfigurationRepresentation rep, String editorId){
-        toEntity(entity, rep, editorId);
+    public void update(GroupEnrollmentConfigurationEntity entity, GroupEnrollmentConfigurationRepresentation rep){
+        toEntity(entity, rep);
         update(entity);
     }
 
-    public Stream<GroupConfigurationEntity> getVoAdminGroups(String userId) {
+    public Stream<GroupEnrollmentConfigurationEntity> getVoAdminGroups(String userId) {
         return em.createNamedQuery("getVoAdminGroups").setParameter("userId",userId).getResultStream();
     }
 
-    public Stream<GroupConfigurationEntity> getByGroup(String groupId) {
+    public Stream<GroupEnrollmentConfigurationEntity> getByGroup(String groupId) {
         return em.createNamedQuery("getByGroup").setParameter("groupId",groupId).getResultStream();
     }
 
-    private void toEntity(GroupConfigurationEntity entity, GroupConfigurationRepresentation rep, String editorId) {
+    private void toEntity(GroupEnrollmentConfigurationEntity entity, GroupEnrollmentConfigurationRepresentation rep) {
         entity.setName(rep.getName());
         entity.setActive(rep.isActive());
         entity.setHideConfiguration(rep.isHideConfiguration());
@@ -75,19 +73,16 @@ public class GroupConfigurationRepository extends GeneralRepository<GroupConfigu
         entity.setInvitationConclusion(rep.getInvitationConclusion());
         entity.setInvitationIntroduction(rep.getInvitationIntroduction());
         if ( rep.getAup() != null)
-            entity.setAupEntity(toEntity(rep.getAup(), editorId));
+            entity.setAupEntity(toEntity(rep.getAup()));
     }
 
-    private GroupAupEntity toEntity(GroupAupRepresentation rep, String editorId) {
+    private GroupAupEntity toEntity(GroupAupRepresentation rep) {
         GroupAupEntity entity = new GroupAupEntity();
         entity.setId(rep.getId() != null ? rep.getId() : KeycloakModelUtils.generateId());
         entity.setType(rep.getType());
         entity.setContent(rep.getContent());
         entity.setMimeType(rep.getMimeType());
         entity.setUrl(rep.getUrl());
-        UserEntity editor = new UserEntity();
-        editor.setId(editorId);
-        entity.setEditor(editor);
         return entity;
     }
 

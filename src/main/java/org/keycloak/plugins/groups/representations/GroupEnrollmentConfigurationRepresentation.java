@@ -1,8 +1,6 @@
 package org.keycloak.plugins.groups.representations;
 
-import javax.persistence.Column;
-
-public class GroupConfigurationRepresentation {
+public class GroupEnrollmentConfigurationRepresentation {
 
     private String id;
     private String groupId;
@@ -19,11 +17,11 @@ public class GroupConfigurationRepresentation {
     private String invitationConclusion;
     private Boolean hideConfiguration;
 
-    public GroupConfigurationRepresentation(String id){
+    public GroupEnrollmentConfigurationRepresentation(String id){
         this.id = id;
     }
 
-    public GroupConfigurationRepresentation(){  }
+    public GroupEnrollmentConfigurationRepresentation(){  }
 
     public String getId() {
         return id;

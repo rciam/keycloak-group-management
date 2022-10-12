@@ -1,19 +1,16 @@
 package org.keycloak.plugins.groups.helpers;
 
-import org.keycloak.models.GroupModel;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
-import org.keycloak.models.jpa.entities.FederatedIdentityEntity;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentStateEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserVoGroupMembershipEntity;
 import org.keycloak.plugins.groups.representations.GroupAupRepresentation;
-import org.keycloak.plugins.groups.representations.GroupConfigurationRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentStateRepresentation;
 import org.keycloak.plugins.groups.representations.UserVoGroupMembershipRepresentation;
@@ -25,8 +22,8 @@ import java.util.stream.Collectors;
 
 public class EntityToRepresentation {
 
-    public static GroupConfigurationRepresentation toRepresentation(GroupConfigurationEntity entity, RealmModel realm) {
-        GroupConfigurationRepresentation rep = new GroupConfigurationRepresentation(entity.getId());
+    public static GroupEnrollmentConfigurationRepresentation toRepresentation(GroupEnrollmentConfigurationEntity entity) {
+        GroupEnrollmentConfigurationRepresentation rep = new GroupEnrollmentConfigurationRepresentation(entity.getId());
         rep.setGroupId(entity.getGroup().getId());
         rep.setName(entity.getName());
         rep.setActive(entity.isActive());
@@ -40,18 +37,17 @@ public class EntityToRepresentation {
         rep.setInvitationConclusion(entity.getInvitationConclusion());
         rep.setInvitationIntroduction(entity.getInvitationIntroduction());
         if ( entity.getAupEntity() != null)
-            rep.setAup(toRepresentation(entity.getAupEntity(), realm));
+            rep.setAup(toRepresentation(entity.getAupEntity()));
         return rep;
     }
 
-    private static GroupAupRepresentation toRepresentation(GroupAupEntity entity, RealmModel realm) {
+    private static GroupAupRepresentation toRepresentation(GroupAupEntity entity) {
         GroupAupRepresentation rep = new GroupAupRepresentation();
         rep.setId(entity.getId());
         rep.setType(entity.getType());
         rep.setContent(entity.getContent());
         rep.setMimeType(entity.getMimeType());
         rep.setUrl(entity.getUrl());
-        rep.setEditor(toBriefRepresentation(entity.getEditor(), realm));
         return rep;
     }
 
