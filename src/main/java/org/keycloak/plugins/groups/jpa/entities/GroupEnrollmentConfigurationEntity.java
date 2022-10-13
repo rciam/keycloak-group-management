@@ -1,6 +1,10 @@
 package org.keycloak.plugins.groups.jpa.entities;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.keycloak.models.jpa.entities.GroupEntity;
+import org.keycloak.models.jpa.entities.RequiredCredentialEntity;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -12,6 +16,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -68,6 +73,9 @@ public class GroupEnrollmentConfigurationEntity {
 
     @Column(name="HIDE_CONFIGURATION")
     protected Boolean hideConfiguration;
+
+    @OneToMany(cascade =CascadeType.ALL, orphanRemoval = true, mappedBy = "groupEnrollmentConfiguration")
+    private List<GroupEnrollmentAttributesEntity> attributes;
 
     public String getName() {
         return name;
@@ -179,5 +187,13 @@ public class GroupEnrollmentConfigurationEntity {
 
     public void setHideConfiguration(Boolean hideConfiguration) {
         this.hideConfiguration = hideConfiguration;
+    }
+
+    public List<GroupEnrollmentAttributesEntity> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(List<GroupEnrollmentAttributesEntity> attributes) {
+        this.attributes = attributes;
     }
 }
