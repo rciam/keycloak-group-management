@@ -1,5 +1,7 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.keycloak.models.KeycloakSession;
@@ -7,8 +9,10 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.representations.GroupAupRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 
 public class GroupEnrollmentConfigurationRepository extends GeneralRepository<GroupEnrollmentConfigurationEntity> {
@@ -74,6 +78,25 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         entity.setInvitationIntroduction(rep.getInvitationIntroduction());
         if ( rep.getAup() != null)
             entity.setAupEntity(toEntity(rep.getAup()));
+        if (rep.getAttributes() != null) {
+            entity.getAttributes().clear();
+            entity.getAttributes().addAll(rep.getAttributes().stream().map(attr-> this.toEntity(attr, entity)).collect(Collectors.toList()));
+        } else if (entity.getAttributes() != null) {
+            entity.getAttributes().clear();
+        }
+    }
+
+    private GroupEnrollmentAttributesEntity toEntity(GroupEnrollmentAttributesRepresentation rep, GroupEnrollmentConfigurationEntity configuration){
+        GroupEnrollmentAttributesEntity entity = new GroupEnrollmentAttributesEntity();
+        entity.setId(rep.getId() != null ? rep.getId() : KeycloakModelUtils.generateId());
+        entity.setLabel(rep.getLabel());
+        entity.setGroupEnrollmentConfiguration(configuration);
+        entity.setAttribute(rep.getAttribute());
+        entity.setHidden(rep.getHidden());
+        entity.setModifiable(rep.getModifiable());
+        entity.setOrder(rep.getOrder());
+        entity.setDefaultValue(rep.getDefaultValue());
+        return entity;
     }
 
     private GroupAupEntity toEntity(GroupAupRepresentation rep) {

@@ -317,7 +317,39 @@
     </changeSet>
 
     <changeSet author="cgeorgilakis@grnet.gr" id="rename-table">
-        <renameTable newTableName="USER_GROUP_MEMBERSHIP_EXTENSION" oldTableName="USER_VO_GROUP_MEMBERSHIP"/>
+         <renameTable newTableName="USER_GROUP_MEMBERSHIP_EXTENSION" oldTableName="USER_VO_GROUP_MEMBERSHIP"/>
+    </changeSet>
+
+    <changeSet author="cgeorgilakis@grnet.gr" id="group-enrollment-attributes">
+        <createTable tableName="GROUP_ENROLLMENT_ATTRIBUTES">
+            <column name="ID" type="VARCHAR(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="GROUP_ENROLLMENT_CONFIGURATION_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="ATTRIBUTE" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LABEL" type="VARCHAR(255)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="ORDER_ATTR" type="INT"/>
+            <column name="DEFAULT_VALUE" type="TEXT" />
+            <column name="HIDDEN" type="boolean" defaultValueBoolean="false" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="MODIFIABLE" type="boolean" defaultValueBoolean="true" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                constraintName="group_enrollment_fk"
+                baseTableName="GROUP_ENROLLMENT_ATTRIBUTES"
+                baseColumnNames="GROUP_ENROLLMENT_CONFIGURATION_ID"
+                referencedTableName="GROUP_ENROLLMENT_CONFIGURATION"
+                referencedColumnNames="id"
+        />
     </changeSet>
 
 

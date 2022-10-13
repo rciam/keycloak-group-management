@@ -5,11 +5,13 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentStateEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.representations.GroupAupRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentStateRepresentation;
@@ -38,6 +40,20 @@ public class EntityToRepresentation {
         rep.setInvitationIntroduction(entity.getInvitationIntroduction());
         if ( entity.getAupEntity() != null)
             rep.setAup(toRepresentation(entity.getAupEntity()));
+        if ( entity.getAttributes() != null)
+            rep.setAttributes(entity.getAttributes().stream().map(EntityToRepresentation::toRepresentation).collect(Collectors.toList()));
+        return rep;
+    }
+
+    private static GroupEnrollmentAttributesRepresentation toRepresentation(GroupEnrollmentAttributesEntity entity){
+        GroupEnrollmentAttributesRepresentation rep = new GroupEnrollmentAttributesRepresentation();
+        rep.setId(entity.getId());
+        rep.setAttribute(entity.getAttribute());
+        rep.setDefaultValue(entity.getDefaultValue());
+        rep.setHidden(entity.getHidden());
+        rep.setLabel(entity.getLabel());
+        rep.setModifiable(entity.getModifiable());
+        rep.setOrder(entity.getOrder());
         return rep;
     }
 
