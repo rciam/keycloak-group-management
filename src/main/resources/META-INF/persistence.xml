@@ -11,7 +11,7 @@
         <class>org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentStateEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.GroupAupEntity</class>
-        <class>org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipEntity</class>
+        <class>org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity</class>
 
 
