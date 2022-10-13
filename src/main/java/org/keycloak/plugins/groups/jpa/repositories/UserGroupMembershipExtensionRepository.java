@@ -18,29 +18,29 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.enums.StatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
-import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipEntity;
-import org.keycloak.plugins.groups.representations.UserGroupMembershipRepresentation;
-import org.keycloak.plugins.groups.representations.UserGroupMembershipRepresentationPager;
+import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
+import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
+import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
 
-public class UserGroupMembershipRepository extends GeneralRepository<UserGroupMembershipEntity> {
+public class UserGroupMembershipExtensionRepository extends GeneralRepository<UserGroupMembershipExtensionEntity> {
 
-    public UserGroupMembershipRepository(KeycloakSession session, RealmModel realm) {
+    public UserGroupMembershipExtensionRepository(KeycloakSession session, RealmModel realm) {
         super(session, realm);
     }
 
     @Override
-    protected Class<UserGroupMembershipEntity> getTClass() {
-        return UserGroupMembershipEntity.class;
+    protected Class<UserGroupMembershipExtensionEntity> getTClass() {
+        return UserGroupMembershipExtensionEntity.class;
     }
 
-    public UserGroupMembershipEntity getByUserAndGroup(String groupId, String userId){
-        List<UserGroupMembershipEntity> results = em.createNamedQuery("getByUserAndGroup").setParameter("groupId",groupId).setParameter("userId",userId).getResultList();
+    public UserGroupMembershipExtensionEntity getByUserAndGroup(String groupId, String userId){
+        List<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getByUserAndGroup").setParameter("groupId",groupId).setParameter("userId",userId).getResultList();
         return results.isEmpty() ? null : results.get(0);
     }
 
-    public UserGroupMembershipRepresentationPager searchByGroup(String groupId, String search, StatusEnum status, Integer first, Integer max, RealmModel realm) {
+    public UserGroupMembershipExtensionRepresentationPager searchByGroup(String groupId, String search, StatusEnum status, Integer first, Integer max, RealmModel realm) {
 
-        String sqlQuery = "from UserGroupMembershipEntity f ";
+        String sqlQuery = "from UserGroupMembershipExtensionEntity f ";
         Map<String, Object> params = new HashMap<>();
         params.put("groupId", groupId);
         if (search != null) {
@@ -58,7 +58,7 @@ public class UserGroupMembershipRepository extends GeneralRepository<UserGroupMe
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             queryList.setParameter(entry.getKey(), entry.getValue());
         }
-        Stream<UserGroupMembershipEntity> results = queryList.getResultStream();
+        Stream<UserGroupMembershipExtensionEntity> results = queryList.getResultStream();
 
         Query queryCount = em.createQuery("select count(f) " + sqlQuery, Long.class);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
@@ -66,11 +66,11 @@ public class UserGroupMembershipRepository extends GeneralRepository<UserGroupMe
         }
         Long count = (Long) queryCount.getSingleResult();
 
-        return new UserGroupMembershipRepresentationPager(results.map(x-> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList()), count);
+        return new UserGroupMembershipExtensionRepresentationPager(results.map(x-> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList()), count);
     }
 
     @Transactional
-    public void suspendUser(UserModel user, UserGroupMembershipEntity member, String justification, GroupModel group){
+    public void suspendUser(UserModel user, UserGroupMembershipExtensionEntity member, String justification, GroupModel group){
         member.setStatus(StatusEnum.SUSPENDED);
         member.setJustification(justification);
         update(member);
@@ -78,7 +78,7 @@ public class UserGroupMembershipRepository extends GeneralRepository<UserGroupMe
     }
 
     @Transactional
-    public void activateUser(UserModel user, UserGroupMembershipEntity member, String justification, GroupModel group){
+    public void activateUser(UserModel user, UserGroupMembershipExtensionEntity member, String justification, GroupModel group){
         member.setStatus(StatusEnum.ENABLED);
         member.setJustification(justification);
         update(member);
@@ -87,8 +87,8 @@ public class UserGroupMembershipRepository extends GeneralRepository<UserGroupMe
 
 
     @Transactional
-    public void create(UserGroupMembershipRepresentation rep, String editor, UserModel userModel, GroupModel groupModel){
-        UserGroupMembershipEntity entity = new UserGroupMembershipEntity();
+    public void create(UserGroupMembershipExtensionRepresentation rep, String editor, UserModel userModel, GroupModel groupModel){
+        UserGroupMembershipExtensionEntity entity = new UserGroupMembershipExtensionEntity();
         entity.setId(KeycloakModelUtils.generateId());
         entity.setAupExpiresAt(rep.getAupExpiresAt());
         entity.setMembershipExpiresAt(rep.getMembershipExpiresAt());

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import org.keycloak.plugins.groups.enums.StatusEnum;
 import org.keycloak.representations.idm.UserRepresentation;
 
-public class UserGroupMembershipRepresentation {
+public class UserGroupMembershipExtensionRepresentation {
 
     protected String id;
     protected String groupId;
@@ -19,7 +19,7 @@ public class UserGroupMembershipRepresentation {
     protected Date aupExpiresAt;
     protected String justification;
 
-    public UserGroupMembershipRepresentation(){}
+    public UserGroupMembershipExtensionRepresentation(){}
 
     public String getId() {
         return id;
