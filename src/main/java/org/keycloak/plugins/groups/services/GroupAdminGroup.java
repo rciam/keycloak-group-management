@@ -25,10 +25,10 @@ import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
-import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipEntity;
+import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
-import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipRepository;
+import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.theme.FreeMarkerUtil;
@@ -39,7 +39,7 @@ public class GroupAdminGroup {
     private final UserModel voAdmin;
     private GroupModel group;
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
-    private final UserGroupMembershipRepository userGroupMembershipRepository;
+    private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final GroupAdminRepository groupAdminRepository;
 
@@ -49,7 +49,7 @@ public class GroupAdminGroup {
         this.voAdmin = voAdmin;
         this.group = group;
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, session.getContext().getRealm());
-        this.userGroupMembershipRepository =  new UserGroupMembershipRepository(session, session.getContext().getRealm());
+        this.userGroupMembershipExtensionRepository =  new UserGroupMembershipExtensionRepository(session, session.getContext().getRealm());
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         this.groupAdminRepository = new GroupAdminRepository(session, realm);
@@ -95,18 +95,18 @@ public class GroupAdminGroup {
 
     @Path("/members")
     public GroupAdminGroupMembers addGroupMember() {
-        GroupAdminGroupMembers service = new GroupAdminGroupMembers(session, realm, voAdmin, userGroupMembershipRepository, group, customFreeMarkerEmailTemplateProvider);
+        GroupAdminGroupMembers service = new GroupAdminGroupMembers(session, realm, voAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
 
     @Path("/member/{memberId}")
     public GroupAdminGroupMember addGroupMember(@PathParam("memberId") String memberId) {
-        UserGroupMembershipEntity member = userGroupMembershipRepository.getEntity(memberId);
+        UserGroupMembershipExtensionEntity member = userGroupMembershipExtensionRepository.getEntity(memberId);
         if (member == null) {
             throw new NotFoundException("Could not find this group member");
         }
-        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipRepository, group, customFreeMarkerEmailTemplateProvider, member);
+        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

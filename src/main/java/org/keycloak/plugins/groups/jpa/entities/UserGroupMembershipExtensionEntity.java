@@ -20,11 +20,11 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="USER_GROUP_MEMBERSHIP")
+@Table(name="USER_GROUP_MEMBERSHIP_EXTENSION")
 @NamedQueries({
-        @NamedQuery(name="getByUserAndGroup", query="from UserGroupMembershipEntity f where f.group.id = :groupId and f.user.id = :userId")
+        @NamedQuery(name="getByUserAndGroup", query="from UserGroupMembershipExtensionEntity f where f.group.id = :groupId and f.user.id = :userId")
 })
-public class UserGroupMembershipEntity {
+public class UserGroupMembershipExtensionEntity {
 
     @Id
     @Column(name="ID")

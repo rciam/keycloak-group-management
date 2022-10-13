@@ -8,12 +8,12 @@ import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentStateEntity;
-import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipEntity;
+import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.representations.GroupAupRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentStateRepresentation;
-import org.keycloak.plugins.groups.representations.UserGroupMembershipRepresentation;
+import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.keycloak.representations.idm.FederatedIdentityRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -51,8 +51,8 @@ public class EntityToRepresentation {
         return rep;
     }
 
-    public static UserGroupMembershipRepresentation toRepresentation(UserGroupMembershipEntity entity, RealmModel realm) {
-        UserGroupMembershipRepresentation rep = new UserGroupMembershipRepresentation();
+    public static UserGroupMembershipExtensionRepresentation toRepresentation(UserGroupMembershipExtensionEntity entity, RealmModel realm) {
+        UserGroupMembershipExtensionRepresentation rep = new UserGroupMembershipExtensionRepresentation();
         rep.setId(entity.getId());
         rep.setGroupId(entity.getGroup().getId());
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
