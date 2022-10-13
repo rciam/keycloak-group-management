@@ -4,8 +4,6 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
@@ -14,29 +12,27 @@ import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
-import org.keycloak.plugins.groups.enums.StatusEnum;
-import org.keycloak.plugins.groups.jpa.entities.UserVoGroupMembershipEntity;
-import org.keycloak.plugins.groups.jpa.repositories.UserVoGroupMembershipRepository;
+import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
+import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.services.ServicesLogger;
 
-public class VoAdminGroupMember {
+public class GroupAdminGroupMember {
 
     private final KeycloakSession session;
     private final RealmModel realm;
     private final UserModel voAdmin;
     private GroupModel group;
-    private final UserVoGroupMembershipRepository userVoGroupMembershipRepository;
+    private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
-    private final UserVoGroupMembershipEntity member;
+    private final UserGroupMembershipExtensionEntity member;
 
-    public VoAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserVoGroupMembershipRepository userVoGroupMembershipRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserVoGroupMembershipEntity member) {
+    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member) {
         this.session = session;
         this.realm =  realm;
         this.voAdmin = voAdmin;
         this.group = group;
-        this.userVoGroupMembershipRepository =  userVoGroupMembershipRepository;
+        this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
         this.member = member;
     }
@@ -44,12 +40,12 @@ public class VoAdminGroupMember {
     @POST
     @Path("/suspend")
     public Response suspendUser(@QueryParam("justification") String justification) {
-        UserModel user = userVoGroupMembershipRepository.getUserModel(session, member.getUser());
+        UserModel user = userGroupMembershipExtensionRepository.getUserModel(session, member.getUser());
         if (user == null) {
             throw new NotFoundException("Could not find this User");
         }
         try {
-            userVoGroupMembershipRepository.suspendUser(user, member, justification, group);
+            userGroupMembershipExtensionRepository.suspendUser(user, member, justification, group);
         } catch (Exception e) {
             e.printStackTrace();
             throw new BadRequestException("problem suspended group member");
@@ -66,12 +62,12 @@ public class VoAdminGroupMember {
     @POST
     @Path("/activate")
     public Response activateUser(@QueryParam("justification") String justification) {
-        UserModel user = userVoGroupMembershipRepository.getUserModel(session, member.getUser());
+        UserModel user = userGroupMembershipExtensionRepository.getUserModel(session, member.getUser());
         if (user == null) {
             throw new NotFoundException("Could not find this User");
         }
         try {
-            userVoGroupMembershipRepository.activateUser(user, member, justification, group);
+            userGroupMembershipExtensionRepository.activateUser(user, member, justification, group);
         } catch (Exception e) {
             e.printStackTrace();
             throw new BadRequestException("problem activate group member");

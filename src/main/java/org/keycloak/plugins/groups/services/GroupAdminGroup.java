@@ -27,32 +27,32 @@ import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.StatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupConfigurationEntity;
-import org.keycloak.plugins.groups.jpa.entities.UserVoGroupMembershipEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupConfigurationRepository;
-import org.keycloak.plugins.groups.jpa.repositories.UserVoGroupMembershipRepository;
-import org.keycloak.plugins.groups.representations.GroupConfigurationRepresentation;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
+import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.theme.FreeMarkerUtil;
 
-public class VoAdminGroup {
+public class GroupAdminGroup {
     private final KeycloakSession session;
     private final RealmModel realm;
     private final UserModel voAdmin;
     private GroupModel group;
-    private final GroupConfigurationRepository groupConfigurationRepository;
-    private final UserVoGroupMembershipRepository userVoGroupMembershipRepository;
+    private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
+    private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final GroupAdminRepository groupAdminRepository;
 
-    public VoAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupConfigurationRepository groupConfigurationRepository, UserVoGroupMembershipRepository userVoGroupMembershipRepository, GroupModel group) {
+    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupModel group) {
         this.session = session;
         this.realm = realm;
         this.voAdmin = voAdmin;
         this.group = group;
-        this.groupConfigurationRepository = groupConfigurationRepository;
-        this.userVoGroupMembershipRepository = userVoGroupMembershipRepository;
+        this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, session.getContext().getRealm());
+        this.userGroupMembershipExtensionRepository =  new UserGroupMembershipExtensionRepository(session, session.getContext().getRealm());
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         this.groupAdminRepository = new GroupAdminRepository(session, realm);
@@ -61,33 +61,33 @@ public class VoAdminGroup {
     @GET
     @Path("/configuration/all")
     @Produces("application/json")
-    public List<GroupConfigurationRepresentation> getGroupConfigurationsByGroup() {
-       return groupConfigurationRepository.getByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf, realm)).collect(Collectors.toList());
+    public List<GroupEnrollmentConfigurationRepresentation> getGroupEnrollmentConfigurationsByGroup() {
+       return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf)).collect(Collectors.toList());
     }
 
     @GET
     @Path("/configuration/{id}")
     @Produces("application/json")
-    public GroupConfigurationRepresentation getGroupConfiguration(@PathParam("id") String id) {
-        GroupConfigurationEntity groupConfiguration = groupConfigurationRepository.getEntity(id);
+    public GroupEnrollmentConfigurationRepresentation getGroupEnrollmentConfiguration(@PathParam("id") String id) {
+        GroupEnrollmentConfigurationEntity groupConfiguration = groupEnrollmentConfigurationRepository.getEntity(id);
         //if not exist, group have only created from main Keycloak
         if (groupConfiguration == null) {
             throw new NotFoundException("Could not find this group configuration");
         } else {
-            return EntityToRepresentation.toRepresentation(groupConfiguration, realm);
+            return EntityToRepresentation.toRepresentation(groupConfiguration);
         }
     }
 
     @POST
     @Path("/configuration")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response saveGroupConfiguration(GroupConfigurationRepresentation rep) {
+    public Response saveGroupEnrollmentConfiguration(GroupEnrollmentConfigurationRepresentation rep) {
         if (rep.getId() == null ) {
-            groupConfigurationRepository.create(rep, group.getId(), voAdmin.getId());
+            groupEnrollmentConfigurationRepository.create(rep, group.getId());
         } else {
-            GroupConfigurationEntity entity = groupConfigurationRepository.getEntity(rep.getId());
+            GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(rep.getId());
             if (entity != null) {
-                groupConfigurationRepository.update(entity, rep, voAdmin.getId());
+                groupEnrollmentConfigurationRepository.update(entity, rep);
             } else {
                 throw new NotFoundException("Could not find this group configuration");
             }
@@ -97,37 +97,37 @@ public class VoAdminGroup {
     }
 
     @Path("/members")
-    public VoAdminGroupMembers addGroupMember() {
-        VoAdminGroupMembers service = new VoAdminGroupMembers(session, realm, voAdmin, userVoGroupMembershipRepository, group, customFreeMarkerEmailTemplateProvider);
+    public GroupAdminGroupMembers addGroupMember() {
+        GroupAdminGroupMembers service = new GroupAdminGroupMembers(session, realm, voAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
 
     @Path("/member/{memberId}")
-    public VoAdminGroupMember addGroupMember(@PathParam("memberId") String memberId) {
-        UserVoGroupMembershipEntity member = userVoGroupMembershipRepository.getEntity(memberId);
+    public GroupAdminGroupMember addGroupMember(@PathParam("memberId") String memberId) {
+        UserGroupMembershipExtensionEntity member = userGroupMembershipExtensionRepository.getEntity(memberId);
         if (member == null) {
             throw new NotFoundException("Could not find this group member");
         }
-        VoAdminGroupMember service = new VoAdminGroupMember(session, realm, voAdmin, userVoGroupMembershipRepository, group, customFreeMarkerEmailTemplateProvider, member);
+        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
 
     @POST
     @Path("/admin/{userId}")
-    public Response addVoAdmin(@PathParam("userId") String userId) {
+    public Response addGroupAdmin(@PathParam("userId") String userId) {
         UserModel user = session.users().getUserById(realm, userId);
         if ( user == null ) {
             throw new NotFoundException("Could not find this User");
         }
         try {
-            if (!groupAdminRepository.isVoAdmin(user.getId(), group)) {
+            if (!groupAdminRepository.isGroupAdmin(user.getId(), group)) {
                 groupAdminRepository.addGroupAdmin(userId, group.getId());
 
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(user);
-                    customFreeMarkerEmailTemplateProvider.sendVoAdminEmail(group.getName(), true);
+                    customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
                 } catch (EmailException e) {
                     ServicesLogger.LOGGER.failedToSendEmail(e);
                 }
@@ -142,7 +142,7 @@ public class VoAdminGroup {
 
     @DELETE
     @Path("/admin/{userId}")
-    public Response removeVoAdmin(@PathParam("userId") String userId) {
+    public Response removeGroupAdmin(@PathParam("userId") String userId) {
         UserModel user = session.users().getUserById(realm, userId);
         if ( user == null ) {
             throw new NotFoundException("Could not find this User");
@@ -152,7 +152,7 @@ public class VoAdminGroup {
             groupAdminRepository.deleteEntity(admin.getId());
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(user);
-                customFreeMarkerEmailTemplateProvider.sendVoAdminEmail(group.getName(), false);
+                customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), false);
             } catch (EmailException e) {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
             }
