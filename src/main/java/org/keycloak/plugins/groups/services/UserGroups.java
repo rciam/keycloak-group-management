@@ -1,7 +1,9 @@
 package org.keycloak.plugins.groups.services;
 
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -9,6 +11,7 @@ import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
+import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
 import org.keycloak.plugins.groups.stubs.ErrorResponse;
@@ -16,8 +19,10 @@ import org.keycloak.representations.idm.GroupRepresentation;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -30,15 +35,13 @@ public class UserGroups {
 
     protected KeycloakSession session;
     private RealmModel realm;
-
-    private AuthenticationHelper authHelper;
     private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private  UserModel user;
 
     public UserGroups(KeycloakSession session, RealmModel realm) {
         this.session = session;
         this.realm =  realm;
-        this.authHelper = new AuthenticationHelper(session);
+        AuthenticationHelper authHelper = new AuthenticationHelper(session);
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
         this.user = authHelper.authenticateUserRequest().getUser();
     }
@@ -53,32 +56,16 @@ public class UserGroups {
         return Response.ok().type(MediaType.APPLICATION_JSON).entity(userGroups).build();
     }
 
-    @POST
-    @Path("/group/{groupId}/admin")
-    @Produces("application/json")
-    public Response addAsGroupAdmin() {
-        //    UserModel user = session.users().getUserById(realm, userId);
-//        if ( user == null ) {
-//        throw new NotFoundException("Could not find this User");
-//    }
-//        try {
-//        if (!groupAdminRepository.isGroupAdmin(user.getId(), group)) {
-//            groupAdminRepository.addGroupAdmin(userId, group.getId());
-//
-//            try {
-//                customFreeMarkerEmailTemplateProvider.setUser(user);
-//                customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
-//            } catch (EmailException e) {
-//                ServicesLogger.LOGGER.failedToSendEmail(e);
-//            }
-//            return Response.noContent().build();
-//        } else {
-//            return Response.status(Response.Status.BAD_REQUEST).entity(user.getUsername() + " is already group admin for the " + group.getName() + " group or one of its parent.").build();
-//        }
-//    } catch (Exception e) {
-//        return Response.status(Response.Status.BAD_REQUEST).entity(ModelDuplicateException.class.equals(e.getClass()) ? "Admin has already been existed" : "Problem during admin save").build();
-//    }
-        return Response.ok().build();
+    @Path("/group/{groupId}")
+    public UserGroup userGroup(@PathParam("groupId") String groupId) {
+        GroupModel group = realm.getGroupById(groupId);
+        if (group == null) {
+            throw new NotFoundException("Could not find group by id");
+        }
+
+        UserGroup service = new UserGroup(session, realm, groupEnrollmentConfigurationRepository, user, group);
+        ResteasyProviderFactory.getInstance().injectProperties(service);
+        return service;
     }
 
     @GET

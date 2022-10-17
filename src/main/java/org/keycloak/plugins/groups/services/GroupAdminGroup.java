@@ -22,8 +22,10 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelDuplicateException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
@@ -31,6 +33,7 @@ import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
+import org.keycloak.representations.account.UserRepresentation;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.theme.FreeMarkerUtil;
 
@@ -43,14 +46,16 @@ public class GroupAdminGroup {
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final GroupAdminRepository groupAdminRepository;
+    //TODO Add real url
+    private static final String ADD_ADMIN_URL = "http://localhost:8080/realms/master/agm/dummy";
 
     public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupModel group) {
         this.session = session;
         this.realm = realm;
         this.voAdmin = voAdmin;
         this.group = group;
-        this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, session.getContext().getRealm());
-        this.userGroupMembershipExtensionRepository =  new UserGroupMembershipExtensionRepository(session, session.getContext().getRealm());
+        this.groupEnrollmentConfigurationRepository = new GroupEnrollmentConfigurationRepository(session, session.getContext().getRealm());
+        this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, session.getContext().getRealm());
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         this.groupAdminRepository = new GroupAdminRepository(session, realm);
@@ -60,7 +65,7 @@ public class GroupAdminGroup {
     @Path("/configuration/all")
     @Produces("application/json")
     public List<GroupEnrollmentConfigurationRepresentation> getGroupEnrollmentConfigurationsByGroup() {
-       return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf)).collect(Collectors.toList());
+        return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf)).collect(Collectors.toList());
     }
 
     @GET
@@ -80,7 +85,7 @@ public class GroupAdminGroup {
     @Path("/configuration")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response saveGroupEnrollmentConfiguration(GroupEnrollmentConfigurationRepresentation rep) {
-        if (rep.getId() == null ) {
+        if (rep.getId() == null) {
             groupEnrollmentConfigurationRepository.create(rep, group.getId());
         } else {
             GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(rep.getId());
@@ -114,17 +119,15 @@ public class GroupAdminGroup {
 
     @POST
     @Path("/admin")
-    public Response inviteGroupAdmin(@QueryParam("email") String email, @QueryParam("fullname") String fullname) {
+    public Response inviteGroupAdmin(UserRepresentation userRep) throws EmailException {
+        if (userRep.getEmail() == null || userRep.getFirstName() == null || userRep.getLastName() == null)
+            return Response.status(Response.Status.BAD_REQUEST).entity("Required user fields have not submitted").build();
 
-        //TODO
-        //send email to user outside keycloak
+        UserAdapter user = Utils.getDummyUser(userRep);
 
-//        try {
-//            customFreeMarkerEmailTemplateProvider.setUser(user);
-//            customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
-//        } catch (EmailException e) {
-//            ServicesLogger.LOGGER.failedToSendEmail(e);
-//        }
+        customFreeMarkerEmailTemplateProvider.setUser(user);
+        customFreeMarkerEmailTemplateProvider.sendInviteGroupAdminEmail(user.getFirstName()+" "+user.getLastName(),group.getName(), ADD_ADMIN_URL);
+
         return Response.noContent().build();
 
     }
@@ -133,7 +136,7 @@ public class GroupAdminGroup {
     @Path("/admin/{userId}")
     public Response removeGroupAdmin(@PathParam("userId") String userId) {
         UserModel user = session.users().getUserById(realm, userId);
-        if ( user == null ) {
+        if (user == null) {
             throw new NotFoundException("Could not find this User");
         }
         GroupAdminEntity admin = groupAdminRepository.getGroupAdminByUserAndGroup(userId, group.getId());
