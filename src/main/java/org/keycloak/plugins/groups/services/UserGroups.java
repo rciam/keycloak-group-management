@@ -33,13 +33,14 @@ public class UserGroups {
 
     private AuthenticationHelper authHelper;
     private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
-    private UserModel user;
+    private  UserModel user;
 
     public UserGroups(KeycloakSession session, RealmModel realm) {
         this.session = session;
         this.realm =  realm;
         this.authHelper = new AuthenticationHelper(session);
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
+        this.user = authHelper.authenticateUserRequest().getUser();
     }
 
 
@@ -48,10 +49,6 @@ public class UserGroups {
     @Path("/groups")
     @Produces("application/json")
     public Response getAllUserGroups() {
-        UserModel user = authHelper.authenticateUserRequest().getUser();
-        if(user == null)
-            return Response.status(Response.Status.UNAUTHORIZED).entity(new ErrorResponse("Could not identify logged in user.")).build();
-//        RealmModel realm = session.getContext().getRealm();
         List<GroupRepresentation> userGroups = user.getGroupsStream().map(g-> ModelToRepresentation.toRepresentation(g,true)).collect(Collectors.toList());
         return Response.ok().type(MediaType.APPLICATION_JSON).entity(userGroups).build();
     }
@@ -88,7 +85,6 @@ public class UserGroups {
     @Path("/enroll/request")
     @Produces("application/json")
     public List<GroupEnrollmentEntity> getMyEnrollments() {
-        UserModel user = authHelper.authenticateUserRequest().getUser();
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         List<GroupEnrollmentEntity> groupEnrollmentEntities = em.createNamedQuery("getAllUserGroupEnrollments", GroupEnrollmentEntity.class)
                 .setParameter("userId", user.getId())
@@ -102,7 +98,6 @@ public class UserGroups {
     @Path("/test/get-all")
     @Produces("application/json")
     public List<GroupEnrollmentRepresentation> getAll() {
-//        UserModel user = authHelper.authenticateUserRequest();
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         List<GroupEnrollmentRepresentation> res = em.createQuery("select ge from GroupEnrollmentEntity ge", GroupEnrollmentEntity.class)
                 .getResultStream()
