@@ -16,6 +16,7 @@ import org.keycloak.representations.idm.GroupRepresentation;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -32,6 +33,7 @@ public class UserGroups {
 
     private AuthenticationHelper authHelper;
     private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
+    private UserModel user;
 
     public UserGroups(KeycloakSession session, RealmModel realm) {
         this.session = session;
@@ -43,6 +45,7 @@ public class UserGroups {
 
 
     @GET
+    @Path("/groups")
     @Produces("application/json")
     public Response getAllUserGroups() {
         UserModel user = authHelper.authenticateUserRequest().getUser();
@@ -53,16 +56,33 @@ public class UserGroups {
         return Response.ok().type(MediaType.APPLICATION_JSON).entity(userGroups).build();
     }
 
-//    @POST
-//    @Produces("application/json")
-//    public Response addUserGroup() {
-//        UserModel user = authHelper.authenticateUserRequest();
-//        if(user == null)
-//            return Response.status(Response.Status.UNAUTHORIZED).entity(new ErrorResponse("Could not identify logged in user.")).build();
-////        RealmModel realm = session.getContext().getRealm();
-//        List<GroupRepresentation> userGroups = user.getGroupsStream().map(g-> ModelToRepresentation.toRepresentation(g,true)).collect(Collectors.toList());
-//        return Response.ok().type(MediaType.APPLICATION_JSON).entity(userGroups).build();
+    @POST
+    @Path("/group/{groupId}/admin")
+    @Produces("application/json")
+    public Response addAsGroupAdmin() {
+        //    UserModel user = session.users().getUserById(realm, userId);
+//        if ( user == null ) {
+//        throw new NotFoundException("Could not find this User");
 //    }
+//        try {
+//        if (!groupAdminRepository.isGroupAdmin(user.getId(), group)) {
+//            groupAdminRepository.addGroupAdmin(userId, group.getId());
+//
+//            try {
+//                customFreeMarkerEmailTemplateProvider.setUser(user);
+//                customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
+//            } catch (EmailException e) {
+//                ServicesLogger.LOGGER.failedToSendEmail(e);
+//            }
+//            return Response.noContent().build();
+//        } else {
+//            return Response.status(Response.Status.BAD_REQUEST).entity(user.getUsername() + " is already group admin for the " + group.getName() + " group or one of its parent.").build();
+//        }
+//    } catch (Exception e) {
+//        return Response.status(Response.Status.BAD_REQUEST).entity(ModelDuplicateException.class.equals(e.getClass()) ? "Admin has already been existed" : "Problem during admin save").build();
+//    }
+        return Response.ok().build();
+    }
 
     @GET
     @Path("/enroll/request")

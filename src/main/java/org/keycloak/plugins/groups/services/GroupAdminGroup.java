@@ -11,6 +11,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -101,7 +102,7 @@ public class GroupAdminGroup {
     }
 
     @Path("/member/{memberId}")
-    public GroupAdminGroupMember addGroupMember(@PathParam("memberId") String memberId) {
+    public GroupAdminGroupMember groupMember(@PathParam("memberId") String memberId) {
         UserGroupMembershipExtensionEntity member = userGroupMembershipExtensionRepository.getEntity(memberId);
         if (member == null) {
             throw new NotFoundException("Could not find this group member");
@@ -112,29 +113,20 @@ public class GroupAdminGroup {
     }
 
     @POST
-    @Path("/admin/{userId}")
-    public Response addGroupAdmin(@PathParam("userId") String userId) {
-        UserModel user = session.users().getUserById(realm, userId);
-        if ( user == null ) {
-            throw new NotFoundException("Could not find this User");
-        }
-        try {
-            if (!groupAdminRepository.isGroupAdmin(user.getId(), group)) {
-                groupAdminRepository.addGroupAdmin(userId, group.getId());
+    @Path("/admin")
+    public Response inviteGroupAdmin(@QueryParam("email") String email, @QueryParam("fullname") String fullname) {
 
-                try {
-                    customFreeMarkerEmailTemplateProvider.setUser(user);
-                    customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
-                } catch (EmailException e) {
-                    ServicesLogger.LOGGER.failedToSendEmail(e);
-                }
-                return Response.noContent().build();
-            } else {
-                return Response.status(Response.Status.BAD_REQUEST).entity(user.getUsername() + " is already group admin for the " + group.getName() + " group or one of its parent.").build();
-            }
-        } catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(ModelDuplicateException.class.equals(e.getClass()) ? "Admin has already been existed" : "Problem during admin save").build();
-        }
+        //TODO
+        //send email to user outside keycloak
+
+//        try {
+//            customFreeMarkerEmailTemplateProvider.setUser(user);
+//            customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
+//        } catch (EmailException e) {
+//            ServicesLogger.LOGGER.failedToSendEmail(e);
+//        }
+        return Response.noContent().build();
+
     }
 
     @DELETE
