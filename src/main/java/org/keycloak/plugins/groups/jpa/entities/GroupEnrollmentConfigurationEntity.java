@@ -1,10 +1,8 @@
 package org.keycloak.plugins.groups.jpa.entities;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.keycloak.models.jpa.entities.GroupEntity;
-import org.keycloak.models.jpa.entities.RequiredCredentialEntity;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -75,7 +73,7 @@ public class GroupEnrollmentConfigurationEntity {
     protected Boolean hideConfiguration;
 
     @OneToMany(cascade =CascadeType.ALL, orphanRemoval = true, mappedBy = "groupEnrollmentConfiguration")
-    private List<GroupEnrollmentAttributesEntity> attributes;
+    private List<GroupEnrollmentConfigurationAttributesEntity> attributes;
 
     public String getName() {
         return name;
@@ -189,11 +187,11 @@ public class GroupEnrollmentConfigurationEntity {
         this.hideConfiguration = hideConfiguration;
     }
 
-    public List<GroupEnrollmentAttributesEntity> getAttributes() {
+    public List<GroupEnrollmentConfigurationAttributesEntity> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(List<GroupEnrollmentAttributesEntity> attributes) {
+    public void setAttributes(List<GroupEnrollmentConfigurationAttributesEntity> attributes) {
         this.attributes = attributes;
     }
 }

@@ -1,6 +1,5 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -9,10 +8,10 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.representations.GroupAupRepresentation;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentAttributesRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 
 public class GroupEnrollmentConfigurationRepository extends GeneralRepository<GroupEnrollmentConfigurationEntity> {
@@ -86,8 +85,8 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         }
     }
 
-    private GroupEnrollmentAttributesEntity toEntity(GroupEnrollmentAttributesRepresentation rep, GroupEnrollmentConfigurationEntity configuration){
-        GroupEnrollmentAttributesEntity entity = new GroupEnrollmentAttributesEntity();
+    private GroupEnrollmentConfigurationAttributesEntity toEntity(GroupEnrollmentConfigurationAttributesRepresentation rep, GroupEnrollmentConfigurationEntity configuration){
+        GroupEnrollmentConfigurationAttributesEntity entity = new GroupEnrollmentConfigurationAttributesEntity();
         entity.setId(rep.getId() != null ? rep.getId() : KeycloakModelUtils.generateId());
         entity.setLabel(rep.getLabel());
         entity.setGroupEnrollmentConfiguration(configuration);

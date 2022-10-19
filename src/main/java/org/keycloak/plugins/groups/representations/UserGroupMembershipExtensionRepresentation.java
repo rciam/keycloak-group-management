@@ -3,7 +3,7 @@ package org.keycloak.plugins.groups.representations;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.keycloak.plugins.groups.enums.StatusEnum;
+import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.representations.idm.UserRepresentation;
 
 public class UserGroupMembershipExtensionRepresentation {
@@ -11,7 +11,7 @@ public class UserGroupMembershipExtensionRepresentation {
     protected String id;
     protected String groupId;
     protected UserRepresentation user;
-    protected StatusEnum status;
+    protected MemberStatusEnum status;
     protected String changedByUserId;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
     protected Date membershipExpiresAt;
@@ -45,11 +45,11 @@ public class UserGroupMembershipExtensionRepresentation {
         this.user = user;
     }
 
-    public StatusEnum getStatus() {
+    public MemberStatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(StatusEnum status) {
+    public void setStatus(MemberStatusEnum status) {
         this.status = status;
     }
 

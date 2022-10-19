@@ -1,18 +1,16 @@
 package org.keycloak.plugins.groups.jpa.entities;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Fetch;
-import org.keycloak.models.jpa.entities.GroupAttributeEntity;
-import org.keycloak.models.jpa.entities.GroupEntity;
-import org.keycloak.models.jpa.entities.RealmEntity;
+
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -22,35 +20,48 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name="GROUP_ENROLLMENT")
 @NamedQueries({
-        @NamedQuery(name="getAllUserGroupEnrollments", query="from GroupEnrollmentEntity ge where ge.user.id = :userId")
+        @NamedQuery(name="getAllUserGroupEnrollments", query="from GroupEnrollmentEntity ge where ge.user.id = :userId"),
+        @NamedQuery(name="countOngoingByUserAndGroup", query="select count(f) from GroupEnrollmentEntity f, GroupEnrollmentConfigurationEntity c  where f.groupEnrollmentConfiguration.id = c.id and f.user.id = :userId and c.group.id = :groupId and f.status in (:status)")
 })
 public class GroupEnrollmentEntity {
 
     @Id
     @Column(name="ID")
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
-    protected String id;
+    private String id;
 
     @ManyToOne()
     @JoinColumn(name = "USER_ID")
-    protected UserEntity user;
+    private UserEntity user;
 
     @ManyToOne()
-    @JoinColumn(name = "GROUP_ID")
-    protected GroupEntity group;
+    @JoinColumn(name = "CHECK_ADMIN_ID")
+    private UserEntity checkAdmin;
 
-    @JsonManagedReference
-    @BatchSize(size = 50)
-    @OneToMany(
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.REMOVE,
-            orphanRemoval = true,
-            mappedBy="enrollmentEntity")
-    protected Collection<GroupEnrollmentStateEntity> enrollmentStates;
+    @ManyToOne()
+    @JoinColumn(name = "GROUP_ENROLLMENT_CONFIGURATION_ID")
+    private GroupEnrollmentConfigurationEntity groupEnrollmentConfiguration;
+
+    @Column(name="STATUS")
+    @Enumerated(EnumType.STRING)
+    private EnrollmentStatusEnum status;
+
+    @Column(name="REASON")
+    private String reason;
+
+    @Column(name="ADMIN_JUSTIFICATION")
+    private String adminJustification;
+
+    @Column(name="COMMENTS")
+    private String comments;
+
+    @OneToMany(cascade =CascadeType.ALL, orphanRemoval = true, mappedBy = "enrollment")
+    private List<GroupEnrollmentAttributesEntity> attributes;
 
     public String getId() {
         return id;
@@ -68,19 +79,59 @@ public class GroupEnrollmentEntity {
         this.user = user;
     }
 
-    public GroupEntity getGroup() {
-        return group;
+    public UserEntity getCheckAdmin() {
+        return checkAdmin;
     }
 
-    public void setGroup(GroupEntity group) {
-        this.group = group;
+    public void setCheckAdmin(UserEntity checkAdmin) {
+        this.checkAdmin = checkAdmin;
     }
 
-    public Collection<GroupEnrollmentStateEntity> getEnrollmentStates() {
-        return enrollmentStates;
+    public GroupEnrollmentConfigurationEntity getGroupEnrollmentConfiguration() {
+        return groupEnrollmentConfiguration;
     }
 
-    public void setEnrollmentStates(Collection<GroupEnrollmentStateEntity> enrollmentStates) {
-        this.enrollmentStates = enrollmentStates;
+    public void setGroupEnrollmentConfiguration(GroupEnrollmentConfigurationEntity groupEnrollmentConfiguration) {
+        this.groupEnrollmentConfiguration = groupEnrollmentConfiguration;
+    }
+
+    public EnrollmentStatusEnum getStatus() {
+        return status;
+    }
+
+    public void setStatus(EnrollmentStatusEnum status) {
+        this.status = status;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
+    }
+
+    public String getAdminJustification() {
+        return adminJustification;
+    }
+
+    public void setAdminJustification(String adminJustification) {
+        this.adminJustification = adminJustification;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
+
+    public List<GroupEnrollmentAttributesEntity> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(List<GroupEnrollmentAttributesEntity> attributes) {
+        this.attributes = attributes;
     }
 }

@@ -5,16 +5,15 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentStateEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.representations.GroupAupRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentAttributesRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentStateRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.keycloak.representations.idm.FederatedIdentityRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
@@ -45,8 +44,8 @@ public class EntityToRepresentation {
         return rep;
     }
 
-    private static GroupEnrollmentAttributesRepresentation toRepresentation(GroupEnrollmentAttributesEntity entity){
-        GroupEnrollmentAttributesRepresentation rep = new GroupEnrollmentAttributesRepresentation();
+    private static GroupEnrollmentConfigurationAttributesRepresentation toRepresentation(GroupEnrollmentConfigurationAttributesEntity entity){
+        GroupEnrollmentConfigurationAttributesRepresentation rep = new GroupEnrollmentConfigurationAttributesRepresentation();
         rep.setId(entity.getId());
         rep.setAttribute(entity.getAttribute());
         rep.setDefaultValue(entity.getDefaultValue());
@@ -82,21 +81,11 @@ public class EntityToRepresentation {
     public static GroupEnrollmentRepresentation toRepresentation(GroupEnrollmentEntity entity, RealmModel realm) {
         GroupEnrollmentRepresentation rep = new GroupEnrollmentRepresentation();
         rep.setId(entity.getId());
-        rep.setGroup(toBriefRepresentation(entity.getGroup()));
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
-        rep.setEnrollmentStates(entity.getEnrollmentStates().stream().map(es->toRepresentation(es)).collect(Collectors.toList()));
+        //TODO extend
         return rep;
     }
 
-    public static GroupEnrollmentStateRepresentation toRepresentation(GroupEnrollmentStateEntity entity) {
-        GroupEnrollmentStateRepresentation rep = new GroupEnrollmentStateRepresentation();
-        rep.setId(entity.getId());
-        rep.setEnrollmentId(entity.getEnrollmentEntity().getId());
-        rep.setJustification(entity.getJustification());
-        rep.setState(entity.getState());
-        rep.setTimestamp(entity.getTimestamp());
-        return rep;
-    }
 
     public static GroupRepresentation toBriefRepresentation(GroupEntity entity) {
         GroupRepresentation rep = new GroupRepresentation();
