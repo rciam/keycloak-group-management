@@ -32,6 +32,7 @@ export class GroupsServiceClient {
     private kcSvc: KeycloakService;
     private groupsUrl: string;
 
+    //TODO: UPDATE the groupsUrl value in the constructor to match the base path of the extension's REST endpoints!!!
     public constructor() {
         this.kcSvc = keycloakService;
         this.groupsUrl = this.kcSvc.authServerUrl() + 'realms/' + this.kcSvc.realm() + '/groups-management';
