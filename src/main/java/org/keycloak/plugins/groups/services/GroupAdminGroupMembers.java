@@ -15,7 +15,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
-import org.keycloak.plugins.groups.enums.StatusEnum;
+import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
@@ -79,7 +79,7 @@ public class GroupAdminGroupMembers {
     public UserGroupMembershipExtensionRepresentationPager memberhipPager(@QueryParam("first") @DefaultValue("0") Integer first,
                                                                           @QueryParam("max") @DefaultValue("10") Integer max,
                                                                           @QueryParam("search") String search,
-                                                                          @QueryParam("status") StatusEnum status){
+                                                                          @QueryParam("status") MemberStatusEnum status){
         return userGroupMembershipExtensionRepository.searchByGroup(group.getId(), search, status, first, max, realm);
     }
 

@@ -352,5 +352,67 @@
         />
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="group-enrollment">
+        <renameTable newTableName="GROUP_ENROLLMENT_CONFIGURATION_ATTRIBUTES" oldTableName="GROUP_ENROLLMENT_ATTRIBUTES"/>
+        <delete tableName="GROUP_ENROLLMENT_STATE"/>
+        <dropForeignKeyConstraint baseTableName="GROUP_ENROLLMENT" constraintName="fk_kc_grp_enrol_gid"/>
+        <dropColumn tableName="GROUP_ENROLLMENT" columnName="EDITOR" />
+        <addColumn tableName="GROUP_ENROLLMENT">
+            <column name="STATE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT">
+            <column name="REASON" type="TEXT"/>
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT">
+            <column name="ADMIN_JUSTIFICATION" type="TEXT"/>
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT">
+            <column name="COMMENTS" type="TEXT"/>
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT">
+            <column name="CHECK_ADMIN_ID" type="VARCHAR(36)"/>
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT">
+            <column name="GROUP_ENROLLMENT_CONFIGURATION_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint
+                constraintName="fk_group_enrollment1"
+                baseTableName="GROUP_ENROLLMENT"
+                baseColumnNames="GROUP_ENROLLMENT_CONFIGURATION_ID"
+                referencedTableName="GROUP_ENROLLMENT_CONFIGURATION"
+                referencedColumnNames="id"
+        />
+        <createTable tableName="GROUP_ENROLLMENT_ATTRIBUTES">
+            <column name="ID" type="VARCHAR(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="GROUP_ENROLLMENT_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="GROUP_ENROLLMENT_CONFIGURATION_ATTRIBUTES_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="VALUE" type="TEXT" />
+        </createTable>
+        <addForeignKeyConstraint
+                constraintName="fk_enrollment_attributes"
+                baseTableName="GROUP_ENROLLMENT_ATTRIBUTES"
+                baseColumnNames="GROUP_ENROLLMENT_ID"
+                referencedTableName="GROUP_ENROLLMENT"
+                referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint
+                constraintName="fk_enrollment_attributes_conf"
+                baseTableName="GROUP_ENROLLMENT_ATTRIBUTES"
+                baseColumnNames="GROUP_ENROLLMENT_ID"
+                referencedTableName="GROUP_ENROLLMENT_CONFIGURATION_ATTRIBUTES"
+                referencedColumnNames="id"
+        />
+    </changeSet>
+
 
 </databaseChangeLog>

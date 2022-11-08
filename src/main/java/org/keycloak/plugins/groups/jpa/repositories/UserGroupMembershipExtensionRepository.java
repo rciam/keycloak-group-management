@@ -16,7 +16,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
-import org.keycloak.plugins.groups.enums.StatusEnum;
+import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
@@ -38,7 +38,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         return results.isEmpty() ? null : results.get(0);
     }
 
-    public UserGroupMembershipExtensionRepresentationPager searchByGroup(String groupId, String search, StatusEnum status, Integer first, Integer max, RealmModel realm) {
+    public UserGroupMembershipExtensionRepresentationPager searchByGroup(String groupId, String search, MemberStatusEnum status, Integer first, Integer max, RealmModel realm) {
 
         String sqlQuery = "from UserGroupMembershipExtensionEntity f ";
         Map<String, Object> params = new HashMap<>();
@@ -71,7 +71,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
     @Transactional
     public void suspendUser(UserModel user, UserGroupMembershipExtensionEntity member, String justification, GroupModel group){
-        member.setStatus(StatusEnum.SUSPENDED);
+        member.setStatus(MemberStatusEnum.SUSPENDED);
         member.setJustification(justification);
         update(member);
         user.leaveGroup(group);
@@ -79,7 +79,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
     @Transactional
     public void activateUser(UserModel user, UserGroupMembershipExtensionEntity member, String justification, GroupModel group){
-        member.setStatus(StatusEnum.ENABLED);
+        member.setStatus(MemberStatusEnum.ENABLED);
         member.setJustification(justification);
         update(member);
         user.joinGroup(group);

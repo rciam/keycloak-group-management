@@ -2,8 +2,6 @@ package org.keycloak.plugins.groups.representations;
 
 import java.util.List;
 
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity;
-
 public class GroupEnrollmentConfigurationRepresentation {
 
     private String id;
@@ -21,7 +19,7 @@ public class GroupEnrollmentConfigurationRepresentation {
     private String invitationConclusion;
     private Boolean hideConfiguration;
 
-    private List<GroupEnrollmentAttributesRepresentation> attributes;
+    private List<GroupEnrollmentConfigurationAttributesRepresentation> attributes;
 
     public GroupEnrollmentConfigurationRepresentation(String id){
         this.id = id;
@@ -141,11 +139,11 @@ public class GroupEnrollmentConfigurationRepresentation {
         this.hideConfiguration = hideConfiguration;
     }
 
-    public List<GroupEnrollmentAttributesRepresentation> getAttributes() {
+    public List<GroupEnrollmentConfigurationAttributesRepresentation> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(List<GroupEnrollmentAttributesRepresentation> attributes) {
+    public void setAttributes(List<GroupEnrollmentConfigurationAttributesRepresentation> attributes) {
         this.attributes = attributes;
     }
 }

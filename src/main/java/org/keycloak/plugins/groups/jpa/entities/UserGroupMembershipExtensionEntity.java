@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.plugins.groups.enums.StatusEnum;
+import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -41,7 +41,7 @@ public class UserGroupMembershipExtensionEntity {
 
     @Column(name="STATUS")
     @Enumerated(EnumType.STRING)
-    protected StatusEnum status;
+    protected MemberStatusEnum status;
 
     @ManyToOne()
     @JoinColumn(name = "CHANGED_BY")
@@ -80,11 +80,11 @@ public class UserGroupMembershipExtensionEntity {
         this.user = user;
     }
 
-    public StatusEnum getStatus() {
+    public MemberStatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(StatusEnum status) {
+    public void setStatus(MemberStatusEnum status) {
         this.status = status;
     }
 
