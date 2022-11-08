@@ -19,7 +19,7 @@ public class GroupEnrollmentRepresentation {
 
     private String id;
     private UserRepresentation user;
-    private UserEntity checkAdmin;
+    private UserRepresentation checkAdmin;
     private GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
     private EnrollmentStatusEnum status;
     private String reason;
@@ -46,11 +46,11 @@ public class GroupEnrollmentRepresentation {
         this.user = user;
     }
 
-    public UserEntity getCheckAdmin() {
+    public UserRepresentation getCheckAdmin() {
         return checkAdmin;
     }
 
-    public void setCheckAdmin(UserEntity checkAdmin) {
+    public void setCheckAdmin(UserRepresentation checkAdmin) {
         this.checkAdmin = checkAdmin;
     }
 

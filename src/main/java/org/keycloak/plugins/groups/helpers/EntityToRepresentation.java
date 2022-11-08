@@ -4,11 +4,7 @@ import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
-import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
+import org.keycloak.plugins.groups.jpa.entities.*;
 import org.keycloak.plugins.groups.representations.GroupAupRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationAttributesRepresentation;
@@ -23,7 +19,7 @@ import java.util.stream.Collectors;
 
 public class EntityToRepresentation {
 
-    public static GroupEnrollmentConfigurationRepresentation toRepresentation(GroupEnrollmentConfigurationEntity entity) {
+    public static GroupEnrollmentConfigurationRepresentation toRepresentation(GroupEnrollmentConfigurationEntity entity, boolean containAttributes) {
         GroupEnrollmentConfigurationRepresentation rep = new GroupEnrollmentConfigurationRepresentation(entity.getId());
         rep.setGroupId(entity.getGroup().getId());
         rep.setName(entity.getName());
@@ -39,7 +35,7 @@ public class EntityToRepresentation {
         rep.setInvitationIntroduction(entity.getInvitationIntroduction());
         if ( entity.getAupEntity() != null)
             rep.setAup(toRepresentation(entity.getAupEntity()));
-        if ( entity.getAttributes() != null)
+        if ( containAttributes && entity.getAttributes() != null)
             rep.setAttributes(entity.getAttributes().stream().map(EntityToRepresentation::toRepresentation).collect(Collectors.toList()));
         return rep;
     }
@@ -82,7 +78,23 @@ public class EntityToRepresentation {
         GroupEnrollmentRepresentation rep = new GroupEnrollmentRepresentation();
         rep.setId(entity.getId());
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
-        //TODO extend
+        if (entity.getCheckAdmin() != null )
+            rep.setCheckAdmin(toBriefRepresentation(entity.getCheckAdmin(), realm));
+        rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration(), false));
+        rep.setAdminJustification(entity.getAdminJustification());
+        rep.setComment(entity.getComments());
+        rep.setStatus(entity.getStatus());
+        rep.setReason(entity.getReason());
+        if ( entity.getAttributes()!= null)
+            rep.setAttributes(entity.getAttributes().stream().map(attr-> EntityToRepresentation.toRepresentation(attr)).collect(Collectors.toList()));
+        return rep;
+    }
+
+    private static GroupEnrollmentAttributesRepresentation toRepresentation(GroupEnrollmentAttributesEntity entity){
+        GroupEnrollmentAttributesRepresentation rep = new GroupEnrollmentAttributesRepresentation();
+        rep.setId(entity.getId());
+        rep.setValue(entity.getValue());
+        rep.setConfigurationAttribute(toRepresentation(entity.getConfigurationAttribute()));
         return rep;
     }
 
