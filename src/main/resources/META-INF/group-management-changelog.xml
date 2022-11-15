@@ -53,6 +53,9 @@
         />
 
         <createTable tableName="GROUP_CONFIGURATION">
+            <column name="ID" type="varchar(36)" >
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
             <column name="GROUP_ID" type="VARCHAR(36)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -232,15 +235,6 @@
             <column name="URL" type="VARCHAR(255)"/>
         </addColumn>
         <dropNotNullConstraint tableName="GROUP_AUP" columnName="CONTENT" columnDataType="BLOB"/>
-    </changeSet>
-
-    <changeSet author="cgeorgilakis@grnet.gr" id="configuration">
-        <dropPrimaryKey tableName="GROUP_CONFIGURATION"/>
-        <addColumn tableName="GROUP_CONFIGURATION">
-            <column name="ID" type="varchar(36)" >
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-        </addColumn>
     </changeSet>
 
     <changeSet author="cgeorgilakis@grnet.gr" id="groupadmin">
