@@ -126,18 +126,4 @@ public class UserGroups {
         return service;
     }
 
-
-    //REMOVE THIS ONE, IT'S FOR TESTING PURPOSES
-    @GET
-    @Path("/test/get-all")
-    @Produces("application/json")
-    public List<GroupEnrollmentRepresentation> getAll() {
-        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
-        List<GroupEnrollmentRepresentation> res = em.createQuery("select ge from GroupEnrollmentEntity ge", GroupEnrollmentEntity.class)
-                .getResultStream()
-                .map(entity -> EntityToRepresentation.toRepresentation(entity, realm))
-                .collect(Collectors.toList());
-        return res;
-    }
-
 }

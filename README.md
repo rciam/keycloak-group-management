@@ -14,8 +14,11 @@ Main url : {server_url}/realms/{realm}/agm
 
 Path | Method | Description                              | Classes 
 ------------ |--------|------------------------------------------|--------
-/account/group-admin/groups | GET    | get all user groups                      | UserGroups
-/account/group-admin/group/{groupId}/admin | POST   | accept invitation and become group admin | UserGroups        
+/account/user/groups | GET    | get all user groups                      | UserGroups
+/account/user/group/{groupId}/admin | POST   | accept invitation and become group admin | UserGroup 
+/account/user/enroll-requests | GET    | get all user ongoing enrollment requests | UserGroups
+/account/user/enroll-request | POST    | create new enrollment request            | UserGroups
+/account/user/enroll-request/{id} | GET    | get enrollment request by id              | UserGroupEnrollmentAction
 
 **Group admin web services ( for group specific web services user must have admin rights to this group)**
 
@@ -28,7 +31,7 @@ Path | Method | Description                                                     
 /account/group-admin/group/{groupId}/members | GET | get all group members pager, being able to search and get by type (fe active) | VoAdminGroupMembers
 /account/group-admin/group/{groupId}/member/{memberId}/suspend | POST | suspend group member                                                          | VoAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/activate | POST | activate group member                                                         | VoAdminGroupMember
-/account/group-admin/group/{groupId}/admin/{userId} | POST | invite user as group admin for this groupId group                             | VoAdminGroup
+/account/group-admin/group/{groupId}/admin | POST | invite user as group admin for this groupId group                             | VoAdminGroup
 /account/group-admin/group/{groupId}/admin/{userId} | DELETE | delete group admin                                                            | VoAdminGroup
 
 
