@@ -31,4 +31,12 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("groupname", groupName);
         send("activateMemberSubject", "activate-member.ftl", attributes);
     }
+
+    public void sendInviteGroupAdminEmail(String groupadmin, String groupname, String url) throws EmailException, EmailException {
+        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
+        attributes.put("groupadmin", groupadmin);
+        attributes.put("groupname", groupname);
+        attributes.put("url", url);
+        send("inviteGroupAdminSubject", "invite-group-admin.ftl", attributes);
+    }
 }

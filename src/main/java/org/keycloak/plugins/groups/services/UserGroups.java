@@ -3,6 +3,7 @@ package org.keycloak.plugins.groups.services;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -61,22 +62,24 @@ public class UserGroups {
 
 
     @GET
+    @Path("/groups")
     @Produces("application/json")
     public Response getAllUserGroups() {
         List<GroupRepresentation> userGroups = user.getGroupsStream().map(g-> ModelToRepresentation.toRepresentation(g,true)).collect(Collectors.toList());
         return Response.ok().type(MediaType.APPLICATION_JSON).entity(userGroups).build();
     }
 
-//    @POST
-//    @Produces("application/json")
-//    public Response addUserGroup() {
-//        UserModel user = authHelper.authenticateUserRequest();
-//        if(user == null)
-//            return Response.status(Response.Status.UNAUTHORIZED).entity(new ErrorResponse("Could not identify logged in user.")).build();
-////        RealmModel realm = session.getContext().getRealm();
-//        List<GroupRepresentation> userGroups = user.getGroupsStream().map(g-> ModelToRepresentation.toRepresentation(g,true)).collect(Collectors.toList());
-//        return Response.ok().type(MediaType.APPLICATION_JSON).entity(userGroups).build();
-//    }
+    @Path("/group/{groupId}")
+    public UserGroup userGroup(@PathParam("groupId") String groupId) {
+        GroupModel group = realm.getGroupById(groupId);
+        if (group == null) {
+            throw new NotFoundException("Could not find group by id");
+        }
+
+        UserGroup service = new UserGroup(session, realm, groupEnrollmentConfigurationRepository, user, group);
+        ResteasyProviderFactory.getInstance().injectProperties(service);
+        return service;
+    }
 
     @GET
     @Path("/enroll-requests")
