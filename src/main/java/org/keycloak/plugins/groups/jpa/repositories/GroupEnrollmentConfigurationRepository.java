@@ -1,5 +1,6 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -78,7 +79,7 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         if ( rep.getAup() != null)
             entity.setAupEntity(toEntity(rep.getAup()));
         if (rep.getAttributes() != null) {
-            entity.getAttributes().clear();
+            entity.setAttributes(new ArrayList<>());
             entity.getAttributes().addAll(rep.getAttributes().stream().map(attr-> this.toEntity(attr, entity)).collect(Collectors.toList()));
         } else if (entity.getAttributes() != null) {
             entity.getAttributes().clear();
