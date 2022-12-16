@@ -5,7 +5,7 @@ import java.util.List;
 public class GroupEnrollmentConfigurationRepresentation {
 
     private String id;
-    private String groupId;
+    private org.keycloak.representations.idm.GroupRepresentation group;
     private String name;
     private Boolean active;
     private Boolean requireAupAcceptance;
@@ -35,12 +35,12 @@ public class GroupEnrollmentConfigurationRepresentation {
         this.id = id;
     }
 
-    public String getGroupId() {
-        return groupId;
+    public org.keycloak.representations.idm.GroupRepresentation getGroup() {
+        return group;
     }
 
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
+    public void setGroup(org.keycloak.representations.idm.GroupRepresentation group) {
+        this.group = group;
     }
 
     public String getName() {

@@ -403,6 +403,17 @@
                 referencedColumnNames="id"
         />
     </changeSet>
+    <changeSet author="cgeorgilakis@grnet.gr" id="delete-group-from-enrollment">
+        <dropColumn tableName="GROUP_ENROLLMENT" columnName="GROUP_ID" />
+        <dropForeignKeyConstraint baseTableName="GROUP_ENROLLMENT_ATTRIBUTES" constraintName="fk_enrollment_attributes_conf"/>
+        <addForeignKeyConstraint
+                constraintName="fk_enrollment_attributes_conf"
+                baseTableName="GROUP_ENROLLMENT_ATTRIBUTES"
+                baseColumnNames="GROUP_ENROLLMENT_CONFIGURATION_ATTRIBUTES_ID"
+                referencedTableName="GROUP_ENROLLMENT_CONFIGURATION_ATTRIBUTES"
+                referencedColumnNames="id"
+        />
+    </changeSet>
 
 
 </databaseChangeLog>

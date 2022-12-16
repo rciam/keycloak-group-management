@@ -1,20 +1,28 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.persistence.TypedQuery;
 
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
+import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentAttributesRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentPager;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
+import org.keycloak.plugins.groups.representations.GroupsPager;
 
 public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollmentEntity> {
 
@@ -55,8 +63,34 @@ public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollment
     }
 
     public Long countOngoingByUserAndGroup(String userId, String groupId) {
-        List<String> statusList = Stream.of(EnrollmentStatusEnum.PENDING_APPROVAL.toString(),EnrollmentStatusEnum.WAITING_FOR_REPLY.toString()).collect(Collectors.toList());
+        List<EnrollmentStatusEnum> statusList = Stream.of(EnrollmentStatusEnum.PENDING_APPROVAL,EnrollmentStatusEnum.WAITING_FOR_REPLY).collect(Collectors.toList());
         return em.createNamedQuery("countOngoingByUserAndGroup", Long.class).setParameter("userId",userId).setParameter("groupId",groupId).setParameter("status",statusList).getSingleResult();
+    }
+
+    public GroupEnrollmentPager groupEnrollmentPager(String userId, String groupName, EnrollmentStatusEnum status, Integer first, Integer max){
+        StringBuilder sqlQueryMain = new StringBuilder("from GroupEnrollmentEntity f");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("userId",userId);
+        if (groupName == null) {
+            sqlQueryMain.append(" where f.user.id = :userId");
+        } else {
+            sqlQueryMain.append(" join f.groupEnrollmentConfiguration c join c.group g where f.user.id = :userId and g.name like :groupName");
+            parameters.put("groupName","%"+groupName+"%");
+        }
+        if (status != null) {
+            sqlQueryMain.append(" and f.status = :status");
+            parameters.put("status",status);
+        }
+
+        TypedQuery<GroupEnrollmentEntity> query = em.createQuery("select f "+sqlQueryMain.toString(), GroupEnrollmentEntity.class);
+        TypedQuery<Long> queryCount = em.createQuery("select count(f) "+ sqlQueryMain.toString(), Long.class);
+        for (Map.Entry<String, Object> e : parameters.entrySet()) {
+            query.setParameter(e.getKey(), e.getValue());
+            queryCount.setParameter(e.getKey(), e.getValue());
+        }
+        List<GroupEnrollmentRepresentation> enrollments = query.setFirstResult(first).setMaxResults(max).getResultStream().map(x -> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList());
+        return new GroupEnrollmentPager(enrollments,queryCount.getSingleResult());
+
     }
 
 

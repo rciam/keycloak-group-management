@@ -18,6 +18,7 @@ import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEnti
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentPager;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
 import org.keycloak.plugins.groups.stubs.ErrorResponse;
 import org.keycloak.representations.idm.GroupRepresentation;
@@ -84,16 +85,11 @@ public class UserGroups {
     @GET
     @Path("/enroll-requests")
     @Produces("application/json")
-    public List<GroupEnrollmentEntity> getMyEnrollments(@QueryParam("first") @DefaultValue("0") Integer first,
-                                                        @QueryParam("max") @DefaultValue("10") Integer max,
-                                                        @QueryParam("groupName") String groupName,
-                                                        @QueryParam("status") EnrollmentStatusEnum status) {
-        //TODO make it pager
-        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
-        List<GroupEnrollmentEntity> groupEnrollmentEntities = em.createNamedQuery("getAllUserGroupEnrollments", GroupEnrollmentEntity.class)
-                .setParameter("userId", user.getId())
-                .getResultList();
-        return groupEnrollmentEntities;
+    public GroupEnrollmentPager getMyEnrollments(@QueryParam("first") @DefaultValue("0") Integer first,
+                                                 @QueryParam("max") @DefaultValue("10") Integer max,
+                                                 @QueryParam("groupName") String groupName,
+                                                 @QueryParam("status") EnrollmentStatusEnum status) {
+        return groupEnrollmentRepository.groupEnrollmentPager(user.getId(), groupName, status, first, max);
     }
 
     @POST
@@ -111,7 +107,7 @@ public class UserGroups {
             throw new BadRequestException("You have an ongoing request to become member of this group");
 
         groupEnrollmentRepository.create(rep, user.getId());
-        return Response.ok().build();
+        return Response.noContent().build();
     }
 
     @Path("/enroll-request/{id}")

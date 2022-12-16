@@ -47,7 +47,7 @@ public class GroupEnrollmentEntity {
     @JoinColumn(name = "GROUP_ENROLLMENT_CONFIGURATION_ID")
     private GroupEnrollmentConfigurationEntity groupEnrollmentConfiguration;
 
-    @Column(name="STATUS")
+    @Column(name="STATE")
     @Enumerated(EnumType.STRING)
     private EnrollmentStatusEnum status;
 

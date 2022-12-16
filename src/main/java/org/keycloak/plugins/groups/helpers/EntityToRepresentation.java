@@ -21,7 +21,10 @@ public class EntityToRepresentation {
 
     public static GroupEnrollmentConfigurationRepresentation toRepresentation(GroupEnrollmentConfigurationEntity entity, boolean containAttributes) {
         GroupEnrollmentConfigurationRepresentation rep = new GroupEnrollmentConfigurationRepresentation(entity.getId());
-        rep.setGroupId(entity.getGroup().getId());
+        org.keycloak.representations.idm.GroupRepresentation group = new GroupRepresentation();
+        group.setId(entity.getGroup().getId());
+        group.setName(entity.getGroup().getName());
+        rep.setGroup(group);
         rep.setName(entity.getName());
         rep.setActive(entity.isActive());
         rep.setHideConfiguration(entity.isHideConfiguration());
