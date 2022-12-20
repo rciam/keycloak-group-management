@@ -1,2 +1,2 @@
 <#ftl output_format="plainText">
-${msg("activateMemberBodyHtml",groupname,justification)}
+${msg("acceptRejectEnrollmentBody",groupname,justification)}

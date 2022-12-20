@@ -3,6 +3,7 @@ package org.keycloak.plugins.groups.jpa.repositories;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -76,6 +77,32 @@ public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollment
         } else {
             sqlQueryMain.append(" join f.groupEnrollmentConfiguration c join c.group g where f.user.id = :userId and g.name like :groupName");
             parameters.put("groupName","%"+groupName+"%");
+        }
+        if (status != null) {
+            sqlQueryMain.append(" and f.status = :status");
+            parameters.put("status",status);
+        }
+
+        TypedQuery<GroupEnrollmentEntity> query = em.createQuery("select f "+sqlQueryMain.toString(), GroupEnrollmentEntity.class);
+        TypedQuery<Long> queryCount = em.createQuery("select count(f) "+ sqlQueryMain.toString(), Long.class);
+        for (Map.Entry<String, Object> e : parameters.entrySet()) {
+            query.setParameter(e.getKey(), e.getValue());
+            queryCount.setParameter(e.getKey(), e.getValue());
+        }
+        List<GroupEnrollmentRepresentation> enrollments = query.setFirstResult(first).setMaxResults(max).getResultStream().map(x -> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList());
+        return new GroupEnrollmentPager(enrollments,queryCount.getSingleResult());
+
+    }
+
+    public GroupEnrollmentPager groupAdminEnrollmentPager(List<String> groupIds, String userSearch, EnrollmentStatusEnum status, Integer first, Integer max){
+        StringBuilder sqlQueryMain = new StringBuilder("from GroupEnrollmentEntity f join f.groupEnrollmentConfiguration c join c.group g");
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("groupIds",groupIds);
+        if (userSearch == null) {
+            sqlQueryMain.append(" where g.id in (:groupIds)");
+        } else {
+            sqlQueryMain.append(" join f.user u where g.id in (:groupIds) and (u.firstName like :userSearch or u.lastName like :userSearch) ");
+            parameters.put("userSearch","%"+userSearch+"%");
         }
         if (status != null) {
             sqlQueryMain.append(" and f.status = :status");

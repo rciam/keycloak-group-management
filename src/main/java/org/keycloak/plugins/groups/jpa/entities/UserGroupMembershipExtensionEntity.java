@@ -1,5 +1,6 @@
 package org.keycloak.plugins.groups.jpa.entities;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import org.keycloak.models.jpa.entities.GroupEntity;
@@ -47,11 +48,14 @@ public class UserGroupMembershipExtensionEntity {
     @JoinColumn(name = "CHANGED_BY")
     protected UserEntity changedBy;
 
+    @Column(name="VALID_FROM")
+    protected LocalDate validFrom;
+
     @Column(name="MEMBERSHIP_EXPIRES_AT")
-    protected Date membershipExpiresAt;
+    protected LocalDate membershipExpiresAt;
 
     @Column(name="AUP_EXPIRES_AT")
-    protected Date aupExpiresAt;
+    protected LocalDate aupExpiresAt;
 
     @Column(name="JUSTIFICATION")
     protected String justification;
@@ -96,19 +100,27 @@ public class UserGroupMembershipExtensionEntity {
         this.changedBy = changedBy;
     }
 
-    public Date getMembershipExpiresAt() {
+    public LocalDate getValidFrom() {
+        return validFrom;
+    }
+
+    public void setValidFrom(LocalDate validFrom) {
+        this.validFrom = validFrom;
+    }
+
+    public LocalDate getMembershipExpiresAt() {
         return membershipExpiresAt;
     }
 
-    public void setMembershipExpiresAt(Date membershipExpiresAt) {
+    public void setMembershipExpiresAt(LocalDate membershipExpiresAt) {
         this.membershipExpiresAt = membershipExpiresAt;
     }
 
-    public Date getAupExpiresAt() {
+    public LocalDate getAupExpiresAt() {
         return aupExpiresAt;
     }
 
-    public void setAupExpiresAt(Date aupExpiresAt) {
+    public void setAupExpiresAt(LocalDate aupExpiresAt) {
         this.aupExpiresAt = aupExpiresAt;
     }
 

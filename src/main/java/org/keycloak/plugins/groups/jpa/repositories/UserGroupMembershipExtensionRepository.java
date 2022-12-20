@@ -1,5 +1,9 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +20,13 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.plugins.groups.enums.GroupEnrollmentAttributeEnum;
 import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.helpers.Utils;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
@@ -87,6 +96,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
 
     @Transactional
+    @Deprecated
     public void create(UserGroupMembershipExtensionRepresentation rep, String editor, UserModel userModel, GroupModel groupModel){
         UserGroupMembershipExtensionEntity entity = new UserGroupMembershipExtensionEntity();
         entity.setId(KeycloakModelUtils.generateId());
@@ -105,6 +115,33 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setStatus(rep.getStatus());
         create(entity);
         userModel.joinGroup(groupModel);
+    }
+
+    @Transactional
+    public void create(GroupEnrollmentEntity enrollmentEntity, KeycloakSession session, String groupAdminId){
+        UserGroupMembershipExtensionEntity entity = new UserGroupMembershipExtensionEntity();
+        entity.setId(KeycloakModelUtils.generateId());
+        GroupEnrollmentConfigurationEntity configuration = enrollmentEntity.getGroupEnrollmentConfiguration();
+        if (configuration.getAupExpirySec() != null)
+            entity.setAupExpiresAt(LocalDate.ofEpochDay(Duration.ofMillis(Instant.now().toEpochMilli() + configuration.getAupExpirySec()).toDays()));
+        String validThroughValue = enrollmentEntity.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_THROUGH.equals(at.getConfigurationAttribute().getAttribute())).findAny().orElse(new GroupEnrollmentAttributesEntity()).getValue();
+        if (validThroughValue != null)
+            entity.setMembershipExpiresAt(LocalDate.parse(validThroughValue, Utils.formatter));
+        String validFromValue = enrollmentEntity.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_FROM.equals(at.getConfigurationAttribute().getAttribute())).findAny().orElse(new GroupEnrollmentAttributesEntity()).getValue();
+        if (validFromValue != null)
+            entity.setValidFrom(LocalDate.parse(validFromValue, Utils.formatter));
+        entity.setGroup(configuration.getGroup());
+        entity.setUser(enrollmentEntity.getUser());
+        UserEntity editorUser = new UserEntity();
+        editorUser.setId(groupAdminId);
+        entity.setChangedBy(editorUser);
+        entity.setJustification(enrollmentEntity.getAdminJustification());
+        entity.setStatus(MemberStatusEnum.ENABLED);
+        create(entity);
+
+        GroupModel group = realm.getGroupById(configuration.getGroup().getId());
+        UserModel userModel = session.users().getUserById(realm,enrollmentEntity.getUser().getId());
+        userModel.joinGroup(group);
     }
 
 }

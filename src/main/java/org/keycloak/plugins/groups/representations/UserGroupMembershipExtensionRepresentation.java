@@ -1,5 +1,7 @@
 package org.keycloak.plugins.groups.representations;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -14,9 +16,11 @@ public class UserGroupMembershipExtensionRepresentation {
     protected MemberStatusEnum status;
     protected String changedByUserId;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
-    protected Date membershipExpiresAt;
+    protected LocalDate validFrom;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
-    protected Date aupExpiresAt;
+    protected LocalDate membershipExpiresAt;
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    protected LocalDate aupExpiresAt;
     protected String justification;
 
     public UserGroupMembershipExtensionRepresentation(){}
@@ -61,19 +65,27 @@ public class UserGroupMembershipExtensionRepresentation {
         this.changedByUserId = changedByUserId;
     }
 
-    public Date getMembershipExpiresAt() {
+    public LocalDate getValidFrom() {
+        return validFrom;
+    }
+
+    public void setValidFrom(LocalDate validFrom) {
+        this.validFrom = validFrom;
+    }
+
+    public LocalDate getMembershipExpiresAt() {
         return membershipExpiresAt;
     }
 
-    public void setMembershipExpiresAt(Date membershipExpiresAt) {
+    public void setMembershipExpiresAt(LocalDate membershipExpiresAt) {
         this.membershipExpiresAt = membershipExpiresAt;
     }
 
-    public Date getAupExpiresAt() {
+    public LocalDate getAupExpiresAt() {
         return aupExpiresAt;
     }
 
-    public void setAupExpiresAt(Date aupExpiresAt) {
+    public void setAupExpiresAt(LocalDate aupExpiresAt) {
         this.aupExpiresAt = aupExpiresAt;
     }
 

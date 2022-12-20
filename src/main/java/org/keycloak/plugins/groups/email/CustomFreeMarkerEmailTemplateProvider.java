@@ -39,4 +39,12 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("url", url);
         send("inviteGroupAdminSubject", "invite-group-admin.ftl", attributes);
     }
+
+    public void sendAcceptRejectEnrollmentEmail(boolean isAccepted, String groupname, String justification) throws EmailException, EmailException {
+        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
+        attributes.put("groupname", groupname);
+        attributes.put("action", isAccepted ? "accepted" : "rejected");
+        attributes.put("justification", justification != null ? justification : "");
+        send(isAccepted ? "acceptEnrollmentSubject" : "rejectEnrollmentSubject", "accept-reject-enrollment.ftl", attributes);
+    }
 }

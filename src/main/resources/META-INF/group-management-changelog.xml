@@ -415,5 +415,11 @@
         />
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="validfrom">
+        <addColumn tableName="USER_GROUP_MEMBERSHIP_EXTENSION">
+            <column name="VALID_FROM" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+
 
 </databaseChangeLog>

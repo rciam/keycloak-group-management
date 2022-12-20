@@ -73,6 +73,7 @@ public class EntityToRepresentation {
         rep.setJustification(entity.getJustification());
         rep.setAupExpiresAt(entity.getAupExpiresAt());
         rep.setMembershipExpiresAt(entity.getMembershipExpiresAt());
+        rep.setValidFrom(entity.getValidFrom());
         rep.setStatus(entity.getStatus());
         return rep;
     }

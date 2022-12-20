@@ -24,16 +24,16 @@ Path | Method | Description                              | Classes
 
 Path | Method | Description                                                                   | Classes 
 ------------ | ------------- |-------------------------------------------------------------------------------|--------- 
-/account/group-admin/groups | GET | get all groups that this user has admin rights                                | VoAdminService 
-/account/group-admin/group/{groupId}/configuration/all | GET | get all group enrollment configurations                                       | VoAdminGroup
-/account/group-admin/group/{groupId}/configuration/{id} | GET | get group enrollment configuration                                            | VoAdminGroup
-/account/group-admin/group/{groupId}/configuration | POST | create/ update group enrollment configuration                                 | VoAdminGroup
-/account/group-admin/group/{groupId}/members | GET | get all group members pager, being able to search and get by type (fe active) | VoAdminGroupMembers
-/account/group-admin/group/{groupId}/member/{memberId}/suspend | POST | suspend group member                                                          | VoAdminGroupMember
-/account/group-admin/group/{groupId}/member/{memberId}/activate | POST | activate group member                                                         | VoAdminGroupMember
-/account/group-admin/group/{groupId}/admin | POST | invite user as group admin for this groupId group                             | VoAdminGroup
-/account/group-admin/group/{groupId}/admin/{userId} | DELETE | delete group admin                                                            | VoAdminGroup
-
+/account/group-admin/groups | GET | get all groups that this user has admin rights                                | GroupAdminService 
+/account/group-admin/group/{groupId}/configuration/all | GET | get all group enrollment configurations                                       | GroupAdminGroup
+/account/group-admin/group/{groupId}/configuration/{id} | GET | get group enrollment configuration                                            | GroupAdminGroup
+/account/group-admin/group/{groupId}/configuration | POST | create/ update group enrollment configuration                                 | GroupAdminGroup
+/account/group-admin/group/{groupId}/members | GET | get all group members pager, being able to search and get by type (fe active) | GroupAdminGroupMembers
+/account/group-admin/group/{groupId}/member/{memberId}/suspend | POST | suspend group member                                                          | GroupAdminGroupMember
+/account/group-admin/group/{groupId}/member/{memberId}/activate | POST | activate group member                                                         | GroupAdminGroupMember
+/account/group-admin/group/{groupId}/admin | POST | invite user as group admin for this groupId group                             | GroupAdminGroup
+/account/group-admin/group/{groupId}/admin/{userId} | DELETE | delete group admin                                                            | GroupAdminService
+/account/group-admin/enroll-requests | GET | get all group admin enrollment requests
 
 **Admin web services**
 

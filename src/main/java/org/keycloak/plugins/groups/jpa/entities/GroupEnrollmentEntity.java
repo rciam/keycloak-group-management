@@ -127,6 +127,11 @@ public class GroupEnrollmentEntity {
         this.comments = comments;
     }
 
+    public void setComment(String comment) {
+        //add comment to existing comments after line separator
+        this.comments = this.comments != null ? this.comments + System.lineSeparator()+comment : comment;
+    }
+
     public List<GroupEnrollmentAttributesEntity> getAttributes() {
         return attributes;
     }

@@ -1,7 +1,9 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.keycloak.models.GroupModel;
@@ -58,5 +60,18 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
         return new GroupsPager(groups,em.createNamedQuery("countGroupsForAdmin", Long.class).setParameter("userId",userId).getSingleResult());
 
     }
+
+    public List<String> getAllAdminGroupIds(String userId) {
+        List<String> groupIds = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).getResultStream().map(id -> realm.getGroupById(id)).flatMap(g ->this.getLeafGroupsIds(g).stream()).collect(Collectors.toList());
+        return groupIds;
+    }
+
+    private Set<String> getLeafGroupsIds(GroupModel group) {
+        Set<String> groupIds = new HashSet<>();
+        groupIds.add(group.getId());
+        group.getSubGroupsStream().forEach(g -> groupIds.addAll(getLeafGroupsIds(g)));
+        return groupIds;
+    }
+
 
 }
