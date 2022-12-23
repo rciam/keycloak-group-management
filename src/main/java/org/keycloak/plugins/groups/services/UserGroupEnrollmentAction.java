@@ -1,15 +1,21 @@
 package org.keycloak.plugins.groups.services;
 
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
@@ -44,6 +50,17 @@ public class UserGroupEnrollmentAction {
     @Produces("application/json")
     public GroupEnrollmentRepresentation getGroupEnrollment() {
        return EntityToRepresentation.toRepresentation(enrollmentEntity, realm);
+    }
+
+    @POST
+    @Path("/respond")
+    public Response askForExtraInformation(@NotNull @QueryParam("comment") String comment) {
+        if (!EnrollmentStatusEnum.WAITING_FOR_REPLY.equals(enrollmentEntity.getStatus()))
+            throw new BadRequestException("You can not change this group enrollment");
+        enrollmentEntity.setStatus(EnrollmentStatusEnum.PENDING_APPROVAL);
+        enrollmentEntity.setComment(comment);
+        groupEnrollmentRepository.update(enrollmentEntity);
+        return Response.noContent().build();
     }
 
 

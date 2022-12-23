@@ -22,6 +22,7 @@ import org.keycloak.plugins.groups.representations.GroupEnrollmentPager;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
 import org.keycloak.plugins.groups.stubs.ErrorResponse;
 import org.keycloak.representations.idm.GroupRepresentation;
+import org.keycloak.services.ForbiddenException;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.BadRequestException;
@@ -116,6 +117,8 @@ public class UserGroups {
         GroupEnrollmentEntity entity = groupEnrollmentRepository.getEntity(id);
         if (entity == null)
             throw new NotFoundException("Could not find this group enrollment configuration");
+        if ( !entity.getUser().getId().equals(user.getId()))
+            throw new ForbiddenException("You do not have access to this group enrollment");
 
         UserGroupEnrollmentAction service = new UserGroupEnrollmentAction(session, realm, groupEnrollmentConfigurationRepository, groupEnrollmentRepository, user, entity);
         ResteasyProviderFactory.getInstance().injectProperties(service);
