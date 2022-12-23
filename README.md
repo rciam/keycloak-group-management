@@ -34,6 +34,9 @@ Path | Method | Description                                                     
 /account/group-admin/group/{groupId}/admin | POST | invite user as group admin for this groupId group                             | GroupAdminGroup
 /account/group-admin/group/{groupId}/admin/{userId} | DELETE | delete group admin                                                            | GroupAdminService
 /account/group-admin/enroll-requests | GET | get all group admin enrollment requests
+/account/group-admin/enroll-request/{enrollId}/extra-info | POST | request extra infrormation from user
+/account/group-admin/enroll-request/{enrollId}/accept | POST | accept group enrollment
+/account/group-admin/enroll-request/{enrollId}/reject | POST | reject group enrollment
 
 **Admin web services**
 
