@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 
+import org.jboss.logging.Logger;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -20,6 +21,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.plugins.groups.GroupManagementEvent;
 import org.keycloak.plugins.groups.enums.GroupEnrollmentAttributeEnum;
 import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
@@ -33,6 +35,8 @@ import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionR
 
 public class UserGroupMembershipExtensionRepository extends GeneralRepository<UserGroupMembershipExtensionEntity> {
 
+    private static final Logger logger = Logger.getLogger(UserGroupMembershipExtensionRepository.class);
+
     public UserGroupMembershipExtensionRepository(KeycloakSession session, RealmModel realm) {
         super(session, realm);
     }
@@ -45,6 +49,20 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     public UserGroupMembershipExtensionEntity getByUserAndGroup(String groupId, String userId){
         List<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getByUserAndGroup").setParameter("groupId",groupId).setParameter("userId",userId).getResultList();
         return results.isEmpty() ? null : results.get(0);
+    }
+
+    @Transactional
+    public void inactivateExpiredMemberships(KeycloakSession session){
+        Stream<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getExpiredMemberships").setParameter("status",MemberStatusEnum.ENABLED).setParameter("date",LocalDate.now()).getResultStream();
+        logger.info("inactivateExpiredMemberships action is executing ...");
+        results.forEach(entity -> {
+            entity.setStatus(MemberStatusEnum.DISABLED);
+            update(entity);
+            RealmModel realmModel = session.realms().getRealm(entity.getUser().getRealmId());
+            UserModel user = session.users().getUserById(realmModel, entity.getUser().getId());
+            GroupModel group = realmModel.getGroupById(entity.getGroup().getId());
+            user.leaveGroup(group);
+        });
     }
 
     public UserGroupMembershipExtensionRepresentationPager searchByGroup(String groupId, String search, MemberStatusEnum status, Integer first, Integer max, RealmModel realm) {

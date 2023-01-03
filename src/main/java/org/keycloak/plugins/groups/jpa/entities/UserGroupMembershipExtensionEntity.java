@@ -23,7 +23,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name="USER_GROUP_MEMBERSHIP_EXTENSION")
 @NamedQueries({
-        @NamedQuery(name="getByUserAndGroup", query="from UserGroupMembershipExtensionEntity f where f.group.id = :groupId and f.user.id = :userId")
+        @NamedQuery(name="getByUserAndGroup", query="from UserGroupMembershipExtensionEntity f where f.group.id = :groupId and f.user.id = :userId"),
+        @NamedQuery(name="getExpiredMemberships", query="from UserGroupMembershipExtensionEntity f where f.status = :status and (f.membershipExpiresAt < :date or f.aupExpiresAt < :date)")
 })
 public class UserGroupMembershipExtensionEntity {
 
