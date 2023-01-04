@@ -3,10 +3,12 @@ package org.keycloak.plugins.groups.services;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.email.EmailException;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
 import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
@@ -15,6 +17,7 @@ import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
+import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
@@ -23,6 +26,8 @@ import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation
 import org.keycloak.plugins.groups.stubs.ErrorResponse;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ForbiddenException;
+import org.keycloak.services.ServicesLogger;
+import org.keycloak.theme.FreeMarkerUtil;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.BadRequestException;
@@ -50,7 +55,9 @@ public class UserGroups {
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final GroupEnrollmentRepository groupEnrollmentRepository;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
+    private final GroupAdminRepository groupAdminRepository;
     private final UserModel user;
+    private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
 
     public UserGroups(KeycloakSession session, RealmModel realm) {
         this.session = session;
@@ -59,6 +66,9 @@ public class UserGroups {
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
         this.groupEnrollmentRepository =  new GroupEnrollmentRepository(session, realm);
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
+        this.groupAdminRepository =  new GroupAdminRepository(session, realm);
+        this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
+        this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
     }
 
 
@@ -78,7 +88,7 @@ public class UserGroups {
             throw new NotFoundException("Could not find group by id");
         }
 
-        UserGroup service = new UserGroup(session, realm, groupEnrollmentConfigurationRepository, user, group);
+        UserGroup service = new UserGroup(session, realm, groupEnrollmentConfigurationRepository, user, group, customFreeMarkerEmailTemplateProvider, groupAdminRepository);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
@@ -107,7 +117,23 @@ public class UserGroups {
         if (groupEnrollmentRepository.countOngoingByUserAndGroup(user.getId(), configuration.getGroup().getId()) > 0)
             throw new BadRequestException("You have an ongoing request to become member of this group");
 
-        groupEnrollmentRepository.create(rep, user.getId());
+        GroupEnrollmentEntity entity = groupEnrollmentRepository.create(rep, user.getId());
+        //email to group admins if they must accept it
+        //find thems based on group
+        if (configuration.getRequireApproval()) {
+            groupAdminRepository.getAllAdminGroupUsers(configuration.getGroup().getId()).forEach(adminId -> {
+                try {
+                    UserModel admin = session.users().getUserById(realm,adminId);
+                    if ( admin != null) {
+                        customFreeMarkerEmailTemplateProvider.setUser(admin);
+                        customFreeMarkerEmailTemplateProvider.sendGroupAdminEnrollmentCreationEmail(user, configuration.getGroup().getName(), rep.getReason(), entity.getId());
+                    }
+                } catch (EmailException e) {
+                    ServicesLogger.LOGGER.failedToSendEmail(e);
+                }
+
+            });
+        }
         return Response.noContent().build();
     }
 

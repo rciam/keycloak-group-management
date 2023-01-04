@@ -23,21 +23,22 @@ Path | Method | Description                              | Classes
 
 **Group admin web services ( for group specific web services user must have admin rights to this group)**
 
-Path | Method | Description                                                                   | Classes 
------------- | ------------- |-------------------------------------------------------------------------------|--------- 
-/account/group-admin/groups | GET | get all groups that this user has admin rights                                | GroupAdminService 
-/account/group-admin/group/{groupId}/configuration/all | GET | get all group enrollment configurations                                       | GroupAdminGroup
-/account/group-admin/group/{groupId}/configuration/{id} | GET | get group enrollment configuration                                            | GroupAdminGroup
-/account/group-admin/group/{groupId}/configuration | POST | create/ update group enrollment configuration                                 | GroupAdminGroup
+Path | Method | Description                                                                  | Classes 
+------------ | ------------- |------------------------------------------------------------------------------|--------- 
+/account/group-admin/groups | GET | get all groups that this user has admin rights                               | GroupAdminService 
+/account/group-admin/group/{groupId}/configuration/all | GET | get all group enrollment configurations                                      | GroupAdminGroup
+/account/group-admin/group/{groupId}/configuration/{id} | GET | get group enrollment configuration                                           | GroupAdminGroup
+/account/group-admin/group/{groupId}/configuration | POST | create/ update group enrollment configuration                                | GroupAdminGroup
 /account/group-admin/group/{groupId}/members | GET | get all group members pager, being able to search and get by type (fe active) | GroupAdminGroupMembers
-/account/group-admin/group/{groupId}/member/{memberId}/suspend | POST | suspend group member                                                          | GroupAdminGroupMember
-/account/group-admin/group/{groupId}/member/{memberId}/activate | POST | activate group member                                                         | GroupAdminGroupMember
-/account/group-admin/group/{groupId}/admin | POST | invite user as group admin for this groupId group                             | GroupAdminGroup
-/account/group-admin/group/{groupId}/admin/{userId} | DELETE | delete group admin                                                            | GroupAdminService
-/account/group-admin/enroll-requests | GET | get all group admin enrollment requests  | GroupAdminEnrollement
-/account/group-admin/enroll-request/{enrollId}/extra-info | POST | request extra infrormation from user  | GroupAdminEnrollement
-/account/group-admin/enroll-request/{enrollId}/accept | POST | accept group enrollment  | GroupAdminEnrollement
-/account/group-admin/enroll-request/{enrollId}/reject | POST | reject group enrollment  | GroupAdminEnrollement
+/account/group-admin/group/{groupId}/member/{memberId}/suspend | POST | suspend group member                                                         | GroupAdminGroupMember
+/account/group-admin/group/{groupId}/member/{memberId}/activate | POST | activate group member                                                        | GroupAdminGroupMember
+/account/group-admin/group/{groupId}/admin | POST | invite user as group admin for this groupId group                            | GroupAdminGroup
+/account/group-admin/group/{groupId}/admin/{userId} | DELETE | delete group admin                                                           | GroupAdminService
+/account/group-admin/enroll-requests | GET | get all group admin enrollment requests                                      | GroupAdminService
+/account/group-admin/enroll-request/{enrollId} | GET | get enrollment request                                                       | GroupAdminEnrollement
+/account/group-admin/enroll-request/{enrollId}/extra-info | POST | request extra infrormation from user                                         | GroupAdminEnrollement
+/account/group-admin/enroll-request/{enrollId}/accept | POST | accept group enrollment                                                      | GroupAdminEnrollement
+/account/group-admin/enroll-request/{enrollId}/reject | POST | reject group enrollment                                                      | GroupAdminEnrollement
 
 **Admin web services**
 
