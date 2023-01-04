@@ -32,15 +32,14 @@ public class UserGroup {
     private GroupModel group;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
 
-    public UserGroup(KeycloakSession session, RealmModel realm, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, UserModel user, GroupModel group) {
+    public UserGroup(KeycloakSession session, RealmModel realm, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, UserModel user, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, GroupAdminRepository groupAdminRepository) {
         this.session = session;
         this.realm =  realm;
         this.groupEnrollmentConfigurationRepository =  groupEnrollmentConfigurationRepository;
-        this.groupAdminRepository =  new GroupAdminRepository(session, realm);
+        this.groupAdminRepository = groupAdminRepository;
         this.user = user;
         this.group = group;
-        this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
-        this.customFreeMarkerEmailTemplateProvider.setRealm(realm).setUser(user);
+        this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
     }
 
     @POST

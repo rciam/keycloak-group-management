@@ -36,7 +36,7 @@ public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollment
         return GroupEnrollmentEntity.class;
     }
 
-    public void create(GroupEnrollmentRepresentation rep, String userId){
+    public GroupEnrollmentEntity create(GroupEnrollmentRepresentation rep, String userId){
         GroupEnrollmentEntity entity = new GroupEnrollmentEntity();
         entity.setId(KeycloakModelUtils.generateId());
         UserEntity user = new UserEntity();
@@ -50,6 +50,7 @@ public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollment
         if (rep.getAttributes() != null)
             entity.setAttributes(rep.getAttributes().stream().map(x -> toEntity(x, entity)).collect(Collectors.toList()));
         create(entity);
+        return  entity;
     }
 
     private GroupEnrollmentAttributesEntity toEntity(GroupEnrollmentAttributesRepresentation rep, GroupEnrollmentEntity enrollment){

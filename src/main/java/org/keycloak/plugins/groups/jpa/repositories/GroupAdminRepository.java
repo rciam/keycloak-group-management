@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
@@ -29,14 +30,19 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
     }
 
     public boolean isGroupAdmin(String userId, GroupModel group){
-       List<String> groupIds = new ArrayList<>();
-       groupIds.add(group.getId());
-       while ( group.getParent() != null){
-           group = group.getParent();
-           groupIds.add(group.getId());
-       }
+        List<String> groupIds = getThisAndParentGroupIds(group);
         Long count = em.createNamedQuery("countByUserAndGroups", Long.class).setParameter("groupIds",groupIds).setParameter("userId",userId).getSingleResult();
         return count > 0;
+    }
+
+    private  List<String> getThisAndParentGroupIds(GroupModel group) {
+        List<String> groupIds =  new ArrayList<>();
+        groupIds.add(group.getId());
+        while ( group.getParent() != null){
+            group = group.getParent();
+            groupIds.add(group.getId());
+        }
+        return groupIds;
     }
 
     public void addGroupAdmin(String userId, String groupId) {
@@ -64,6 +70,12 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
     public List<String> getAllAdminGroupIds(String userId) {
         List<String> groupIds = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).getResultStream().map(id -> realm.getGroupById(id)).flatMap(g ->this.getLeafGroupsIds(g).stream()).collect(Collectors.toList());
         return groupIds;
+    }
+
+    public Stream<String> getAllAdminGroupUsers(String groupId){
+        GroupModel group = realm.getGroupById(groupId);
+        List<String> groupIds = getThisAndParentGroupIds(group);
+        return em.createNamedQuery("getAdminsForGroup", String.class).setParameter("groupIds", groupIds).getResultStream();
     }
 
     private Set<String> getLeafGroupsIds(GroupModel group) {
