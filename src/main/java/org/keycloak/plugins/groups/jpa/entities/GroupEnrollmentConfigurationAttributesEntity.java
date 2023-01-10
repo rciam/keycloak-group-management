@@ -9,12 +9,17 @@ import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import org.keycloak.plugins.groups.enums.GroupEnrollmentAttributeEnum;
 
 @Entity
 @Table(name="GROUP_ENROLLMENT_CONFIGURATION_ATTRIBUTES")
+@NamedQueries({
+       @NamedQuery(name="deleteEnrollmentConfigurationAttrByGroup", query="delete from GroupEnrollmentConfigurationAttributesEntity g where g.groupEnrollmentConfiguration.id in (select conf.id from GroupEnrollmentConfigurationEntity conf where conf.group.id = :groupId)")
+})
 public class GroupEnrollmentConfigurationAttributesEntity {
 
     @Id

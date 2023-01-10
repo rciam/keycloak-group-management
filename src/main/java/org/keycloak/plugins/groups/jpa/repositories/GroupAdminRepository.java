@@ -85,5 +85,9 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
         return groupIds;
     }
 
+    public void deleteByGroup(String groupId){
+        em.createNamedQuery("deleteAdminByGroup").setParameter("groupId", groupId).executeUpdate();
+    }
+
 
 }

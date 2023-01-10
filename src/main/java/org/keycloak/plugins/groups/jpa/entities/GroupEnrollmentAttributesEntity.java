@@ -7,10 +7,15 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 @Entity
 @Table(name="GROUP_ENROLLMENT_ATTRIBUTES")
+@NamedQueries({
+        @NamedQuery(name="deleteEnrollmentAttrByGroup", query="delete from GroupEnrollmentAttributesEntity g where g.enrollment.id in (select e.id from GroupEnrollmentEntity e join GroupEnrollmentConfigurationEntity conf on e.groupEnrollmentConfiguration.id = conf.id where conf.group.id = :groupId)")
+})
 public class GroupEnrollmentAttributesEntity {
     @Id
     @Column(name="ID")
