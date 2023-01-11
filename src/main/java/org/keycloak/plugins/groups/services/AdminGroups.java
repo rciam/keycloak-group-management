@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
+import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
@@ -27,10 +28,13 @@ import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.jpa.GeneralJpaService;
 import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
+import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ServicesLogger;
@@ -52,18 +56,31 @@ public class AdminGroups {
     private final GroupModel group;
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final GroupAdminRepository groupAdminRepository;
+    private final GeneralJpaService generalJpaService;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
 
-    public AdminGroups(KeycloakSession session, AdminPermissionEvaluator realmAuth, GroupModel group,  RealmModel realm) {
+    public AdminGroups(KeycloakSession session, AdminPermissionEvaluator realmAuth, GroupModel group,  RealmModel realm, GeneralJpaService generalJpaService) {
         this.session = session;
         this.realm =  realm;
         this.realmAuth = realmAuth;
         this.group = group;
-        this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, session.getContext().getRealm());
-        this.groupAdminRepository =  new GroupAdminRepository(session, session.getContext().getRealm());
+        this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
+        this.groupAdminRepository =  new GroupAdminRepository(session, realm);
+        this.generalJpaService =  generalJpaService;
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
   }
+
+    @DELETE
+    public void deleteGroup() {
+        this.realmAuth.groups().requireManage(group);
+        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
+        adminEvent = adminEvent.realm(realm).resource(ResourceType.REALM).resource(ResourceType.GROUP);
+
+        generalJpaService.removeGroup(group);
+
+        adminEvent.operation(OperationType.DELETE).resourcePath(session.getContext().getUri()).success();
+    }
 
     @GET
     @Path("/configuration/{id}}")

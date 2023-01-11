@@ -109,4 +109,9 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         return entity;
     }
 
+    public void deleteByGroup(String groupId){
+        em.createNamedQuery("deleteEnrollmentConfigurationAttrByGroup").setParameter("groupId", groupId).executeUpdate();
+        em.createNamedQuery("deleteEnrollmentConfigurationByGroup").setParameter("groupId", groupId).executeUpdate();
+    }
+
 }

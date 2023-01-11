@@ -162,4 +162,12 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         userModel.joinGroup(group);
     }
 
+    public void deleteByGroup(String groupId){
+        em.createNamedQuery("deleteMembershipExtensionByGroup").setParameter("groupId", groupId).executeUpdate();
+    }
+
+    public void deleteByUser(String userId){
+        em.createNamedQuery("deleteMembershipExtensionByUser").setParameter("userId", userId).executeUpdate();
+    }
+
 }
