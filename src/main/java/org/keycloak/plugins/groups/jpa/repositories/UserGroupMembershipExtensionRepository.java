@@ -29,6 +29,7 @@ import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
@@ -36,9 +37,12 @@ import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionR
 public class UserGroupMembershipExtensionRepository extends GeneralRepository<UserGroupMembershipExtensionEntity> {
 
     private static final Logger logger = Logger.getLogger(UserGroupMembershipExtensionRepository.class);
+    public static final String eventId = "1";
+    private  GroupManagementEventRepository eventRepository;
 
     public UserGroupMembershipExtensionRepository(KeycloakSession session, RealmModel realm) {
         super(session, realm);
+        this.eventRepository = new GroupManagementEventRepository(session);
     }
 
     @Override
@@ -52,17 +56,31 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     }
 
     @Transactional
-    public void inactivateExpiredMemberships(KeycloakSession session){
-        Stream<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getExpiredMemberships").setParameter("status",MemberStatusEnum.ENABLED).setParameter("date",LocalDate.now()).getResultStream();
-        logger.info("inactivateExpiredMemberships action is executing ...");
-        results.forEach(entity -> {
-            entity.setStatus(MemberStatusEnum.DISABLED);
-            update(entity);
-            RealmModel realmModel = session.realms().getRealm(entity.getUser().getRealmId());
-            UserModel user = session.users().getUserById(realmModel, entity.getUser().getId());
-            GroupModel group = realmModel.getGroupById(entity.getGroup().getId());
-            user.leaveGroup(group);
-        });
+    public void inactivateExpiredMemberships(KeycloakSession session) {
+        GroupManagementEventEntity eventEntity = eventRepository.getEntity(eventId);
+        if (eventEntity == null || LocalDate.now().isAfter(eventEntity.getDate())) {
+            logger.info("group management daily action is executing ...");
+            Stream<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getExpiredMemberships").setParameter("status", MemberStatusEnum.ENABLED).setParameter("date", LocalDate.now()).getResultStream();
+            results.forEach(entity -> {
+                entity.setStatus(MemberStatusEnum.DISABLED);
+                update(entity);
+                RealmModel realmModel = session.realms().getRealm(entity.getUser().getRealmId());
+                UserModel user = session.users().getUserById(realmModel, entity.getUser().getId());
+                GroupModel group = realmModel.getGroupById(entity.getGroup().getId());
+                logger.info(user.getFirstName()+" "+user.getFirstName()+" is removing from being member of group "+group.getName());
+                user.leaveGroup(group);
+            });
+
+            if (eventEntity == null) {
+                eventEntity = new GroupManagementEventEntity();
+                eventEntity.setId(eventId);
+                eventEntity.setDate(LocalDate.now());
+                eventRepository.create(eventEntity);
+            } else {
+                eventEntity.setDate(LocalDate.now());
+                eventRepository.update(eventEntity);
+            }
+        }
     }
 
     public UserGroupMembershipExtensionRepresentationPager searchByGroup(String groupId, String search, MemberStatusEnum status, Integer first, Integer max, RealmModel realm) {

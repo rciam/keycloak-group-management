@@ -25,12 +25,12 @@ public class GroupManagementEvent {
         //work only for quarkus
         QuarkusKeycloakSessionFactory instance = QuarkusKeycloakSessionFactory.getInstance();
         instance.init();
-        KeycloakSession session= instance.create();
+        KeycloakSession session = instance.create();
         TimerProvider timer = session.getProvider(TimerProvider.class);
         //schedule task once a day at 02.00
         long interval = 24 * 3600 * 1000;
         long delay = (LocalDate.now().plusDays(1).atTime(2, 0).atZone(ZoneId.systemDefault()).toEpochSecond() - LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond()) * 1000;
-        timer.schedule(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new GroupManagementTasks(), interval),delay, interval, "GroupManagementActions");
-        //execute also task once now if not executed???
+        timer.schedule(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new GroupManagementTasks(), interval), delay, interval, "GroupManagementActions");
+        timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new GroupManagementTasks(), interval), 3 * 60 * 1000, "GroupManagementOnceActions");
     }
 }

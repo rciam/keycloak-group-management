@@ -421,5 +421,14 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="event_date">
+        <createTable tableName="GROUP_MANAGEMENT_EVENT">
+            <column name="ID" type="VARCHAR(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="DATE" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
 
 </databaseChangeLog>
