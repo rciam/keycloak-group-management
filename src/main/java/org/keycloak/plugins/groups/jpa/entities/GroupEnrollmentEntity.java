@@ -27,7 +27,9 @@ import java.util.List;
 @NamedQueries({
         @NamedQuery(name="getAllUserGroupEnrollments", query="from GroupEnrollmentEntity ge where ge.user.id = :userId"),
         @NamedQuery(name="countOngoingByUserAndGroup", query="select count(f) from GroupEnrollmentEntity f, GroupEnrollmentConfigurationEntity c  where f.groupEnrollmentConfiguration.id = c.id and f.user.id = :userId and c.group.id = :groupId and f.status in (:status)"),
-        @NamedQuery(name="deleteEnrollmentByGroup", query="delete from GroupEnrollmentEntity g where g.groupEnrollmentConfiguration.id in (select conf.id from GroupEnrollmentConfigurationEntity conf where conf.group.id = :groupId)")
+        @NamedQuery(name="deleteEnrollmentByGroup", query="delete from GroupEnrollmentEntity g where g.groupEnrollmentConfiguration.id in (select conf.id from GroupEnrollmentConfigurationEntity conf where conf.group.id = :groupId)"),
+        @NamedQuery(name="deleteEnrollmentByUser", query="delete from GroupEnrollmentEntity g where g.user.id = :userId"),
+        @NamedQuery(name="updateEnrollmentByAdminUser", query="update GroupEnrollmentEntity g set g.checkAdmin = null where g.checkAdmin.id = :userId")
 })
 public class GroupEnrollmentEntity {
 

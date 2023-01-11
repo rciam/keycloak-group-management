@@ -59,14 +59,14 @@ public class AdminGroups {
     private final GeneralJpaService generalJpaService;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
 
-    public AdminGroups(KeycloakSession session, AdminPermissionEvaluator realmAuth, GroupModel group,  RealmModel realm) {
+    public AdminGroups(KeycloakSession session, AdminPermissionEvaluator realmAuth, GroupModel group,  RealmModel realm, GeneralJpaService generalJpaService) {
         this.session = session;
         this.realm =  realm;
         this.realmAuth = realmAuth;
         this.group = group;
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
         this.groupAdminRepository =  new GroupAdminRepository(session, realm);
-        this.generalJpaService =  new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository, groupAdminRepository);
+        this.generalJpaService =  generalJpaService;
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
   }

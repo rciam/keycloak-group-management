@@ -45,6 +45,7 @@ Path | Method | Description                                                     
 Path | Method | Description                                  | Classes |
 ------------ |--|----------------------------------------------|---------| 
 /admin/group | POST | create top level group                       | ResourcesProvider
+/admin/user/{id} | DELETE | delete user          | ResourcesProvider
 /admin/group/{groupId} | DELETE | delete group          | AdminGroups
 /admin/group/{groupId}/configuration/{id} | GET | get  group enrollment configuration          | AdminGroups
 /admin/group/{groupId}/configuration | POST | create/update group enrollment configuration | AdminGroups

@@ -20,22 +20,27 @@ package org.keycloak.plugins.groups.providers;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
+import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
+import org.keycloak.plugins.groups.jpa.GeneralJpaService;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.services.AdminGroups;
 import org.keycloak.plugins.groups.services.AccountService;
 import org.keycloak.plugins.groups.ui.UserInterfaceService;
 import org.keycloak.representations.idm.GroupRepresentation;
+import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.GroupsResource;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -54,12 +59,14 @@ public class ResourcesProvider implements RealmResourceProvider {
     private KeycloakSession session;
     private final RealmModel realm;
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
+    private final GeneralJpaService generalJpaService;
 
     public ResourcesProvider(KeycloakSession session) {
         this.session = session;
         this.realm = session.getContext().getRealm();
         this.clientConnection = session.getContext().getConnection();
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, session.getContext().getRealm());
+        this.generalJpaService =  new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
     }
 
     @Override
@@ -87,7 +94,7 @@ public class ResourcesProvider implements RealmResourceProvider {
         AuthenticationHelper authHelper = new AuthenticationHelper(session);
         AdminPermissionEvaluator realmAuth = authHelper.authenticateRealmAdminRequest();
         realmAuth.groups().requireView(group);
-        AdminGroups service = new AdminGroups(session, realmAuth, group, realm);
+        AdminGroups service = new AdminGroups(session, realmAuth, group, realm, generalJpaService);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
@@ -115,6 +122,28 @@ public class ResourcesProvider implements RealmResourceProvider {
         logger.info("group configuration exists ==== "+rep.getId());
 
         return Response.noContent().build();
+    }
+
+    @DELETE
+    @Path("/admin/user/{id}")
+    public Response deleteUser(@PathParam("id") String id) {
+        AuthenticationHelper authHelper = new AuthenticationHelper(session);
+        AdminPermissionEvaluator realmAuth = authHelper.authenticateRealmAdminRequest();
+        UserModel user = session.users().getUserById(realm, id);
+        if (user == null) {
+            throw new NotFoundException("Could not find user by id");
+        }
+        realmAuth.users().requireManage(user);
+
+        boolean removed = generalJpaService.removeUser(user);
+
+        if (removed) {
+            AdminEventBuilder adminEvent = new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
+            adminEvent.operation(OperationType.DELETE).resourcePath(session.getContext().getUri()).success();
+            return Response.noContent().build();
+        } else {
+            return ErrorResponse.error("User couldn't be deleted", Response.Status.BAD_REQUEST);
+        }
     }
 
 

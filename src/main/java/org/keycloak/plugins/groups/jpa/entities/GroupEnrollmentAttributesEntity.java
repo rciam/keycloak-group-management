@@ -14,7 +14,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name="GROUP_ENROLLMENT_ATTRIBUTES")
 @NamedQueries({
-        @NamedQuery(name="deleteEnrollmentAttrByGroup", query="delete from GroupEnrollmentAttributesEntity g where g.enrollment.id in (select e.id from GroupEnrollmentEntity e join GroupEnrollmentConfigurationEntity conf on e.groupEnrollmentConfiguration.id = conf.id where conf.group.id = :groupId)")
+        @NamedQuery(name="deleteEnrollmentAttrByGroup", query="delete from GroupEnrollmentAttributesEntity g where g.enrollment.id in (select e.id from GroupEnrollmentEntity e join GroupEnrollmentConfigurationEntity conf on e.groupEnrollmentConfiguration.id = conf.id where conf.group.id = :groupId)"),
+        @NamedQuery(name="deleteEnrollmentAttrByUser", query="delete from GroupEnrollmentAttributesEntity g where g.enrollment.id in (select e.id from GroupEnrollmentEntity e where e.user.id = :userId)")
 })
 public class GroupEnrollmentAttributesEntity {
     @Id

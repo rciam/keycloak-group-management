@@ -126,5 +126,11 @@ public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollment
         em.createNamedQuery("deleteEnrollmentByGroup").setParameter("groupId", groupId).executeUpdate();
     }
 
+    public void deleteByUser(String userId){
+        em.createNamedQuery("deleteEnrollmentAttrByUser").setParameter("userId", userId).executeUpdate();
+        em.createNamedQuery("deleteEnrollmentByUser").setParameter("userId", userId).executeUpdate();
+        em.createNamedQuery("updateEnrollmentByAdminUser").setParameter("userId", userId).executeUpdate();
+    }
+
 
 }
