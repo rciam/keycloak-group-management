@@ -27,19 +27,19 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send(title, "add-remove-group-admin.ftl", attributes);
     }
 
-    public void sendSuspensionEmail(String groupName,String justification) throws EmailException, EmailException {
+    public void sendSuspensionEmail(String groupName,String justification) throws EmailException {
         attributes.put("justification", justification);
         attributes.put("groupname", groupName);
         send("suspendMemberSubject", "suspend-member.ftl", attributes);
     }
 
-    public void sendActivationEmail(String groupName,String justification) throws EmailException, EmailException {
+    public void sendActivationEmail(String groupName,String justification) throws EmailException {
         attributes.put("justification", justification);
         attributes.put("groupname", groupName);
         send("activateMemberSubject", "activate-member.ftl", attributes);
     }
 
-    public void sendInviteGroupAdminEmail(String groupadmin, String groupname, String url) throws EmailException, EmailException {
+    public void sendInviteGroupAdminEmail(String groupadmin, String groupname, String url) throws EmailException {
         attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
         attributes.put("groupadmin", groupadmin);
         attributes.put("groupname", groupname);
@@ -47,7 +47,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("inviteGroupAdminSubject", "invite-group-admin.ftl", attributes);
     }
 
-    public void sendAcceptRejectEnrollmentEmail(boolean isAccepted, String groupname, String justification) throws EmailException, EmailException {
+    public void sendAcceptRejectEnrollmentEmail(boolean isAccepted, String groupname, String justification) throws EmailException{
         attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
         attributes.put("groupname", groupname);
         attributes.put("action", isAccepted ? "accepted" : "rejected");
@@ -55,7 +55,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send(isAccepted ? "acceptEnrollmentSubject" : "rejectEnrollmentSubject", "accept-reject-enrollment.ftl", attributes);
     }
 
-    public void sendGroupAdminEnrollmentCreationEmail(UserModel userRequest, String groupname, String reason, String enrollmentId) throws EmailException, EmailException {
+    public void sendGroupAdminEnrollmentCreationEmail(UserModel userRequest, String groupname, String reason, String enrollmentId) throws EmailException {
         attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
         attributes.put("user", userRequest.getFirstName()+" "+userRequest.getLastName());
         attributes.put("groupname", groupname);
@@ -64,5 +64,21 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         URI baseUri = uriInfo.getBaseUri();
         attributes.put("url",baseUri.toString() + enrollmentUrl.replace("{realmName}",realm.getName()).replace("{id}",enrollmentId));
         send( "groupadminEnrollmentCreationSubject", "groupadmin-enrollment-creation.ftl", attributes);
+    }
+
+    public void sendExpiredGroupMemberEmailToAdmin(UserModel userRequest, String groupname) throws EmailException {
+        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
+        attributes.put("user", userRequest.getFirstName()+" "+userRequest.getLastName());
+        attributes.put("groupname", groupname);
+        send( "adminGroupUserRemovalSubject", "expired-group-member.ftl", attributes);
+    }
+
+    public void sendExpiredGroupMembershipNotification(String groupname, String date, String groupId) throws EmailException {
+        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
+        attributes.put("groupname", groupname);
+        KeycloakUriInfo uriInfo = session.getContext().getUri();
+        URI baseUri = uriInfo.getBaseUri();
+        attributes.put("url",baseUri.toString() + enrollmentUrl.replace("{realmName}",realm.getName()).replace("{id}",groupId));
+        send( "groupMembershipExpirationNotificationSubject", "group-membership-expiration-notification.ftl", attributes);
     }
 }

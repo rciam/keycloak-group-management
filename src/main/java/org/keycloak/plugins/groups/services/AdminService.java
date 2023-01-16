@@ -1,9 +1,15 @@
 package org.keycloak.plugins.groups.services;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -20,6 +26,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
+import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.GeneralJpaService;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.providers.ResourcesProvider;
@@ -31,7 +38,8 @@ import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluato
 
 public class AdminService {
 
-    private static final Logger logger = Logger.getLogger(ResourcesProvider.class);
+    private static final Logger logger = Logger.getLogger(AdminService.class);
+    private static final List<String> realmAttributesNames = Stream.of(Utils.expirationNotificationPeriod).collect(Collectors.toList());
 
     @Context
     protected ClientConnection clientConnection;
@@ -49,6 +57,18 @@ public class AdminService {
         this.realmAuth =  realmAuth;
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
         this.generalJpaService =  new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
+    }
+
+    @PUT
+    @Path("/configuration")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response configureGroupManagement(Map<String, String> attributes) {
+        realmAuth.realm().requireManageRealm();
+        for (Map.Entry<String, String> attr : attributes.entrySet()) {
+            if (realmAttributesNames.contains(attr.getKey()))
+                realm.setAttribute(attr.getKey(), attr.getValue());
+        }
+        return Response.noContent().build();
     }
 
     @Path("/group/{groupId}")

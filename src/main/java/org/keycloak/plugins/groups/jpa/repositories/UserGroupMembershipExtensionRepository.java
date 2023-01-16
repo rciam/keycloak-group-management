@@ -14,6 +14,7 @@ import javax.persistence.Query;
 import javax.transaction.Transactional;
 
 import org.jboss.logging.Logger;
+import org.keycloak.email.EmailException;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -22,6 +23,7 @@ import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.GroupManagementEvent;
+import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.GroupEnrollmentAttributeEnum;
 import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
@@ -33,16 +35,19 @@ import org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
+import org.keycloak.theme.FreeMarkerUtil;
 
 public class UserGroupMembershipExtensionRepository extends GeneralRepository<UserGroupMembershipExtensionEntity> {
 
     private static final Logger logger = Logger.getLogger(UserGroupMembershipExtensionRepository.class);
     public static final String eventId = "1";
     private  GroupManagementEventRepository eventRepository;
+    private  GroupAdminRepository groupAdminRepository;
 
     public UserGroupMembershipExtensionRepository(KeycloakSession session, RealmModel realm) {
         super(session, realm);
         this.eventRepository = new GroupManagementEventRepository(session);
+        this.groupAdminRepository = new GroupAdminRepository(session, realm);
     }
 
     @Override
@@ -58,6 +63,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     @Transactional
     public void inactivateExpiredMemberships(KeycloakSession session) {
         GroupManagementEventEntity eventEntity = eventRepository.getEntity(eventId);
+        CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         if (eventEntity == null || LocalDate.now().isAfter(eventEntity.getDate())) {
             logger.info("group management daily action is executing ...");
             Stream<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getExpiredMemberships").setParameter("status", MemberStatusEnum.ENABLED).setParameter("date", LocalDate.now()).getResultStream();
@@ -69,18 +75,52 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 GroupModel group = realmModel.getGroupById(entity.getGroup().getId());
                 logger.info(user.getFirstName()+" "+user.getFirstName()+" is removing from being member of group "+group.getName());
                 user.leaveGroup(group);
+                groupAdminRepository.getAllAdminGroupUsers(group.getId()).map(id -> session.users().getUserById(realmModel, id)).forEach(admin -> {
+                    if ( admin != null) {
+                        customFreeMarkerEmailTemplateProvider.setRealm(realmModel);
+                        customFreeMarkerEmailTemplateProvider.setUser(admin);
+                        try {
+                            customFreeMarkerEmailTemplateProvider.sendExpiredGroupMemberEmailToAdmin(user, group.getName());
+                        } catch (EmailException e) {
+                           logger.info("problem sending email to group admin "+ admin.getFirstName()+ " "+ admin.getLastName());
+                        }
+                    }
+                });
             });
 
             if (eventEntity == null) {
+                //first time, execute also weekly tasks
+                weeklyTaskExecution();
                 eventEntity = new GroupManagementEventEntity();
                 eventEntity.setId(eventId);
                 eventEntity.setDate(LocalDate.now());
+                eventEntity.setDateForWeekTasks(LocalDate.now());
                 eventRepository.create(eventEntity);
             } else {
                 eventEntity.setDate(LocalDate.now());
                 eventRepository.update(eventEntity);
             }
         }
+        if (LocalDate.now().isAfter(eventEntity.getDateForWeekTasks().plusDays(6))) {
+            //weekly tasks execution
+            weeklyTaskExecution();
+            eventEntity.setDateForWeekTasks(LocalDate.now());
+            eventRepository.update(eventEntity);
+        }
+    }
+
+    private void weeklyTaskExecution(CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, KeycloakSession session){
+        Stream<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getSoonExpiredMemberships").setParameter("status", MemberStatusEnum.ENABLED).setParameter("date", LocalDate.now().plusDays(6)).getResultStream();
+        results.forEach( entity -> {
+            UserModel user = session.users().getUserById(session.realms().getRealm(entity.getUser().getRealmId()), entity.getUser().getId());
+            customFreeMarkerEmailTemplateProvider.setUser(user);
+            LocalDate date = entity.getMembershipExpiresAt() != null && ( entity.getAupExpiresAt() == null || entity.getMembershipExpiresAt().isBefore(entity.getAupExpiresAt()) ) ? entity.getMembershipExpiresAt() : entity.getAupExpiresAt();
+            try {
+                customFreeMarkerEmailTemplateProvider.sendExpiredGroupMembershipNotification(entity.getGroup().getName(), date.format(Utils.formatter),entity.getGroup().getId());
+            } catch (EmailException e) {
+                logger.info("problem sending email to user  "+ user.getFirstName()+ " "+ user.getLastName());
+            }
+        });
     }
 
     public UserGroupMembershipExtensionRepresentationPager searchByGroup(String groupId, String search, MemberStatusEnum status, Integer first, Integer max, RealmModel realm) {

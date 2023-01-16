@@ -58,6 +58,9 @@ public class GroupEnrollmentConfigurationEntity {
     @Column(name="MEMBERSHIP_EXPIRATION_SEC")
     protected Long membershipExpirationSec;
 
+    @Column(name="EXPIRATION_NOTIFICATION_PERIOD")
+    protected Integer expirationNotificationPeriod;
+
     @Column(name="ENROLLMENT_INTRODUCTION")
     protected String enrollmentIntroduction;
 
@@ -130,6 +133,14 @@ public class GroupEnrollmentConfigurationEntity {
 
     public void setMembershipExpirationSec(Long membershipExpirationSec) {
         this.membershipExpirationSec = membershipExpirationSec;
+    }
+
+    public Integer getExpirationNotificationPeriod() {
+        return expirationNotificationPeriod;
+    }
+
+    public void setExpirationNotificationPeriod(Integer expirationNotificationPeriod) {
+        this.expirationNotificationPeriod = expirationNotificationPeriod;
     }
 
     public String getId() {

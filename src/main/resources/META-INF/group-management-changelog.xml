@@ -430,5 +430,13 @@
         </createTable>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="expiration-notifications">
+        <addColumn tableName="GROUP_ENROLLMENT_CONFIGURATION">
+            <column name="EXPIRATION_NOTIFICATION_PERIOD" type="int"/>
+        </addColumn>
+        <addColumn tableName="GROUP_MANAGEMENT_EVENT">
+            <column name="DATE_FOR_WEEK_TASKS" type="timestamp"/>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

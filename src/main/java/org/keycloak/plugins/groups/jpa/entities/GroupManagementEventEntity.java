@@ -23,6 +23,9 @@ public class GroupManagementEventEntity {
     @Column(name="DATE")
     protected LocalDate date;
 
+    @Column(name="DATE_FOR_WEEK_TASKS")
+    protected LocalDate dateForWeekTasks;
+
     public String getId() {
         return id;
     }
@@ -37,5 +40,13 @@ public class GroupManagementEventEntity {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    public LocalDate getDateForWeekTasks() {
+        return dateForWeekTasks;
+    }
+
+    public void setDateForWeekTasks(LocalDate dateForWeekTasks) {
+        this.dateForWeekTasks = dateForWeekTasks;
     }
 }

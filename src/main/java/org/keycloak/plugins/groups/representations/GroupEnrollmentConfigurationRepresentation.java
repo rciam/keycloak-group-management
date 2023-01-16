@@ -12,6 +12,7 @@ public class GroupEnrollmentConfigurationRepresentation {
     private Boolean requireApproval;
     private Long aupExpirySec;
     private Long membershipExpirationSec;
+    private Integer expirationNotificationPeriod;
     private GroupAupRepresentation aup;
     private String enrollmentIntroduction;
     private String invitationIntroduction;
@@ -89,6 +90,14 @@ public class GroupEnrollmentConfigurationRepresentation {
 
     public void setMembershipExpirationSec(Long membershipExpirationSec) {
         this.membershipExpirationSec = membershipExpirationSec;
+    }
+
+    public Integer getExpirationNotificationPeriod() {
+        return expirationNotificationPeriod;
+    }
+
+    public void setExpirationNotificationPeriod(Integer expirationNotificationPeriod) {
+        this.expirationNotificationPeriod = expirationNotificationPeriod;
     }
 
     public GroupAupRepresentation getAup() {
