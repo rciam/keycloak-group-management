@@ -15,6 +15,7 @@
         <class>org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity</class>
+        <class>org.keycloak.plugins.groups.jpa.entities.GroupInvitationEntity</class>
 
 
         <!-- KEYCLOAK's CORE MODEL ENTITIES-->

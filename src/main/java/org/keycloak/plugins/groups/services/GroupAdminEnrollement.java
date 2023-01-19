@@ -76,7 +76,7 @@ public class GroupAdminEnrollement {
         if (!EnrollmentStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
             throw new BadRequestException(statusErrorMessage);
 
-        UserGroupMembershipExtensionEntity member = userGroupMembershipExtensionRepository.getByUserAndGroup(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getId(), enrollmentEntity.getUser().getId());
+        UserGroupMembershipExtensionEntity member = userGroupMembershipExtensionRepository.getActiveByUserAndGroup(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getId(), enrollmentEntity.getUser().getId());
         if ( member != null ) {
             enrollmentEntity.setStatus(EnrollmentStatusEnum.REJECTED);
             groupEnrollmentRepository.update(enrollmentEntity);
