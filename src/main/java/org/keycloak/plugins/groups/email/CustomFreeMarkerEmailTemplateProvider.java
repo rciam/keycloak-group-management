@@ -13,6 +13,8 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
 
     //must be changed to a ui ( account console url)
     private static final String enrollmentUrl = "/realms/{realmName}/agm/account/group-admin/enroll-request/{id}";
+    private static final String enrollmentStartUrl = "/realms/{realmName}/agm/account/user/group/{id}";
+    private static final String finishGroupInvitation = "/realms/{realmName}/agm/account/user/groups/invitation/{id}/accept";
 
     public CustomFreeMarkerEmailTemplateProvider(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
@@ -80,5 +82,33 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         URI baseUri = uriInfo.getBaseUri();
         attributes.put("url",baseUri.toString() + enrollmentUrl.replace("{realmName}",realm.getName()).replace("{id}",groupId));
         send( "groupMembershipExpirationNotificationSubject", "group-membership-expiration-notification.ftl", attributes);
+    }
+
+    public void sendGroupInvitationEmail(UserModel groupadmin, String groupname, boolean withoutAcceptance, String id) throws EmailException, EmailException {
+        StringBuilder sb = new StringBuilder();
+        if (user.getFirstName() != null){
+            sb.append(user.getFirstName()).append(" ");
+        }
+        if (user.getLastName() != null){
+            sb.append(user.getLastName());
+        } else  if (user.getFirstName() == null){
+            sb.append("Sir/Madam");
+        }
+
+        attributes.put("fullname", sb.toString());
+        attributes.put("groupadmin", groupadmin.getFirstName()+" "+groupadmin.getLastName());
+        attributes.put("groupname", groupname);
+        KeycloakUriInfo uriInfo = session.getContext().getUri();
+        URI baseUri = uriInfo.getBaseUri();
+        attributes.put("url",baseUri.toString() + (withoutAcceptance ? finishGroupInvitation:enrollmentStartUrl).replace("{realmName}",realm.getName()).replace("{id}",id));
+        send( "groupInvitationSubject", "user-group-invitation.ftl", attributes);
+    }
+
+    public void sendAcceptInvitationEmail(UserModel userModel, String groupname) throws EmailException, EmailException {
+        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
+        attributes.put("userfullname", userModel.getFirstName()+" "+userModel.getLastName());
+        attributes.put("email", userModel.getEmail());
+        attributes.put("groupname", groupname);
+        send("groupAcceptInvitationSubject", "accept-invitation.ftl", attributes);
     }
 }

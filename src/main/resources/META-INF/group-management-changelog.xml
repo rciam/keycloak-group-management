@@ -430,6 +430,34 @@
         </createTable>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="group_invitation">
+        <createTable tableName="GROUP_INVITATION">
+            <column name="ID" type="VARCHAR(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="CREATION_DATE" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CHECK_ADMIN_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="GROUP_ENROLLMENT_CONFIGURATION_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="REALM_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                constraintName="group_invitation_fk"
+                baseTableName="GROUP_INVITATION"
+                baseColumnNames="GROUP_ENROLLMENT_CONFIGURATION_ID"
+                referencedTableName="GROUP_ENROLLMENT_CONFIGURATION"
+                referencedColumnNames="id"
+        />
+    </changeSet>
+
     <changeSet author="cgeorgilakis@grnet.gr" id="expiration-notifications">
         <addColumn tableName="GROUP_ENROLLMENT_CONFIGURATION">
             <column name="EXPIRATION_NOTIFICATION_PERIOD" type="int"/>
@@ -438,5 +466,7 @@
             <column name="DATE_FOR_WEEK_TASKS" type="timestamp"/>
         </addColumn>
     </changeSet>
+
+
 
 </databaseChangeLog>

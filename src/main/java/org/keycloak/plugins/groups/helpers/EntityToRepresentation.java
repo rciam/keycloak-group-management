@@ -10,6 +10,7 @@ import org.keycloak.plugins.groups.representations.GroupEnrollmentAttributesRepr
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
+import org.keycloak.plugins.groups.representations.GroupInvitationRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.keycloak.representations.idm.FederatedIdentityRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
@@ -130,7 +131,13 @@ public class EntityToRepresentation {
         return rep;
     }
 
-
+    public static GroupInvitationRepresentation toRepresentation(GroupInvitationEntity entity) {
+        GroupInvitationRepresentation rep = new GroupInvitationRepresentation();
+        rep.setId(entity.getId());
+        rep.setCreationDate(entity.getCreationDate());
+        rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration(), true));
+        return rep;
+    }
 
 
 }

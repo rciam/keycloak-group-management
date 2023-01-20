@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,20 +23,24 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
-import org.keycloak.plugins.groups.GroupManagementEvent;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.GroupEnrollmentAttributeEnum;
 import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupInvitationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
+import org.keycloak.plugins.groups.scheduled.DeleteExpiredInvitationTask;
 import org.keycloak.theme.FreeMarkerUtil;
+import org.keycloak.timer.TimerProvider;
+import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 
 public class UserGroupMembershipExtensionRepository extends GeneralRepository<UserGroupMembershipExtensionEntity> {
 
@@ -90,7 +95,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
             if (eventEntity == null) {
                 //first time, execute also weekly tasks
-                weeklyTaskExecution();
+                weeklyTaskExecution(customFreeMarkerEmailTemplateProvider,session);
                 eventEntity = new GroupManagementEventEntity();
                 eventEntity.setId(eventId);
                 eventEntity.setDate(LocalDate.now());
@@ -103,10 +108,22 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         if (LocalDate.now().isAfter(eventEntity.getDateForWeekTasks().plusDays(6))) {
             //weekly tasks execution
-            weeklyTaskExecution();
+            weeklyTaskExecution(customFreeMarkerEmailTemplateProvider,session);
             eventEntity.setDateForWeekTasks(LocalDate.now());
             eventRepository.update(eventEntity);
         }
+
+        session.realms().getRealmsStream().forEach(realm -> {
+            GroupInvitationRepository groupInvitationRepository = new GroupInvitationRepository(session, realm);
+            groupInvitationRepository.getAllByRealm().forEach(entity -> {
+                TimerProvider timer = session.getProvider(TimerProvider.class);
+                long invitationExpirationHour = realm.getAttribute(Utils.urlExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.urlExpirationPeriod)) : 72;
+                long interval = entity.getCreationDate().atZone(ZoneId.systemDefault()).toEpochSecond() + (invitationExpirationHour * 3600 * 1000) -LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
+                if (interval <=  60 * 1000)
+                    interval = 60 * 1000;
+                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new DeleteExpiredInvitationTask(entity.getId(), realm.getId()), interval), interval, "DeleteExpiredInvitation_"+entity.getId());
+            });
+        });
     }
 
     private void weeklyTaskExecution(CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, KeycloakSession session){
@@ -188,7 +205,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         editorUser.setId(editor);
         entity.setChangedBy(editorUser);
         entity.setJustification(rep.getJustification());
-        entity.setStatus(rep.getStatus());
+        entity.setStatus(MemberStatusEnum.ENABLED);
         create(entity);
         userModel.joinGroup(groupModel);
     }
@@ -218,6 +235,34 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         GroupModel group = realm.getGroupById(configuration.getGroup().getId());
         UserModel userModel = session.users().getUserById(realm,enrollmentEntity.getUser().getId());
         userModel.joinGroup(group);
+    }
+
+    @Transactional
+    public void create( GroupInvitationRepository groupInvitationRepository, GroupInvitationEntity invitationEntity, UserModel userModel){
+        UserGroupMembershipExtensionEntity entity = new UserGroupMembershipExtensionEntity();
+        entity.setId(KeycloakModelUtils.generateId());
+        GroupEnrollmentConfigurationEntity configuration = invitationEntity.getGroupEnrollmentConfiguration();
+        if (configuration.getAupExpirySec() != null)
+            entity.setAupExpiresAt(LocalDate.ofEpochDay(Duration.ofMillis(Instant.now().toEpochMilli() + configuration.getAupExpirySec()).toDays()));
+        String validThroughValue = configuration.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_THROUGH.equals(at.getAttribute())).findAny().orElse(new GroupEnrollmentConfigurationAttributesEntity()).getDefaultValue();
+        if (validThroughValue != null)
+            entity.setMembershipExpiresAt(LocalDate.parse(validThroughValue, Utils.formatter));
+        String validFromValue = configuration.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_FROM.equals(at.getAttribute())).findAny().orElse(new GroupEnrollmentConfigurationAttributesEntity()).getDefaultValue();
+        if (validFromValue != null)
+            entity.setValidFrom(LocalDate.parse(validFromValue, Utils.formatter));
+        entity.setGroup(configuration.getGroup());
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(userModel.getId());
+        entity.setUser(userEntity);
+        UserEntity editorUser = new UserEntity();
+        editorUser.setId(userModel.getId());
+        entity.setChangedBy(editorUser);
+        entity.setStatus(MemberStatusEnum.ENABLED);
+        create(entity);
+
+        GroupModel group = realm.getGroupById(configuration.getGroup().getId());
+        userModel.joinGroup(group);
+        groupInvitationRepository.deleteEntity(invitationEntity.getId());
     }
 
     public void deleteByGroup(String groupId){

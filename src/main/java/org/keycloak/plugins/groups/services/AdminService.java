@@ -39,7 +39,7 @@ import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluato
 public class AdminService {
 
     private static final Logger logger = Logger.getLogger(AdminService.class);
-    private static final List<String> realmAttributesNames = Stream.of(Utils.expirationNotificationPeriod).collect(Collectors.toList());
+    private static final List<String> realmAttributesNames = Stream.of(Utils.expirationNotificationPeriod, Utils.urlExpirationPeriod).collect(Collectors.toList());
 
     @Context
     protected ClientConnection clientConnection;

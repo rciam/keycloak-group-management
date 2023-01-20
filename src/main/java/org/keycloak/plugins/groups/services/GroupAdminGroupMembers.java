@@ -5,6 +5,7 @@ import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
+import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -14,14 +15,24 @@ import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.MemberStatusEnum;
+import org.keycloak.plugins.groups.helpers.Utils;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupInvitationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
+import org.keycloak.plugins.groups.representations.GroupInvitationInitialRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
+import org.keycloak.plugins.groups.scheduled.DeleteExpiredInvitationTask;
+import org.keycloak.plugins.groups.scheduled.GroupManagementTasks;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.ServicesLogger;
+import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
+import org.keycloak.timer.TimerProvider;
 
 public class GroupAdminGroupMembers {
 
@@ -31,6 +42,8 @@ public class GroupAdminGroupMembers {
     private GroupModel group;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
+    private final GroupInvitationRepository groupInvitationRepository;
+    private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
 
     public GroupAdminGroupMembers(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider) {
         this.session = session;
@@ -39,32 +52,43 @@ public class GroupAdminGroupMembers {
         this.group = group;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
+        this.groupInvitationRepository = new GroupInvitationRepository(session, realm);
+        this.groupEnrollmentConfigurationRepository = new GroupEnrollmentConfigurationRepository(session, realm);
     }
 
-
-    @Deprecated
+    // group invitation and process for accept it
     @POST
+    @Path("/invitation")
     @Produces("application/json")
     @Consumes("application/json")
-    public Response addGroupMember(UserGroupMembershipExtensionRepresentation rep) {
-        UserGroupMembershipExtensionEntity member = userGroupMembershipExtensionRepository.getByUserAndGroup(group.getId(), rep.getUser().getId());
-        if ( member != null ) {
-            return ErrorResponse.error("This user is already member of this group!", Response.Status.BAD_REQUEST);
+    public Response inviteUser(GroupInvitationInitialRepresentation groupInvitationInitialRep) {
+
+        if (groupInvitationInitialRep.getEmail() == null || (groupInvitationInitialRep.isWithoutAcceptance() && groupInvitationInitialRep.getGroupEnrollmentConfiguration() == null))
+            return ErrorResponse.error("Wrong data", Response.Status.BAD_REQUEST);
+
+        String emailId = group.getId();
+        if (groupInvitationInitialRep.isWithoutAcceptance()) {
+            GroupEnrollmentConfigurationEntity conf = groupEnrollmentConfigurationRepository.getEntity(groupInvitationInitialRep.getGroupEnrollmentConfiguration().getId());
+            if ( conf == null)
+                return ErrorResponse.error("Wrong group enrollment configuration", Response.Status.BAD_REQUEST);
+            emailId = groupInvitationRepository.create(groupInvitationInitialRep, voAdmin.getId(),conf);
+            //execute once delete invitation after "url-expiration-period" ( default 72 hours)
+            TimerProvider timer = session.getProvider(TimerProvider.class);
+            long invitationExpirationHour = realm.getAttribute(Utils.urlExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.urlExpirationPeriod)) : 72;
+            long interval = invitationExpirationHour * 3600 * 1000;
+            timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new DeleteExpiredInvitationTask(emailId, realm.getId()), interval), interval, "DeleteExpiredInvitation_"+emailId);
         }
-        UserModel user = session.users().getUserById(realm, rep.getUser().getId());
-        if ( user == null ) {
-            throw new NotFoundException("Could not find this User");
-        }
-        rep.setGroupId(group.getId());
-        userGroupMembershipExtensionRepository.create(rep, voAdmin.getId(), user, group );
+
         try {
+            UserAdapter user = Utils.getDummyUser(groupInvitationInitialRep.getEmail(), groupInvitationInitialRep.getFirstName(), groupInvitationInitialRep.getLastName());
             customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendGroupActionEmail(group.getName(), true);
+            customFreeMarkerEmailTemplateProvider.sendGroupInvitationEmail(voAdmin, group.getName(), groupInvitationInitialRep.isWithoutAcceptance(), emailId);
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         }
         return Response.noContent().build();
     }
+
 
     /**
      *
