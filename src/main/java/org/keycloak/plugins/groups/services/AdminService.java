@@ -5,13 +5,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -28,8 +31,9 @@ import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.GeneralJpaService;
+import org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
-import org.keycloak.plugins.groups.providers.ResourcesProvider;
+import org.keycloak.plugins.groups.jpa.repositories.GroupManagementEventRepository;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
@@ -39,7 +43,7 @@ import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluato
 public class AdminService {
 
     private static final Logger logger = Logger.getLogger(AdminService.class);
-    private static final List<String> realmAttributesNames = Stream.of(Utils.expirationNotificationPeriod, Utils.urlExpirationPeriod).collect(Collectors.toList());
+    private static final List<String> realmAttributesNames = Stream.of(Utils.expirationNotificationPeriod, Utils.invitationExpirationPeriod).collect(Collectors.toList());
 
     @Context
     protected ClientConnection clientConnection;
@@ -50,6 +54,8 @@ public class AdminService {
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final GeneralJpaService generalJpaService;
 
+    private final GroupManagementEventRepository groupManagementEventRepository;
+
     public AdminService(KeycloakSession session, RealmModel realm, ClientConnection clientConnection, AdminPermissionEvaluator realmAuth) {
         this.session = session;
         this.realm = realm;
@@ -57,7 +63,18 @@ public class AdminService {
         this.realmAuth =  realmAuth;
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
         this.generalJpaService =  new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
+        this.groupManagementEventRepository = new GroupManagementEventRepository (session, realm);
     }
+
+    @GET
+    @Path("/server-url")
+    public Response configureServerUrl(@NotNull @QueryParam("url") String url) {
+        GroupManagementEventEntity eventEntity = groupManagementEventRepository.getEntity(Utils.eventId);
+        eventEntity.setServerUrl(url);
+        groupManagementEventRepository.update(eventEntity);
+        return Response.noContent().build();
+    }
+
 
     @PUT
     @Path("/configuration")

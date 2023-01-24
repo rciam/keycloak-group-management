@@ -3,7 +3,6 @@ package org.keycloak.plugins.groups.services;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -20,15 +19,12 @@ import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
-import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupInvitationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupInvitationInitialRepresentation;
-import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
 import org.keycloak.plugins.groups.scheduled.DeleteExpiredInvitationTask;
-import org.keycloak.plugins.groups.scheduled.GroupManagementTasks;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
@@ -74,7 +70,7 @@ public class GroupAdminGroupMembers {
             emailId = groupInvitationRepository.create(groupInvitationInitialRep, voAdmin.getId(),conf);
             //execute once delete invitation after "url-expiration-period" ( default 72 hours)
             TimerProvider timer = session.getProvider(TimerProvider.class);
-            long invitationExpirationHour = realm.getAttribute(Utils.urlExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.urlExpirationPeriod)) : 72;
+            long invitationExpirationHour = realm.getAttribute(Utils.invitationExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.invitationExpirationPeriod)) : 72;
             long interval = invitationExpirationHour * 3600 * 1000;
             timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new DeleteExpiredInvitationTask(emailId, realm.getId()), interval), interval, "DeleteExpiredInvitation_"+emailId);
         }
@@ -104,7 +100,7 @@ public class GroupAdminGroupMembers {
                                                                           @QueryParam("max") @DefaultValue("10") Integer max,
                                                                           @QueryParam("search") String search,
                                                                           @QueryParam("status") MemberStatusEnum status){
-        return userGroupMembershipExtensionRepository.searchByGroup(group.getId(), search, status, first, max, realm);
+        return userGroupMembershipExtensionRepository.searchByGroup(group.getId(), search, status, first, max);
     }
 
 }

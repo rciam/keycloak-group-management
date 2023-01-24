@@ -26,6 +26,9 @@ public class GroupManagementEventEntity {
     @Column(name="DATE_FOR_WEEK_TASKS")
     protected LocalDate dateForWeekTasks;
 
+    @Column(name = "SERVER_URL")
+    protected String serverUrl;
+
     public String getId() {
         return id;
     }
@@ -48,5 +51,13 @@ public class GroupManagementEventEntity {
 
     public void setDateForWeekTasks(LocalDate dateForWeekTasks) {
         this.dateForWeekTasks = dateForWeekTasks;
+    }
+
+    public String getServerUrl() {
+        return serverUrl;
+    }
+
+    public void setServerUrl(String serverUrl) {
+        this.serverUrl = serverUrl;
     }
 }

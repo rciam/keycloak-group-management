@@ -6,6 +6,26 @@ A keycloak plugin to perform advanced group management
 
 <h1>THIS PLUGIN IS CURRENTLY UNDER CONSTRUCTION</h1>
 
+## General configuration options 
+
+For general group management configuarion options execute following web service (necessary during first time deployed):
+
+`curl --request PUT \
+--url {server_url}/realms/{realmName}/agm/admin/configuration \
+--header 'Accept: application/json' \
+--header 'Authorization: Bearer {admin_access_token}' \
+--header 'Content-Type: application/json' \
+--data '{
+"invitation-expiration-period":"72",
+"expiration-notification-period": "21"
+}'`
+
+Parameter explanation:
+- invitation-expiration-period = After how many hours the invitation will be expired.
+- expiration-notification-period = How many days before Group Membership expiration (or aup expiration) notification email will be sent to user. Can be overridden per Group.
+
+Moreover execute '{server_url}/realms/{realmName}/agm/admin/server-url?url={url}' in order to set server url in order to be used in usergroup expiration notification emails.
+
 ## REST API
 
 Main url : {server_url}/realms/{realm}/agm

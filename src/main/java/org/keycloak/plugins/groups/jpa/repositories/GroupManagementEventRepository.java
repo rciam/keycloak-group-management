@@ -10,6 +10,10 @@ public class GroupManagementEventRepository extends GeneralRepository<GroupManag
         super(session, null);
     }
 
+    public GroupManagementEventRepository(KeycloakSession session, RealmModel realm) {
+        super(session, realm);
+    }
+
     @Override
     protected Class<GroupManagementEventEntity> getTClass() {
         return GroupManagementEventEntity.class;

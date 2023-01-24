@@ -11,6 +11,7 @@ import io.quarkus.runtime.StartupEvent;
 import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.plugins.groups.scheduled.GroupManagementTasks;
+import org.keycloak.plugins.groups.scheduled.StartUpTasks;
 import org.keycloak.quarkus.runtime.integration.QuarkusKeycloakSessionFactory;
 import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 import org.keycloak.timer.TimerProvider;
@@ -30,7 +31,7 @@ public class GroupManagementEvent {
         //schedule task once a day at 02.00
         long interval = 24 * 3600 * 1000;
         long delay = (LocalDate.now().plusDays(1).atTime(2, 0).atZone(ZoneId.systemDefault()).toEpochSecond() - LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond()) * 1000;
+        timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new StartUpTasks(), interval), 3 * 60 * 1000, "GroupManagementOnceActions");
         timer.schedule(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new GroupManagementTasks(), interval), delay, interval, "GroupManagementActions");
-        timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new GroupManagementTasks(), interval), 3 * 60 * 1000, "GroupManagementOnceActions");
     }
 }

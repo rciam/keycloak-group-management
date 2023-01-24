@@ -75,12 +75,12 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send( "adminGroupUserRemovalSubject", "expired-group-member.ftl", attributes);
     }
 
-    public void sendExpiredGroupMembershipNotification(String groupname, String date, String groupId) throws EmailException {
+    public void sendExpiredGroupMembershipNotification(String groupname, String date, String groupId, String serverUrl) throws EmailException {
         attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
         attributes.put("groupname", groupname);
-        KeycloakUriInfo uriInfo = session.getContext().getUri();
-        URI baseUri = uriInfo.getBaseUri();
-        attributes.put("url",baseUri.toString() + enrollmentUrl.replace("{realmName}",realm.getName()).replace("{id}",groupId));
+        attributes.put("date", date);
+        attributes.put("url",(serverUrl != null ? serverUrl : "localhost:8080") + enrollmentUrl.replace("{realmName}",realm.getName()).replace("{id}",groupId));
+        session.getContext().setRealm(this.realm);
         send( "groupMembershipExpirationNotificationSubject", "group-membership-expiration-notification.ftl", attributes);
     }
 

@@ -9,8 +9,10 @@ import org.keycloak.representations.account.UserRepresentation;
 public class Utils {
 
     public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-public static final String expirationNotificationPeriod="expiration-notification-period";
-    public static final String urlExpirationPeriod="url-expiration-period";
+    public static final String expirationNotificationPeriod="expiration-notification-period";
+    public static final String invitationExpirationPeriod ="invitation-expiration-period";
+
+    public static final String eventId = "1";
 
     public static UserAdapter getDummyUser(UserRepresentation userRep) {
         UserEntity userEntity = new UserEntity();

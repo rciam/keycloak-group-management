@@ -467,6 +467,12 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="server-url">
+        <addColumn tableName="GROUP_MANAGEMENT_EVENT">
+            <column name="SERVER_URL" type="VARCHAR(36)"/>
+        </addColumn>
+    </changeSet>
+
 
 
 </databaseChangeLog>
