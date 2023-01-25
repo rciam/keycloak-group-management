@@ -58,8 +58,9 @@ public class AdminGroups {
     private final GroupAdminRepository groupAdminRepository;
     private final GeneralJpaService generalJpaService;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
+    private final AdminEventBuilder adminEvent;
 
-    public AdminGroups(KeycloakSession session, AdminPermissionEvaluator realmAuth, GroupModel group,  RealmModel realm, GeneralJpaService generalJpaService) {
+    public AdminGroups(KeycloakSession session, AdminPermissionEvaluator realmAuth, GroupModel group,  RealmModel realm, GeneralJpaService generalJpaService, AdminEventBuilder adminEvent) {
         this.session = session;
         this.realm =  realm;
         this.realmAuth = realmAuth;
@@ -69,14 +70,12 @@ public class AdminGroups {
         this.generalJpaService =  generalJpaService;
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
+        this.adminEvent = adminEvent.resource(ResourceType.GROUP);
   }
 
     @DELETE
     public void deleteGroup() {
         this.realmAuth.groups().requireManage(group);
-        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
-        adminEvent = adminEvent.realm(realm).resource(ResourceType.REALM).resource(ResourceType.GROUP);
-
         generalJpaService.removeGroup(group);
 
         adminEvent.operation(OperationType.DELETE).resourcePath(session.getContext().getUri()).success();
@@ -170,10 +169,7 @@ public class AdminGroups {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addChild(GroupRepresentation rep) {
-        AuthenticationHelper authHelper = new AuthenticationHelper(session);
-        AdminPermissionEvaluator realmAuth = authHelper.authenticateRealmAdminRequest();
-        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
-        adminEvent.realm(realm).resource(ResourceType.REALM);
+        adminEvent.resource(ResourceType.GROUP);
         GroupResource groupResource = new GroupResource(realm, group, session, realmAuth,adminEvent);
         Response response = groupResource.addChild(rep);
         if (response.getStatus() >= 400) {

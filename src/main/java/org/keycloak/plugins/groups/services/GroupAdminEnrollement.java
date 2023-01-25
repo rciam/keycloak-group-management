@@ -11,6 +11,8 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
 import org.keycloak.email.EmailException;
+import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -25,6 +27,7 @@ import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtension
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.ServicesLogger;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.theme.FreeMarkerUtil;
 
 public class GroupAdminEnrollement {
@@ -34,16 +37,18 @@ public class GroupAdminEnrollement {
 
     protected final KeycloakSession session;
     private final RealmModel realm;
+    private final UserModel groupAdmin;
+    private final AdminEventBuilder adminEvent;
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final GroupEnrollmentRepository groupEnrollmentRepository;
-    private final UserModel groupAdmin;
     private final GroupEnrollmentEntity enrollmentEntity;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
 
-    public GroupAdminEnrollement(KeycloakSession session, RealmModel realm, GroupEnrollmentRepository groupEnrollmentRepository, UserModel groupAdmin, GroupEnrollmentEntity enrollmentEntity) {
+    public GroupAdminEnrollement(KeycloakSession session, RealmModel realm, GroupEnrollmentRepository groupEnrollmentRepository, UserModel groupAdmin, GroupEnrollmentEntity enrollmentEntity, AdminEventBuilder adminEvent) {
         this.session = session;
         this.realm =  realm;
+        this.adminEvent = adminEvent;
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
         this.groupEnrollmentRepository =  groupEnrollmentRepository;
         this.groupAdmin = groupAdmin;
@@ -88,6 +93,7 @@ public class GroupAdminEnrollement {
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         }
+        adminEvent.operation(OperationType.CREATE).resource(ResourceType.GROUP_MEMBERSHIP).resourcePath(session.getContext().getUri()).success();
         return Response.noContent().build();
     }
 

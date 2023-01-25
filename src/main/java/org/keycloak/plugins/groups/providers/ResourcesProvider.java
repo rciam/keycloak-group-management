@@ -59,7 +59,7 @@ public class ResourcesProvider implements RealmResourceProvider {
 
     @Path("account")
     public AccountService getAccountService() {
-        AccountService service = new AccountService(session, realm);
+        AccountService service = new AccountService(session, realm, clientConnection);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

@@ -3,6 +3,8 @@ package org.keycloak.plugins.groups.services;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.email.EmailException;
+import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -27,6 +29,7 @@ import org.keycloak.plugins.groups.representations.GroupInvitationRepresentation
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.ServicesLogger;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.theme.FreeMarkerUtil;
 
 import javax.ws.rs.BadRequestException;
@@ -59,11 +62,13 @@ public class UserGroups {
     private final GroupInvitationRepository groupInvitationRepository;
     private final UserModel user;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
+    private final AdminEventBuilder adminEvent;
 
-    public UserGroups(KeycloakSession session, RealmModel realm) {
+    public UserGroups(KeycloakSession session, RealmModel realm, UserModel user, AdminEventBuilder adminEvent)  {
         this.session = session;
         this.realm =  realm;
-        this.user = new AuthenticationHelper(session).authenticateUserRequest().getUser();
+        this.user = user;
+        this.adminEvent = adminEvent;
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
         this.groupEnrollmentRepository =  new GroupEnrollmentRepository(session, realm);
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
@@ -134,6 +139,7 @@ public class UserGroups {
         } else {
             //user become immediately group member
             userGroupMembershipExtensionRepository.createOrUpdate(rep, session, user);
+            adminEvent.operation(OperationType.CREATE).resource(ResourceType.GROUP_MEMBERSHIP).resourcePath(session.getContext().getUri()).success();
         }
         return Response.noContent().build();
     }
@@ -177,6 +183,7 @@ public class UserGroups {
         }
 
         userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user);
+        adminEvent.operation(OperationType.CREATE).resource(ResourceType.GROUP_MEMBERSHIP).resourcePath(session.getContext().getUri()).success();
 
         try {
             customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm,invitationEntity.getCheckAdmin().getId()));

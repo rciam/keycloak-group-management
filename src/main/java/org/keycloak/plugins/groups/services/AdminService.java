@@ -51,6 +51,7 @@ public class AdminService {
     private KeycloakSession session;
     private final RealmModel realm;
     private  final AdminPermissionEvaluator realmAuth;
+    private final AdminEventBuilder adminEvent;
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final GeneralJpaService generalJpaService;
 
@@ -64,6 +65,8 @@ public class AdminService {
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
         this.generalJpaService =  new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
         this.groupManagementEventRepository = new GroupManagementEventRepository (session, realm);
+        this.adminEvent =  new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
+        adminEvent.realm(realm);
     }
 
     @GET
@@ -95,7 +98,7 @@ public class AdminService {
             throw new NotFoundException("Could not find group by id");
         }
         realmAuth.groups().requireView(group);
-        AdminGroups service = new AdminGroups(session, realmAuth, group, realm, generalJpaService);
+        AdminGroups service = new AdminGroups(session, realmAuth, group, realm, generalJpaService, adminEvent);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
@@ -104,8 +107,6 @@ public class AdminService {
     @Path("/group")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addTopLevelGroup(GroupRepresentation rep) {
-        AdminEventBuilder adminEvent = new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
-        adminEvent.realm(realm).resource(ResourceType.REALM);
         GroupsResource groupsResource = new GroupsResource(realm, session, realmAuth,adminEvent);
         Response response = groupsResource.addTopLevelGroup(rep);
         logger.info("group have been created with status"+response.getStatus());
@@ -137,8 +138,7 @@ public class AdminService {
         boolean removed = generalJpaService.removeUser(user);
 
         if (removed) {
-            AdminEventBuilder adminEvent = new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
-            adminEvent.operation(OperationType.DELETE).resourcePath(session.getContext().getUri()).success();
+            adminEvent.resource(ResourceType.USER).operation(OperationType.DELETE).resourcePath(session.getContext().getUri()).success();
             return Response.noContent().build();
         } else {
             return ErrorResponse.error("User couldn't be deleted", Response.Status.BAD_REQUEST);

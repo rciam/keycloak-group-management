@@ -100,7 +100,7 @@ public class GroupAdminGroup {
     }
 
     @Path("/members")
-    public GroupAdminGroupMembers addGroupMember() {
+    public GroupAdminGroupMembers groupMember() {
         GroupAdminGroupMembers service = new GroupAdminGroupMembers(session, realm, voAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;

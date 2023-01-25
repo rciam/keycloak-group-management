@@ -286,30 +286,37 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     }
 
     @Transactional
-    public void create( GroupInvitationRepository groupInvitationRepository, GroupInvitationEntity invitationEntity, UserModel userModel){
-        UserGroupMembershipExtensionEntity entity = new UserGroupMembershipExtensionEntity();
-        entity.setId(KeycloakModelUtils.generateId());
+    public void create(GroupInvitationRepository groupInvitationRepository, GroupInvitationEntity invitationEntity, UserModel userModel) {
         GroupEnrollmentConfigurationEntity configuration = invitationEntity.getGroupEnrollmentConfiguration();
-        if (configuration.getAupExpirySec() != null)
+        UserGroupMembershipExtensionEntity entity = getByUserAndGroup(configuration.getGroup().getId(), userModel.getId());
+        boolean isNotMember = entity == null || !MemberStatusEnum.ENABLED.equals(entity.getStatus());
+        if (entity == null) {
+            entity = new UserGroupMembershipExtensionEntity();
+            entity.setId(KeycloakModelUtils.generateId());
+        }
+
+        if (configuration.getAupExpirySec() != null) {
             entity.setAupExpiresAt(LocalDate.ofEpochDay(Duration.ofMillis(Instant.now().toEpochMilli() + configuration.getAupExpirySec()).toDays()));
+        } else {
+            entity.setAupExpiresAt(null);
+        }
         String validThroughValue = configuration.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_THROUGH.equals(at.getAttribute())).findAny().orElse(new GroupEnrollmentConfigurationAttributesEntity()).getDefaultValue();
-        if (validThroughValue != null)
-            entity.setMembershipExpiresAt(LocalDate.parse(validThroughValue, Utils.formatter));
+        entity.setMembershipExpiresAt(validThroughValue != null ? LocalDate.parse(validThroughValue, Utils.formatter) : null);
         String validFromValue = configuration.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_FROM.equals(at.getAttribute())).findAny().orElse(new GroupEnrollmentConfigurationAttributesEntity()).getDefaultValue();
-        if (validFromValue != null)
-            entity.setValidFrom(LocalDate.parse(validFromValue, Utils.formatter));
+        entity.setValidFrom(validFromValue != null ? LocalDate.parse(validFromValue, Utils.formatter) : null);
         entity.setGroup(configuration.getGroup());
         UserEntity userEntity = new UserEntity();
         userEntity.setId(userModel.getId());
         entity.setUser(userEntity);
-        UserEntity editorUser = new UserEntity();
-        editorUser.setId(userModel.getId());
-        entity.setChangedBy(editorUser);
+        entity.setChangedBy(invitationEntity.getCheckAdmin());
         entity.setStatus(MemberStatusEnum.ENABLED);
-        create(entity);
+        entity.setJustification(null);
+        update(entity);
 
-        GroupModel group = realm.getGroupById(configuration.getGroup().getId());
-        userModel.joinGroup(group);
+        if (isNotMember) {
+            GroupModel group = realm.getGroupById(configuration.getGroup().getId());
+            userModel.joinGroup(group);
+        }
         groupInvitationRepository.deleteEntity(invitationEntity.getId());
     }
 

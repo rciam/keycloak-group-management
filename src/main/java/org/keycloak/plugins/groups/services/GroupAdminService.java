@@ -1,7 +1,6 @@
 package org.keycloak.plugins.groups.services;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,27 +18,28 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
-import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentPager;
 import org.keycloak.plugins.groups.representations.GroupsPager;
 import org.keycloak.services.ForbiddenException;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
 
 public class GroupAdminService {
 
     private KeycloakSession session;
     private final RealmModel realm;
-    private final UserModel voAdmin;
+    private final UserModel groupAdmin;
     private final GroupAdminRepository groupAdminRepository;
     private final GroupEnrollmentRepository groupEnrollmentRepository;
+    private final AdminEventBuilder adminEvent;
 
-    public GroupAdminService(KeycloakSession session, RealmModel realm) {
+    public GroupAdminService(KeycloakSession session, RealmModel realm, UserModel user, AdminEventBuilder adminEvent) {
         this.session = session;
         this.realm =  realm;
-        AuthenticationHelper authHelper = new AuthenticationHelper(session);
-        this.voAdmin = authHelper.authenticateUserRequest().getUser();
+        this.groupAdmin = user;
+        this.adminEvent = adminEvent;
         this.groupAdminRepository =  new GroupAdminRepository(session, realm);
         this.groupEnrollmentRepository =  new GroupEnrollmentRepository(session, realm);
     }
@@ -49,7 +49,7 @@ public class GroupAdminService {
     @Path("/groups")
     public GroupsPager getGroupAdminGroups(@QueryParam("first") @DefaultValue("0") Integer first,
                                            @QueryParam("max") @DefaultValue("10") Integer max){
-        return groupAdminRepository.getAdminGroups(voAdmin.getId(), first, max);
+        return groupAdminRepository.getAdminGroups(groupAdmin.getId(), first, max);
     }
 
     @Path("/group/{groupId}")
@@ -58,11 +58,11 @@ public class GroupAdminService {
         if (group == null) {
             throw new NotFoundException("Could not find group by id");
         }
-        if (!groupAdminRepository.isGroupAdmin(voAdmin.getId(), group)){
+        if (!groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group)){
             throw new ForbiddenException();
         }
 
-        GroupAdminGroup service = new GroupAdminGroup(session, realm, voAdmin, group);
+        GroupAdminGroup service = new GroupAdminGroup(session, realm, groupAdmin, group);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
@@ -75,7 +75,7 @@ public class GroupAdminService {
                                                     @QueryParam("groupId") String groupId,
                                                     @QueryParam("userSearch") String userSearch,
                                                     @QueryParam("status") EnrollmentStatusEnum status) {
-        List<String> groupIds = groupId != null ? Stream.of(groupId).collect(Collectors.toList()):groupAdminRepository.getAllAdminGroupIds(voAdmin.getId());
+        List<String> groupIds = groupId != null ? Stream.of(groupId).collect(Collectors.toList()):groupAdminRepository.getAllAdminGroupIds(groupAdmin.getId());
         return groupEnrollmentRepository.groupAdminEnrollmentPager(groupIds, userSearch, status, first, max);
     }
 
@@ -89,11 +89,11 @@ public class GroupAdminService {
         if (group == null) {
             throw new NotFoundException("Could not find the group of Group Enrollment Request by id");
         }
-        if (!groupAdminRepository.isGroupAdmin(voAdmin.getId(), group)){
+        if (!groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group)){
             throw new ForbiddenException();
         }
 
-        GroupAdminEnrollement service = new GroupAdminEnrollement(session, realm, groupEnrollmentRepository, voAdmin, entity);
+        GroupAdminEnrollement service = new GroupAdminEnrollement(session, realm, groupEnrollmentRepository, groupAdmin, entity, adminEvent);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
