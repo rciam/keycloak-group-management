@@ -76,16 +76,10 @@ public class GroupAdminEnrollement {
         if (!EnrollmentStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
             throw new BadRequestException(statusErrorMessage);
 
-        UserGroupMembershipExtensionEntity member = userGroupMembershipExtensionRepository.getByUserAndGroup(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getId(), enrollmentEntity.getUser().getId());
-        if ( member != null ) {
-            enrollmentEntity.setStatus(EnrollmentStatusEnum.REJECTED);
-            groupEnrollmentRepository.update(enrollmentEntity);
-            return ErrorResponse.error("This user is already member of this group! Request was closed as rejected. ", Response.Status.BAD_REQUEST);
-        }
-
+        userGroupMembershipExtensionRepository.createOrUpdate(enrollmentEntity, session, groupAdmin.getId());
         enrollmentEntity.setStatus(EnrollmentStatusEnum.ACCEPTED);
         enrollmentEntity.setAdminJustification(adminJustification);
-        userGroupMembershipExtensionRepository.create(enrollmentEntity, session, groupAdmin.getId());
+
         groupEnrollmentRepository.update(enrollmentEntity);
 
         try {

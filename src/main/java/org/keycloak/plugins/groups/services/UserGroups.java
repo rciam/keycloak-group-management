@@ -115,12 +115,6 @@ public class UserGroups {
         if (groupEnrollmentRepository.countOngoingByUserAndGroup(user.getId(), configuration.getGroup().getId()) > 0)
             throw new BadRequestException("You have an ongoing request to become member of this group");
 
-        //    UserGroupMembershipExtensionEntity member = userGroupMembershipExtensionRepository.getByUserAndGroup(configuration.getGroup().getId(), user.getId());
-//        if (member != null) {
-//            throw new BadRequestException("You are already member of this group");
-//        } else {
-
-        //  }
         if (configuration.getRequireApproval()) {
             GroupEnrollmentEntity entity = groupEnrollmentRepository.create(rep, user.getId());
             //email to group admins if they must accept it
@@ -139,7 +133,7 @@ public class UserGroups {
             });
         } else {
             //user become immediately group member
-            // create - update group membership
+            userGroupMembershipExtensionRepository.createOrUpdate(rep, session, user);
         }
         return Response.noContent().build();
     }
