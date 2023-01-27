@@ -81,7 +81,7 @@ public class GroupAdminEnrollement {
         if (!EnrollmentStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
             throw new BadRequestException(statusErrorMessage);
 
-        userGroupMembershipExtensionRepository.createOrUpdate(enrollmentEntity, session, groupAdmin.getId());
+        userGroupMembershipExtensionRepository.createOrUpdate(enrollmentEntity, session, groupAdmin.getId(),adminEvent);
         enrollmentEntity.setStatus(EnrollmentStatusEnum.ACCEPTED);
         enrollmentEntity.setAdminJustification(adminJustification);
 
@@ -93,7 +93,7 @@ public class GroupAdminEnrollement {
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         }
-        adminEvent.operation(OperationType.CREATE).resource(ResourceType.GROUP_MEMBERSHIP).resourcePath(session.getContext().getUri()).success();
+
         return Response.noContent().build();
     }
 

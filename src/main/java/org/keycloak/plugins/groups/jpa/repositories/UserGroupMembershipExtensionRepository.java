@@ -14,8 +14,11 @@ import javax.transaction.Transactional;
 
 import org.jboss.logging.Logger;
 import org.keycloak.email.EmailException;
+import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.KeycloakUriInfo;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
@@ -24,6 +27,7 @@ import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.GroupEnrollmentAttributeEnum;
 import org.keycloak.plugins.groups.enums.MemberStatusEnum;
+import org.keycloak.plugins.groups.helpers.DummyClientConnection;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity;
@@ -37,11 +41,14 @@ import org.keycloak.plugins.groups.representations.GroupEnrollmentAttributesRepr
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
+import org.keycloak.services.resources.admin.AdminAuth;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.theme.FreeMarkerUtil;
 
 public class UserGroupMembershipExtensionRepository extends GeneralRepository<UserGroupMembershipExtensionEntity> {
 
     private static final Logger logger = Logger.getLogger(UserGroupMembershipExtensionRepository.class);
+    private final String adminCli ="admin-cli";
     private final GroupManagementEventRepository eventRepository;
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     public UserGroupMembershipExtensionRepository(KeycloakSession session, RealmModel realm) {
@@ -75,6 +82,10 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 logger.info(user.getFirstName()+" "+user.getFirstName()+" is removing from being member of group "+group.getName());
                 deleteEntity(entity.getId());
                 user.leaveGroup(group);
+                AdminAuth adminAuth = new AdminAuth(realmModel, null, Utils.getChronJobUser(), realmModel.getClientByClientId(adminCli));
+                AdminEventBuilder adminEvent =  new AdminEventBuilder(realmModel, adminAuth, session, new DummyClientConnection("127.0.0.1"));
+                adminEvent.realm(realmModel).operation(OperationType.DELETE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(entity, realm)).resourcePath("127.0.0.1").success();
+
                 groupAdminRepository.getAllAdminGroupUsers(group.getId()).map(id -> session.users().getUserById(realmModel, id)).forEach(admin -> {
                     if ( admin != null) {
                         customFreeMarkerEmailTemplateProvider.setRealm(realmModel);
@@ -183,7 +194,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
     @Transactional
     @Deprecated
-    public void create(UserGroupMembershipExtensionRepresentation rep, String editor, UserModel userModel, GroupModel groupModel){
+    public void create(UserGroupMembershipExtensionRepresentation rep, String editor, UserModel userModel, GroupModel groupModel, AdminEventBuilder adminEvent, KeycloakUriInfo uri){
         UserGroupMembershipExtensionEntity entity = new UserGroupMembershipExtensionEntity();
         entity.setId(KeycloakModelUtils.generateId());
         entity.setAupExpiresAt(rep.getAupExpiresAt());
@@ -200,11 +211,12 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setJustification(rep.getJustification());
         entity.setStatus(MemberStatusEnum.ENABLED);
         create(entity);
+       // adminEvent.operation(OperationType.CREATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(entity).resourcePath(uri).success();
         userModel.joinGroup(groupModel);
     }
 
     @Transactional
-    public void createOrUpdate(GroupEnrollmentEntity enrollmentEntity, KeycloakSession session, String groupAdminId){
+    public void createOrUpdate(GroupEnrollmentEntity enrollmentEntity, KeycloakSession session, String groupAdminId,AdminEventBuilder adminEvent){
         UserGroupMembershipExtensionEntity entity = getByUserAndGroup(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getId(), enrollmentEntity.getUser().getId());
         boolean isNotMember = entity == null || !MemberStatusEnum.ENABLED.equals(entity.getStatus());
         if (entity == null) {
@@ -243,10 +255,11 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             UserModel userModel = session.users().getUserById(realm, enrollmentEntity.getUser().getId());
             userModel.joinGroup(group);
         }
+        adminEvent.operation(isNotMember? OperationType.CREATE :  OperationType.UPDATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(entity, realm)).resourcePath(session.getContext().getUri()).success();
     }
 
     @Transactional
-    public void createOrUpdate(GroupEnrollmentRepresentation rep, KeycloakSession session, UserModel user){
+    public void createOrUpdate(GroupEnrollmentRepresentation rep, KeycloakSession session, UserModel user,AdminEventBuilder adminEvent){
         GroupEnrollmentConfigurationEntity configuration = groupEnrollmentConfigurationRepository.getEntity(rep.getGroupEnrollmentConfiguration().getId());
         UserGroupMembershipExtensionEntity entity = getByUserAndGroup(configuration.getGroup().getId(), user.getId());
         boolean isNotMember = entity == null || !MemberStatusEnum.ENABLED.equals(entity.getStatus());
@@ -283,10 +296,11 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             GroupModel group = realm.getGroupById(configuration.getGroup().getId());
             user.joinGroup(group);
         }
+        adminEvent.operation(isNotMember? OperationType.CREATE :  OperationType.UPDATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(entity, realm)).resourcePath(session.getContext().getUri()).success();
     }
 
     @Transactional
-    public void create(GroupInvitationRepository groupInvitationRepository, GroupInvitationEntity invitationEntity, UserModel userModel) {
+    public void create(GroupInvitationRepository groupInvitationRepository, GroupInvitationEntity invitationEntity, UserModel userModel, AdminEventBuilder adminEvent, KeycloakUriInfo uri) {
         GroupEnrollmentConfigurationEntity configuration = invitationEntity.getGroupEnrollmentConfiguration();
         UserGroupMembershipExtensionEntity entity = getByUserAndGroup(configuration.getGroup().getId(), userModel.getId());
         boolean isNotMember = entity == null || !MemberStatusEnum.ENABLED.equals(entity.getStatus());
@@ -317,6 +331,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             GroupModel group = realm.getGroupById(configuration.getGroup().getId());
             userModel.joinGroup(group);
         }
+        adminEvent.operation(isNotMember? OperationType.CREATE :  OperationType.UPDATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(entity, realm)).resourcePath(uri).success();
         groupInvitationRepository.deleteEntity(invitationEntity.getId());
     }
 

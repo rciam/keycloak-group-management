@@ -14,6 +14,8 @@ public class Utils {
 
     public static final String eventId = "1";
 
+    private static final String chronJobUserId ="chron-job";
+
     public static UserAdapter getDummyUser(UserRepresentation userRep) {
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(userRep.getEmail(), true);
@@ -31,4 +33,12 @@ public class Utils {
         UserAdapter user = new UserAdapter(null, null, null, userEntity);
         return user;
     }
+
+    public static UserAdapter getChronJobUser() {
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(chronJobUserId);
+        UserAdapter user = new UserAdapter(null, null, null, userEntity);
+        return user;
+    }
+
 }

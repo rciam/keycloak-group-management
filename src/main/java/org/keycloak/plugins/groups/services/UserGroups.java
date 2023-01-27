@@ -138,8 +138,7 @@ public class UserGroups {
             });
         } else {
             //user become immediately group member
-            userGroupMembershipExtensionRepository.createOrUpdate(rep, session, user);
-            adminEvent.operation(OperationType.CREATE).resource(ResourceType.GROUP_MEMBERSHIP).resourcePath(session.getContext().getUri()).success();
+            userGroupMembershipExtensionRepository.createOrUpdate(rep, session, user, adminEvent);
         }
         return Response.noContent().build();
     }
@@ -182,8 +181,7 @@ public class UserGroups {
             throw new BadRequestException("You are already member of this group");
         }
 
-        userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user);
-        adminEvent.operation(OperationType.CREATE).resource(ResourceType.GROUP_MEMBERSHIP).resourcePath(session.getContext().getUri()).success();
+        userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user, adminEvent, session.getContext().getUri());
 
         try {
             customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm,invitationEntity.getCheckAdmin().getId()));

@@ -75,6 +75,7 @@ public class AdminService {
         GroupManagementEventEntity eventEntity = groupManagementEventRepository.getEntity(Utils.eventId);
         eventEntity.setServerUrl(url);
         groupManagementEventRepository.update(eventEntity);
+        adminEvent.resource(ResourceType.REALM).operation(OperationType.UPDATE).representation(eventEntity).resourcePath(session.getContext().getUri()).success();
         return Response.noContent().build();
     }
 
@@ -88,6 +89,7 @@ public class AdminService {
             if (realmAttributesNames.contains(attr.getKey()))
                 realm.setAttribute(attr.getKey(), attr.getValue());
         }
+        adminEvent.resource(ResourceType.REALM).operation(OperationType.UPDATE).representation(attributes).resourcePath(session.getContext().getUri()).success();
         return Response.noContent().build();
     }
 
@@ -135,10 +137,11 @@ public class AdminService {
         }
         realmAuth.users().requireManage(user);
 
+        String username = user.getUsername();
         boolean removed = generalJpaService.removeUser(user);
 
         if (removed) {
-            adminEvent.resource(ResourceType.USER).operation(OperationType.DELETE).resourcePath(session.getContext().getUri()).success();
+            adminEvent.resource(ResourceType.USER).operation(OperationType.DELETE).representation(username).resourcePath(session.getContext().getUri()).success();
             return Response.noContent().build();
         } else {
             return ErrorResponse.error("User couldn't be deleted", Response.Status.BAD_REQUEST);

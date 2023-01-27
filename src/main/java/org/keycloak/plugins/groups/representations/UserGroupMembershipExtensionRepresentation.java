@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.representations.idm.UserRepresentation;
 
@@ -16,10 +18,13 @@ public class UserGroupMembershipExtensionRepresentation {
     protected MemberStatusEnum status;
     protected String changedByUserId;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonSerialize(using = LocalDateSerializer.class)
     protected LocalDate validFrom;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonSerialize(using = LocalDateSerializer.class)
     protected LocalDate membershipExpiresAt;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonSerialize(using = LocalDateSerializer.class)
     protected LocalDate aupExpiresAt;
     protected String justification;
 

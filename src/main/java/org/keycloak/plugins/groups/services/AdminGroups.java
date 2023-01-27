@@ -76,9 +76,10 @@ public class AdminGroups {
     @DELETE
     public void deleteGroup() {
         this.realmAuth.groups().requireManage(group);
+        String groupName = group.getName();
         generalJpaService.removeGroup(group);
 
-        adminEvent.operation(OperationType.DELETE).resourcePath(session.getContext().getUri()).success();
+        adminEvent.operation(OperationType.DELETE).representation(groupName).resourcePath(session.getContext().getUri()).success();
     }
 
     @GET

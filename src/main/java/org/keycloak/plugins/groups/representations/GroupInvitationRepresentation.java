@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.representations.idm.UserRepresentation;
@@ -13,6 +14,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 public class GroupInvitationRepresentation {
 
     private String id;
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime creationDate;
     private UserRepresentation checkAdmin;
     private GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
