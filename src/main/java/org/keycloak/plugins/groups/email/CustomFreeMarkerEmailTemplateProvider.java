@@ -72,7 +72,14 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
         attributes.put("user", userRequest.getFirstName()+" "+userRequest.getLastName());
         attributes.put("groupname", groupname);
-        send( "adminGroupUserRemovalSubject", "expired-group-member.ftl", attributes);
+        send( "adminGroupUserRemovalSubject", "expired-group-membership-admin.ftl", attributes);
+    }
+
+    public void sendExpiredGroupMemberEmailToUser(String groupname, String groupId, String serverUrl) throws EmailException {
+        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
+        attributes.put("groupname", groupname);
+        attributes.put("url",(serverUrl != null ? serverUrl : "localhost:8080") + enrollmentUrl.replace("{realmName}",realm.getName()).replace("{id}",groupId));
+        send( "userRemovalSubject", "expired-group-membership-user.ftl", attributes);
     }
 
     public void sendExpiredGroupMembershipNotification(String groupname, String date, String groupId, String serverUrl) throws EmailException {

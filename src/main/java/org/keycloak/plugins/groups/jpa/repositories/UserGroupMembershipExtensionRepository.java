@@ -74,26 +74,32 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         if (eventEntity == null || LocalDate.now().isAfter(eventEntity.getDate())) {
             logger.info("group management daily action is executing ...");
             Stream<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getExpiredMemberships").setParameter("date", LocalDate.now()).getResultStream();
+            String serverUrl = eventEntity != null ? eventEntity.getServerUrl() : null;
             results.forEach(entity -> {
                 RealmModel realmModel = session.realms().getRealm(entity.getUser().getRealmId());
                 GroupAdminRepository groupAdminRepository = new GroupAdminRepository(session, realmModel);
                 UserModel user = session.users().getUserById(realmModel, entity.getUser().getId());
                 GroupModel group = realmModel.getGroupById(entity.getGroup().getId());
-                logger.info(user.getFirstName()+" "+user.getFirstName()+" is removing from being member of group "+group.getName());
+                logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
                 deleteEntity(entity.getId());
                 user.leaveGroup(group);
                 AdminAuth adminAuth = new AdminAuth(realmModel, null, Utils.getChronJobUser(), realmModel.getClientByClientId(adminCli));
-                AdminEventBuilder adminEvent =  new AdminEventBuilder(realmModel, adminAuth, session, new DummyClientConnection("127.0.0.1"));
+                AdminEventBuilder adminEvent = new AdminEventBuilder(realmModel, adminAuth, session, new DummyClientConnection("127.0.0.1"));
                 adminEvent.realm(realmModel).operation(OperationType.DELETE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(entity, realm)).resourcePath("127.0.0.1").success();
-
+                customFreeMarkerEmailTemplateProvider.setRealm(realmModel);
+                try {
+                    customFreeMarkerEmailTemplateProvider.setUser(user);
+                    customFreeMarkerEmailTemplateProvider.sendExpiredGroupMemberEmailToUser(group.getName(), group.getId(), serverUrl);
+                } catch (EmailException e) {
+                    logger.info("problem sending email to user " + user.getFirstName() + " " + user.getLastName());
+                }
                 groupAdminRepository.getAllAdminGroupUsers(group.getId()).map(id -> session.users().getUserById(realmModel, id)).forEach(admin -> {
-                    if ( admin != null) {
-                        customFreeMarkerEmailTemplateProvider.setRealm(realmModel);
+                    if (admin != null) {
                         customFreeMarkerEmailTemplateProvider.setUser(admin);
                         try {
                             customFreeMarkerEmailTemplateProvider.sendExpiredGroupMemberEmailToAdmin(user, group.getName());
                         } catch (EmailException e) {
-                           logger.info("problem sending email to group admin "+ admin.getFirstName()+ " "+ admin.getLastName());
+                            logger.info("problem sending email to group admin " + admin.getFirstName() + " " + admin.getLastName());
                         }
                     }
                 });
@@ -101,7 +107,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
             if (eventEntity == null) {
                 //first time, execute also weekly tasks
-                weeklyTaskExecution(customFreeMarkerEmailTemplateProvider,session, null);
+                weeklyTaskExecution(customFreeMarkerEmailTemplateProvider, session, serverUrl);
                 eventEntity = new GroupManagementEventEntity();
                 eventEntity.setId(Utils.eventId);
                 eventEntity.setDate(LocalDate.now());
@@ -113,7 +119,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
                 if (LocalDate.now().isAfter(eventEntity.getDateForWeekTasks().plusDays(6))) {
                     //weekly tasks execution
-                    weeklyTaskExecution(customFreeMarkerEmailTemplateProvider,session, eventEntity.getServerUrl());
+                    weeklyTaskExecution(customFreeMarkerEmailTemplateProvider, session, serverUrl);
                     eventEntity.setDateForWeekTasks(LocalDate.now());
                     eventRepository.update(eventEntity);
                 }
