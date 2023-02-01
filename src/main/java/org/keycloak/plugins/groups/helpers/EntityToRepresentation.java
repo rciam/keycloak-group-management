@@ -31,8 +31,8 @@ public class EntityToRepresentation {
         rep.setHideConfiguration(entity.isHideConfiguration());
         rep.setRequireApproval(entity.getRequireApproval());
         rep.setRequireAupAcceptance(entity.getRequireAupAcceptance());
-        rep.setAupExpirySec(entity.getAupExpirySec());
-        rep.setMembershipExpirationSec(entity.getMembershipExpirationSec());
+        rep.setAupExpiryDays(entity.getAupExpiryDays());
+        rep.setMembershipExpirationDays(entity.getMembershipExpirationDays());
         rep.setEnrollmentConclusion(entity.getEnrollmentConclusion());
         rep.setEnrollmentIntroduction(entity.getEnrollmentIntroduction());
         rep.setInvitationConclusion(entity.getInvitationConclusion());

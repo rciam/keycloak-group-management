@@ -11,6 +11,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
+import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
@@ -99,6 +100,19 @@ public class UserGroups {
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
+
+    @Path("/group/{groupId}/member")
+    public UserGroupMember userGroupMember(@PathParam("groupId") String groupId) {
+        UserGroupMembershipExtensionEntity entity = userGroupMembershipExtensionRepository.getByUserAndGroup(groupId, user.getId());
+        if (entity == null) {
+            throw new NotFoundException("You are not member of this group");
+        }
+
+        UserGroupMember service = new UserGroupMember(session, realm, user, entity, customFreeMarkerEmailTemplateProvider, userGroupMembershipExtensionRepository, groupEnrollmentConfigurationRepository);
+        ResteasyProviderFactory.getInstance().injectProperties(service);
+        return service;
+    }
+
 
     @GET
     @Path("/enroll-requests")

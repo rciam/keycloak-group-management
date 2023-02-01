@@ -10,8 +10,8 @@ public class GroupEnrollmentConfigurationRepresentation {
     private Boolean active;
     private Boolean requireAupAcceptance;
     private Boolean requireApproval;
-    private Long aupExpirySec;
-    private Long membershipExpirationSec;
+    private Long aupExpiryDays;
+    private Long membershipExpirationDays;
     private Integer expirationNotificationPeriod;
     private GroupAupRepresentation aup;
     private String enrollmentIntroduction;
@@ -76,20 +76,20 @@ public class GroupEnrollmentConfigurationRepresentation {
         this.requireApproval = requireApproval;
     }
 
-    public Long getAupExpirySec() {
-        return aupExpirySec;
+    public Long getAupExpiryDays() {
+        return aupExpiryDays;
     }
 
-    public void setAupExpirySec(Long aupExpirySec) {
-        this.aupExpirySec = aupExpirySec;
+    public void setAupExpiryDays(Long aupExpiryDays) {
+        this.aupExpiryDays = aupExpiryDays;
     }
 
-    public Long getMembershipExpirationSec() {
-        return membershipExpirationSec;
+    public Long getMembershipExpirationDays() {
+        return membershipExpirationDays;
     }
 
-    public void setMembershipExpirationSec(Long membershipExpirationSec) {
-        this.membershipExpirationSec = membershipExpirationSec;
+    public void setMembershipExpirationDays(Long membershipExpirationDays) {
+        this.membershipExpirationDays = membershipExpirationDays;
     }
 
     public Integer getExpirationNotificationPeriod() {

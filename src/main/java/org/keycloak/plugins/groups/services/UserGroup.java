@@ -26,10 +26,10 @@ public class UserGroup {
     protected KeycloakSession session;
     private RealmModel realm;
 
-    private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
-    private GroupAdminRepository groupAdminRepository;
-    private UserModel user;
-    private GroupModel group;
+    private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
+    private final GroupAdminRepository groupAdminRepository;
+    private final UserModel user;
+    private final GroupModel group;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
 
     public UserGroup(KeycloakSession session, RealmModel realm, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, UserModel user, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, GroupAdminRepository groupAdminRepository) {
@@ -63,4 +63,6 @@ public class UserGroup {
             return Response.status(Response.Status.BAD_REQUEST).entity(ModelDuplicateException.class.equals(e.getClass()) ? "Admin has already been existed" : "Problem during admin save").build();
         }
     }
+
+
 }

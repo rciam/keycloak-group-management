@@ -64,6 +64,9 @@ public class UserGroupMembershipExtensionEntity {
     @Column(name="JUSTIFICATION")
     protected String justification;
 
+    @Column(name="GROUP_ENROLLMENT_CONFIGURATION_ID")
+    protected String groupEnrollmentConfigurationId;
+
     public String getId() {
         return id;
     }
@@ -136,4 +139,11 @@ public class UserGroupMembershipExtensionEntity {
         this.justification = justification;
     }
 
+    public String getGroupEnrollmentConfigurationId() {
+        return groupEnrollmentConfigurationId;
+    }
+
+    public void setGroupEnrollmentConfigurationId(String groupEnrollmentConfigurationId) {
+        this.groupEnrollmentConfigurationId = groupEnrollmentConfigurationId;
+    }
 }

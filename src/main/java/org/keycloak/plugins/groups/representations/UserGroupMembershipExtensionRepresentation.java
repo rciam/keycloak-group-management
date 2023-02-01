@@ -27,6 +27,7 @@ public class UserGroupMembershipExtensionRepresentation {
     @JsonSerialize(using = LocalDateSerializer.class)
     protected LocalDate aupExpiresAt;
     protected String justification;
+    protected GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
 
     public UserGroupMembershipExtensionRepresentation(){}
 
@@ -102,4 +103,11 @@ public class UserGroupMembershipExtensionRepresentation {
         this.justification = justification;
     }
 
+    public GroupEnrollmentConfigurationRepresentation getGroupEnrollmentConfiguration() {
+        return groupEnrollmentConfiguration;
+    }
+
+    public void setGroupEnrollmentConfiguration(GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration) {
+        this.groupEnrollmentConfiguration = groupEnrollmentConfiguration;
+    }
 }

@@ -230,8 +230,8 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             entity.setId(KeycloakModelUtils.generateId());
         }
         GroupEnrollmentConfigurationEntity configuration = enrollmentEntity.getGroupEnrollmentConfiguration();
-        if (configuration.getAupExpirySec() != null) {
-            entity.setAupExpiresAt(LocalDate.ofEpochDay(Duration.ofMillis(Instant.now().toEpochMilli() + configuration.getAupExpirySec()).toDays()));
+        if (configuration.getAupExpiryDays() != null) {
+            entity.setAupExpiresAt(LocalDate.now().plusDays(configuration.getAupExpiryDays()));
         } else {
             entity.setAupExpiresAt(null);
         }
@@ -254,6 +254,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setChangedBy(editorUser);
         entity.setJustification(enrollmentEntity.getAdminJustification());
         entity.setStatus(MemberStatusEnum.ENABLED);
+        entity.setGroupEnrollmentConfigurationId(configuration.getId());
         update(entity);
 
         if (isNotMember) {
@@ -273,8 +274,8 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             entity = new UserGroupMembershipExtensionEntity();
             entity.setId(KeycloakModelUtils.generateId());
         }
-        if (configuration.getAupExpirySec() != null) {
-            entity.setAupExpiresAt(LocalDate.ofEpochDay(Duration.ofMillis(Instant.now().toEpochMilli() + configuration.getAupExpirySec()).toDays()));
+        if (configuration.getAupExpiryDays() != null) {
+            entity.setAupExpiresAt(LocalDate.now().plusDays(configuration.getAupExpiryDays()));
         } else {
             entity.setAupExpiresAt(null);
         }
@@ -296,6 +297,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setChangedBy(null);
         entity.setJustification(null);
         entity.setStatus(MemberStatusEnum.ENABLED);
+        entity.setGroupEnrollmentConfigurationId(configuration.getId());
         update(entity);
 
         if (isNotMember) {
@@ -315,8 +317,8 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             entity.setId(KeycloakModelUtils.generateId());
         }
 
-        if (configuration.getAupExpirySec() != null) {
-            entity.setAupExpiresAt(LocalDate.ofEpochDay(Duration.ofMillis(Instant.now().toEpochMilli() + configuration.getAupExpirySec()).toDays()));
+        if (configuration.getAupExpiryDays() != null) {
+            entity.setAupExpiresAt(LocalDate.now().plusDays(configuration.getAupExpiryDays()));
         } else {
             entity.setAupExpiresAt(null);
         }
@@ -331,6 +333,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setChangedBy(invitationEntity.getCheckAdmin());
         entity.setStatus(MemberStatusEnum.ENABLED);
         entity.setJustification(null);
+        entity.setGroupEnrollmentConfigurationId(configuration.getId());
         update(entity);
 
         if (isNotMember) {

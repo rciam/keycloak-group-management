@@ -52,11 +52,11 @@ public class GroupEnrollmentConfigurationEntity {
     @Column(name="REQUIRE_APPROVAL")
     protected Boolean requireApproval;
 
-    @Column(name="AUP_EXPIRY_SEC")
-    protected Long aupExpirySec;
+    @Column(name="AUP_EXPIRY_DAYS")
+    protected Long aupExpiryDays;
 
-    @Column(name="MEMBERSHIP_EXPIRATION_SEC")
-    protected Long membershipExpirationSec;
+    @Column(name="MEMBERSHIP_EXPIRATION_DAYS")
+    protected Long membershipExpirationDays;
 
     @Column(name="EXPIRATION_NOTIFICATION_PERIOD")
     protected Integer expirationNotificationPeriod;
@@ -119,20 +119,20 @@ public class GroupEnrollmentConfigurationEntity {
         this.requireApproval = requireApproval;
     }
 
-    public Long getAupExpirySec() {
-        return aupExpirySec;
+    public Long getAupExpiryDays() {
+        return aupExpiryDays;
     }
 
-    public void setAupExpirySec(Long aupExpirySec) {
-        this.aupExpirySec = aupExpirySec;
+    public void setAupExpiryDays(Long aupExpiryDays) {
+        this.aupExpiryDays = aupExpiryDays;
     }
 
-    public Long getMembershipExpirationSec() {
-        return membershipExpirationSec;
+    public Long getMembershipExpirationDays() {
+        return membershipExpirationDays;
     }
 
-    public void setMembershipExpirationSec(Long membershipExpirationSec) {
-        this.membershipExpirationSec = membershipExpirationSec;
+    public void setMembershipExpirationDays(Long membershipExpirationDays) {
+        this.membershipExpirationDays = membershipExpirationDays;
     }
 
     public Integer getExpirationNotificationPeriod() {

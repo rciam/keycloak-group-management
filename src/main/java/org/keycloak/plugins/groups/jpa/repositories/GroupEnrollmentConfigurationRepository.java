@@ -70,8 +70,8 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         entity.setHideConfiguration(rep.isHideConfiguration());
         entity.setRequireApproval(rep.getRequireApproval());
         entity.setRequireAupAcceptance(rep.getRequireAupAcceptance());
-        entity.setAupExpirySec(rep.getAupExpirySec());
-        entity.setMembershipExpirationSec(rep.getMembershipExpirationSec());
+        entity.setAupExpiryDays(rep.getAupExpiryDays());
+        entity.setMembershipExpirationDays(rep.getMembershipExpirationDays());
         entity.setEnrollmentConclusion(rep.getEnrollmentConclusion());
         entity.setEnrollmentIntroduction(rep.getEnrollmentIntroduction());
         entity.setInvitationConclusion(rep.getInvitationConclusion());

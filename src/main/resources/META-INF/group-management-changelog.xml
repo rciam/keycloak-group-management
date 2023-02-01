@@ -473,6 +473,13 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="changes-user-groups">
+        <addColumn tableName="USER_GROUP_MEMBERSHIP_EXTENSION">
+            <column name="GROUP_ENROLLMENT_CONFIGURATION_ID" type="VARCHAR(36)"/>
+        </addColumn>
+        <renameColumn tableName="GROUP_ENROLLMENT_CONFIGURATION" oldColumnName="AUP_EXPIRY_SEC" newColumnName="AUP_EXPIRY_DAYS" columnDataType="bigint"/>
+        <renameColumn tableName="GROUP_ENROLLMENT_CONFIGURATION" oldColumnName="MEMBERSHIP_EXPIRATION_SEC" newColumnName="MEMBERSHIP_EXPIRATION_DAYS" columnDataType="bigint"/>
+    </changeSet>
 
 
 </databaseChangeLog>
