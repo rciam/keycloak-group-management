@@ -1,8 +1,7 @@
 package org.keycloak.plugins.groups.representations;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -28,6 +27,7 @@ public class UserGroupMembershipExtensionRepresentation {
     protected LocalDate aupExpiresAt;
     protected String justification;
     protected GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
+    protected List<String> getGroupRoles;
 
     public UserGroupMembershipExtensionRepresentation(){}
 
@@ -109,5 +109,13 @@ public class UserGroupMembershipExtensionRepresentation {
 
     public void setGroupEnrollmentConfiguration(GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration) {
         this.groupEnrollmentConfiguration = groupEnrollmentConfiguration;
+    }
+
+    public List<String> getGetGroupRoles() {
+        return getGroupRoles;
+    }
+
+    public void setGetGroupRoles(List<String> getGroupRoles) {
+        this.getGroupRoles = getGroupRoles;
     }
 }

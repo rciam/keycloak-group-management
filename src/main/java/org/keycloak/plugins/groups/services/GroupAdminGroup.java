@@ -28,9 +28,12 @@ import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.representations.account.UserRepresentation;
@@ -46,6 +49,7 @@ public class GroupAdminGroup {
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final GroupAdminRepository groupAdminRepository;
+    private final GroupRolesRepository groupRolesRepository;
     //TODO Add real url
     private static final String ADD_ADMIN_URL = "http://localhost:8080/realms/master/agm/dummy";
 
@@ -54,11 +58,12 @@ public class GroupAdminGroup {
         this.realm = realm;
         this.voAdmin = voAdmin;
         this.group = group;
-        this.groupEnrollmentConfigurationRepository = new GroupEnrollmentConfigurationRepository(session, session.getContext().getRealm());
-        this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, session.getContext().getRealm());
+        this.groupEnrollmentConfigurationRepository = new GroupEnrollmentConfigurationRepository(session, realm);
+        this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
+        this.groupAdminRepository = new GroupAdminRepository(session, realm);
+        this.groupRolesRepository = new GroupRolesRepository(session, realm, new GroupEnrollmentRepository(session, realm, null), userGroupMembershipExtensionRepository);
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
-        this.groupAdminRepository = new GroupAdminRepository(session, realm);
     }
 
     @GET
@@ -96,6 +101,28 @@ public class GroupAdminGroup {
             }
         }
         //aup change action
+        return Response.noContent().build();
+    }
+
+    @GET
+    @Path("/roles")
+    @Produces("application/json")
+    public List<String> getGroupRoles() {
+        return groupRolesRepository.getGroupRolesByGroup(group.getId()).map(GroupRolesEntity::getName).collect(Collectors.toList());
+    }
+
+    @POST
+    @Path("/roles")
+    public Response saveGroupRole(@QueryParam("name") String name) {
+        groupRolesRepository.create(name, group.getId());
+        return Response.noContent().build();
+    }
+
+    @DELETE
+    @Path("/role/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response deleteGroupRole(@PathParam("id") String id) {
+        groupRolesRepository.delete(id);
         return Response.noContent().build();
     }
 

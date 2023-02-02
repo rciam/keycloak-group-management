@@ -481,5 +481,72 @@
         <renameColumn tableName="GROUP_ENROLLMENT_CONFIGURATION" oldColumnName="MEMBERSHIP_EXPIRATION_SEC" newColumnName="MEMBERSHIP_EXPIRATION_DAYS" columnDataType="bigint"/>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="group_roles">
+        <createTable tableName="GROUP_ROLES">
+            <column name="ID" type="VARCHAR(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="GROUP_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="NAME" type="VARCHAR(256)" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="GROUP_MEMBERSHIP_ROLES">
+            <column name="GROUP_ROLES_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="USER_GROUP_MEMBERSHIP_EXTENSION_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="GROUP_ENROLLMENT_ROLES">
+            <column name="GROUP_ROLES_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="GROUP_ENROLLMENT_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                constraintName="group_roles_fk"
+                baseTableName="GROUP_ROLES"
+                baseColumnNames="GROUP_ID"
+                referencedTableName="KEYCLOAK_GROUP"
+                referencedColumnNames="id"
+        />
+        <addUniqueConstraint columnNames="GROUP_ID, NAME" constraintName="UK_GROUP_ROLES" tableName="GROUP_ROLES"/>
+        <addForeignKeyConstraint
+                constraintName="group_membership_roles_fk"
+                baseTableName="GROUP_MEMBERSHIP_ROLES"
+                baseColumnNames="GROUP_ROLES_ID"
+                referencedTableName="GROUP_ROLES"
+                referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint
+                constraintName="group_membership_roles_fk2"
+                baseTableName="GROUP_MEMBERSHIP_ROLES"
+                baseColumnNames="USER_GROUP_MEMBERSHIP_EXTENSION_ID"
+                referencedTableName="USER_GROUP_MEMBERSHIP_EXTENSION"
+                referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint
+                constraintName="group_enrollment_roles_fk"
+                baseTableName="GROUP_ENROLLMENT_ROLES"
+                baseColumnNames="GROUP_ROLES_ID"
+                referencedTableName="GROUP_ROLES"
+                referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint
+                constraintName="group_enrollment_roles_fk2"
+                baseTableName="GROUP_ENROLLMENT_ROLES"
+                baseColumnNames="GROUP_ENROLLMENT_ID"
+                referencedTableName="GROUP_ENROLLMENT"
+                referencedColumnNames="id"
+        />
+    </changeSet>
+
 
 </databaseChangeLog>

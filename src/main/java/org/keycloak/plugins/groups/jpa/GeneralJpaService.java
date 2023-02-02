@@ -9,6 +9,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 
 public class GeneralJpaService {
@@ -19,14 +20,17 @@ public class GeneralJpaService {
     private final GroupAdminRepository groupAdminRepository;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final GroupEnrollmentRepository groupEnrollmentRepository;
+    private final GroupRolesRepository groupRolesRepository;
 
     public GeneralJpaService(KeycloakSession session, RealmModel realm, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository) {
         this.realm = realm;
         this.session = session;
         this.groupEnrollmentConfigurationRepository = groupEnrollmentConfigurationRepository;
-        this.groupAdminRepository = new GroupAdminRepository(session, session.getContext().getRealm());
-        this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, session.getContext().getRealm());
-        this.groupEnrollmentRepository = new GroupEnrollmentRepository(session, session.getContext().getRealm());
+        this.groupAdminRepository = new GroupAdminRepository(session, realm);
+        this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
+        this.groupEnrollmentRepository = new GroupEnrollmentRepository(session, realm, null);
+        this.groupRolesRepository = new GroupRolesRepository(session, realm);
+
     }
 
     @Transactional
@@ -36,6 +40,7 @@ public class GeneralJpaService {
         userGroupMembershipExtensionRepository.deleteByGroup(group.getId());
         groupEnrollmentConfigurationRepository.deleteByGroup(group.getId());
         groupAdminRepository.deleteByGroup(group.getId());
+        groupRolesRepository.deleteByGroup(group.getId());
 
         realm.removeGroup(group);
     }

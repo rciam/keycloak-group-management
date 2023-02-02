@@ -3,7 +3,7 @@ package org.keycloak.plugins.groups.jpa.repositories;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -15,7 +15,6 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
-import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
@@ -23,12 +22,14 @@ import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentPager;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
-import org.keycloak.plugins.groups.representations.GroupsPager;
 
 public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollmentEntity> {
 
-    public GroupEnrollmentRepository(KeycloakSession session, RealmModel realm) {
+    private final GroupRolesRepository groupRolesRepository;
+
+    public GroupEnrollmentRepository(KeycloakSession session, RealmModel realm, GroupRolesRepository groupRolesRepository) {
         super(session, realm);
+        this.groupRolesRepository = groupRolesRepository;
     }
 
     @Override
@@ -36,7 +37,7 @@ public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollment
         return GroupEnrollmentEntity.class;
     }
 
-    public GroupEnrollmentEntity create(GroupEnrollmentRepresentation rep, String userId){
+    public GroupEnrollmentEntity create(GroupEnrollmentRepresentation rep, String userId, String groupId){
         GroupEnrollmentEntity entity = new GroupEnrollmentEntity();
         entity.setId(KeycloakModelUtils.generateId());
         UserEntity user = new UserEntity();
@@ -47,6 +48,8 @@ public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollment
         entity.setGroupEnrollmentConfiguration(configuration);
         entity.setReason(rep.getReason());
         entity.setStatus(EnrollmentStatusEnum.PENDING_APPROVAL);
+        if (rep.getGroupRoles() != null)
+            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x,groupId)).filter(Objects::nonNull).collect(Collectors.toList()));
         if (rep.getAttributes() != null)
             entity.setAttributes(rep.getAttributes().stream().map(x -> toEntity(x, entity)).collect(Collectors.toList()));
         create(entity);

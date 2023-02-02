@@ -2,7 +2,9 @@ package org.keycloak.plugins.groups.jpa.entities;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 
+import org.keycloak.authorization.jpa.entities.PolicyEntity;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.enums.MemberStatusEnum;
@@ -13,8 +15,11 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -66,6 +71,10 @@ public class UserGroupMembershipExtensionEntity {
 
     @Column(name="GROUP_ENROLLMENT_CONFIGURATION_ID")
     protected String groupEnrollmentConfigurationId;
+
+    @ManyToMany
+    @JoinTable(name = "GROUP_MEMBERSHIP_ROLES", joinColumns = @JoinColumn(name = "USER_GROUP_MEMBERSHIP_EXTENSION_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
+    private List<GroupRolesEntity> groupRoles;
 
     public String getId() {
         return id;
@@ -145,5 +154,13 @@ public class UserGroupMembershipExtensionEntity {
 
     public void setGroupEnrollmentConfigurationId(String groupEnrollmentConfigurationId) {
         this.groupEnrollmentConfigurationId = groupEnrollmentConfigurationId;
+    }
+
+    public List<GroupRolesEntity> getGroupRoles() {
+        return groupRoles;
+    }
+
+    public void setGroupRoles(List<GroupRolesEntity> groupRoles) {
+        this.groupRoles = groupRoles;
     }
 }

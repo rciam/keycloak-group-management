@@ -76,6 +76,8 @@ public class EntityToRepresentation {
         rep.setMembershipExpiresAt(entity.getMembershipExpiresAt());
         rep.setValidFrom(entity.getValidFrom());
         rep.setStatus(entity.getStatus());
+        if (entity.getGroupRoles() != null)
+            rep.setGetGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
         return rep;
     }
 
@@ -92,6 +94,8 @@ public class EntityToRepresentation {
         rep.setReason(entity.getReason());
         if ( entity.getAttributes()!= null)
             rep.setAttributes(entity.getAttributes().stream().map(attr-> EntityToRepresentation.toRepresentation(attr)).collect(Collectors.toList()));
+        if (entity.getGroupRoles() != null)
+            rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
         return rep;
     }
 
