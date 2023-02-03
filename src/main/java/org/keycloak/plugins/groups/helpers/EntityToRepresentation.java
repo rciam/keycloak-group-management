@@ -77,7 +77,7 @@ public class EntityToRepresentation {
         rep.setValidFrom(entity.getValidFrom());
         rep.setStatus(entity.getStatus());
         if (entity.getGroupRoles() != null)
-            rep.setGetGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
+            rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
         return rep;
     }
 

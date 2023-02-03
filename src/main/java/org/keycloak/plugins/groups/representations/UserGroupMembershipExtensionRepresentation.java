@@ -27,7 +27,7 @@ public class UserGroupMembershipExtensionRepresentation {
     protected LocalDate aupExpiresAt;
     protected String justification;
     protected GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
-    protected List<String> getGroupRoles;
+    protected List<String> groupRoles;
 
     public UserGroupMembershipExtensionRepresentation(){}
 
@@ -111,11 +111,11 @@ public class UserGroupMembershipExtensionRepresentation {
         this.groupEnrollmentConfiguration = groupEnrollmentConfiguration;
     }
 
-    public List<String> getGetGroupRoles() {
-        return getGroupRoles;
+    public List<String> getGroupRoles() {
+        return groupRoles;
     }
 
-    public void setGetGroupRoles(List<String> getGroupRoles) {
-        this.getGroupRoles = getGroupRoles;
+    public void setGroupRoles(List<String> groupRoles) {
+        this.groupRoles = groupRoles;
     }
 }
