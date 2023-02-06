@@ -33,6 +33,7 @@ import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEnti
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupInvitationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
@@ -61,7 +62,7 @@ public class GroupAdminGroup {
         this.groupEnrollmentConfigurationRepository = new GroupEnrollmentConfigurationRepository(session, realm);
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
         this.groupAdminRepository = new GroupAdminRepository(session, realm);
-        this.groupRolesRepository = new GroupRolesRepository(session, realm, new GroupEnrollmentRepository(session, realm, null), userGroupMembershipExtensionRepository);
+        this.groupRolesRepository = new GroupRolesRepository(session, realm, new GroupEnrollmentRepository(session, realm, null), userGroupMembershipExtensionRepository, new GroupInvitationRepository(session, realm));
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
     }

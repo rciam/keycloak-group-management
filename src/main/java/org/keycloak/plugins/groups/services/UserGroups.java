@@ -144,7 +144,7 @@ public class UserGroups {
                     UserModel admin = session.users().getUserById(realm, adminId);
                     if (admin != null) {
                         customFreeMarkerEmailTemplateProvider.setUser(admin);
-                        customFreeMarkerEmailTemplateProvider.sendGroupAdminEnrollmentCreationEmail(user, configuration.getGroup().getName(), rep.getReason(), entity.getId());
+                        customFreeMarkerEmailTemplateProvider.sendGroupAdminEnrollmentCreationEmail(user, configuration.getGroup().getName(), rep.getGroupRoles(), rep.getReason(), entity.getId());
                     }
                 } catch (EmailException e) {
                     ServicesLogger.LOGGER.failedToSendEmail(e);

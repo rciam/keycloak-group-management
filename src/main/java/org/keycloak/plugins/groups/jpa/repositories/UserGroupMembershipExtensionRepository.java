@@ -265,13 +265,17 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setJustification(enrollmentEntity.getAdminJustification());
         entity.setStatus(MemberStatusEnum.ENABLED);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
-        entity.setGroupRoles(enrollmentEntity.getGroupRoles().stream().map(x -> {
-            GroupRolesEntity r = new GroupRolesEntity();
-            r.setId(x.getId());
-            r.setGroup(x.getGroup());
-            r.setName(x.getName());
-            return  r;
-        }).collect(Collectors.toList()));
+        if (enrollmentEntity.getGroupRoles() != null) {
+            entity.setGroupRoles(enrollmentEntity.getGroupRoles().stream().map(x -> {
+                GroupRolesEntity r = new GroupRolesEntity();
+                r.setId(x.getId());
+                r.setGroup(x.getGroup());
+                r.setName(x.getName());
+                return r;
+            }).collect(Collectors.toList()));
+        } else {
+            entity.setGroupRoles(null);
+        }
         update(entity);
 
         if (isNotMember) {
@@ -356,7 +360,17 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setStatus(MemberStatusEnum.ENABLED);
         entity.setJustification(null);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
-        //TODO roles
+        if (invitationEntity.getGroupRoles() != null ) {
+            entity.setGroupRoles(invitationEntity.getGroupRoles().stream().map(x -> {
+                GroupRolesEntity r = new GroupRolesEntity();
+                r.setId(x.getId());
+                r.setGroup(x.getGroup());
+                r.setName(x.getName());
+                return r;
+            }).collect(Collectors.toList()));
+        } else {
+            entity.setGroupRoles(null);
+        }
         update(entity);
 
         if (isNotMember) {

@@ -548,5 +548,30 @@
         />
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="group_invitation_roles">
+        <createTable tableName="GROUP_INVITATION_ROLES">
+            <column name="GROUP_ROLES_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="GROUP_INVITATION_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                constraintName="group_invitation_roles_fk"
+                baseTableName="GROUP_INVITATION_ROLES"
+                baseColumnNames="GROUP_ROLES_ID"
+                referencedTableName="GROUP_ROLES"
+                referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint
+                constraintName="group_invitation_roles_fk2"
+                baseTableName="GROUP_INVITATION_ROLES"
+                baseColumnNames="GROUP_INVITATION_ID"
+                referencedTableName="GROUP_INVITATION"
+                referencedColumnNames="id"
+        />
+    </changeSet>
+
 
 </databaseChangeLog>

@@ -13,15 +13,17 @@ public class GroupRolesRepository extends GeneralRepository<GroupRolesEntity> {
 
     private GroupEnrollmentRepository groupEnrollmentRepository;
     private UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
+    private GroupInvitationRepository groupInvitationRepository;
 
     public GroupRolesRepository(KeycloakSession session, RealmModel realm) {
         super(session, realm);
     }
 
-    public GroupRolesRepository(KeycloakSession session, RealmModel realm, GroupEnrollmentRepository groupEnrollmentRepository, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository) {
+    public GroupRolesRepository(KeycloakSession session, RealmModel realm, GroupEnrollmentRepository groupEnrollmentRepository, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupInvitationRepository groupInvitationRepository) {
         super(session, realm);
         this.groupEnrollmentRepository = groupEnrollmentRepository;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
+        this.groupInvitationRepository = groupInvitationRepository;
     }
 
     @Override
@@ -61,6 +63,10 @@ public class GroupRolesRepository extends GeneralRepository<GroupRolesEntity> {
         entity.getGroupExtensions().stream().forEach(x-> {
             x.getGroupRoles().removeIf(role -> id.equals(role.getId()));
             userGroupMembershipExtensionRepository.update(x);
+        });
+        entity.getGroupInvitations().stream().forEach(x-> {
+            x.getGroupRoles().removeIf(role -> id.equals(role.getId()));
+            groupInvitationRepository.update(x);
         });
         deleteEntity(id);
     }

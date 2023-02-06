@@ -1,6 +1,7 @@
 package org.keycloak.plugins.groups.jpa.entities;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -8,6 +9,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -40,6 +43,10 @@ public class GroupInvitationEntity {
 
     @Column(name = "REALM_ID")
     private String realmId;
+
+    @ManyToMany
+    @JoinTable(name = "GROUP_INVITATION_ROLES", joinColumns = @JoinColumn(name = "GROUP_INVITATION_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
+    private List<GroupRolesEntity> groupRoles;
 
     public String getId() {
         return id;
@@ -79,5 +86,13 @@ public class GroupInvitationEntity {
 
     public void setRealmId(String realmId) {
         this.realmId = realmId;
+    }
+
+    public List<GroupRolesEntity> getGroupRoles() {
+        return groupRoles;
+    }
+
+    public void setGroupRoles(List<GroupRolesEntity> groupRoles) {
+        this.groupRoles = groupRoles;
     }
 }
