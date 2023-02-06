@@ -60,10 +60,30 @@
   {
     "id": "group-management",
     "icon": "pf-icon-applications",
-    "path": "group-management",
     "label": "groupManagementSidebarTitle",
     "descriptionLabel": "groupsManagementIntroMessage",
-    "modulePath": "/content/group-management-pages/GroupManagementPage.js",
-    "componentName": "GroupsManagementPage"
+    "content": [
+      {
+        "id": "showgroups",
+        "path": "group-managment/showgroups",
+        "label": "showgroupsActivitySidebarTitle",
+        "modulePath": "/content/group-management-pages/MyGroups.js",
+        "componentName": "MyGroups"
+      },
+      {
+        "id": "joingroups",
+        "path": "group-managment/joingroups",
+        "label": "joingroupsActivitySidebarTitle",
+        "modulePath": "/content/group-management-pages/EnrollmentRequest.js",
+        "componentName": "EnrollmentRequest"
+      },
+      {
+        "id": "enrollment",
+        "path": "group-managment/enrollment",
+        "label": "enrollmentAccountsSidebarTitle",
+        "modulePath": "/content/group-management-pages/EnrollmentProgress.js",
+        "componentName": "EnrollmentProgress"
+      }
+    ]
   }
 ]
