@@ -1,6 +1,8 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.keycloak.models.GroupModel;
@@ -18,8 +20,15 @@ import org.keycloak.plugins.groups.representations.GroupInvitationInitialReprese
 
 public class GroupInvitationRepository extends GeneralRepository<GroupInvitationEntity> {
 
+    private GroupRolesRepository groupRolesRepository;
+
     public GroupInvitationRepository(KeycloakSession session, RealmModel realm) {
         super(session, realm);
+    }
+
+    public GroupInvitationRepository(KeycloakSession session, RealmModel realm, GroupRolesRepository groupRolesRepository) {
+        super(session, realm);
+        this.groupRolesRepository = groupRolesRepository;
     }
 
     @Override
@@ -36,33 +45,14 @@ public class GroupInvitationRepository extends GeneralRepository<GroupInvitation
         entity.setCheckAdmin(checkAdmin);
         entity.setGroupEnrollmentConfiguration(conf);
         entity.setRealmId(realm.getId());
+        if (rep.getGroupRoles() != null)
+            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x,conf.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toList()));
         create(entity);
         return entity.getId();
     }
 
     public Stream<GroupInvitationEntity> getAllByRealm(){
         return em.createNamedQuery("getAllGroupInvitations").setParameter("realmId", realm.getId()).getResultStream();
-    }
-
-    public void acceptInvitation(GroupInvitationEntity entity, KeycloakSession session, UserModel userModel, GroupModel groupModel) {
-        UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository= new UserGroupMembershipExtensionRepository(session, realm);
-
-        UserGroupMembershipExtensionEntity memberExtensionEntity = new UserGroupMembershipExtensionEntity();
-        memberExtensionEntity.setId(KeycloakModelUtils.generateId());
-       // memberExtensionEntity.setAupExpiresAt(rep.getAupExpiresAt());
-      //  memberExtensionEntity.setMembershipExpiresAt(rep.getMembershipExpiresAt());
-        GroupEntity group = new GroupEntity();
-        group.setId(groupModel.getId());
-        memberExtensionEntity.setGroup(group);
-        UserEntity user = new UserEntity();
-        user.setId(userModel.getId());
-        memberExtensionEntity.setUser(user);
-        memberExtensionEntity.setChangedBy(entity.getCheckAdmin());
-        memberExtensionEntity.setStatus(MemberStatusEnum.ENABLED);
-        create(entity);
-        userModel.joinGroup(groupModel);
-
-
     }
 
 }

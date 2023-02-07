@@ -1,5 +1,7 @@
 package org.keycloak.plugins.groups.representations;
 
+import java.util.List;
+
 public class GroupInvitationInitialRepresentation {
 
     private String email;
@@ -7,6 +9,8 @@ public class GroupInvitationInitialRepresentation {
     private String lastName;
     private boolean withoutAcceptance;
     private GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
+
+    private List<String> groupRoles;
 
     public String getEmail() {
         return email;
@@ -46,5 +50,13 @@ public class GroupInvitationInitialRepresentation {
 
     public void setGroupEnrollmentConfiguration(GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration) {
         this.groupEnrollmentConfiguration = groupEnrollmentConfiguration;
+    }
+
+    public List<String> getGroupRoles() {
+        return groupRoles;
+    }
+
+    public void setGroupRoles(List<String> groupRoles) {
+        this.groupRoles = groupRoles;
     }
 }

@@ -1,7 +1,9 @@
 package org.keycloak.plugins.groups.email;
 
 import java.net.URI;
+import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.keycloak.email.EmailException;
 import org.keycloak.email.freemarker.FreeMarkerEmailTemplateProvider;
 import org.keycloak.models.KeycloakSession;
@@ -57,9 +59,14 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send(isAccepted ? "acceptEnrollmentSubject" : "rejectEnrollmentSubject", "accept-reject-enrollment.ftl", attributes);
     }
 
-    public void sendGroupAdminEnrollmentCreationEmail(UserModel userRequest, String groupname, String reason, String enrollmentId) throws EmailException {
+    public void sendGroupAdminEnrollmentCreationEmail(UserModel userRequest, String groupname, List<String> groupRoles, String reason, String enrollmentId) throws EmailException {
         attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
         attributes.put("user", userRequest.getFirstName()+" "+userRequest.getLastName());
+        if (groupRoles != null && !groupRoles.isEmpty()) {
+            StringBuilder sb = new StringBuilder(groupname).append(" with roles : ");
+            groupRoles.stream().forEach(role -> sb.append(role).append(", "));
+            groupname= StringUtils.removeEnd(sb.toString(),", ")+" and ";
+        }
         attributes.put("groupname", groupname);
         attributes.put("reason", reason != null ? reason : "");
         KeycloakUriInfo uriInfo = session.getContext().getUri();
@@ -91,7 +98,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send( "groupMembershipExpirationNotificationSubject", "group-membership-expiration-notification.ftl", attributes);
     }
 
-    public void sendGroupInvitationEmail(UserModel groupadmin, String groupname, boolean withoutAcceptance, String id) throws EmailException, EmailException {
+    public void sendGroupInvitationEmail(UserModel groupadmin, String groupname, boolean withoutAcceptance, List<String> groupRoles, String id) throws EmailException, EmailException {
         StringBuilder sb = new StringBuilder();
         if (user.getFirstName() != null){
             sb.append(user.getFirstName()).append(" ");
@@ -104,6 +111,11 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
 
         attributes.put("fullname", sb.toString());
         attributes.put("groupadmin", groupadmin.getFirstName()+" "+groupadmin.getLastName());
+        if (withoutAcceptance && groupRoles != null && !groupRoles.isEmpty()) {
+            StringBuilder sb2 = new StringBuilder(groupname).append(" with roles : ");
+            groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
+            groupname= StringUtils.removeEnd(sb2.toString(),", ");
+        }
         attributes.put("groupname", groupname);
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();

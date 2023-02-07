@@ -1,19 +1,9 @@
 package org.keycloak.plugins.groups.representations;
 
-import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
-import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
-import java.util.Collection;
 import java.util.List;
-
-import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 
 public class GroupEnrollmentRepresentation {
 
@@ -26,6 +16,8 @@ public class GroupEnrollmentRepresentation {
     private String adminJustification;
     private String comment;
     private List<GroupEnrollmentAttributesRepresentation> attributes;
+
+    private List<String> groupRoles;
 
     public GroupEnrollmentRepresentation() {
     }
@@ -100,5 +92,13 @@ public class GroupEnrollmentRepresentation {
 
     public void setAttributes(List<GroupEnrollmentAttributesRepresentation> attributes) {
         this.attributes = attributes;
+    }
+
+    public List<String> getGroupRoles() {
+        return groupRoles;
+    }
+
+    public void setGroupRoles(List<String> groupRoles) {
+        this.groupRoles = groupRoles;
     }
 }

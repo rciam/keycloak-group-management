@@ -23,6 +23,7 @@ import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupInvitationRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentPager;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
@@ -71,8 +72,8 @@ public class UserGroups {
         this.user = user;
         this.adminEvent = adminEvent;
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
-        this.groupEnrollmentRepository =  new GroupEnrollmentRepository(session, realm);
-        this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
+        this.groupEnrollmentRepository =  new GroupEnrollmentRepository(session, realm, new GroupRolesRepository(session, realm));
+        this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm, groupEnrollmentConfigurationRepository, new GroupRolesRepository(session, realm));
         this.groupAdminRepository =  new GroupAdminRepository(session, realm);
         this.groupInvitationRepository =  new GroupInvitationRepository(session, realm);
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
@@ -135,7 +136,7 @@ public class UserGroups {
             throw new BadRequestException("You have an ongoing request to become member of this group");
 
         if (configuration.getRequireApproval()) {
-            GroupEnrollmentEntity entity = groupEnrollmentRepository.create(rep, user.getId());
+            GroupEnrollmentEntity entity = groupEnrollmentRepository.create(rep, user.getId(), configuration.getGroup().getId());
             //email to group admins if they must accept it
             //find thems based on group
             groupAdminRepository.getAllAdminGroupUsers(configuration.getGroup().getId()).forEach(adminId -> {
@@ -143,7 +144,7 @@ public class UserGroups {
                     UserModel admin = session.users().getUserById(realm, adminId);
                     if (admin != null) {
                         customFreeMarkerEmailTemplateProvider.setUser(admin);
-                        customFreeMarkerEmailTemplateProvider.sendGroupAdminEnrollmentCreationEmail(user, configuration.getGroup().getName(), rep.getReason(), entity.getId());
+                        customFreeMarkerEmailTemplateProvider.sendGroupAdminEnrollmentCreationEmail(user, configuration.getGroup().getName(), rep.getGroupRoles(), rep.getReason(), entity.getId());
                     }
                 } catch (EmailException e) {
                     ServicesLogger.LOGGER.failedToSendEmail(e);

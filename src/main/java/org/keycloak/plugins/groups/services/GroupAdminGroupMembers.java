@@ -21,6 +21,7 @@ import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupInvitationRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupInvitationInitialRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
@@ -48,7 +49,7 @@ public class GroupAdminGroupMembers {
         this.group = group;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
-        this.groupInvitationRepository = new GroupInvitationRepository(session, realm);
+        this.groupInvitationRepository = new GroupInvitationRepository(session, realm, new GroupRolesRepository(session, realm));
         this.groupEnrollmentConfigurationRepository = new GroupEnrollmentConfigurationRepository(session, realm);
     }
 
@@ -78,7 +79,7 @@ public class GroupAdminGroupMembers {
         try {
             UserAdapter user = Utils.getDummyUser(groupInvitationInitialRep.getEmail(), groupInvitationInitialRep.getFirstName(), groupInvitationInitialRep.getLastName());
             customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendGroupInvitationEmail(voAdmin, group.getName(), groupInvitationInitialRep.isWithoutAcceptance(), emailId);
+            customFreeMarkerEmailTemplateProvider.sendGroupInvitationEmail(voAdmin, group.getName(), groupInvitationInitialRep.isWithoutAcceptance(), groupInvitationInitialRep.getGroupRoles(), emailId);
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         }

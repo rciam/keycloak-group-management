@@ -21,6 +21,7 @@ import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentPager;
 import org.keycloak.plugins.groups.representations.GroupsPager;
 import org.keycloak.services.ForbiddenException;
@@ -41,7 +42,7 @@ public class GroupAdminService {
         this.groupAdmin = user;
         this.adminEvent = adminEvent;
         this.groupAdminRepository =  new GroupAdminRepository(session, realm);
-        this.groupEnrollmentRepository =  new GroupEnrollmentRepository(session, realm);
+        this.groupEnrollmentRepository =  new GroupEnrollmentRepository(session, realm, new GroupRolesRepository(session, realm));
     }
 
 

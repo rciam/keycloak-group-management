@@ -14,6 +14,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -65,6 +67,10 @@ public class GroupEnrollmentEntity {
 
     @OneToMany(cascade =CascadeType.ALL, orphanRemoval = true, mappedBy = "enrollment")
     private List<GroupEnrollmentAttributesEntity> attributes;
+
+    @ManyToMany
+    @JoinTable(name = "GROUP_ENROLLMENT_ROLES", joinColumns = @JoinColumn(name = "GROUP_ENROLLMENT_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
+    private List<GroupRolesEntity> groupRoles;
 
     public String getId() {
         return id;
@@ -141,5 +147,13 @@ public class GroupEnrollmentEntity {
 
     public void setAttributes(List<GroupEnrollmentAttributesEntity> attributes) {
         this.attributes = attributes;
+    }
+
+    public List<GroupRolesEntity> getGroupRoles() {
+        return groupRoles;
+    }
+
+    public void setGroupRoles(List<GroupRolesEntity> groupRoles) {
+        this.groupRoles = groupRoles;
     }
 }

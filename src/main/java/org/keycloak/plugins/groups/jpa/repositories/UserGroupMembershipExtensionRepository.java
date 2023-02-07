@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,6 +37,7 @@ import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEnti
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupInvitationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
@@ -50,11 +52,19 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     private static final Logger logger = Logger.getLogger(UserGroupMembershipExtensionRepository.class);
     private final String adminCli ="admin-cli";
     private final GroupManagementEventRepository eventRepository;
-    private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
+    private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
+    private GroupRolesRepository groupRolesRepository;
+
     public UserGroupMembershipExtensionRepository(KeycloakSession session, RealmModel realm) {
         super(session, realm);
         this.eventRepository = new GroupManagementEventRepository(session, realm);
-        this.groupEnrollmentConfigurationRepository = new GroupEnrollmentConfigurationRepository(session, realm);
+    }
+
+    public UserGroupMembershipExtensionRepository(KeycloakSession session, RealmModel realm, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, GroupRolesRepository groupRolesRepository) {
+        super(session, realm);
+        this.eventRepository = new GroupManagementEventRepository(session, realm);
+        this.groupEnrollmentConfigurationRepository = groupEnrollmentConfigurationRepository;
+        this.groupRolesRepository = groupRolesRepository;
     }
 
     @Override
@@ -255,6 +265,17 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setJustification(enrollmentEntity.getAdminJustification());
         entity.setStatus(MemberStatusEnum.ENABLED);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
+        if (enrollmentEntity.getGroupRoles() != null) {
+            entity.setGroupRoles(enrollmentEntity.getGroupRoles().stream().map(x -> {
+                GroupRolesEntity r = new GroupRolesEntity();
+                r.setId(x.getId());
+                r.setGroup(x.getGroup());
+                r.setName(x.getName());
+                return r;
+            }).collect(Collectors.toList()));
+        } else {
+            entity.setGroupRoles(null);
+        }
         update(entity);
 
         if (isNotMember) {
@@ -298,6 +319,11 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setJustification(null);
         entity.setStatus(MemberStatusEnum.ENABLED);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
+        if (rep.getGroupRoles() != null) {
+            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, configuration.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toList()));
+        } else {
+            entity.setGroupRoles(null);
+        }
         update(entity);
 
         if (isNotMember) {
@@ -334,6 +360,17 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setStatus(MemberStatusEnum.ENABLED);
         entity.setJustification(null);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
+        if (invitationEntity.getGroupRoles() != null ) {
+            entity.setGroupRoles(invitationEntity.getGroupRoles().stream().map(x -> {
+                GroupRolesEntity r = new GroupRolesEntity();
+                r.setId(x.getId());
+                r.setGroup(x.getGroup());
+                r.setName(x.getName());
+                return r;
+            }).collect(Collectors.toList()));
+        } else {
+            entity.setGroupRoles(null);
+        }
         update(entity);
 
         if (isNotMember) {
