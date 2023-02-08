@@ -48,6 +48,9 @@ public class GroupRolesEntity {
     @ManyToMany(mappedBy = "groupRoles", fetch = FetchType.LAZY)
     private List<GroupInvitationEntity> groupInvitations = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "groupRoles", fetch = FetchType.LAZY)
+    private List<GroupEnrollmentConfigurationEntity> configurations = new ArrayList<>();
+
     public String getId() {
         return id;
     }
@@ -94,5 +97,13 @@ public class GroupRolesEntity {
 
     public void setGroupInvitations(List<GroupInvitationEntity> groupInvitations) {
         this.groupInvitations = groupInvitations;
+    }
+
+    public List<GroupEnrollmentConfigurationEntity> getConfigurations() {
+        return configurations;
+    }
+
+    public void setConfigurations(List<GroupEnrollmentConfigurationEntity> configurations) {
+        this.configurations = configurations;
     }
 }

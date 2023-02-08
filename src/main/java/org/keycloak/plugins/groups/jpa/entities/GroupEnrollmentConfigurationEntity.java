@@ -11,6 +11,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -76,8 +78,15 @@ public class GroupEnrollmentConfigurationEntity {
     @Column(name="HIDE_CONFIGURATION")
     protected Boolean hideConfiguration;
 
+    @Column(name="CONFIGURABLE_ROLE")
+    private Boolean configurableRole;
+
     @OneToMany(cascade =CascadeType.ALL, orphanRemoval = true, mappedBy = "groupEnrollmentConfiguration")
     private List<GroupEnrollmentConfigurationAttributesEntity> attributes;
+
+    @ManyToMany
+    @JoinTable(name = "GROUP_ENROLLMENT_CONFIGURATION_ROLES", joinColumns = @JoinColumn(name = "GROUP_ENROLLMENT_CONFIGURATION_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
+    private List<GroupRolesEntity> groupRoles;
 
     public String getName() {
         return name;
@@ -205,5 +214,21 @@ public class GroupEnrollmentConfigurationEntity {
 
     public void setAttributes(List<GroupEnrollmentConfigurationAttributesEntity> attributes) {
         this.attributes = attributes;
+    }
+
+    public List<GroupRolesEntity> getGroupRoles() {
+        return groupRoles;
+    }
+
+    public void setGroupRoles(List<GroupRolesEntity> groupRoles) {
+        this.groupRoles = groupRoles;
+    }
+
+    public Boolean isConfigurableRole() {
+        return configurableRole;
+    }
+
+    public void setConfigurableRole(Boolean configurableRole) {
+        this.configurableRole = configurableRole;
     }
 }

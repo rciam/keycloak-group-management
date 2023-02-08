@@ -37,10 +37,13 @@ public class EntityToRepresentation {
         rep.setEnrollmentIntroduction(entity.getEnrollmentIntroduction());
         rep.setInvitationConclusion(entity.getInvitationConclusion());
         rep.setInvitationIntroduction(entity.getInvitationIntroduction());
+        rep.setConfigurableRole(entity.isConfigurableRole());
         if ( entity.getAupEntity() != null)
             rep.setAup(toRepresentation(entity.getAupEntity()));
         if ( containAttributes && entity.getAttributes() != null)
             rep.setAttributes(entity.getAttributes().stream().map(EntityToRepresentation::toRepresentation).collect(Collectors.toList()));
+        if (entity.getGroupRoles() != null)
+            rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
         return rep;
     }
 
