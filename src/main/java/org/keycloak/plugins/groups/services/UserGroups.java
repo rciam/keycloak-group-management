@@ -48,6 +48,7 @@ import javax.ws.rs.core.Response;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class UserGroups {
 
@@ -84,9 +85,8 @@ public class UserGroups {
     @GET
     @Path("/groups")
     @Produces("application/json")
-    public Response getAllUserGroups() {
-        List<GroupRepresentation> userGroups = user.getGroupsStream().map(g-> ModelToRepresentation.toRepresentation(g,true)).collect(Collectors.toList());
-        return Response.ok().type(MediaType.APPLICATION_JSON).entity(userGroups).build();
+    public Stream<GroupRepresentation> getAllUserGroups() {
+        return user.getGroupsStream().map(g-> ModelToRepresentation.toRepresentation(g,true));
     }
 
     @Path("/group/{groupId}")
