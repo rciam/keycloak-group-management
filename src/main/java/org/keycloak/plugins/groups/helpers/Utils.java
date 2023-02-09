@@ -11,6 +11,7 @@ public class Utils {
     public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     public static final String expirationNotificationPeriod="expiration-notification-period";
     public static final String invitationExpirationPeriod ="invitation-expiration-period";
+    public static final String defaultGroupRole ="member";
 
     public static final String eventId = "1";
 

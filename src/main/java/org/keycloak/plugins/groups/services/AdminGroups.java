@@ -1,6 +1,8 @@
 package org.keycloak.plugins.groups.services;
 
 
+import java.util.stream.Collectors;
+
 import javax.persistence.PersistenceException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -28,12 +30,14 @@ import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.GeneralJpaService;
 import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
@@ -56,17 +60,19 @@ public class AdminGroups {
     private final GroupModel group;
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final GroupAdminRepository groupAdminRepository;
+    private final GroupRolesRepository groupRolesRepository;
     private final GeneralJpaService generalJpaService;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final AdminEventBuilder adminEvent;
 
-    public AdminGroups(KeycloakSession session, AdminPermissionEvaluator realmAuth, GroupModel group,  RealmModel realm, GeneralJpaService generalJpaService, AdminEventBuilder adminEvent) {
+    public AdminGroups(KeycloakSession session, AdminPermissionEvaluator realmAuth, GroupModel group,  RealmModel realm, GeneralJpaService generalJpaService, AdminEventBuilder adminEvent, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, GroupRolesRepository groupRolesRepository) {
         this.session = session;
         this.realm =  realm;
         this.realmAuth = realmAuth;
         this.group = group;
-        this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
+        this.groupEnrollmentConfigurationRepository =  groupEnrollmentConfigurationRepository;
         this.groupAdminRepository =  new GroupAdminRepository(session, realm);
+        this.groupRolesRepository = groupRolesRepository;
         this.generalJpaService =  generalJpaService;
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
@@ -176,11 +182,11 @@ public class AdminGroups {
         if (response.getStatus() >= 400) {
             //error response from client creation
             return response;
-        } else  {
+        } else if (groupEnrollmentConfigurationRepository.getByGroup(rep.getId()).collect(Collectors.toList()).isEmpty()) {
             //group creation
-            //get id from GroupRepresentation (response body)
             String groupId = response.readEntity(GroupRepresentation.class).getId();
             groupEnrollmentConfigurationRepository.createDefault(groupId, rep.getName());
+            groupRolesRepository.create(Utils.defaultGroupRole,rep.getId());
         }
         return Response.noContent().build();
     }
