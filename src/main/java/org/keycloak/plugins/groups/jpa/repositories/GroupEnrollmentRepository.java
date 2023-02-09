@@ -19,6 +19,7 @@ import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentPager;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
@@ -37,19 +38,26 @@ public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollment
         return GroupEnrollmentEntity.class;
     }
 
-    public GroupEnrollmentEntity create(GroupEnrollmentRepresentation rep, String userId, String groupId){
+    public GroupEnrollmentEntity create(GroupEnrollmentRepresentation rep, String userId, GroupEnrollmentConfigurationEntity configuration){
         GroupEnrollmentEntity entity = new GroupEnrollmentEntity();
         entity.setId(KeycloakModelUtils.generateId());
         UserEntity user = new UserEntity();
         user.setId(userId);
         entity.setUser(user);
-        GroupEnrollmentConfigurationEntity configuration = new GroupEnrollmentConfigurationEntity();
-        configuration.setId(rep.getGroupEnrollmentConfiguration().getId());
         entity.setGroupEnrollmentConfiguration(configuration);
         entity.setReason(rep.getReason());
         entity.setStatus(EnrollmentStatusEnum.PENDING_APPROVAL);
-        if (rep.getGroupRoles() != null)
-            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x,groupId)).filter(Objects::nonNull).collect(Collectors.toList()));
+        if (configuration.isConfigurableRole() && rep.getGroupRoles() != null) {
+            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, configuration.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toList()));
+        } else if (!configuration.isConfigurableRole() && configuration.getGroupRoles() != null){
+            entity.setGroupRoles(configuration.getGroupRoles().stream().map(x -> {
+                GroupRolesEntity r = new GroupRolesEntity();
+                r.setId(x.getId());
+                r.setGroup(x.getGroup());
+                r.setName(x.getName());
+                return r;
+            }).collect(Collectors.toList()));
+        }
         if (rep.getAttributes() != null)
             entity.setAttributes(rep.getAttributes().stream().map(x -> toEntity(x, entity)).collect(Collectors.toList()));
         create(entity);

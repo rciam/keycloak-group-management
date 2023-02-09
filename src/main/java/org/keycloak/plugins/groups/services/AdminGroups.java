@@ -34,6 +34,7 @@ import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEnti
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
@@ -66,6 +67,7 @@ public class AdminGroups {
         this.realmAuth = realmAuth;
         this.group = group;
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
+        this.groupEnrollmentConfigurationRepository.setGroupRolesRepository(new GroupRolesRepository(session, realm));
         this.groupAdminRepository =  new GroupAdminRepository(session, realm);
         this.generalJpaService =  generalJpaService;
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());

@@ -1,6 +1,7 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -11,14 +12,21 @@ import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.representations.GroupAupRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 
 public class GroupEnrollmentConfigurationRepository extends GeneralRepository<GroupEnrollmentConfigurationEntity> {
 
+    private GroupRolesRepository groupRolesRepository;
+
     public GroupEnrollmentConfigurationRepository(KeycloakSession session, RealmModel realm) {
         super(session, realm);
+    }
+
+    public void setGroupRolesRepository(GroupRolesRepository groupRolesRepository) {
+        this.groupRolesRepository = groupRolesRepository;
     }
 
     @Override
@@ -32,7 +40,7 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         GroupEntity group = new GroupEntity();
         group.setId(groupId);
         entity.setGroup(group);
-        toEntity(entity, rep);
+        toEntity(entity, rep, groupId);
         create(entity);
     }
 
@@ -48,11 +56,19 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         entity.setRequireAupAcceptance(false);
         entity.setActive(true);
         entity.setHideConfiguration(true);
+        entity.setConfigurableRole(true);
+        entity.setGroupRoles(groupRolesRepository.getGroupRolesByGroup(groupId).map(x -> {
+            GroupRolesEntity r = new GroupRolesEntity();
+            r.setId(x.getId());
+            r.setGroup(x.getGroup());
+            r.setName(x.getName());
+            return r;
+        }).collect(Collectors.toList()));
         create(entity);
     }
 
     public void update(GroupEnrollmentConfigurationEntity entity, GroupEnrollmentConfigurationRepresentation rep){
-        toEntity(entity, rep);
+        toEntity(entity, rep, entity.getGroup().getId());
         update(entity);
     }
 
@@ -64,7 +80,7 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         return em.createNamedQuery("getByGroup").setParameter("groupId",groupId).getResultStream();
     }
 
-    private void toEntity(GroupEnrollmentConfigurationEntity entity, GroupEnrollmentConfigurationRepresentation rep) {
+    private void toEntity(GroupEnrollmentConfigurationEntity entity, GroupEnrollmentConfigurationRepresentation rep, String groupId) {
         entity.setName(rep.getName());
         entity.setActive(rep.isActive());
         entity.setHideConfiguration(rep.isHideConfiguration());
@@ -76,6 +92,7 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         entity.setEnrollmentIntroduction(rep.getEnrollmentIntroduction());
         entity.setInvitationConclusion(rep.getInvitationConclusion());
         entity.setInvitationIntroduction(rep.getInvitationIntroduction());
+        entity.setConfigurableRole(rep.getConfigurableRole());
         if ( rep.getAup() != null)
             entity.setAupEntity(toEntity(rep.getAup()));
         if (rep.getAttributes() != null) {
@@ -83,6 +100,11 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
             entity.getAttributes().addAll(rep.getAttributes().stream().map(attr-> this.toEntity(attr, entity)).collect(Collectors.toList()));
         } else if (entity.getAttributes() != null) {
             entity.getAttributes().clear();
+        }
+        if (rep.getGroupRoles() != null) {
+            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, groupId)).filter(Objects::nonNull).collect(Collectors.toList()));
+        } else {
+            entity.setGroupRoles(null);
         }
     }
 

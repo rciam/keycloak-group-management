@@ -136,7 +136,7 @@ public class UserGroups {
             throw new BadRequestException("You have an ongoing request to become member of this group");
 
         if (configuration.getRequireApproval()) {
-            GroupEnrollmentEntity entity = groupEnrollmentRepository.create(rep, user.getId(), configuration.getGroup().getId());
+            GroupEnrollmentEntity entity = groupEnrollmentRepository.create(rep, user.getId(), configuration);
             //email to group admins if they must accept it
             //find thems based on group
             groupAdminRepository.getAllAdminGroupUsers(configuration.getGroup().getId()).forEach(adminId -> {
