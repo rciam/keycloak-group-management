@@ -54,6 +54,7 @@ public class AdminService {
     private  final AdminPermissionEvaluator realmAuth;
     private final AdminEventBuilder adminEvent;
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
+    private final GroupRolesRepository groupRolesRepository;
     private final GeneralJpaService generalJpaService;
 
     private final GroupManagementEventRepository groupManagementEventRepository;
@@ -67,6 +68,7 @@ public class AdminService {
         this.groupEnrollmentConfigurationRepository.setGroupRolesRepository(new GroupRolesRepository(session, realm));
         this.generalJpaService =  new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
         this.groupManagementEventRepository = new GroupManagementEventRepository (session, realm);
+        this.groupRolesRepository = new GroupRolesRepository(session, realm);
         this.adminEvent =  new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
         adminEvent.realm(realm);
     }
@@ -102,7 +104,7 @@ public class AdminService {
             throw new NotFoundException("Could not find group by id");
         }
         realmAuth.groups().requireView(group);
-        AdminGroups service = new AdminGroups(session, realmAuth, group, realm, generalJpaService, adminEvent);
+        AdminGroups service = new AdminGroups(session, realmAuth, group, realm, generalJpaService, adminEvent, groupEnrollmentConfigurationRepository, groupRolesRepository);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
@@ -117,10 +119,11 @@ public class AdminService {
         if (response.getStatus() >= 400) {
             //error response from client creation
             return response;
-        } else if (groupEnrollmentConfigurationRepository.getEntity(rep.getId()) == null) {
+        } else if (groupEnrollmentConfigurationRepository.getByGroup(rep.getId()).collect(Collectors.toList()).isEmpty()) {
             //group creation - group configuration no exist
             logger.info("Create group with groupId === "+rep.getId());
             groupEnrollmentConfigurationRepository.createDefault(rep.getId(), rep.getName());
+            groupRolesRepository.create(Utils.defaultGroupRole,rep.getId());
         }
         //if rep.getId() != null => mean that group has been moved( not created)
         logger.info("group configuration exists ==== "+rep.getId());

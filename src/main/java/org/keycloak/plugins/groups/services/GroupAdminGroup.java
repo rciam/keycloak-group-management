@@ -8,6 +8,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -122,11 +123,23 @@ public class GroupAdminGroup {
 
     @DELETE
     @Path("/role/{id}")
-    @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteGroupRole(@PathParam("id") String id) {
         groupRolesRepository.delete(id);
         return Response.noContent().build();
     }
+
+    @PUT
+    @Path("/role/{id}")
+    public Response renameGroupRole(@PathParam("id") String id, @QueryParam("name") String name) {
+        GroupRolesEntity entity = groupRolesRepository.getEntity(id);
+        if (entity == null) {
+            throw new NotFoundException("Could not find this group role");
+        }
+        entity.setName(name);
+        groupRolesRepository.update(entity);
+        return Response.noContent().build();
+    }
+
 
     @Path("/members")
     public GroupAdminGroupMembers groupMember() {
