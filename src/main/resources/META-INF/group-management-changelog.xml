@@ -573,5 +573,34 @@
         />
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="group_configuration_roles">
+        <createTable tableName="GROUP_ENROLLMENT_CONFIGURATION_ROLES">
+            <column name="GROUP_ROLES_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="GROUP_ENROLLMENT_CONFIGURATION_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                constraintName="group_enrollment_configuration_roles_fk"
+                baseTableName="GROUP_ENROLLMENT_CONFIGURATION_ROLES"
+                baseColumnNames="GROUP_ROLES_ID"
+                referencedTableName="GROUP_ROLES"
+                referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint
+                constraintName="group_enrollment_configuration_roles_fk2"
+                baseTableName="GROUP_ENROLLMENT_CONFIGURATION_ROLES"
+                baseColumnNames="GROUP_ENROLLMENT_CONFIGURATION_ID"
+                referencedTableName="GROUP_ENROLLMENT_CONFIGURATION"
+                referencedColumnNames="id"
+        />
+
+        <addColumn tableName="GROUP_ENROLLMENT_CONFIGURATION">
+            <column name="CONFIGURABLE_ROLE" type="boolean"  defaultValueBoolean="true"/>
+        </addColumn>
+    </changeSet>
+
 
 </databaseChangeLog>

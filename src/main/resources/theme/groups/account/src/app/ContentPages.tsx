@@ -17,8 +17,11 @@
 import * as React from 'react';
 import {Route, Switch,matchPath} from 'react-router-dom';
 import {NavItem, NavExpandable} from '@patternfly/react-core';
+// @ts-ignore
 import {Msg} from './widgets/Msg';
+// @ts-ignore
 import {PageNotFound} from './content/page-not-found/PageNotFound';
+// @ts-ignore
 import { ForbiddenPage } from './content/forbidden-page/ForbiddenPage';
 import {GroupPage} from './content/group-management-pages/GroupPage';
 

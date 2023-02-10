@@ -19,8 +19,11 @@ public class GroupEnrollmentConfigurationRepresentation {
     private String enrollmentConclusion;
     private String invitationConclusion;
     private Boolean hideConfiguration;
+    private Boolean configurableRole;
 
     private List<GroupEnrollmentConfigurationAttributesRepresentation> attributes;
+
+    private List<String> groupRoles;
 
     public GroupEnrollmentConfigurationRepresentation(String id){
         this.id = id;
@@ -154,5 +157,21 @@ public class GroupEnrollmentConfigurationRepresentation {
 
     public void setAttributes(List<GroupEnrollmentConfigurationAttributesRepresentation> attributes) {
         this.attributes = attributes;
+    }
+
+    public Boolean getConfigurableRole() {
+        return configurableRole;
+    }
+
+    public void setConfigurableRole(Boolean configurableRole) {
+        this.configurableRole = configurableRole;
+    }
+
+    public List<String> getGroupRoles() {
+        return groupRoles;
+    }
+
+    public void setGroupRoles(List<String> groupRoles) {
+        this.groupRoles = groupRoles;
     }
 }

@@ -63,7 +63,8 @@ public class GroupAdminGroup {
         this.groupEnrollmentConfigurationRepository = new GroupEnrollmentConfigurationRepository(session, realm);
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
         this.groupAdminRepository = new GroupAdminRepository(session, realm);
-        this.groupRolesRepository = new GroupRolesRepository(session, realm, new GroupEnrollmentRepository(session, realm, null), userGroupMembershipExtensionRepository, new GroupInvitationRepository(session, realm));
+        this.groupRolesRepository = new GroupRolesRepository(session, realm, new GroupEnrollmentRepository(session, realm, null), userGroupMembershipExtensionRepository, new GroupInvitationRepository(session, realm), groupEnrollmentConfigurationRepository);
+        this.groupEnrollmentConfigurationRepository.setGroupRolesRepository(this.groupRolesRepository);
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
     }

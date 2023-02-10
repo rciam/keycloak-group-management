@@ -48,3 +48,7 @@ target
 node
 src/main/resources/theme/groups/account/src/web_modules
 src/main/resources/theme/groups/account/src/node_modules
+src/main/resources/theme/groups/account/resources/content
+src/main/resources/theme/groups/account/resources/group-widgets
+src/main/resources/theme/groups/account/resources/groups-mngnt-service
+src/main/resources/theme/groups/account/resourceswidgets

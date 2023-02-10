@@ -49,6 +49,7 @@ import javax.ws.rs.core.Response;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class UserGroups {
 
@@ -85,9 +86,8 @@ public class UserGroups {
     @GET
     @Path("/groups")
     @Produces("application/json")
-    public Response getAllUserGroups() {
-        List<GroupRepresentation> userGroups = user.getGroupsStream().map(g-> ModelToRepresentation.toRepresentation(g,true)).collect(Collectors.toList());
-        return Response.ok().type(MediaType.APPLICATION_JSON).entity(userGroups).build();
+    public Stream<GroupRepresentation> getAllUserGroups() {
+        return user.getGroupsStream().map(g-> ModelToRepresentation.toRepresentation(g,true));
     }
 
     @Path("/group/{groupId}")
@@ -136,7 +136,7 @@ public class UserGroups {
             throw new BadRequestException("You have an ongoing request to become member of this group");
 
         if (configuration.getRequireApproval()) {
-            GroupEnrollmentEntity entity = groupEnrollmentRepository.create(rep, user.getId(), configuration.getGroup().getId());
+            GroupEnrollmentEntity entity = groupEnrollmentRepository.create(rep, user.getId(), configuration);
             //email to group admins if they must accept it
             //find thems based on group
             groupAdminRepository.getAllAdminGroupUsers(configuration.getGroup().getId()).forEach(adminId -> {

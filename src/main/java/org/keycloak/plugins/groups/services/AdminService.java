@@ -65,6 +65,7 @@ public class AdminService {
         this.clientConnection = clientConnection;
         this.realmAuth =  realmAuth;
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
+        this.groupEnrollmentConfigurationRepository.setGroupRolesRepository(new GroupRolesRepository(session, realm));
         this.generalJpaService =  new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
         this.groupManagementEventRepository = new GroupManagementEventRepository (session, realm);
         this.groupRolesRepository = new GroupRolesRepository(session, realm);

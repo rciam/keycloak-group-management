@@ -70,7 +70,8 @@ public class AdminGroups {
         this.realm =  realm;
         this.realmAuth = realmAuth;
         this.group = group;
-        this.groupEnrollmentConfigurationRepository =  groupEnrollmentConfigurationRepository;
+        this.groupEnrollmentConfigurationRepository =  roupEnrollmentConfigurationRepository;
+        this.groupEnrollmentConfigurationRepository.setGroupRolesRepository(new GroupRolesRepository(session, realm));
         this.groupAdminRepository =  new GroupAdminRepository(session, realm);
         this.groupRolesRepository = groupRolesRepository;
         this.generalJpaService =  generalJpaService;

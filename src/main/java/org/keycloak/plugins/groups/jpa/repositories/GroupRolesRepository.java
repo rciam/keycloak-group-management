@@ -14,16 +14,18 @@ public class GroupRolesRepository extends GeneralRepository<GroupRolesEntity> {
     private GroupEnrollmentRepository groupEnrollmentRepository;
     private UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private GroupInvitationRepository groupInvitationRepository;
+    private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
 
     public GroupRolesRepository(KeycloakSession session, RealmModel realm) {
         super(session, realm);
     }
 
-    public GroupRolesRepository(KeycloakSession session, RealmModel realm, GroupEnrollmentRepository groupEnrollmentRepository, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupInvitationRepository groupInvitationRepository) {
+    public GroupRolesRepository(KeycloakSession session, RealmModel realm, GroupEnrollmentRepository groupEnrollmentRepository, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupInvitationRepository groupInvitationRepository, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository) {
         super(session, realm);
         this.groupEnrollmentRepository = groupEnrollmentRepository;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.groupInvitationRepository = groupInvitationRepository;
+        this.groupEnrollmentConfigurationRepository = groupEnrollmentConfigurationRepository;
     }
 
     @Override
@@ -67,6 +69,10 @@ public class GroupRolesRepository extends GeneralRepository<GroupRolesEntity> {
         entity.getGroupInvitations().stream().forEach(x-> {
             x.getGroupRoles().removeIf(role -> id.equals(role.getId()));
             groupInvitationRepository.update(x);
+        });
+        entity.getConfigurations().stream().forEach(x-> {
+            x.getGroupRoles().removeIf(role -> id.equals(role.getId()));
+            groupEnrollmentConfigurationRepository.update(x);
         });
         deleteEntity(id);
     }
