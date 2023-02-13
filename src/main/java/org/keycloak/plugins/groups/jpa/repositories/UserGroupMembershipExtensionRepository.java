@@ -1,7 +1,5 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -31,16 +29,16 @@ import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.helpers.DummyClientConnection;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupInvitationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentAttributesRepresentation;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestAttributesRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
 import org.keycloak.services.resources.admin.AdminAuth;
@@ -232,7 +230,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     }
 
     @Transactional
-    public void createOrUpdate(GroupEnrollmentEntity enrollmentEntity, KeycloakSession session, String groupAdminId,AdminEventBuilder adminEvent){
+    public void createOrUpdate(GroupEnrollmentRequestEntity enrollmentEntity, KeycloakSession session, String groupAdminId, AdminEventBuilder adminEvent){
         UserGroupMembershipExtensionEntity entity = getByUserAndGroup(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getId(), enrollmentEntity.getUser().getId());
         boolean isNotMember = entity == null || !MemberStatusEnum.ENABLED.equals(entity.getStatus());
         if (entity == null) {
@@ -245,13 +243,13 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         } else {
             entity.setAupExpiresAt(null);
         }
-        String validThroughValue = enrollmentEntity.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_THROUGH.equals(at.getConfigurationAttribute().getAttribute())).findAny().orElse(new GroupEnrollmentAttributesEntity()).getValue();
+        String validThroughValue = enrollmentEntity.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_THROUGH.equals(at.getConfigurationAttribute().getAttribute())).findAny().orElse(new GroupEnrollmentRequestAttributesEntity()).getValue();
         if (validThroughValue != null) {
             entity.setMembershipExpiresAt(LocalDate.parse(validThroughValue, Utils.formatter));
         } else {
             entity.setMembershipExpiresAt(null);
         }
-        String validFromValue = enrollmentEntity.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_FROM.equals(at.getConfigurationAttribute().getAttribute())).findAny().orElse(new GroupEnrollmentAttributesEntity()).getValue();
+        String validFromValue = enrollmentEntity.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_FROM.equals(at.getConfigurationAttribute().getAttribute())).findAny().orElse(new GroupEnrollmentRequestAttributesEntity()).getValue();
         if (validFromValue != null) {
             entity.setValidFrom(LocalDate.parse(validFromValue, Utils.formatter));
         } else {
@@ -287,7 +285,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     }
 
     @Transactional
-    public void createOrUpdate(GroupEnrollmentRepresentation rep, KeycloakSession session, UserModel user,AdminEventBuilder adminEvent){
+    public void createOrUpdate(GroupEnrollmentRequestRepresentation rep, KeycloakSession session, UserModel user, AdminEventBuilder adminEvent){
         GroupEnrollmentConfigurationEntity configuration = groupEnrollmentConfigurationRepository.getEntity(rep.getGroupEnrollmentConfiguration().getId());
         UserGroupMembershipExtensionEntity entity = getByUserAndGroup(configuration.getGroup().getId(), user.getId());
         boolean isNotMember = entity == null || !MemberStatusEnum.ENABLED.equals(entity.getStatus());
@@ -304,10 +302,10 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setValidFrom(null);
         for (GroupEnrollmentConfigurationAttributesEntity attributeConfEntity : configuration.getAttributes()){
             if ( GroupEnrollmentAttributeEnum.VALID_THROUGH.equals(attributeConfEntity.getAttribute())) {
-                String validThroughValue = rep.getAttributes().stream().filter(at -> attributeConfEntity.getId().equals(at.getConfigurationAttribute().getId())).findAny().orElse(new GroupEnrollmentAttributesRepresentation()).getValue();
+                String validThroughValue = rep.getAttributes().stream().filter(at -> attributeConfEntity.getId().equals(at.getConfigurationAttribute().getId())).findAny().orElse(new GroupEnrollmentRequestAttributesRepresentation()).getValue();
                 entity.setMembershipExpiresAt(validThroughValue == null ? null : LocalDate.parse(validThroughValue, Utils.formatter));
             } else if ( GroupEnrollmentAttributeEnum.VALID_FROM.equals(attributeConfEntity.getAttribute())) {
-                String validFromValue = rep.getAttributes().stream().filter(at -> attributeConfEntity.getId().equals(at.getConfigurationAttribute().getId())).findAny().orElse(new GroupEnrollmentAttributesRepresentation()).getValue();
+                String validFromValue = rep.getAttributes().stream().filter(at -> attributeConfEntity.getId().equals(at.getConfigurationAttribute().getId())).findAny().orElse(new GroupEnrollmentRequestAttributesRepresentation()).getValue();
                 entity.setValidFrom(validFromValue == null ? null : LocalDate.parse(validFromValue, Utils.formatter));
             }
         }

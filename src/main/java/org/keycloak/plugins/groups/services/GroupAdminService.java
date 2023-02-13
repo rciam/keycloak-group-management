@@ -18,11 +18,11 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentPager;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestPager;
 import org.keycloak.plugins.groups.representations.GroupsPager;
 import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
@@ -33,7 +33,7 @@ public class GroupAdminService {
     private final RealmModel realm;
     private final UserModel groupAdmin;
     private final GroupAdminRepository groupAdminRepository;
-    private final GroupEnrollmentRepository groupEnrollmentRepository;
+    private final GroupEnrollmentRequestRepository groupEnrollmentRequestRepository;
     private final AdminEventBuilder adminEvent;
 
     public GroupAdminService(KeycloakSession session, RealmModel realm, UserModel user, AdminEventBuilder adminEvent) {
@@ -42,7 +42,7 @@ public class GroupAdminService {
         this.groupAdmin = user;
         this.adminEvent = adminEvent;
         this.groupAdminRepository =  new GroupAdminRepository(session, realm);
-        this.groupEnrollmentRepository =  new GroupEnrollmentRepository(session, realm, new GroupRolesRepository(session, realm));
+        this.groupEnrollmentRequestRepository =  new GroupEnrollmentRequestRepository(session, realm, new GroupRolesRepository(session, realm));
     }
 
 
@@ -71,18 +71,18 @@ public class GroupAdminService {
     @GET
     @Path("/enroll-requests")
     @Produces("application/json")
-    public GroupEnrollmentPager getAdminEnrollments(@QueryParam("first") @DefaultValue("0") Integer first,
-                                                    @QueryParam("max") @DefaultValue("10") Integer max,
-                                                    @QueryParam("groupId") String groupId,
-                                                    @QueryParam("userSearch") String userSearch,
-                                                    @QueryParam("status") EnrollmentStatusEnum status) {
+    public GroupEnrollmentRequestPager getAdminEnrollments(@QueryParam("first") @DefaultValue("0") Integer first,
+                                                           @QueryParam("max") @DefaultValue("10") Integer max,
+                                                           @QueryParam("groupId") String groupId,
+                                                           @QueryParam("userSearch") String userSearch,
+                                                           @QueryParam("status") EnrollmentStatusEnum status) {
         List<String> groupIds = groupId != null ? Stream.of(groupId).collect(Collectors.toList()):groupAdminRepository.getAllAdminGroupIds(groupAdmin.getId());
-        return groupEnrollmentRepository.groupAdminEnrollmentPager(groupIds, userSearch, status, first, max);
+        return groupEnrollmentRequestRepository.groupAdminEnrollmentPager(groupIds, userSearch, status, first, max);
     }
 
     @Path("/enroll-request/{enrollId}")
-    public GroupAdminEnrollement enrollment(@PathParam("enrollId") String enrollId) {
-        GroupEnrollmentEntity entity = groupEnrollmentRepository.getEntity(enrollId);
+    public GroupAdminEnrollementRequest enrollment(@PathParam("enrollId") String enrollId) {
+        GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.getEntity(enrollId);
         if (entity == null) {
             throw new NotFoundException("Could not find Group Enrollment Request by id");
         }
@@ -94,7 +94,7 @@ public class GroupAdminService {
             throw new ForbiddenException();
         }
 
-        GroupAdminEnrollement service = new GroupAdminEnrollement(session, realm, groupEnrollmentRepository, groupAdmin, entity, adminEvent);
+        GroupAdminEnrollementRequest service = new GroupAdminEnrollementRequest(session, realm, groupEnrollmentRequestRepository, groupAdmin, entity, adminEvent);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

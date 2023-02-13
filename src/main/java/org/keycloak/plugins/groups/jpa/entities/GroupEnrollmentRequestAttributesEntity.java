@@ -14,10 +14,10 @@ import javax.persistence.Table;
 @Entity
 @Table(name="GROUP_ENROLLMENT_ATTRIBUTES")
 @NamedQueries({
-        @NamedQuery(name="deleteEnrollmentAttrByGroup", query="delete from GroupEnrollmentAttributesEntity g where g.enrollment.id in (select e.id from GroupEnrollmentEntity e join GroupEnrollmentConfigurationEntity conf on e.groupEnrollmentConfiguration.id = conf.id where conf.group.id = :groupId)"),
-        @NamedQuery(name="deleteEnrollmentAttrByUser", query="delete from GroupEnrollmentAttributesEntity g where g.enrollment.id in (select e.id from GroupEnrollmentEntity e where e.user.id = :userId)")
+        @NamedQuery(name="deleteEnrollmentAttrByGroup", query="delete from GroupEnrollmentRequestAttributesEntity g where g.enrollment.id in (select e.id from GroupEnrollmentRequestEntity e join GroupEnrollmentConfigurationEntity conf on e.groupEnrollmentConfiguration.id = conf.id where conf.group.id = :groupId)"),
+        @NamedQuery(name="deleteEnrollmentAttrByUser", query="delete from GroupEnrollmentRequestAttributesEntity g where g.enrollment.id in (select e.id from GroupEnrollmentRequestEntity e where e.user.id = :userId)")
 })
-public class GroupEnrollmentAttributesEntity {
+public class GroupEnrollmentRequestAttributesEntity {
     @Id
     @Column(name="ID")
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
@@ -25,7 +25,7 @@ public class GroupEnrollmentAttributesEntity {
 
     @ManyToOne()
     @JoinColumn(name = "GROUP_ENROLLMENT_ID")
-    private GroupEnrollmentEntity enrollment;
+    private GroupEnrollmentRequestEntity enrollment;
 
     @ManyToOne()
     @JoinColumn(name = "GROUP_ENROLLMENT_CONFIGURATION_ATTRIBUTES_ID")
@@ -42,11 +42,11 @@ public class GroupEnrollmentAttributesEntity {
         this.id = id;
     }
 
-    public GroupEnrollmentEntity getEnrollment() {
+    public GroupEnrollmentRequestEntity getEnrollment() {
         return enrollment;
     }
 
-    public void setEnrollment(GroupEnrollmentEntity enrollment) {
+    public void setEnrollment(GroupEnrollmentRequestEntity enrollment) {
         this.enrollment = enrollment;
     }
 

@@ -1,12 +1,12 @@
 package org.keycloak.plugins.groups.representations;
 
-public class GroupEnrollmentAttributesRepresentation {
+public class GroupEnrollmentRequestAttributesRepresentation {
 
     private String id;
     private String value;
     private GroupEnrollmentConfigurationAttributesRepresentation configurationAttribute;
 
-    public GroupEnrollmentAttributesRepresentation(){
+    public GroupEnrollmentRequestAttributesRepresentation(){
 
     }
 

@@ -11,7 +11,7 @@ import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 
 public class GroupRolesRepository extends GeneralRepository<GroupRolesEntity> {
 
-    private GroupEnrollmentRepository groupEnrollmentRepository;
+    private GroupEnrollmentRequestRepository groupEnrollmentRequestRepository;
     private UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private GroupInvitationRepository groupInvitationRepository;
     private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
@@ -20,9 +20,9 @@ public class GroupRolesRepository extends GeneralRepository<GroupRolesEntity> {
         super(session, realm);
     }
 
-    public GroupRolesRepository(KeycloakSession session, RealmModel realm, GroupEnrollmentRepository groupEnrollmentRepository, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupInvitationRepository groupInvitationRepository, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository) {
+    public GroupRolesRepository(KeycloakSession session, RealmModel realm, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupInvitationRepository groupInvitationRepository, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository) {
         super(session, realm);
-        this.groupEnrollmentRepository = groupEnrollmentRepository;
+        this.groupEnrollmentRequestRepository = groupEnrollmentRequestRepository;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.groupInvitationRepository = groupInvitationRepository;
         this.groupEnrollmentConfigurationRepository = groupEnrollmentConfigurationRepository;
@@ -60,7 +60,7 @@ public class GroupRolesRepository extends GeneralRepository<GroupRolesEntity> {
         GroupRolesEntity entity = getEntity(id);
         entity.getEnrollments().stream().forEach(x-> {
             x.getGroupRoles().removeIf(role -> id.equals(role.getId()));
-            groupEnrollmentRepository.update(x);
+            groupEnrollmentRequestRepository.update(x);
         });
         entity.getGroupExtensions().stream().forEach(x-> {
             x.getGroupRoles().removeIf(role -> id.equals(role.getId()));

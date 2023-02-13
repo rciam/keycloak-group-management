@@ -40,7 +40,7 @@ public class GroupRolesEntity {
     protected String name;
 
     @ManyToMany(mappedBy = "groupRoles", fetch = FetchType.LAZY)
-    private List<GroupEnrollmentEntity> enrollments = new ArrayList<>();
+    private List<GroupEnrollmentRequestEntity> enrollments = new ArrayList<>();
 
     @ManyToMany(mappedBy = "groupRoles", fetch = FetchType.LAZY)
     private List<UserGroupMembershipExtensionEntity> groupExtensions = new ArrayList<>();
@@ -75,11 +75,11 @@ public class GroupRolesEntity {
         this.name = name;
     }
 
-    public List<GroupEnrollmentEntity> getEnrollments() {
+    public List<GroupEnrollmentRequestEntity> getEnrollments() {
         return enrollments;
     }
 
-    public void setEnrollments(List<GroupEnrollmentEntity> enrollments) {
+    public void setEnrollments(List<GroupEnrollmentRequestEntity> enrollments) {
         this.enrollments = enrollments;
     }
 

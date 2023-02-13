@@ -3,30 +3,26 @@ package org.keycloak.plugins.groups.services;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.email.EmailException;
-import org.keycloak.events.admin.OperationType;
-import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
-import org.keycloak.plugins.groups.enums.MemberStatusEnum;
-import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupInvitationEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupInvitationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentPager;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestPager;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 import org.keycloak.plugins.groups.representations.GroupInvitationRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ForbiddenException;
@@ -44,11 +40,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class UserGroups {
@@ -59,7 +52,7 @@ public class UserGroups {
     private final RealmModel realm;
 
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
-    private final GroupEnrollmentRepository groupEnrollmentRepository;
+    private final GroupEnrollmentRequestRepository groupEnrollmentRequestRepository;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final GroupAdminRepository groupAdminRepository;
     private final GroupInvitationRepository groupInvitationRepository;
@@ -73,7 +66,7 @@ public class UserGroups {
         this.user = user;
         this.adminEvent = adminEvent;
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
-        this.groupEnrollmentRepository =  new GroupEnrollmentRepository(session, realm, new GroupRolesRepository(session, realm));
+        this.groupEnrollmentRequestRepository =  new GroupEnrollmentRequestRepository(session, realm, new GroupRolesRepository(session, realm));
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm, groupEnrollmentConfigurationRepository, new GroupRolesRepository(session, realm));
         this.groupAdminRepository =  new GroupAdminRepository(session, realm);
         this.groupInvitationRepository =  new GroupInvitationRepository(session, realm);
@@ -118,25 +111,25 @@ public class UserGroups {
     @GET
     @Path("/enroll-requests")
     @Produces("application/json")
-    public GroupEnrollmentPager getMyEnrollments(@QueryParam("first") @DefaultValue("0") Integer first,
-                                                 @QueryParam("max") @DefaultValue("10") Integer max,
-                                                 @QueryParam("groupName") String groupName,
-                                                 @QueryParam("status") EnrollmentStatusEnum status) {
-        return groupEnrollmentRepository.groupEnrollmentPager(user.getId(), groupName, status, first, max);
+    public GroupEnrollmentRequestPager getMyEnrollments(@QueryParam("first") @DefaultValue("0") Integer first,
+                                                        @QueryParam("max") @DefaultValue("10") Integer max,
+                                                        @QueryParam("groupName") String groupName,
+                                                        @QueryParam("status") EnrollmentStatusEnum status) {
+        return groupEnrollmentRequestRepository.groupEnrollmentPager(user.getId(), groupName, status, first, max);
     }
 
     @POST
     @Path("/enroll-request")
     @Consumes("application/json")
-    public Response createEnrollmentRequest(GroupEnrollmentRepresentation rep) {
+    public Response createEnrollmentRequest(GroupEnrollmentRequestRepresentation rep) {
         GroupEnrollmentConfigurationEntity configuration = groupEnrollmentConfigurationRepository.getEntity(rep.getGroupEnrollmentConfiguration().getId());
         if (configuration == null)
             throw new NotFoundException("Could not find this group enrollment configuration");
-        if (groupEnrollmentRepository.countOngoingByUserAndGroup(user.getId(), configuration.getGroup().getId()) > 0)
+        if (groupEnrollmentRequestRepository.countOngoingByUserAndGroup(user.getId(), configuration.getGroup().getId()) > 0)
             throw new BadRequestException("You have an ongoing request to become member of this group");
 
         if (configuration.getRequireApproval()) {
-            GroupEnrollmentEntity entity = groupEnrollmentRepository.create(rep, user.getId(), configuration);
+            GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.create(rep, user.getId(), configuration);
             //email to group admins if they must accept it
             //find thems based on group
             groupAdminRepository.getAllAdminGroupUsers(configuration.getGroup().getId()).forEach(adminId -> {
@@ -159,15 +152,15 @@ public class UserGroups {
     }
 
     @Path("/enroll-request/{id}")
-    public UserGroupEnrollmentAction groupEnrollment(@PathParam("id") String id) {
+    public UserGroupEnrollmentRequestAction groupEnrollment(@PathParam("id") String id) {
 
-        GroupEnrollmentEntity entity = groupEnrollmentRepository.getEntity(id);
+        GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.getEntity(id);
         if (entity == null)
             throw new NotFoundException("Could not find this group enrollment configuration");
         if ( !entity.getUser().getId().equals(user.getId()))
             throw new ForbiddenException("You do not have access to this group enrollment");
 
-        UserGroupEnrollmentAction service = new UserGroupEnrollmentAction(session, realm, groupEnrollmentConfigurationRepository, groupEnrollmentRepository, user, entity);
+        UserGroupEnrollmentRequestAction service = new UserGroupEnrollmentRequestAction(session, realm, groupEnrollmentConfigurationRepository, groupEnrollmentRequestRepository, user, entity);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

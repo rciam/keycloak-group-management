@@ -6,10 +6,10 @@ import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.jpa.entities.*;
 import org.keycloak.plugins.groups.representations.GroupAupRepresentation;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentAttributesRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 import org.keycloak.plugins.groups.representations.GroupInvitationRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.keycloak.representations.idm.FederatedIdentityRepresentation;
@@ -84,8 +84,8 @@ public class EntityToRepresentation {
         return rep;
     }
 
-    public static GroupEnrollmentRepresentation toRepresentation(GroupEnrollmentEntity entity, RealmModel realm) {
-        GroupEnrollmentRepresentation rep = new GroupEnrollmentRepresentation();
+    public static GroupEnrollmentRequestRepresentation toRepresentation(GroupEnrollmentRequestEntity entity, RealmModel realm) {
+        GroupEnrollmentRequestRepresentation rep = new GroupEnrollmentRequestRepresentation();
         rep.setId(entity.getId());
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
         if (entity.getCheckAdmin() != null )
@@ -102,8 +102,8 @@ public class EntityToRepresentation {
         return rep;
     }
 
-    private static GroupEnrollmentAttributesRepresentation toRepresentation(GroupEnrollmentAttributesEntity entity){
-        GroupEnrollmentAttributesRepresentation rep = new GroupEnrollmentAttributesRepresentation();
+    private static GroupEnrollmentRequestAttributesRepresentation toRepresentation(GroupEnrollmentRequestAttributesEntity entity){
+        GroupEnrollmentRequestAttributesRepresentation rep = new GroupEnrollmentRequestAttributesRepresentation();
         rep.setId(entity.getId());
         rep.setValue(entity.getValue());
         rep.setConfigurationAttribute(toRepresentation(entity.getConfigurationAttribute()));

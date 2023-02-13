@@ -72,7 +72,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();
         attributes.put("url",baseUri.toString() + enrollmentUrl.replace("{realmName}",realm.getName()).replace("{id}",enrollmentId));
-        send( "groupadminEnrollmentCreationSubject", "groupadmin-enrollment-creation.ftl", attributes);
+        send( "groupadminEnrollmentRequestCreationSubject", "groupadmin-enrollment-creation.ftl", attributes);
     }
 
     public void sendExpiredGroupMemberEmailToAdmin(UserModel userRequest, String groupname) throws EmailException {

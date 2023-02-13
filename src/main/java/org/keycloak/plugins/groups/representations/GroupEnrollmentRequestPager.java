@@ -2,21 +2,21 @@ package org.keycloak.plugins.groups.representations;
 
 import java.util.List;
 
-public class GroupEnrollmentPager {
+public class GroupEnrollmentRequestPager {
 
-    private List<GroupEnrollmentRepresentation> results;
+    private List<GroupEnrollmentRequestRepresentation> results;
     private long count;
 
-    public GroupEnrollmentPager(List<GroupEnrollmentRepresentation> results, long count){
+    public GroupEnrollmentRequestPager(List<GroupEnrollmentRequestRepresentation> results, long count){
         this.results = results;
         this.count = count;
     }
 
-    public List<GroupEnrollmentRepresentation> getResults() {
+    public List<GroupEnrollmentRequestRepresentation> getResults() {
         return results;
     }
 
-    public void setResults(List<GroupEnrollmentRepresentation> results) {
+    public void setResults(List<GroupEnrollmentRequestRepresentation> results) {
         this.results = results;
     }
 

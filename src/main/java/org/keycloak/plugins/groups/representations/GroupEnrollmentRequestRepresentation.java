@@ -5,7 +5,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 
 import java.util.List;
 
-public class GroupEnrollmentRepresentation {
+public class GroupEnrollmentRequestRepresentation {
 
     private String id;
     private UserRepresentation user;
@@ -15,11 +15,11 @@ public class GroupEnrollmentRepresentation {
     private String reason;
     private String adminJustification;
     private String comment;
-    private List<GroupEnrollmentAttributesRepresentation> attributes;
+    private List<GroupEnrollmentRequestAttributesRepresentation> attributes;
 
     private List<String> groupRoles;
 
-    public GroupEnrollmentRepresentation() {
+    public GroupEnrollmentRequestRepresentation() {
     }
 
     public String getId() {
@@ -86,11 +86,11 @@ public class GroupEnrollmentRepresentation {
         this.comment = comment;
     }
 
-    public List<GroupEnrollmentAttributesRepresentation> getAttributes() {
+    public List<GroupEnrollmentRequestAttributesRepresentation> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(List<GroupEnrollmentAttributesRepresentation> attributes) {
+    public void setAttributes(List<GroupEnrollmentRequestAttributesRepresentation> attributes) {
         this.attributes = attributes;
     }
 

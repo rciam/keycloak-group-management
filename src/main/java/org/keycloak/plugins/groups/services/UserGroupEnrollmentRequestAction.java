@@ -3,10 +3,8 @@ package org.keycloak.plugins.groups.services;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
@@ -16,39 +14,35 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
-import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
-import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 
-public class UserGroupEnrollmentAction {
+public class UserGroupEnrollmentRequestAction {
 
-    private static final Logger logger = Logger.getLogger(UserGroupEnrollmentAction.class);
+    private static final Logger logger = Logger.getLogger(UserGroupEnrollmentRequestAction.class);
 
     protected final KeycloakSession session;
     private final RealmModel realm;
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
-    private final GroupEnrollmentRepository groupEnrollmentRepository;
+    private final GroupEnrollmentRequestRepository groupEnrollmentRequestRepository;
     private final UserModel user;
-    private final GroupEnrollmentEntity enrollmentEntity;
+    private final GroupEnrollmentRequestEntity enrollmentEntity;
 
-    public UserGroupEnrollmentAction(KeycloakSession session, RealmModel realm, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, GroupEnrollmentRepository groupEnrollmentRepository, UserModel user, GroupEnrollmentEntity enrollmentEntity) {
+    public UserGroupEnrollmentRequestAction(KeycloakSession session, RealmModel realm, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserModel user, GroupEnrollmentRequestEntity enrollmentEntity) {
         this.session = session;
         this.realm =  realm;
         this.groupEnrollmentConfigurationRepository =  groupEnrollmentConfigurationRepository;
-        this.groupEnrollmentRepository =  groupEnrollmentRepository;
+        this.groupEnrollmentRequestRepository = groupEnrollmentRequestRepository;
         this.user = user;
         this.enrollmentEntity = enrollmentEntity;
     }
 
     @GET
     @Produces("application/json")
-    public GroupEnrollmentRepresentation getGroupEnrollment() {
+    public GroupEnrollmentRequestRepresentation getGroupEnrollment() {
        return EntityToRepresentation.toRepresentation(enrollmentEntity, realm);
     }
 
@@ -59,7 +53,7 @@ public class UserGroupEnrollmentAction {
             throw new BadRequestException("You can not change this group enrollment");
         enrollmentEntity.setStatus(EnrollmentStatusEnum.PENDING_APPROVAL);
         enrollmentEntity.setComment(comment);
-        groupEnrollmentRepository.update(enrollmentEntity);
+        groupEnrollmentRequestRepository.update(enrollmentEntity);
         return Response.noContent().build();
     }
 

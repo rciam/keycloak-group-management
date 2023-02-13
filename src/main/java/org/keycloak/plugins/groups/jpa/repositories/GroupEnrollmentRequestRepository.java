@@ -15,31 +15,31 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentAttributesEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentAttributesRepresentation;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentPager;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestAttributesRepresentation;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestPager;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 
-public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollmentEntity> {
+public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnrollmentRequestEntity> {
 
     private final GroupRolesRepository groupRolesRepository;
 
-    public GroupEnrollmentRepository(KeycloakSession session, RealmModel realm, GroupRolesRepository groupRolesRepository) {
+    public GroupEnrollmentRequestRepository(KeycloakSession session, RealmModel realm, GroupRolesRepository groupRolesRepository) {
         super(session, realm);
         this.groupRolesRepository = groupRolesRepository;
     }
 
     @Override
-    protected Class<GroupEnrollmentEntity> getTClass() {
-        return GroupEnrollmentEntity.class;
+    protected Class<GroupEnrollmentRequestEntity> getTClass() {
+        return GroupEnrollmentRequestEntity.class;
     }
 
-    public GroupEnrollmentEntity create(GroupEnrollmentRepresentation rep, String userId, GroupEnrollmentConfigurationEntity configuration){
-        GroupEnrollmentEntity entity = new GroupEnrollmentEntity();
+    public GroupEnrollmentRequestEntity create(GroupEnrollmentRequestRepresentation rep, String userId, GroupEnrollmentConfigurationEntity configuration){
+        GroupEnrollmentRequestEntity entity = new GroupEnrollmentRequestEntity();
         entity.setId(KeycloakModelUtils.generateId());
         UserEntity user = new UserEntity();
         user.setId(userId);
@@ -64,8 +64,8 @@ public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollment
         return  entity;
     }
 
-    private GroupEnrollmentAttributesEntity toEntity(GroupEnrollmentAttributesRepresentation rep, GroupEnrollmentEntity enrollment){
-        GroupEnrollmentAttributesEntity entity = new GroupEnrollmentAttributesEntity();
+    private GroupEnrollmentRequestAttributesEntity toEntity(GroupEnrollmentRequestAttributesRepresentation rep, GroupEnrollmentRequestEntity enrollment){
+        GroupEnrollmentRequestAttributesEntity entity = new GroupEnrollmentRequestAttributesEntity();
         entity.setId(rep.getId()!= null ? rep.getId() : KeycloakModelUtils.generateId());
         entity.setValue(rep.getValue());
         GroupEnrollmentConfigurationAttributesEntity confAttrEntity = new GroupEnrollmentConfigurationAttributesEntity();
@@ -80,8 +80,8 @@ public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollment
         return em.createNamedQuery("countOngoingByUserAndGroup", Long.class).setParameter("userId",userId).setParameter("groupId",groupId).setParameter("status",statusList).getSingleResult();
     }
 
-    public GroupEnrollmentPager groupEnrollmentPager(String userId, String groupName, EnrollmentStatusEnum status, Integer first, Integer max){
-        StringBuilder sqlQueryMain = new StringBuilder("from GroupEnrollmentEntity f");
+    public GroupEnrollmentRequestPager groupEnrollmentPager(String userId, String groupName, EnrollmentStatusEnum status, Integer first, Integer max){
+        StringBuilder sqlQueryMain = new StringBuilder("from GroupEnrollmentRequestEntity f");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("userId",userId);
         if (groupName == null) {
@@ -95,19 +95,19 @@ public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollment
             parameters.put("status",status);
         }
 
-        TypedQuery<GroupEnrollmentEntity> query = em.createQuery("select f "+sqlQueryMain.toString(), GroupEnrollmentEntity.class);
+        TypedQuery<GroupEnrollmentRequestEntity> query = em.createQuery("select f "+sqlQueryMain.toString(), GroupEnrollmentRequestEntity.class);
         TypedQuery<Long> queryCount = em.createQuery("select count(f) "+ sqlQueryMain.toString(), Long.class);
         for (Map.Entry<String, Object> e : parameters.entrySet()) {
             query.setParameter(e.getKey(), e.getValue());
             queryCount.setParameter(e.getKey(), e.getValue());
         }
-        List<GroupEnrollmentRepresentation> enrollments = query.setFirstResult(first).setMaxResults(max).getResultStream().map(x -> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList());
-        return new GroupEnrollmentPager(enrollments,queryCount.getSingleResult());
+        List<GroupEnrollmentRequestRepresentation> enrollments = query.setFirstResult(first).setMaxResults(max).getResultStream().map(x -> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList());
+        return new GroupEnrollmentRequestPager(enrollments,queryCount.getSingleResult());
 
     }
 
-    public GroupEnrollmentPager groupAdminEnrollmentPager(List<String> groupIds, String userSearch, EnrollmentStatusEnum status, Integer first, Integer max){
-        StringBuilder sqlQueryMain = new StringBuilder("from GroupEnrollmentEntity f join f.groupEnrollmentConfiguration c join c.group g");
+    public GroupEnrollmentRequestPager groupAdminEnrollmentPager(List<String> groupIds, String userSearch, EnrollmentStatusEnum status, Integer first, Integer max){
+        StringBuilder sqlQueryMain = new StringBuilder("from GroupEnrollmentRequestEntity f join f.groupEnrollmentConfiguration c join c.group g");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("groupIds",groupIds);
         if (userSearch == null) {
@@ -121,14 +121,14 @@ public class GroupEnrollmentRepository extends GeneralRepository<GroupEnrollment
             parameters.put("status",status);
         }
 
-        TypedQuery<GroupEnrollmentEntity> query = em.createQuery("select f "+sqlQueryMain.toString(), GroupEnrollmentEntity.class);
+        TypedQuery<GroupEnrollmentRequestEntity> query = em.createQuery("select f "+sqlQueryMain.toString(), GroupEnrollmentRequestEntity.class);
         TypedQuery<Long> queryCount = em.createQuery("select count(f) "+ sqlQueryMain.toString(), Long.class);
         for (Map.Entry<String, Object> e : parameters.entrySet()) {
             query.setParameter(e.getKey(), e.getValue());
             queryCount.setParameter(e.getKey(), e.getValue());
         }
-        List<GroupEnrollmentRepresentation> enrollments = query.setFirstResult(first).setMaxResults(max).getResultStream().map(x -> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList());
-        return new GroupEnrollmentPager(enrollments,queryCount.getSingleResult());
+        List<GroupEnrollmentRequestRepresentation> enrollments = query.setFirstResult(first).setMaxResults(max).getResultStream().map(x -> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList());
+        return new GroupEnrollmentRequestPager(enrollments,queryCount.getSingleResult());
 
     }
 

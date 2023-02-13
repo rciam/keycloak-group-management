@@ -11,28 +11,24 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
 import org.keycloak.email.EmailException;
-import org.keycloak.events.admin.OperationType;
-import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
-import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentRepresentation;
-import org.keycloak.services.ErrorResponse;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.theme.FreeMarkerUtil;
 
-public class GroupAdminEnrollement {
+public class GroupAdminEnrollementRequest {
 
-    private static final Logger logger = Logger.getLogger(UserGroupEnrollmentAction.class);
+    private static final Logger logger = Logger.getLogger(UserGroupEnrollmentRequestAction.class);
     private static final String statusErrorMessage = "Enrollment is not in status Pending approval";
 
     protected final KeycloakSession session;
@@ -40,17 +36,17 @@ public class GroupAdminEnrollement {
     private final UserModel groupAdmin;
     private final AdminEventBuilder adminEvent;
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
-    private final GroupEnrollmentRepository groupEnrollmentRepository;
-    private final GroupEnrollmentEntity enrollmentEntity;
+    private final GroupEnrollmentRequestRepository groupEnrollmentRequestRepository;
+    private final GroupEnrollmentRequestEntity enrollmentEntity;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
 
-    public GroupAdminEnrollement(KeycloakSession session, RealmModel realm, GroupEnrollmentRepository groupEnrollmentRepository, UserModel groupAdmin, GroupEnrollmentEntity enrollmentEntity, AdminEventBuilder adminEvent) {
+    public GroupAdminEnrollementRequest(KeycloakSession session, RealmModel realm, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserModel groupAdmin, GroupEnrollmentRequestEntity enrollmentEntity, AdminEventBuilder adminEvent) {
         this.session = session;
         this.realm =  realm;
         this.adminEvent = adminEvent;
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
-        this.groupEnrollmentRepository =  groupEnrollmentRepository;
+        this.groupEnrollmentRequestRepository = groupEnrollmentRequestRepository;
         this.groupAdmin = groupAdmin;
         this.enrollmentEntity = enrollmentEntity;
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
@@ -60,7 +56,7 @@ public class GroupAdminEnrollement {
 
     @GET
     @Produces("application/json")
-    public GroupEnrollmentRepresentation getGroupEnrollment() {
+    public GroupEnrollmentRequestRepresentation getGroupEnrollment() {
         return EntityToRepresentation.toRepresentation(enrollmentEntity, realm);
     }
 
@@ -71,7 +67,7 @@ public class GroupAdminEnrollement {
             throw new BadRequestException(statusErrorMessage);
         enrollmentEntity.setStatus(EnrollmentStatusEnum.WAITING_FOR_REPLY);
         enrollmentEntity.setComment(comment);
-        groupEnrollmentRepository.update(enrollmentEntity);
+        groupEnrollmentRequestRepository.update(enrollmentEntity);
         return Response.noContent().build();
     }
 
@@ -85,7 +81,7 @@ public class GroupAdminEnrollement {
         enrollmentEntity.setStatus(EnrollmentStatusEnum.ACCEPTED);
         enrollmentEntity.setAdminJustification(adminJustification);
 
-        groupEnrollmentRepository.update(enrollmentEntity);
+        groupEnrollmentRequestRepository.update(enrollmentEntity);
 
         try {
             customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm,enrollmentEntity.getUser().getId()));
@@ -104,7 +100,7 @@ public class GroupAdminEnrollement {
             throw new BadRequestException(statusErrorMessage);
         enrollmentEntity.setStatus(EnrollmentStatusEnum.REJECTED);
         enrollmentEntity.setAdminJustification(adminJustification);
-        groupEnrollmentRepository.update(enrollmentEntity);
+        groupEnrollmentRequestRepository.update(enrollmentEntity);
 
         try {
             customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm,enrollmentEntity.getUser().getId()));

@@ -11,7 +11,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -21,19 +20,19 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.Collection;
+
 import java.util.List;
 
 @Entity
-@Table(name="GROUP_ENROLLMENT")
+@Table(name="GROUP_ENROLLMENT_REQUEST")
 @NamedQueries({
-        @NamedQuery(name="getAllUserGroupEnrollments", query="from GroupEnrollmentEntity ge where ge.user.id = :userId"),
-        @NamedQuery(name="countOngoingByUserAndGroup", query="select count(f) from GroupEnrollmentEntity f, GroupEnrollmentConfigurationEntity c  where f.groupEnrollmentConfiguration.id = c.id and f.user.id = :userId and c.group.id = :groupId and f.status in (:status)"),
-        @NamedQuery(name="deleteEnrollmentByGroup", query="delete from GroupEnrollmentEntity g where g.groupEnrollmentConfiguration.id in (select conf.id from GroupEnrollmentConfigurationEntity conf where conf.group.id = :groupId)"),
-        @NamedQuery(name="deleteEnrollmentByUser", query="delete from GroupEnrollmentEntity g where g.user.id = :userId"),
-        @NamedQuery(name="updateEnrollmentByAdminUser", query="update GroupEnrollmentEntity g set g.checkAdmin = null where g.checkAdmin.id = :userId")
+        @NamedQuery(name="getAllUserGroupEnrollments", query="from GroupEnrollmentRequestEntity ge where ge.user.id = :userId"),
+        @NamedQuery(name="countOngoingByUserAndGroup", query="select count(f) from GroupEnrollmentRequestEntity f, GroupEnrollmentConfigurationEntity c  where f.groupEnrollmentConfiguration.id = c.id and f.user.id = :userId and c.group.id = :groupId and f.status in (:status)"),
+        @NamedQuery(name="deleteEnrollmentByGroup", query="delete from GroupEnrollmentRequestEntity g where g.groupEnrollmentConfiguration.id in (select conf.id from GroupEnrollmentConfigurationEntity conf where conf.group.id = :groupId)"),
+        @NamedQuery(name="deleteEnrollmentByUser", query="delete from GroupEnrollmentRequestEntity g where g.user.id = :userId"),
+        @NamedQuery(name="updateEnrollmentByAdminUser", query="update GroupEnrollmentRequestEntity g set g.checkAdmin = null where g.checkAdmin.id = :userId")
 })
-public class GroupEnrollmentEntity {
+public class GroupEnrollmentRequestEntity {
 
     @Id
     @Column(name="ID")
@@ -66,7 +65,7 @@ public class GroupEnrollmentEntity {
     private String comments;
 
     @OneToMany(cascade =CascadeType.ALL, orphanRemoval = true, mappedBy = "enrollment")
-    private List<GroupEnrollmentAttributesEntity> attributes;
+    private List<GroupEnrollmentRequestAttributesEntity> attributes;
 
     @ManyToMany
     @JoinTable(name = "GROUP_ENROLLMENT_ROLES", joinColumns = @JoinColumn(name = "GROUP_ENROLLMENT_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
@@ -141,11 +140,11 @@ public class GroupEnrollmentEntity {
         this.comments = this.comments != null ? this.comments + System.lineSeparator()+comment : comment;
     }
 
-    public List<GroupEnrollmentAttributesEntity> getAttributes() {
+    public List<GroupEnrollmentRequestAttributesEntity> getAttributes() {
         return attributes;
     }
 
-    public void setAttributes(List<GroupEnrollmentAttributesEntity> attributes) {
+    public void setAttributes(List<GroupEnrollmentRequestAttributesEntity> attributes) {
         this.attributes = attributes;
     }
 

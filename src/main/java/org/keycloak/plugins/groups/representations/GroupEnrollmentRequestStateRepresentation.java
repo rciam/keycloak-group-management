@@ -1,14 +1,8 @@
 package org.keycloak.plugins.groups.representations;
 
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentEntity;
-import org.keycloak.representations.idm.GroupRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
-
-import javax.persistence.Column;
-import java.util.Collection;
 import java.util.Date;
 
-public class GroupEnrollmentStateRepresentation {
+public class GroupEnrollmentRequestStateRepresentation {
 
     protected String id;
     protected String enrollmentId;
@@ -16,10 +10,10 @@ public class GroupEnrollmentStateRepresentation {
     protected Date timestamp;
     protected String justification;
 
-    public GroupEnrollmentStateRepresentation() {
+    public GroupEnrollmentRequestStateRepresentation() {
     }
 
-    public GroupEnrollmentStateRepresentation(String id) {
+    public GroupEnrollmentRequestStateRepresentation(String id) {
         this.id = id;
     }
 

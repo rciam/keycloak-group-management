@@ -8,7 +8,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 
@@ -19,7 +19,7 @@ public class GeneralJpaService {
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final GroupAdminRepository groupAdminRepository;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
-    private final GroupEnrollmentRepository groupEnrollmentRepository;
+    private final GroupEnrollmentRequestRepository groupEnrollmentRequestRepository;
     private final GroupRolesRepository groupRolesRepository;
 
     public GeneralJpaService(KeycloakSession session, RealmModel realm, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository) {
@@ -28,15 +28,15 @@ public class GeneralJpaService {
         this.groupEnrollmentConfigurationRepository = groupEnrollmentConfigurationRepository;
         this.groupAdminRepository = new GroupAdminRepository(session, realm);
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
-        this.groupEnrollmentRepository = new GroupEnrollmentRepository(session, realm, null);
+        this.groupEnrollmentRequestRepository = new GroupEnrollmentRequestRepository(session, realm, null);
         this.groupRolesRepository = new GroupRolesRepository(session, realm);
 
     }
 
     @Transactional
     public void removeGroup(GroupModel group) {
-        //extra delete UserGroupMembershipExtensionEntity, GroupEnrollmentConfigurationEntity, GroupAdminEntity, GroupEnrollmentEntity
-        groupEnrollmentRepository.deleteByGroup(group.getId());
+        //extra delete UserGroupMembershipExtensionEntity, GroupEnrollmentConfigurationEntity, GroupAdminEntity, GroupEnrollmentRequestEntity
+        groupEnrollmentRequestRepository.deleteByGroup(group.getId());
         userGroupMembershipExtensionRepository.deleteByGroup(group.getId());
         groupEnrollmentConfigurationRepository.deleteByGroup(group.getId());
         groupAdminRepository.deleteByGroup(group.getId());
@@ -49,9 +49,9 @@ public class GeneralJpaService {
     public boolean removeUser(UserModel user) {
 
         try {
-            //extra delete UserGroupMembershipExtensionEntity, GroupAdminEntity, GroupEnrollmentEntity
-            //admin sto GroupEnrollmentEntity set null
-            groupEnrollmentRepository.deleteByUser(user.getId());
+            //extra delete UserGroupMembershipExtensionEntity, GroupAdminEntity, GroupEnrollmentRequestEntity
+            //admin sto GroupEnrollmentRequestEntity set null
+            groupEnrollmentRequestRepository.deleteByUser(user.getId());
             userGroupMembershipExtensionRepository.deleteByUser(user.getId());
             groupAdminRepository.deleteByUser(user.getId());
             if (session.users().removeUser(realm, user)) {
