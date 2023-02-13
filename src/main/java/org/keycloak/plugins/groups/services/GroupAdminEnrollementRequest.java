@@ -15,7 +15,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
-import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
+import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
@@ -63,9 +63,9 @@ public class GroupAdminEnrollementRequest {
     @POST
     @Path("/extra-info")
     public Response askForExtraInformation(@NotNull @QueryParam("comment") String comment) {
-        if (!EnrollmentStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
+        if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
             throw new BadRequestException(statusErrorMessage);
-        enrollmentEntity.setStatus(EnrollmentStatusEnum.WAITING_FOR_REPLY);
+        enrollmentEntity.setStatus(EnrollmentRequestStatusEnum.WAITING_FOR_REPLY);
         enrollmentEntity.setComment(comment);
         groupEnrollmentRequestRepository.update(enrollmentEntity);
         return Response.noContent().build();
@@ -74,11 +74,11 @@ public class GroupAdminEnrollementRequest {
     @POST
     @Path("/accept")
     public Response acceptEnrollment(@QueryParam("adminJustification") String adminJustification) {
-        if (!EnrollmentStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
+        if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
             throw new BadRequestException(statusErrorMessage);
 
         userGroupMembershipExtensionRepository.createOrUpdate(enrollmentEntity, session, groupAdmin.getId(),adminEvent);
-        enrollmentEntity.setStatus(EnrollmentStatusEnum.ACCEPTED);
+        enrollmentEntity.setStatus(EnrollmentRequestStatusEnum.ACCEPTED);
         enrollmentEntity.setAdminJustification(adminJustification);
 
         groupEnrollmentRequestRepository.update(enrollmentEntity);
@@ -96,9 +96,9 @@ public class GroupAdminEnrollementRequest {
     @POST
     @Path("/reject")
     public Response rejectEnrollment(@QueryParam("adminJustification") String adminJustification) {
-        if (!EnrollmentStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
+        if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
             throw new BadRequestException(statusErrorMessage);
-        enrollmentEntity.setStatus(EnrollmentStatusEnum.REJECTED);
+        enrollmentEntity.setStatus(EnrollmentRequestStatusEnum.REJECTED);
         enrollmentEntity.setAdminJustification(adminJustification);
         groupEnrollmentRequestRepository.update(enrollmentEntity);
 

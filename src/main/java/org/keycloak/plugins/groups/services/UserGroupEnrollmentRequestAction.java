@@ -13,7 +13,7 @@ import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
+import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
@@ -49,9 +49,9 @@ public class UserGroupEnrollmentRequestAction {
     @POST
     @Path("/respond")
     public Response askForExtraInformation(@NotNull @QueryParam("comment") String comment) {
-        if (!EnrollmentStatusEnum.WAITING_FOR_REPLY.equals(enrollmentEntity.getStatus()))
+        if (!EnrollmentRequestStatusEnum.WAITING_FOR_REPLY.equals(enrollmentEntity.getStatus()))
             throw new BadRequestException("You can not change this group enrollment");
-        enrollmentEntity.setStatus(EnrollmentStatusEnum.PENDING_APPROVAL);
+        enrollmentEntity.setStatus(EnrollmentRequestStatusEnum.PENDING_APPROVAL);
         enrollmentEntity.setComment(comment);
         groupEnrollmentRequestRepository.update(enrollmentEntity);
         return Response.noContent().build();

@@ -58,6 +58,8 @@ Path | Method | Description                                                     
 /account/group-admin/group/{groupId}/role/{id} | DELETE | delete group role                                                             | GroupAdminGroup
 /account/group-admin/group/{groupId}/members | GET    | get all group members pager, being able to search and get by type (fe active) | GroupAdminGroupMembers
 /account/group-admin/group/{groupId}/members/invitation | POST   | send invitation to a user based on email                                      | GroupAdminGroupMembers
+/account/group-admin/group/{groupId}/member/{memberId}/role | POST   | add role to group member                                                      | GroupAdminGroupMember
+/account/group-admin/group/{groupId}/member/{memberId}/role | DELETE | delete role from group member                                                 | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/suspend | POST   | suspend group member                                                          | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/activate | POST   | activate group member                                                         | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/admin | POST   | invite user as group admin for this groupId group                             | GroupAdminGroup
@@ -65,8 +67,8 @@ Path | Method | Description                                                     
 /account/group-admin/enroll-requests | GET    | get all group admin enrollment requests                                       | GroupAdminService
 /account/group-admin/enroll-request/{enrollId} | GET    | get enrollment request                                                        | GroupAdminEnrollementRequest
 /account/group-admin/enroll-request/{enrollId}/extra-info | POST   | request extra infrormation from user                                          | GroupAdminEnrollementRequest
-/account/group-admin/enroll-request/{enrollId}/accept | POST   | accept group enrollment request                                                     | GroupAdminEnrollementRequest
-/account/group-admin/enroll-request/{enrollId}/reject | POST   | reject group enrollment request                                                    | GroupAdminEnrollementRequest
+/account/group-admin/enroll-request/{enrollId}/accept | POST   | accept group enrollment request                                               | GroupAdminEnrollementRequest
+/account/group-admin/enroll-request/{enrollId}/reject | POST   | reject group enrollment request                                               | GroupAdminEnrollementRequest
 
 **Admin web services**
 

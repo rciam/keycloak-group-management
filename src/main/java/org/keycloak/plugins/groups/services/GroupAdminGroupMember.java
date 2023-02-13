@@ -1,9 +1,14 @@
 package org.keycloak.plugins.groups.services;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
@@ -13,7 +18,9 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
+import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
+import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.services.ServicesLogger;
 
@@ -24,17 +31,42 @@ public class GroupAdminGroupMember {
     private final UserModel voAdmin;
     private GroupModel group;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
+    private final GroupRolesRepository groupRolesRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final UserGroupMembershipExtensionEntity member;
 
-    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member) {
+    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository) {
         this.session = session;
         this.realm =  realm;
         this.voAdmin = voAdmin;
         this.group = group;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
+        this.groupRolesRepository = groupRolesRepository;
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
         this.member = member;
+    }
+
+    @POST
+    @Path("/role")
+    public Response addGroupRole(@QueryParam("name") String name) {
+        GroupRolesEntity role = groupRolesRepository.getGroupRolesByNameAndGroup(name, group.getId());
+        if (role == null )
+            throw new NotFoundException(" This role does not exist in this group");
+        if (member.getGroupRoles() == null) {
+            member.setGroupRoles(Stream.of(role).collect(Collectors.toList()));
+        } else if (! member.getGroupRoles().stream().anyMatch(x -> role.getId().equals(x.getId()))) {
+            member.getGroupRoles().add(role);
+        }
+        userGroupMembershipExtensionRepository.update(member);
+        return Response.noContent().build();
+    }
+
+    @DELETE
+    @Path("/role/{id}")
+    public Response deleteGroupRole(@PathParam("id") String id) {
+        if (member.getGroupRoles() != null && (member.getGroupRoles().removeIf(x -> id.equals(x.getId()))))
+            userGroupMembershipExtensionRepository.update(member);
+        return Response.noContent().build();
     }
 
     @POST

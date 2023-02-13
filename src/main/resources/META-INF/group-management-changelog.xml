@@ -610,5 +610,9 @@
         <renameTable newTableName="GROUP_ENROLLMENT_REQUEST_ATTRIBUTES" oldTableName="GROUP_ENROLLMENT_ATTRIBUTES"/>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="roles_changes">
+        <renameColumn tableName="GROUP_ENROLLMENT_CONFIGURATION" oldColumnName="CONFIGURABLE_ROLE" newColumnName="MULTISELECT_ROLE" columnDataType="boolean"/>
+    </changeSet>
+
 
 </databaseChangeLog>

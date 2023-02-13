@@ -13,13 +13,12 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
-import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
+import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestPager;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
@@ -46,17 +45,9 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         entity.setUser(user);
         entity.setGroupEnrollmentConfiguration(configuration);
         entity.setReason(rep.getReason());
-        entity.setStatus(EnrollmentStatusEnum.PENDING_APPROVAL);
-        if (configuration.isConfigurableRole() && rep.getGroupRoles() != null) {
-            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, configuration.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toList()));
-        } else if (!configuration.isConfigurableRole() && configuration.getGroupRoles() != null){
-            entity.setGroupRoles(configuration.getGroupRoles().stream().map(x -> {
-                GroupRolesEntity r = new GroupRolesEntity();
-                r.setId(x.getId());
-                r.setGroup(x.getGroup());
-                r.setName(x.getName());
-                return r;
-            }).collect(Collectors.toList()));
+        entity.setStatus(EnrollmentRequestStatusEnum.PENDING_APPROVAL);
+        if (rep.getGroupRoles() != null) {
+            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, configuration.getGroup().getId())).filter(Objects::nonNull).limit(configuration.isMultiselectRole() ? Integer.MAX_VALUE : 1).collect(Collectors.toList()));
         }
         if (rep.getAttributes() != null)
             entity.setAttributes(rep.getAttributes().stream().map(x -> toEntity(x, entity)).collect(Collectors.toList()));
@@ -76,11 +67,11 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
     }
 
     public Long countOngoingByUserAndGroup(String userId, String groupId) {
-        List<EnrollmentStatusEnum> statusList = Stream.of(EnrollmentStatusEnum.PENDING_APPROVAL,EnrollmentStatusEnum.WAITING_FOR_REPLY).collect(Collectors.toList());
+        List<EnrollmentRequestStatusEnum> statusList = Stream.of(EnrollmentRequestStatusEnum.PENDING_APPROVAL, EnrollmentRequestStatusEnum.WAITING_FOR_REPLY).collect(Collectors.toList());
         return em.createNamedQuery("countOngoingByUserAndGroup", Long.class).setParameter("userId",userId).setParameter("groupId",groupId).setParameter("status",statusList).getSingleResult();
     }
 
-    public GroupEnrollmentRequestPager groupEnrollmentPager(String userId, String groupName, EnrollmentStatusEnum status, Integer first, Integer max){
+    public GroupEnrollmentRequestPager groupEnrollmentPager(String userId, String groupName, EnrollmentRequestStatusEnum status, Integer first, Integer max){
         StringBuilder sqlQueryMain = new StringBuilder("from GroupEnrollmentRequestEntity f");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("userId",userId);
@@ -106,7 +97,7 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
 
     }
 
-    public GroupEnrollmentRequestPager groupAdminEnrollmentPager(List<String> groupIds, String userSearch, EnrollmentStatusEnum status, Integer first, Integer max){
+    public GroupEnrollmentRequestPager groupAdminEnrollmentPager(List<String> groupIds, String userSearch, EnrollmentRequestStatusEnum status, Integer first, Integer max){
         StringBuilder sqlQueryMain = new StringBuilder("from GroupEnrollmentRequestEntity f join f.groupEnrollmentConfiguration c join c.group g");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("groupIds",groupIds);

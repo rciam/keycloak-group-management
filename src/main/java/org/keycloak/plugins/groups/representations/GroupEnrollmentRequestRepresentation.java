@@ -1,6 +1,6 @@
 package org.keycloak.plugins.groups.representations;
 
-import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
+import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import java.util.List;
@@ -11,7 +11,7 @@ public class GroupEnrollmentRequestRepresentation {
     private UserRepresentation user;
     private UserRepresentation checkAdmin;
     private GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
-    private EnrollmentStatusEnum status;
+    private EnrollmentRequestStatusEnum status;
     private String reason;
     private String adminJustification;
     private String comment;
@@ -54,11 +54,11 @@ public class GroupEnrollmentRequestRepresentation {
         this.groupEnrollmentConfiguration = groupEnrollmentConfiguration;
     }
 
-    public EnrollmentStatusEnum getStatus() {
+    public EnrollmentRequestStatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(EnrollmentStatusEnum status) {
+    public void setStatus(EnrollmentRequestStatusEnum status) {
         this.status = status;
     }
 
