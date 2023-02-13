@@ -607,7 +607,7 @@
     </changeSet>
 
     <changeSet author="cgeorgilakis@grnet.gr" id="group_enrollment_request_attributes">
-        <renameTable newTableName="GROUP_ENROLLMENT_ATTRIBUTES_REQUEST" oldTableName="GROUP_ENROLLMENT_ATTRIBUTES"/>
+        <renameTable newTableName="GROUP_ENROLLMENT_REQUEST_ATTRIBUTES" oldTableName="GROUP_ENROLLMENT_ATTRIBUTES"/>
     </changeSet>
 
 

@@ -12,7 +12,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="GROUP_ENROLLMENT_ATTRIBUTES")
+@Table(name="GROUP_ENROLLMENT_REQUEST_ATTRIBUTES")
 @NamedQueries({
         @NamedQuery(name="deleteEnrollmentAttrByGroup", query="delete from GroupEnrollmentRequestAttributesEntity g where g.enrollment.id in (select e.id from GroupEnrollmentRequestEntity e join GroupEnrollmentConfigurationEntity conf on e.groupEnrollmentConfiguration.id = conf.id where conf.group.id = :groupId)"),
         @NamedQuery(name="deleteEnrollmentAttrByUser", query="delete from GroupEnrollmentRequestAttributesEntity g where g.enrollment.id in (select e.id from GroupEnrollmentRequestEntity e where e.user.id = :userId)")
