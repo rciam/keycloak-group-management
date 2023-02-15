@@ -56,7 +56,7 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         entity.setRequireAupAcceptance(false);
         entity.setActive(true);
         entity.setHideConfiguration(true);
-        entity.setConfigurableRole(true);
+        entity.setMultiselectRole(true);
         entity.setGroupRoles(groupRolesRepository.getGroupRolesByGroup(groupId).map(x -> {
             GroupRolesEntity r = new GroupRolesEntity();
             r.setId(x.getId());
@@ -92,7 +92,7 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         entity.setEnrollmentIntroduction(rep.getEnrollmentIntroduction());
         entity.setInvitationConclusion(rep.getInvitationConclusion());
         entity.setInvitationIntroduction(rep.getInvitationIntroduction());
-        entity.setConfigurableRole(rep.getConfigurableRole());
+        entity.setMultiselectRole(rep.getMultiselectRole());
         if ( rep.getAup() != null)
             entity.setAupEntity(toEntity(rep.getAup()));
         if (rep.getAttributes() != null) {

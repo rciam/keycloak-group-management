@@ -3,6 +3,7 @@ package org.keycloak.plugins.groups.services;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -123,7 +124,10 @@ public class GroupAdminGroup {
     @DELETE
     @Path("/role/{id}")
     public Response deleteGroupRole(@PathParam("id") String id) {
-        groupRolesRepository.delete(id);
+        GroupRolesEntity entity = groupRolesRepository.getEntity(id);
+        if (entity.getGroupExtensions() != null && entity.getGroupExtensions().size() > 0 )
+            throw new BadRequestException(" You can not delete this role because it is assigned in a group membership");
+        groupRolesRepository.delete(entity);
         return Response.noContent().build();
     }
 
@@ -153,7 +157,7 @@ public class GroupAdminGroup {
         if (member == null) {
             throw new NotFoundException("Could not find this group member");
         }
-        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member);
+        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

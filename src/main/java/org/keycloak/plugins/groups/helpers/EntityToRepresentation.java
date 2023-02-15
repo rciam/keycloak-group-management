@@ -37,7 +37,7 @@ public class EntityToRepresentation {
         rep.setEnrollmentIntroduction(entity.getEnrollmentIntroduction());
         rep.setInvitationConclusion(entity.getInvitationConclusion());
         rep.setInvitationIntroduction(entity.getInvitationIntroduction());
-        rep.setConfigurableRole(entity.isConfigurableRole());
+        rep.setMultiselectRole(entity.isMultiselectRole());
         if ( entity.getAupEntity() != null)
             rep.setAup(toRepresentation(entity.getAupEntity()));
         if ( containAttributes && entity.getAttributes() != null)

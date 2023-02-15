@@ -8,7 +8,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
-import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
+import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
@@ -114,7 +114,7 @@ public class UserGroups {
     public GroupEnrollmentRequestPager getMyEnrollments(@QueryParam("first") @DefaultValue("0") Integer first,
                                                         @QueryParam("max") @DefaultValue("10") Integer max,
                                                         @QueryParam("groupName") String groupName,
-                                                        @QueryParam("status") EnrollmentStatusEnum status) {
+                                                        @QueryParam("status") EnrollmentRequestStatusEnum status) {
         return groupEnrollmentRequestRepository.groupEnrollmentPager(user.getId(), groupName, status, first, max);
     }
 

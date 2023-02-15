@@ -7,6 +7,9 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupInvitationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 
 public class GroupRolesRepository extends GeneralRepository<GroupRolesEntity> {
@@ -56,25 +59,21 @@ public class GroupRolesRepository extends GeneralRepository<GroupRolesEntity> {
         em.createNamedQuery("deleteRolesByGroup").setParameter("groupId", groupId).executeUpdate();
     }
 
-    public void delete(String id){
-        GroupRolesEntity entity = getEntity(id);
-        entity.getEnrollments().stream().forEach(x-> {
-            x.getGroupRoles().removeIf(role -> id.equals(role.getId()));
-            groupEnrollmentRequestRepository.update(x);
-        });
-        entity.getGroupExtensions().stream().forEach(x-> {
-            x.getGroupRoles().removeIf(role -> id.equals(role.getId()));
-            userGroupMembershipExtensionRepository.update(x);
-        });
-        entity.getGroupInvitations().stream().forEach(x-> {
-            x.getGroupRoles().removeIf(role -> id.equals(role.getId()));
-            groupInvitationRepository.update(x);
-        });
+    public void delete(GroupRolesEntity entity){
+        for (GroupEnrollmentRequestEntity request : entity.getEnrollments()) {
+            request.getGroupRoles().removeIf(x -> entity.getId().equals(x.getId()));
+            request.setStatus(EnrollmentRequestStatusEnum.ARCHIVED);
+            groupEnrollmentRequestRepository.update(request);
+        }
+        //TODO TBD
+        for (GroupInvitationEntity x : entity.getGroupInvitations()) {
+            groupInvitationRepository.deleteEntity(x.getId());
+        }
         entity.getConfigurations().stream().forEach(x-> {
-            x.getGroupRoles().removeIf(role -> id.equals(role.getId()));
+            x.getGroupRoles().removeIf(role -> entity.getId().equals(role.getId()));
             groupEnrollmentConfigurationRepository.update(x);
         });
-        deleteEntity(id);
+        deleteEntity(entity.getId());
     }
 
 }

@@ -2,7 +2,7 @@ package org.keycloak.plugins.groups.jpa.entities;
 
 
 import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
+import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -53,7 +53,7 @@ public class GroupEnrollmentRequestEntity {
 
     @Column(name="STATE")
     @Enumerated(EnumType.STRING)
-    private EnrollmentStatusEnum status;
+    private EnrollmentRequestStatusEnum status;
 
     @Column(name="REASON")
     private String reason;
@@ -103,11 +103,11 @@ public class GroupEnrollmentRequestEntity {
         this.groupEnrollmentConfiguration = groupEnrollmentConfiguration;
     }
 
-    public EnrollmentStatusEnum getStatus() {
+    public EnrollmentRequestStatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(EnrollmentStatusEnum status) {
+    public void setStatus(EnrollmentRequestStatusEnum status) {
         this.status = status;
     }
 

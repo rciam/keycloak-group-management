@@ -19,7 +19,7 @@ public class GroupEnrollmentConfigurationRepresentation {
     private String enrollmentConclusion;
     private String invitationConclusion;
     private Boolean hideConfiguration;
-    private Boolean configurableRole;
+    private Boolean multiselectRole;
 
     private List<GroupEnrollmentConfigurationAttributesRepresentation> attributes;
 
@@ -159,12 +159,12 @@ public class GroupEnrollmentConfigurationRepresentation {
         this.attributes = attributes;
     }
 
-    public Boolean getConfigurableRole() {
-        return configurableRole;
+    public Boolean getMultiselectRole() {
+        return multiselectRole;
     }
 
-    public void setConfigurableRole(Boolean configurableRole) {
-        this.configurableRole = configurableRole;
+    public void setMultiselectRole(Boolean multiselectRole) {
+        this.multiselectRole = multiselectRole;
     }
 
     public List<String> getGroupRoles() {

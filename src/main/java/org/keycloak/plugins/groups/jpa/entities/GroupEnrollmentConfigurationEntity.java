@@ -78,8 +78,8 @@ public class GroupEnrollmentConfigurationEntity {
     @Column(name="HIDE_CONFIGURATION")
     protected Boolean hideConfiguration;
 
-    @Column(name="CONFIGURABLE_ROLE")
-    private Boolean configurableRole;
+    @Column(name="MULTISELECT_ROLE")
+    private Boolean multiselectRole;
 
     @OneToMany(cascade =CascadeType.ALL, orphanRemoval = true, mappedBy = "groupEnrollmentConfiguration")
     private List<GroupEnrollmentConfigurationAttributesEntity> attributes;
@@ -224,11 +224,11 @@ public class GroupEnrollmentConfigurationEntity {
         this.groupRoles = groupRoles;
     }
 
-    public Boolean isConfigurableRole() {
-        return configurableRole;
+    public Boolean isMultiselectRole() {
+        return multiselectRole;
     }
 
-    public void setConfigurableRole(Boolean configurableRole) {
-        this.configurableRole = configurableRole;
+    public void setMultiselectRole(Boolean multiselectRole) {
+        this.multiselectRole = multiselectRole;
     }
 }

@@ -17,7 +17,7 @@ import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.plugins.groups.enums.EnrollmentStatusEnum;
+import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
@@ -75,7 +75,7 @@ public class GroupAdminService {
                                                            @QueryParam("max") @DefaultValue("10") Integer max,
                                                            @QueryParam("groupId") String groupId,
                                                            @QueryParam("userSearch") String userSearch,
-                                                           @QueryParam("status") EnrollmentStatusEnum status) {
+                                                           @QueryParam("status") EnrollmentRequestStatusEnum status) {
         List<String> groupIds = groupId != null ? Stream.of(groupId).collect(Collectors.toList()):groupAdminRepository.getAllAdminGroupIds(groupAdmin.getId());
         return groupEnrollmentRequestRepository.groupAdminEnrollmentPager(groupIds, userSearch, status, first, max);
     }
