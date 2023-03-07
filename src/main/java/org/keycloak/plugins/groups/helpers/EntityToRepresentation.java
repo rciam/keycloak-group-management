@@ -72,7 +72,10 @@ public class EntityToRepresentation {
     public static UserGroupMembershipExtensionRepresentation toRepresentation(UserGroupMembershipExtensionEntity entity, RealmModel realm) {
         UserGroupMembershipExtensionRepresentation rep = new UserGroupMembershipExtensionRepresentation();
         rep.setId(entity.getId());
-        rep.setGroupId(entity.getGroup().getId());
+        GroupRepresentation groupRep = new GroupRepresentation();
+        groupRep.setId(entity.getGroup().getId());
+        groupRep.setName(entity.getGroup().getName());
+        rep.setGroup(groupRep);
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
         rep.setJustification(entity.getJustification());
         rep.setAupExpiresAt(entity.getAupExpiresAt());

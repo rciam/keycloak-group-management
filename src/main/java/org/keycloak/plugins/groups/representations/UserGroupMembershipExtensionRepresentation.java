@@ -8,11 +8,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.representations.idm.GroupRepresentation;
 
 public class UserGroupMembershipExtensionRepresentation {
 
     protected String id;
-    protected String groupId;
+    protected GroupRepresentation group;
     protected UserRepresentation user;
     protected MemberStatusEnum status;
     protected String changedByUserId;
@@ -39,12 +40,12 @@ public class UserGroupMembershipExtensionRepresentation {
         this.id = id;
     }
 
-    public String getGroupId() {
-        return groupId;
+    public GroupRepresentation getGroup() {
+        return group;
     }
 
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
+    public void setGroup(GroupRepresentation group) {
+        this.group = group;
     }
 
     public UserRepresentation getUser() {
