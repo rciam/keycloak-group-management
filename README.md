@@ -75,6 +75,7 @@ Path | Method | Description                                                     
 Path | Method | Description                                  | Classes |
 ------------ |--|----------------------------------------------|---------| 
 /admin/group | POST | create top level group                       | AdminService
+/admin/admin-events | POST | search for admin events                     | AdminService
 /admin/configuration | PUT | change realm settings (realm attributes)                  | AdminService
 /admin/user/{id} | DELETE | delete user          | AdminService
 /admin/group/{groupId} | DELETE | delete group          | AdminGroups

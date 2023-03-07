@@ -1,11 +1,15 @@
 package org.keycloak.plugins.groups.services;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.validation.constraints.NotNull;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -14,27 +18,36 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.annotations.cache.NoCache;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
+import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.events.EventStoreProvider;
+import org.keycloak.events.admin.AdminEventQuery;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
+import org.keycloak.models.Constants;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.GeneralJpaService;
 import org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity;
+import org.keycloak.plugins.groups.jpa.repositories.CustomJpaAdminEventQuery;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupManagementEventRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
+import org.keycloak.representations.idm.AdminEventRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
@@ -151,5 +164,92 @@ public class AdminService {
         } else {
             return ErrorResponse.error("User couldn't be deleted", Response.Status.BAD_REQUEST);
         }
+    }
+
+    @Path("admin-events")
+    @GET
+    @NoCache
+    @Produces(MediaType.APPLICATION_JSON)
+    public Stream<AdminEventRepresentation> getEvents(@QueryParam("operationTypes") List<String> operationTypes, @QueryParam("authRealm") String authRealm, @QueryParam("authClient") String authClient,
+                                                      @QueryParam("authUser") String authUser, @QueryParam("authIpAddress") String authIpAddress,
+                                                      @QueryParam("resourcePath") String resourcePath, @QueryParam("dateFrom") String dateFrom,
+                                                      @QueryParam("dateTo") String dateTo, @QueryParam("first") Integer firstResult,
+                                                      @QueryParam("max") Integer maxResults,
+                                                      @QueryParam("resourceTypes") List<String> resourceTypes) {
+        realmAuth.realm().requireViewEvents();
+
+        CustomJpaAdminEventQuery customJpaAdminEventQuery = new CustomJpaAdminEventQuery(session.getProvider(JpaConnectionProvider.class).getEntityManager());
+        AdminEventQuery query = customJpaAdminEventQuery.realm(realm.getId());
+
+        if (authRealm != null) {
+            query.authRealm(authRealm);
+        }
+
+        if (authClient != null) {
+            query.authClient(authClient);
+        }
+
+        if (authUser != null) {
+            query.authUser(authUser);
+        }
+
+        if (authIpAddress != null) {
+            query.authIpAddress(authIpAddress);
+        }
+
+        if (resourcePath != null) {
+            query.resourcePath(resourcePath);
+        }
+
+        if (operationTypes != null && !operationTypes.isEmpty()) {
+            OperationType[] t = new OperationType[operationTypes.size()];
+            for (int i = 0; i < t.length; i++) {
+                t[i] = OperationType.valueOf(operationTypes.get(i));
+            }
+            query.operation(t);
+        }
+
+        if (resourceTypes != null && !resourceTypes.isEmpty()) {
+            ResourceType[] t = new ResourceType[resourceTypes.size()];
+            for (int i = 0; i < t.length; i++) {
+                t[i] = ResourceType.valueOf(resourceTypes.get(i));
+            }
+            query.resourceType(t);
+        }
+
+
+
+        if(dateFrom != null) {
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            Date from = null;
+            try {
+                from = df.parse(dateFrom);
+            } catch (ParseException e) {
+                throw new BadRequestException("Invalid value for 'Date(From)', expected format is yyyy-MM-dd");
+            }
+            query.fromTime(from);
+        }
+
+        if(dateTo != null) {
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            Date to = null;
+            try {
+                to = df.parse(dateTo);
+            } catch (ParseException e) {
+                throw new BadRequestException("Invalid value for 'Date(To)', expected format is yyyy-MM-dd");
+            }
+            query.toTime(to);
+        }
+
+        if (firstResult != null) {
+            query.firstResult(firstResult);
+        }
+        if (maxResults != null) {
+            query.maxResults(maxResults);
+        } else {
+            query.maxResults(Constants.DEFAULT_MAX_RESULTS);
+        }
+
+        return query.getResultStream().map(ModelToRepresentation::toRepresentation);
     }
 }
