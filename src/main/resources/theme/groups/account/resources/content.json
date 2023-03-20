@@ -58,15 +58,15 @@
     "hidden": "!features.isMyResourcesEnabled"
   },
   {
-    "id": "group-management",
+    "id": "groups",
     "icon": "pf-icon-applications",
-    "label": "groupManagementSidebarTitle",
-    "descriptionLabel": "groupsManagementIntroMessage",
+    "label": "groupsSidebarTitle",
+    "descriptionLabel": "groupsIntroMessage",
     "hidden": "!features.isViewGroupsEnabled",
     "content": [
       {
         "id": "showgroups",
-        "path": "group-managment/showgroups",
+        "path": "groups/showgroups",
         "label": "groupLabel",
         "modulePath": "/content/group-page/GroupsPage.js",
         "componentName": "GroupsPage"

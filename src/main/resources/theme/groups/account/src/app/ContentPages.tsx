@@ -36,8 +36,8 @@ export interface ContentItem {
 
 let customPages =[ 
     {
-        path: "/group-managment/showgroups/:id",
-        expandId: "group-management",
+        path: "/groups/showgroups/:id",
+        expandId: "groups",
         parentId: "showgroups",
         componentName: "GroupPage"
     }
