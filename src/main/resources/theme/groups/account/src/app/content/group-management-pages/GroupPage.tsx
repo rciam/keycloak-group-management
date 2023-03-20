@@ -78,8 +78,8 @@ export const GroupPage: FC<GroupsPageProps> = (props)=> {
             <BreadcrumbItem to="#">
               Account Console
             </BreadcrumbItem>
-            <BreadcrumbItem to="#/group-managment/showgroups">
-              Group Managment
+            <BreadcrumbItem to="#/groups/showgroups">
+              My Groups
             </BreadcrumbItem>
             <BreadcrumbItem isActive>
               {groupMembership?.group?.name}

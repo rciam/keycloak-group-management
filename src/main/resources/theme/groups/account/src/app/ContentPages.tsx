@@ -106,7 +106,6 @@ function createNavItems(activePage: PageDef, contentParam: ContentItem[], groupN
         })
 
         const links: React.ReactElement[] = contentParam.map((item: ContentItem) => {
-            console.log(item);
             const navLinkId = `nav-link-${item.id}`;
             if (isExpansion(item)) {
                 return <NavExpandable id={navLinkId}
@@ -161,7 +160,6 @@ function setIds(contentParam: ContentItem[], groupNum: number): number {
 
 export function initGroupAndItemIds(): void {
     setIds(content, 0);
-    console.log({content});
 }
 
 // get rid of Expansions and put all PageDef items into a single array
