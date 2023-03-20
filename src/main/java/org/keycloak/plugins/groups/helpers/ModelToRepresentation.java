@@ -41,13 +41,13 @@ public class ModelToRepresentation extends org.keycloak.models.utils.ModelToRepr
         return rep;
     }
 
-    public static GroupRepresentation toSimpleGroupHierarchy(GroupModel group, boolean full) {
-        GroupRepresentation rep = toRepresentation(group, full);
-        List<GroupRepresentation> subGroups = group.getSubGroupsStream()
-                .map(subGroup -> toSimpleGroupHierarchy(subGroup, full)).collect(Collectors.toList());
-        rep.setExtraSubGroups(subGroups);
-        return rep;
-    }
+    // public static GroupRepresentation toSimpleGroupHierarchy(GroupModel group, boolean full) {
+    //     GroupRepresentation rep = toRepresentation(group, full);
+    //     List<GroupRepresentation> subGroups = group.getSubGroupsStream()
+    //             .map(subGroup -> toSimpleGroupHierarchy(subGroup, full)).collect(Collectors.toList());
+    //     rep.setExtraSubGroups(subGroups);
+    //     return rep;
+    // }
 
 
 }
