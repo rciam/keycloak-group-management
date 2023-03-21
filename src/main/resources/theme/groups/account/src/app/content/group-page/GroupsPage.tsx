@@ -95,7 +95,6 @@ export class GroupsPage extends React.Component<GroupsPageProps, GroupsPageState
   }
 
   private renderGroupList(group: Group, appIndex: number): React.ReactNode {
-    console.log(group);
     return (
       <Link to={"/groups/showgroups/"+group.id}>        
         <DataListItem id={`${appIndex}-group`} key={'group-' + appIndex} aria-labelledby="groups-list" >

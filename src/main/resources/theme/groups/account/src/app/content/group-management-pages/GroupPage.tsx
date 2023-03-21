@@ -24,9 +24,14 @@ interface User {
   federatedIdentities: object;
 }
 
+interface Attributes {
+  description:string[];
+}
+
 interface Group {
   id: string;
   name: string;
+  attributes: Attributes;
 }
 
 interface GroupMembership {
@@ -67,7 +72,6 @@ export const GroupPage: FC<GroupsPageProps> = (props)=> {
     .then((response: HttpResponse<GroupMembership>) => {
       if(response.status===200&&response.data){
         setGroupMembership(response.data);
-        console.log(response.data);
       }
     })
   }
@@ -86,6 +90,9 @@ export const GroupPage: FC<GroupsPageProps> = (props)=> {
             </BreadcrumbItem>
           </Breadcrumb>
           <ContentPage title={groupMembership?.group?.name||""}>
+            <p className="gm_group_desc">
+              {(groupMembership?.group?.attributes?.description&&groupMembership?.group?.attributes?.description[0])||"No descritption available."}
+            </p>
             <Tabs
             className="gm_tabs"
             activeKey={activeTabKey}
