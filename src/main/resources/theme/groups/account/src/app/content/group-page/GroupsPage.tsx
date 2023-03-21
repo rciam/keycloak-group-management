@@ -1,4 +1,5 @@
 import * as React from 'react';
+import {Link} from 'react-router-dom';
 
 import {
   Checkbox,
@@ -94,26 +95,26 @@ export class GroupsPage extends React.Component<GroupsPageProps, GroupsPageState
   }
 
   private renderGroupList(group: Group, appIndex: number): React.ReactNode {
-
     return (
-      <DataListItem id={`${appIndex}-group`} key={'group-' + appIndex} aria-labelledby="groups-list" >
-        <DataListItemRow>
-          <DataListItemCells
-            dataListCells={[
-              <DataListCell id={`${appIndex}-group-name`} width={2} key={'name-' + appIndex}>
-                {group.name}
-              </DataListCell>,
-              <DataListCell id={`${appIndex}-group-path`} width={2} key={'path-' + appIndex}>
-                {group.path}
-              </DataListCell>,
-              <DataListCell id={`${appIndex}-group-directMembership`} width={2} key={'directMembership-' + appIndex}>
-                <Checkbox id={`${appIndex}-checkbox-directMembership`} isChecked={group.id != null} isDisabled={true} />
-              </DataListCell>
-            ]}
-          />
-        </DataListItemRow>
-
-      </DataListItem>
+      <Link to={"/groups/showgroups/"+group.id}>        
+        <DataListItem id={`${appIndex}-group`} key={'group-' + appIndex} aria-labelledby="groups-list" >
+          <DataListItemRow>
+            <DataListItemCells
+              dataListCells={[
+                <DataListCell id={`${appIndex}-group-name`} width={2} key={'name-' + appIndex}>
+                  {group.name}
+                </DataListCell>,
+                <DataListCell id={`${appIndex}-group-path`} width={2} key={'path-' + appIndex}>
+                  {group.path}
+                </DataListCell>,
+                <DataListCell id={`${appIndex}-group-directMembership`} width={2} key={'directMembership-' + appIndex}>
+                  <Checkbox id={`${appIndex}-checkbox-directMembership`} isChecked={group.id != null} isDisabled={true} />
+                </DataListCell>
+              ]}
+            />
+          </DataListItemRow>
+        </DataListItem>
+      </Link>
     )
   }
 

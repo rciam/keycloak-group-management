@@ -1,7 +1,9 @@
 package org.keycloak.plugins.groups.helpers;
 
+import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.jpa.entities.GroupAttributeEntity;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.jpa.entities.*;
@@ -16,6 +18,9 @@ import org.keycloak.representations.idm.FederatedIdentityRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class EntityToRepresentation {
@@ -72,7 +77,11 @@ public class EntityToRepresentation {
     public static UserGroupMembershipExtensionRepresentation toRepresentation(UserGroupMembershipExtensionEntity entity, RealmModel realm) {
         UserGroupMembershipExtensionRepresentation rep = new UserGroupMembershipExtensionRepresentation();
         rep.setId(entity.getId());
-        rep.setGroupId(entity.getGroup().getId());
+        GroupRepresentation groupRep = new GroupRepresentation();
+        groupRep.setId(entity.getGroup().getId());
+        groupRep.setName(entity.getGroup().getName());
+        groupRep.setAttributes(getGroupAttributes(entity.getGroup().getAttributes()));
+        rep.setGroup(groupRep);
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
         rep.setJustification(entity.getJustification());
         rep.setAupExpiresAt(entity.getAupExpiresAt());
@@ -82,6 +91,14 @@ public class EntityToRepresentation {
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
         return rep;
+    }
+
+    private static Map<String, List<String>> getGroupAttributes(Collection<GroupAttributeEntity> attributesList) {
+        MultivaluedHashMap<String, String> result = new MultivaluedHashMap<>();
+        for (GroupAttributeEntity attr : attributesList) {
+            result.add(attr.getName(), attr.getValue());
+        }
+        return result;
     }
 
     public static GroupEnrollmentRequestRepresentation toRepresentation(GroupEnrollmentRequestEntity entity, RealmModel realm) {

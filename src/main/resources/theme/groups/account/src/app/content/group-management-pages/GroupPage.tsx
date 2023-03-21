@@ -1,48 +1,169 @@
-
 import * as React from 'react';
+import {FC,useState,useEffect} from 'react';
+import { Tabs, Tab, TabTitleText, DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell,Breadcrumb, BreadcrumbItem, } from '@patternfly/react-core';
+// @ts-ignore
+import { ContentPage } from '../ContentPage';
+import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
+// @ts-ignore
+import { Msg } from '../../widgets/Msg';
+//import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 
-import { GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
-import { DataList, DataListItem, DataListItemRow, DataListItemCells, DataListCell, Divider, Label } from '@patternfly/react-core';
+export interface GroupsPageProps {
+  match:any;
+}
 
+export interface GroupsPageState {
+  group_id: any;
+  group_membership: GroupMembership;
+}
+interface User {
+  id: string;
+  username: string;
+  emailVerified: boolean;
+  email: string;
+  federatedIdentities: object;
+}
 
+interface Attributes {
+  description:string[];
+}
 
-interface State {
-  data: any,
-  group_id: any
+interface Group {
+  id: string;
+  name: string;
+  attributes: Attributes;
+}
+
+interface GroupMembership {
+  id?: string;
+  group: Group;
+  user: User;
+  status: string;
+  membershipExpiresAt: string;
+  aupExpiresAt: string;
+  validFrom: string;
+  groupRoles: string[];
 }
 
 
-interface Props {
-  match:any
-}
 
 
+// export class GroupPage extends React.Component<GroupsPageProps, GroupsPageState> {
+export const GroupPage: FC<GroupsPageProps> = (props)=> {
 
-export class GroupPage extends React.Component<Props, State> {
+  let groupsService = new GroupsServiceClient();
+  useEffect(()=>{
+    fetchGroups();
+  },[]);
+  const [groupMembership,setGroupMembership] = useState({} as GroupMembership);
+  const [groupId] = useState(props.match.params.id);
+  const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
 
-    groupsService = new GroupsServiceClient();
-
-    constructor(props : Props){
-
-      super(props);
-      console.log(props);
-      this.state = {
-            group_id: props.match.params.id,
-            data: []
-        };
-        
-    }
-
-    public componentDidMount(): void {
-    }
+  const handleTabClick = (
+    event: React.MouseEvent<any> | React.KeyboardEvent | MouseEvent,
+    tabIndex: string | number
+  ) => {
+    setActiveTabKey(tabIndex);
+  };
 
 
-    public render(): React.ReactNode {
-      return (
-        <>
-          <h1>This is the Show Group Page</h1>
-          <h3>The group Id is {this.state.group_id}</h3>
-        </>
-      );
-    }
+  let fetchGroups = ()=>{
+    groupsService!.doGet<GroupMembership>("/user/group/"+groupId+"/member")
+    .then((response: HttpResponse<GroupMembership>) => {
+      if(response.status===200&&response.data){
+        setGroupMembership(response.data);
+      }
+    })
+  }
+    return (
+      <>
+        <div className="gm_content">
+          <Breadcrumb className="gm_breadcumb">
+            <BreadcrumbItem to="#">
+              Account Console
+            </BreadcrumbItem>
+            <BreadcrumbItem to="#/groups/showgroups">
+              My Groups
+            </BreadcrumbItem>
+            <BreadcrumbItem isActive>
+              {groupMembership?.group?.name}
+            </BreadcrumbItem>
+          </Breadcrumb>
+          <ContentPage title={groupMembership?.group?.name||""}>
+            <p className="gm_group_desc">
+              {(groupMembership?.group?.attributes?.description&&groupMembership?.group?.attributes?.description[0])||"No descritption available."}
+            </p>
+            <Tabs
+            className="gm_tabs"
+            activeKey={activeTabKey}
+            onSelect={handleTabClick}
+            isBox={false}
+            aria-label="Tabs in the default example"
+            role="region"
+            >
+              <Tab eventKey={0} title={<TabTitleText>Membership Details</TabTitleText>} aria-label="Default content - users">
+                <DataList className="gm_datalist" aria-label="Compact data list example" isCompact>
+                <DataListItem aria-labelledby="compact-item2">
+                    <DataListItemRow>
+                      <DataListItemCells
+                        dataListCells={[
+                          <DataListCell key="primary content">
+                            <span id="compact-item2"><strong>Member Since</strong></span>
+                          </DataListCell>,
+                          <DataListCell key="secondary content ">
+                             <span>{groupMembership?.validFrom||"Not Available"}</span>  
+                          </DataListCell>
+                        ]}
+                      />
+                    </DataListItemRow>
+                  </DataListItem>
+                  <DataListItem aria-labelledby="compact-item1">
+                    <DataListItemRow>
+                      <DataListItemCells
+                        dataListCells={[
+                          <DataListCell key="primary content">
+                            <span id="compact-item1"><strong>Memberhip Expiration</strong></span>
+                          </DataListCell>,
+                          <DataListCell key="secondary content">{groupMembership?.membershipExpiresAt||"Never"}</DataListCell>
+                        ]}
+                      />
+                    </DataListItemRow>
+                  </DataListItem>
+                  <DataListItem aria-labelledby="compact-item2">
+                    <DataListItemRow>
+                      <DataListItemCells
+                        dataListCells={[
+                          <DataListCell key="primary content">
+                            <span id="compact-item2"><strong>AUP Expiration</strong></span>
+                          </DataListCell>,
+                          <DataListCell key="secondary content ">
+                            <span>{groupMembership?.aupExpiresAt||"Never"}</span>
+                          </DataListCell>
+                        ]}
+                      />
+                    </DataListItemRow>
+                  </DataListItem>
+                  <DataListItem aria-labelledby="compact-item2">
+                    <DataListItemRow>
+                      <DataListItemCells
+                        dataListCells={[
+                          <DataListCell key="primary content">
+                            <span id="compact-item2"><strong>Group Roles</strong></span>
+                          </DataListCell>,
+                          <DataListCell key="secondary content ">
+                            {groupMembership?.groupRoles&&groupMembership?.groupRoles.join(', ')||"No Roles"}  
+                          </DataListCell>
+                        ]}
+                      />
+                    </DataListItemRow>
+                  </DataListItem>
+                  
+                </DataList>
+              </Tab>           
+            </Tabs>
+          </ContentPage>
+        </div>
+      </>  
+    )
+  
 };

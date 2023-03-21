@@ -6,3 +6,19 @@
 .centered-text {
     text-align: center;
 }
+.gm_content {
+    background-color:rgb(255, 255, 255);
+}
+
+.gm_breadcumb {
+    margin-left:1rem!important;
+    margin-top: 0.5rem!important;
+}
+.gm_datalist {
+    width: 50%;
+}
+
+.gm_group_desc {
+    font-style: italic;
+    margin: -2rem 0 1rem 1.5rem;
+}

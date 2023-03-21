@@ -214,7 +214,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setAupExpiresAt(rep.getAupExpiresAt());
         entity.setMembershipExpiresAt(rep.getMembershipExpiresAt());
         GroupEntity group = new GroupEntity();
-        group.setId(rep.getGroupId());
+        group.setId(rep.getGroup().getId());
         entity.setGroup(group);
         UserEntity user = new UserEntity();
         user.setId(rep.getUser().getId());
