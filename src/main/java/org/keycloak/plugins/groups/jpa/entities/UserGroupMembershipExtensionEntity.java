@@ -72,7 +72,7 @@ public class UserGroupMembershipExtensionEntity {
     @Column(name="GROUP_ENROLLMENT_CONFIGURATION_ID")
     protected String groupEnrollmentConfigurationId;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "GROUP_MEMBERSHIP_ROLES", joinColumns = @JoinColumn(name = "USER_GROUP_MEMBERSHIP_EXTENSION_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
     private List<GroupRolesEntity> groupRoles;
 

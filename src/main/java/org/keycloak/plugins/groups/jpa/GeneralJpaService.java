@@ -1,16 +1,22 @@
 package org.keycloak.plugins.groups.jpa;
 
+import java.util.stream.Collectors;
+
 import javax.transaction.Transactional;
 
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
+import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
+import org.keycloak.plugins.groups.representations.GroupRepresentation;
 
 public class GeneralJpaService {
 
@@ -80,5 +86,13 @@ public class GeneralJpaService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public GroupRepresentation getAllGroupInfo(GroupModel group){
+        GroupRepresentation rep = ModelToRepresentation.toRepresentationWithAttributes(group);
+        rep.setGroupRoles(groupRolesRepository.getGroupRolesByGroup(group.getId()).map(GroupRolesEntity::getName).collect(Collectors.toList()));
+        rep.setEnrollmentConfigurationList(groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(x -> EntityToRepresentation.toRepresentation(x, true)).collect(Collectors.toList()));
+        rep.setAdmins(groupAdminRepository.getAdminsForGroup(group.getId()).map(x -> EntityToRepresentation.toBriefRepresentation(x, realm)).collect(Collectors.toList()));
+        return rep;
     }
 }

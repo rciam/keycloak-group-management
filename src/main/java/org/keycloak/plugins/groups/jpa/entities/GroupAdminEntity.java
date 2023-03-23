@@ -20,14 +20,14 @@ import org.keycloak.models.jpa.entities.UserEntity;
 @NamedQueries({
         @NamedQuery(name="countByUserAndGroups", query="select count(f) from GroupAdminEntity f where f.user.id = :userId and f.group.id in (:groupIds)"),
         @NamedQuery(name="getAdminByUserAndGroup", query="from GroupAdminEntity f where f.user.id = :userId and f.group.id = :groupId"),
+        @NamedQuery(name="getAdminsForGroupIds", query="select distinct(f.user.id) from GroupAdminEntity f where f.group.id in (:groupIds)"),
         @NamedQuery(name="getGroupsForAdmin", query="select f.group.id from GroupAdminEntity f where f.user.id = :userId"),
-        @NamedQuery(name="getAdminsForGroup", query="select distinct(f.user.id) from GroupAdminEntity f where f.group.id in (:groupIds)"),
         @NamedQuery(name="countGroupsForAdmin", query="select count(f) from GroupAdminEntity f where f.user.id = :userId"),
+        @NamedQuery(name="searchGroupsForAdmin", query="select f.group.id from GroupAdminEntity f join GroupEntity g on f.group.id = g.id where f.user.id = :userId and g.name like :search"),
+        @NamedQuery(name="countSearchGroupsForAdmin", query="select count(f) from GroupAdminEntity f join GroupEntity g on f.group.id = g.id where f.user.id = :userId and g.name like :search"),
+        @NamedQuery(name="getAdminsForGroup", query="from GroupAdminEntity g where g.group.id = :groupId"),
         @NamedQuery(name="deleteAdminByGroup", query="delete from GroupAdminEntity g where g.group.id = :groupId"),
         @NamedQuery(name="deleteAdminByUser", query="delete from GroupAdminEntity g where g.user.id = :userId")
-//        ,
-//        @NamedQuery(name="getGroupsForAdminSearch", query="select g from GroupAdminEntity f, GroupEntity g where f.user.id = :userId and f.group.id = g.id and g.name like :search"),
-//        @NamedQuery(name="countGroupsForAdminSearch", query="select count(g) from GroupAdminEntity f, GroupEntity g where f.user.id = :userId and f.group.id = g.id and g.name like :search")
 })
 public class GroupAdminEntity {
 

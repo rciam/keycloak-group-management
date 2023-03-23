@@ -48,9 +48,10 @@ public class GroupAdminService {
 
     @GET
     @Path("/groups")
-    public GroupsPager getGroupAdminGroups(@QueryParam("first") @DefaultValue("0") Integer first,
+    public GroupsPager getGroupAdminGroups(@QueryParam("search") String search,
+                                           @QueryParam("first") @DefaultValue("0") Integer first,
                                            @QueryParam("max") @DefaultValue("10") Integer max){
-        return groupAdminRepository.getAdminGroups(groupAdmin.getId(), first, max);
+        return groupAdminRepository.getAdminGroups(groupAdmin.getId(), search, first, max);
     }
 
     @Path("/group/{groupId}")

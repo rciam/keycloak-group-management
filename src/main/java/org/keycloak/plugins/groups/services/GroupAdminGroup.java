@@ -27,6 +27,7 @@ import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
+import org.keycloak.plugins.groups.jpa.GeneralJpaService;
 import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
@@ -38,6 +39,7 @@ import org.keycloak.plugins.groups.jpa.repositories.GroupInvitationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
+import org.keycloak.plugins.groups.representations.GroupRepresentation;
 import org.keycloak.representations.account.UserRepresentation;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.theme.FreeMarkerUtil;
@@ -52,6 +54,7 @@ public class GroupAdminGroup {
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final GroupAdminRepository groupAdminRepository;
     private final GroupRolesRepository groupRolesRepository;
+    private final GeneralJpaService generalService;
     //TODO Add real url
     private static final String ADD_ADMIN_URL = "http://localhost:8080/realms/master/agm/dummy";
 
@@ -67,6 +70,7 @@ public class GroupAdminGroup {
         this.groupEnrollmentConfigurationRepository.setGroupRolesRepository(this.groupRolesRepository);
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
+        this.generalService =  new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
     }
 
     @GET
@@ -74,6 +78,13 @@ public class GroupAdminGroup {
     @Produces("application/json")
     public List<GroupEnrollmentConfigurationRepresentation> getGroupEnrollmentConfigurationsByGroup() {
        return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf,false)).collect(Collectors.toList());
+    }
+
+    @GET
+    @Path("/all")
+    @Produces("application/json")
+    public GroupRepresentation getAllGroupInfo() {
+        return generalService.getAllGroupInfo(group);
     }
 
     @GET

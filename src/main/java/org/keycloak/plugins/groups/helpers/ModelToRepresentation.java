@@ -4,6 +4,7 @@ import org.keycloak.models.GroupModel;
 import org.keycloak.plugins.groups.representations.GroupRepresentation;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,6 +25,18 @@ public class ModelToRepresentation extends org.keycloak.models.utils.ModelToRepr
         rep.setName(group.getName());
         if ( full)
            rep.setPath(buildGroupPath(group));
+        return rep;
+    }
+
+    public static GroupRepresentation toRepresentationWithAttributes(GroupModel group) {
+        GroupRepresentation rep = new GroupRepresentation();
+        rep.setId(group.getId());
+        rep.setName(group.getName());
+        Map<String, List<String>> attributes = group.getAttributes();
+        rep.setAttributes(attributes);
+        List<GroupRepresentation> subGroups = group.getSubGroupsStream()
+                .map(subGroup -> toSimpleGroupHierarchy(subGroup, false)).collect(Collectors.toList());
+        rep.setExtraSubGroups(subGroups);
         return rep;
     }
 

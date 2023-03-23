@@ -61,10 +61,18 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
         return em.createNamedQuery("getAdminByUserAndGroup", GroupAdminEntity.class).setParameter("groupId",groupId).setParameter("userId",userId).getResultStream().findAny().orElse(null);
     }
 
-    public GroupsPager getAdminGroups(String userId, Integer first, Integer max) {
-        List<GroupRepresentation> groups = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId",userId).setFirstResult(first).setMaxResults(max).getResultStream().map(id -> realm.getGroupById(id)) .map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
-        return new GroupsPager(groups,em.createNamedQuery("countGroupsForAdmin", Long.class).setParameter("userId",userId).getSingleResult());
+    public GroupsPager getAdminGroups(String userId, String search, Integer first, Integer max) {
+        if ( search == null) {
+            List<GroupRepresentation> groups = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).setFirstResult(first).setMaxResults(max).getResultStream().map(id -> realm.getGroupById(id)).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+            return new GroupsPager(groups, em.createNamedQuery("countGroupsForAdmin", Long.class).setParameter("userId", userId).getSingleResult());
+        } else {
+            List<GroupRepresentation> groups = em.createNamedQuery("searchGroupsForAdmin", String.class).setParameter("userId", userId).setParameter("search", "%"+search+"%").setFirstResult(first).setMaxResults(max).getResultStream().map(id -> realm.getGroupById(id)).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+            return new GroupsPager(groups, em.createNamedQuery("countSearchGroupsForAdmin", Long.class).setParameter("userId", userId).setParameter("search", "%"+search+"%").setParameter("userId", userId).getSingleResult());
+        }
+    }
 
+    public Stream<UserEntity> getAdminsForGroup(String groupId) {
+        return  em.createNamedQuery("getAdminsForGroup", GroupAdminEntity.class).setParameter("groupId",groupId).getResultStream().map(GroupAdminEntity::getUser);
     }
 
     public List<String> getAllAdminGroupIds(String userId) {
@@ -75,7 +83,7 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
     public Stream<String> getAllAdminGroupUsers(String groupId){
         GroupModel group = realm.getGroupById(groupId);
         List<String> groupIds = getThisAndParentGroupIds(group);
-        return em.createNamedQuery("getAdminsForGroup", String.class).setParameter("groupIds", groupIds).getResultStream();
+        return em.createNamedQuery("getAdminsForGroupIds", String.class).setParameter("groupIds", groupIds).getResultStream();
     }
 
     private Set<String> getLeafGroupsIds(GroupModel group) {
