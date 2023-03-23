@@ -34,8 +34,9 @@ public class ModelToRepresentation extends org.keycloak.models.utils.ModelToRepr
         rep.setName(group.getName());
         Map<String, List<String>> attributes = group.getAttributes();
         rep.setAttributes(attributes);
+        rep.setPath(buildGroupPath(group));
         List<GroupRepresentation> subGroups = group.getSubGroupsStream()
-                .map(subGroup -> toSimpleGroupHierarchy(subGroup, false)).collect(Collectors.toList());
+                .map(subGroup -> toSimpleGroupHierarchy(subGroup, true)).collect(Collectors.toList());
         rep.setExtraSubGroups(subGroups);
         return rep;
     }
