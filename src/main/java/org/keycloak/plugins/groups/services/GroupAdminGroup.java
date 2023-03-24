@@ -1,6 +1,9 @@
 package org.keycloak.plugins.groups.services;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
@@ -85,6 +88,29 @@ public class GroupAdminGroup {
     @Produces("application/json")
     public GroupRepresentation getAllGroupInfo() {
         return generalService.getAllGroupInfo(group);
+    }
+
+    @POST
+    @Path("/attributes")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response saveAttributes(Map<String, List<String>> attributes) {
+        if (attributes != null) {
+            Set<String> attrsToRemove = new HashSet<>(group.getAttributes().keySet());
+            attrsToRemove.removeAll(attributes.keySet());
+            for (Map.Entry<String, List<String>> attr : attributes.entrySet()) {
+                group.setAttribute(attr.getKey(), attr.getValue());
+            }
+
+            for (String attr : attrsToRemove) {
+                group.removeAttribute(attr);
+            }
+        } else {
+            Set<String> attrsToRemove = new HashSet<>(group.getAttributes().keySet());
+            for (String attr : attrsToRemove) {
+                group.removeAttribute(attr);
+            }
+        }
+        return Response.noContent().build();
     }
 
     @GET
