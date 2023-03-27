@@ -13,8 +13,10 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
+import org.keycloak.plugins.groups.representations.GroupAdminRepresentation;
 import org.keycloak.plugins.groups.representations.GroupsPager;
 import org.keycloak.representations.idm.GroupRepresentation;
 
@@ -30,14 +32,15 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
     }
 
     public boolean isGroupAdmin(String userId, GroupModel group){
-        List<String> groupIds = getThisAndParentGroupIds(group);
+        List<String> groupIds = getThisAndParentGroupIds(group, true);
         Long count = em.createNamedQuery("countByUserAndGroups", Long.class).setParameter("groupIds",groupIds).setParameter("userId",userId).getSingleResult();
         return count > 0;
     }
 
-    private  List<String> getThisAndParentGroupIds(GroupModel group) {
+    private  List<String> getThisAndParentGroupIds(GroupModel group, boolean includeThis) {
         List<String> groupIds =  new ArrayList<>();
-        groupIds.add(group.getId());
+        if (includeThis)
+            groupIds.add(group.getId());
         while ( group.getParent() != null){
             group = group.getParent();
             groupIds.add(group.getId());
@@ -61,10 +64,27 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
         return em.createNamedQuery("getAdminByUserAndGroup", GroupAdminEntity.class).setParameter("groupId",groupId).setParameter("userId",userId).getResultStream().findAny().orElse(null);
     }
 
-    public GroupsPager getAdminGroups(String userId, Integer first, Integer max) {
-        List<GroupRepresentation> groups = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId",userId).setFirstResult(first).setMaxResults(max).getResultStream().map(id -> realm.getGroupById(id)) .map(g -> ModelToRepresentation.toGroupHierarchy(g, false)).collect(Collectors.toList());
-        return new GroupsPager(groups,em.createNamedQuery("countGroupsForAdmin", Long.class).setParameter("userId",userId).getSingleResult());
+    public GroupsPager getAdminGroups(String userId, String search, Integer first, Integer max) {
+        if ( search == null) {
+            List<GroupRepresentation> groups = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).setFirstResult(first).setMaxResults(max).getResultStream().map(id -> realm.getGroupById(id)).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+            return new GroupsPager(groups, em.createNamedQuery("countGroupsForAdmin", Long.class).setParameter("userId", userId).getSingleResult());
+        } else {
+            List<GroupRepresentation> groups = em.createNamedQuery("searchGroupsForAdmin", String.class).setParameter("userId", userId).setParameter("search", "%"+search+"%").setFirstResult(first).setMaxResults(max).getResultStream().map(id -> realm.getGroupById(id)).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+            return new GroupsPager(groups, em.createNamedQuery("countSearchGroupsForAdmin", Long.class).setParameter("userId", userId).setParameter("search", "%"+search+"%").setParameter("userId", userId).getSingleResult());
+        }
+    }
 
+    public List<GroupAdminRepresentation> getAdminsForGroup(GroupModel group) {
+        //prota to arxiko kai to vazo me true
+        //meta ti lista xoris to id mono parent - an parent != null kai an den yparxei idi to vazo me false
+        List<UserEntity> admins =  em.createNamedQuery("getAdminsForGroup", GroupAdminEntity.class).setParameter("groupId",group.getId()).getResultStream().map(GroupAdminEntity::getUser).collect(Collectors.toList());
+        List<GroupAdminRepresentation> adminsRep= admins.stream().map(x-> new GroupAdminRepresentation(EntityToRepresentation.toBriefRepresentation(x, realm), true)).collect(Collectors.toList());
+        List<String> groupIds = getThisAndParentGroupIds(group, false);
+        if (!groupIds.isEmpty()) {
+            Stream<UserEntity> parentAdmins = em.createNamedQuery("getAdminsForGroupIds", UserEntity.class).setParameter("groupIds", groupIds).getResultStream().filter(x -> !admins.contains(x));
+            adminsRep.addAll(parentAdmins.map(x -> new GroupAdminRepresentation(EntityToRepresentation.toBriefRepresentation(x, realm), false)).collect(Collectors.toList()));
+        }
+        return adminsRep;
     }
 
     public List<String> getAllAdminGroupIds(String userId) {
@@ -72,10 +92,10 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
         return groupIds;
     }
 
-    public Stream<String> getAllAdminGroupUsers(String groupId){
+    public Stream<String> getAllAdminIdsGroupUsers(String groupId){
         GroupModel group = realm.getGroupById(groupId);
-        List<String> groupIds = getThisAndParentGroupIds(group);
-        return em.createNamedQuery("getAdminsForGroup", String.class).setParameter("groupIds", groupIds).getResultStream();
+        List<String> groupIds = getThisAndParentGroupIds(group, true);
+        return em.createNamedQuery("getAdminsIdsForGroupIds", String.class).setParameter("groupIds", groupIds).getResultStream();
     }
 
     private Set<String> getLeafGroupsIds(GroupModel group) {

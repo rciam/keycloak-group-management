@@ -50,6 +50,7 @@ Path | Method | Description                              | Classes
 Path | Method | Description                                                                   | Classes 
 ------------ |--------|-------------------------------------------------------------------------------|--------- 
 /account/group-admin/groups | GET    | get all groups that this user has admin rights                                | GroupAdminService 
+/account/group-admin/group/{groupId}/all | GET    | get all group information                                                     | GroupAdminGroup
 /account/group-admin/group/{groupId}/configuration/all | GET    | get all group enrollment configurations                                       | GroupAdminGroup
 /account/group-admin/group/{groupId}/configuration/{id} | GET    | get group enrollment configuration                                            | GroupAdminGroup
 /account/group-admin/group/{groupId}/configuration | POST   | create/ update group enrollment configuration                                 | GroupAdminGroup
