@@ -20,7 +20,8 @@ import org.keycloak.models.jpa.entities.UserEntity;
 @NamedQueries({
         @NamedQuery(name="countByUserAndGroups", query="select count(f) from GroupAdminEntity f where f.user.id = :userId and f.group.id in (:groupIds)"),
         @NamedQuery(name="getAdminByUserAndGroup", query="from GroupAdminEntity f where f.user.id = :userId and f.group.id = :groupId"),
-        @NamedQuery(name="getAdminsForGroupIds", query="select distinct(f.user.id) from GroupAdminEntity f where f.group.id in (:groupIds)"),
+        @NamedQuery(name="getAdminsIdsForGroupIds", query="select distinct(f.user.id) from GroupAdminEntity f where f.group.id in (:groupIds)"),
+        @NamedQuery(name="getAdminsForGroupIds", query="select distinct(g) from UserEntity g join GroupAdminEntity f on f.user.id = g.id where f.group.id in (:groupIds)"),
         @NamedQuery(name="getGroupsForAdmin", query="select f.group.id from GroupAdminEntity f where f.user.id = :userId"),
         @NamedQuery(name="countGroupsForAdmin", query="select count(f) from GroupAdminEntity f where f.user.id = :userId"),
         @NamedQuery(name="searchGroupsForAdmin", query="select f.group.id from GroupAdminEntity f join GroupEntity g on f.group.id = g.id where f.user.id = :userId and g.name like :search"),

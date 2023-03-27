@@ -132,7 +132,7 @@ public class UserGroups {
             GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.create(rep, user.getId(), configuration);
             //email to group admins if they must accept it
             //find thems based on group
-            groupAdminRepository.getAllAdminGroupUsers(configuration.getGroup().getId()).forEach(adminId -> {
+            groupAdminRepository.getAllAdminIdsGroupUsers(configuration.getGroup().getId()).forEach(adminId -> {
                 try {
                     UserModel admin = session.users().getUserById(realm, adminId);
                     if (admin != null) {

@@ -9,7 +9,7 @@ public class GroupRepresentation extends org.keycloak.representations.idm.GroupR
     private List<GroupRepresentation> subGroups;
     private List<String> groupRoles;
     private List<GroupEnrollmentConfigurationRepresentation> enrollmentConfigurationList;
-    private List<UserRepresentation> admins;
+    private List<GroupAdminRepresentation> admins;
 
 
     public List<GroupRepresentation> getExtraSubGroups() {
@@ -36,11 +36,11 @@ public class GroupRepresentation extends org.keycloak.representations.idm.GroupR
         this.enrollmentConfigurationList = enrollmentConfigurationList;
     }
 
-    public List<UserRepresentation> getAdmins() {
+    public List<GroupAdminRepresentation> getAdmins() {
         return admins;
     }
 
-    public void setAdmins(List<UserRepresentation> admins) {
+    public void setAdmins(List<GroupAdminRepresentation> admins) {
         this.admins = admins;
     }
 }

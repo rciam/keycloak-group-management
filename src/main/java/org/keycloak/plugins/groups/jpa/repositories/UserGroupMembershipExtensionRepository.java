@@ -101,7 +101,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 } catch (EmailException e) {
                     logger.info("problem sending email to user " + user.getFirstName() + " " + user.getLastName());
                 }
-                groupAdminRepository.getAllAdminGroupUsers(group.getId()).map(id -> session.users().getUserById(realmModel, id)).forEach(admin -> {
+                groupAdminRepository.getAllAdminIdsGroupUsers(group.getId()).map(id -> session.users().getUserById(realmModel, id)).forEach(admin -> {
                     if (admin != null) {
                         customFreeMarkerEmailTemplateProvider.setUser(admin);
                         try {

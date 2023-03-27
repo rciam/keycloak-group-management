@@ -92,7 +92,7 @@ public class GeneralJpaService {
         GroupRepresentation rep = ModelToRepresentation.toRepresentationWithAttributes(group);
         rep.setGroupRoles(groupRolesRepository.getGroupRolesByGroup(group.getId()).map(GroupRolesEntity::getName).collect(Collectors.toList()));
         rep.setEnrollmentConfigurationList(groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(x -> EntityToRepresentation.toRepresentation(x, true)).collect(Collectors.toList()));
-        rep.setAdmins(groupAdminRepository.getAdminsForGroup(group.getId()).map(x -> EntityToRepresentation.toBriefRepresentation(x, realm)).collect(Collectors.toList()));
+        rep.setAdmins(groupAdminRepository.getAdminsForGroup(group));
         return rep;
     }
 }
