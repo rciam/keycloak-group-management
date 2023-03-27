@@ -43,11 +43,22 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("activateMemberSubject", "activate-member.ftl", attributes);
     }
 
-    public void sendInviteGroupAdminEmail(String groupadmin, String groupname, String url) throws EmailException {
-        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
-        attributes.put("groupadmin", groupadmin);
+    public void sendInviteGroupAdminEmail(String invitationId, UserModel groupadmin, String groupname) throws EmailException {
+        StringBuilder sb = new StringBuilder();
+        if (user.getFirstName() != null){
+            sb.append(user.getFirstName()).append(" ");
+        }
+        if (user.getLastName() != null){
+            sb.append(user.getLastName());
+        } else  if (user.getFirstName() == null){
+            sb.append("Sir/Madam");
+        }
+        attributes.put("fullname", sb.toString());
+        attributes.put("groupadmin", groupadmin.getFirstName()+" "+groupadmin.getLastName());
         attributes.put("groupname", groupname);
-        attributes.put("url", url);
+        KeycloakUriInfo uriInfo = session.getContext().getUri();
+        URI baseUri = uriInfo.getBaseUri();
+        attributes.put("url",baseUri.toString() + finishGroupInvitation.replace("{realmName}",realm.getName()).replace("{id}",invitationId));
         send("inviteGroupAdminSubject", "invite-group-admin.ftl", attributes);
     }
 
@@ -98,7 +109,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send( "groupMembershipExpirationNotificationSubject", "group-membership-expiration-notification.ftl", attributes);
     }
 
-    public void sendGroupInvitationEmail(UserModel groupadmin, String groupname, boolean withoutAcceptance, List<String> groupRoles, String id) throws EmailException, EmailException {
+    public void sendGroupInvitationEmail(UserModel groupadmin, String groupname, boolean withoutAcceptance, List<String> groupRoles, String id) throws EmailException {
         StringBuilder sb = new StringBuilder();
         if (user.getFirstName() != null){
             sb.append(user.getFirstName()).append(" ");
@@ -123,11 +134,12 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send( "groupInvitationSubject", "user-group-invitation.ftl", attributes);
     }
 
-    public void sendAcceptInvitationEmail(UserModel userModel, String groupname) throws EmailException, EmailException {
+    public void sendAcceptInvitationEmail(UserModel userModel, String groupname, boolean forMember) throws EmailException {
         attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
         attributes.put("userfullname", userModel.getFirstName()+" "+userModel.getLastName());
         attributes.put("email", userModel.getEmail());
         attributes.put("groupname", groupname);
+        attributes.put("type", forMember ? "member" : "group admin");
         send("groupAcceptInvitationSubject", "accept-invitation.ftl", attributes);
     }
 }

@@ -16,6 +16,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
+import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 
 @Entity
@@ -40,6 +41,13 @@ public class GroupInvitationEntity {
     @ManyToOne()
     @JoinColumn(name = "GROUP_ENROLLMENT_CONFIGURATION_ID")
     private GroupEnrollmentConfigurationEntity groupEnrollmentConfiguration;
+
+    @ManyToOne()
+    @JoinColumn(name = "GROUP_ID")
+    private GroupEntity group;
+
+    @Column(name = "FOR_MEMBER")
+    private Boolean forMember;
 
     @Column(name = "REALM_ID")
     private String realmId;
@@ -78,6 +86,22 @@ public class GroupInvitationEntity {
 
     public void setGroupEnrollmentConfiguration(GroupEnrollmentConfigurationEntity groupEnrollmentConfiguration) {
         this.groupEnrollmentConfiguration = groupEnrollmentConfiguration;
+    }
+
+    public GroupEntity getGroup() {
+        return group;
+    }
+
+    public void setGroup(GroupEntity group) {
+        this.group = group;
+    }
+
+    public Boolean getForMember() {
+        return forMember;
+    }
+
+    public void setForMember(Boolean forMember) {
+        this.forMember = forMember;
     }
 
     public String getRealmId() {

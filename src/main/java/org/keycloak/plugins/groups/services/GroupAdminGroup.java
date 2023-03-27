@@ -38,9 +38,13 @@ import org.keycloak.plugins.groups.jpa.repositories.GroupInvitationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
+import org.keycloak.plugins.groups.scheduled.DeleteExpiredInvitationTask;
 import org.keycloak.representations.account.UserRepresentation;
+import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.ServicesLogger;
+import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 import org.keycloak.theme.FreeMarkerUtil;
+import org.keycloak.timer.TimerProvider;
 
 public class GroupAdminGroup {
     private final KeycloakSession session;
@@ -52,6 +56,7 @@ public class GroupAdminGroup {
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final GroupAdminRepository groupAdminRepository;
     private final GroupRolesRepository groupRolesRepository;
+    private  final GroupInvitationRepository groupInvitationRepository;
     //TODO Add real url
     private static final String ADD_ADMIN_URL = "http://localhost:8080/realms/master/agm/dummy";
 
@@ -65,6 +70,7 @@ public class GroupAdminGroup {
         this.groupAdminRepository = new GroupAdminRepository(session, realm);
         this.groupRolesRepository = new GroupRolesRepository(session, realm, new GroupEnrollmentRequestRepository(session, realm, null), userGroupMembershipExtensionRepository, new GroupInvitationRepository(session, realm), groupEnrollmentConfigurationRepository);
         this.groupEnrollmentConfigurationRepository.setGroupRolesRepository(this.groupRolesRepository);
+        this.groupInvitationRepository = new GroupInvitationRepository(session, realm);
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
     }
@@ -157,25 +163,37 @@ public class GroupAdminGroup {
         if (member == null) {
             throw new NotFoundException("Could not find this group member");
         }
-        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository);
+        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipExtensionRepository, groupAdminRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
 
     @POST
-    @Path("/admin")
+    @Path("/admin/invite")
     public Response inviteGroupAdmin(UserRepresentation userRep) throws EmailException {
-        if (userRep.getEmail() == null || userRep.getFirstName() == null || userRep.getLastName() == null)
-            return Response.status(Response.Status.BAD_REQUEST).entity("Required user fields have not submitted").build();
+        if (userRep.getEmail() == null)
+            return ErrorResponse.error("Wrong data", Response.Status.BAD_REQUEST);
 
-        UserAdapter user = Utils.getDummyUser(userRep);
+        String invitationId = groupInvitationRepository.createForAdmin(group.getId(), voAdmin.getId());
+        //execute once delete invitation after "url-expiration-period" ( default 72 hours)
+        TimerProvider timer = session.getProvider(TimerProvider.class);
+        long invitationExpirationHour = realm.getAttribute(Utils.invitationExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.invitationExpirationPeriod)) : 72;
+        long interval = invitationExpirationHour * 3600 * 1000;
+        timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new DeleteExpiredInvitationTask(invitationId, realm.getId()), interval), interval, "DeleteExpiredInvitation_" + invitationId);
 
-        customFreeMarkerEmailTemplateProvider.setUser(user);
-        customFreeMarkerEmailTemplateProvider.sendInviteGroupAdminEmail(user.getFirstName()+" "+user.getLastName(),group.getName(), ADD_ADMIN_URL);
+        try {
+            UserAdapter user = Utils.getDummyUser(userRep.getEmail(), userRep.getFirstName(), userRep.getLastName());
+            customFreeMarkerEmailTemplateProvider.setUser(user);
+            customFreeMarkerEmailTemplateProvider.sendInviteGroupAdminEmail(invitationId, voAdmin, group.getName());
+        } catch (EmailException e) {
+            ServicesLogger.LOGGER.failedToSendEmail(e);
+        }
+
 
         return Response.noContent().build();
 
     }
+
 
     @DELETE
     @Path("/admin/{userId}")

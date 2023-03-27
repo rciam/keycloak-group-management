@@ -185,15 +185,22 @@ public class UserGroups {
         if ( invitationEntity == null ) {
             throw new NotFoundException("This invitation does not exist or has been expired");
         }
-        if (userGroupMembershipExtensionRepository.getByUserAndGroup(invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId(), user.getId()) != null){
+        if (invitationEntity.getForMember() && userGroupMembershipExtensionRepository.getByUserAndGroup(invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId(), user.getId()) != null){
             throw new BadRequestException("You are already member of this group");
         }
+        if (!invitationEntity.getForMember() && groupAdminRepository.getGroupAdminByUserAndGroup(user.getId(), invitationEntity.getGroup().getId()) != null){
+            throw new BadRequestException("You are already group admin for this group");
+        }
 
-        userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user, adminEvent, session.getContext().getUri());
+        if (invitationEntity.getForMember() ) {
+            userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user, adminEvent, session.getContext().getUri());
+        } else {
+            groupAdminRepository.addGroupAdmin(user.getId(), invitationEntity.getGroup().getId());
+        }
 
         try {
             customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm,invitationEntity.getCheckAdmin().getId()));
-            customFreeMarkerEmailTemplateProvider.sendAcceptInvitationEmail(user,invitationEntity.getGroupEnrollmentConfiguration().getGroup().getName());
+            customFreeMarkerEmailTemplateProvider.sendAcceptInvitationEmail(user,invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getName() :invitationEntity.getGroup().getName(), invitationEntity.getForMember());
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         }

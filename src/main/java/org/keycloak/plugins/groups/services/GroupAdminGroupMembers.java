@@ -68,7 +68,7 @@ public class GroupAdminGroupMembers {
             GroupEnrollmentConfigurationEntity conf = groupEnrollmentConfigurationRepository.getEntity(groupInvitationInitialRep.getGroupEnrollmentConfiguration().getId());
             if ( conf == null)
                 return ErrorResponse.error("Wrong group enrollment configuration", Response.Status.BAD_REQUEST);
-            emailId = groupInvitationRepository.create(groupInvitationInitialRep, voAdmin.getId(),conf);
+            emailId = groupInvitationRepository.createForMember(groupInvitationInitialRep, voAdmin.getId(),conf);
             //execute once delete invitation after "url-expiration-period" ( default 72 hours)
             TimerProvider timer = session.getProvider(TimerProvider.class);
             long invitationExpirationHour = realm.getAttribute(Utils.invitationExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.invitationExpirationPeriod)) : 72;
