@@ -24,8 +24,8 @@ import org.keycloak.models.jpa.entities.UserEntity;
         @NamedQuery(name="getAdminsForGroupIds", query="select distinct(g) from UserEntity g join GroupAdminEntity f on f.user.id = g.id where f.group.id in (:groupIds)"),
         @NamedQuery(name="getGroupsForAdmin", query="select f.group.id from GroupAdminEntity f where f.user.id = :userId"),
         @NamedQuery(name="countGroupsForAdmin", query="select count(f) from GroupAdminEntity f where f.user.id = :userId"),
-        @NamedQuery(name="searchGroupsForAdmin", query="select f.group.id from GroupAdminEntity f join GroupEntity g on f.group.id = g.id where f.user.id = :userId and g.name like :search"),
-        @NamedQuery(name="countSearchGroupsForAdmin", query="select count(f) from GroupAdminEntity f join GroupEntity g on f.group.id = g.id where f.user.id = :userId and g.name like :search"),
+        @NamedQuery(name="searchGroupsForAdmin", query="select f.group.id from GroupAdminEntity f join GroupEntity g on f.group.id = g.id where f.user.id = :userId and lower(g.name) like :search"),
+        @NamedQuery(name="countSearchGroupsForAdmin", query="select count(f) from GroupAdminEntity f join GroupEntity g on f.group.id = g.id where f.user.id = :userId and lower(g.name) like :search"),
         @NamedQuery(name="getAdminsForGroup", query="from GroupAdminEntity g where g.group.id = :groupId"),
         @NamedQuery(name="deleteAdminByGroup", query="delete from GroupAdminEntity g where g.group.id = :groupId"),
         @NamedQuery(name="deleteAdminByUser", query="delete from GroupAdminEntity g where g.user.id = :userId")
