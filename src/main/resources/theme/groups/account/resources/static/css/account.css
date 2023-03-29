@@ -22,3 +22,78 @@
     font-style: italic;
     margin: -2rem 0 1rem 1.5rem;
 }
+
+.gm_search-icon-container {
+    background-image: url('../svg/magnifying-glass-solid.svg');
+    background-size: cover;
+    height:0.8rem;
+    width:0.8rem;
+}
+
+.gm_search-input {
+    max-width: 20rem!important;
+}
+
+.gm_cancel-icon-container {
+    background-image: url('../svg/xmark-solid.svg');
+    background-size: cover;
+    height:0.8rem;
+    width:0.8rem;
+    margin-top: -0.1rem;
+}
+
+.gm_expandable-list a {
+    width:100%;
+}
+
+.gm_expandable-list-item > .pf-c-data-list__item-row {
+    margin-left:-1.5rem;
+
+}
+
+.gm_expandable-list-item > .pf-c-data-list__item-row > .pf-c-data-list__item-control {
+    margin-right:-0.5rem!important;
+}
+
+.gm_expandable-list .pf-c-data-list__expandable-content-body {
+    padding:0!important;
+}
+.gm_epxand-toggle {
+    cursor: pointer;
+}
+
+.gm_epxand-toggle div {
+    height:1rem;
+    width:1rem;
+}
+
+.gm_epxand-toggle:hover div {
+    opacity: .5;
+}
+
+.gm_epxand-toggle-expanded {
+    background-image: url('../svg/angle-down-solid.svg');
+    background-size: cover;
+    margin: 0.7rem 0.5rem 0 0.4rem;
+}
+
+
+.gm_epxand-toggle-hidden {
+    background-image: url('../svg/angle-right-solid.svg');
+    background-size: cover;
+    margin:0.6rem 0.8rem 0 0.4rem;
+    width: 0.7rem!important;;
+}
+.gm_datalist-header {
+    margin-left:1rem!important;
+}
+
+.gm_search-input-container {
+    width:100%;
+    padding: 0.5rem;
+}
+
+.gm_search-input-container div {
+    margin-left:auto;
+    margin-right:0;
+}

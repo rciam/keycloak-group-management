@@ -70,6 +70,13 @@
         "label": "groupLabel",
         "modulePath": "/content/group-page/GroupsPage.js",
         "componentName": "GroupsPage"
+      },
+      {
+        "id": "admingroups",
+        "path": "groups/admingroups",
+        "label": "adminGroupLabel",
+        "modulePath": "/content/group-page/AdminGroupsPage.js",
+        "componentName": "AdminGroupsPage"
       }
     ]
   }
