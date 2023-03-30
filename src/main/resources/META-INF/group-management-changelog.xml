@@ -614,5 +614,25 @@
         <renameColumn tableName="GROUP_ENROLLMENT_CONFIGURATION" oldColumnName="CONFIGURABLE_ROLE" newColumnName="MULTISELECT_ROLE" columnDataType="boolean"/>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="invite-group-admin">
+
+        <addColumn tableName="GROUP_INVITATION">
+            <column name="FOR_MEMBER" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="GROUP_INVITATION">
+            <column name="GROUP_ID" type="VARCHAR(36)"/>
+        </addColumn>
+        <addForeignKeyConstraint
+                constraintName="group_invitation_group_fk"
+                baseTableName="GROUP_INVITATION"
+                baseColumnNames="GROUP_ID"
+                referencedTableName="keycloak_group"
+                referencedColumnNames="id"
+        />
+        <dropNotNullConstraint tableName="GROUP_INVITATION" columnName="GROUP_ENROLLMENT_CONFIGURATION_ID" columnDataType="VARCHAR(36)"/>
+    </changeSet>
+
 
 </databaseChangeLog>

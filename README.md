@@ -63,7 +63,8 @@ Path | Method | Description                                                     
 /account/group-admin/group/{groupId}/member/{memberId}/role | DELETE | delete role from group member                                                 | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/suspend | POST   | suspend group member                                                          | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/activate | POST   | activate group member                                                         | GroupAdminGroupMember
-/account/group-admin/group/{groupId}/admin | POST   | invite user as group admin for this groupId group                             | GroupAdminGroup
+/account/group-admin/group/{groupId}/member/{memberId}/admin | POST   | add group member as admin                                                     | GroupAdminGroupMember
+/account/group-admin/group/{groupId}/admin/invite | POST   | invite user as group admin for this groupId group                             | GroupAdminGroup
 /account/group-admin/group/{groupId}/admin/{userId} | DELETE | delete group admin                                                            | GroupAdminService
 /account/group-admin/enroll-requests | GET    | get all group admin enrollment requests                                       | GroupAdminService
 /account/group-admin/enroll-request/{enrollId} | GET    | get enrollment request                                                        | GroupAdminEnrollementRequest
