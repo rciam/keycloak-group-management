@@ -113,6 +113,15 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 });
             });
 
+            Stream<UserGroupMembershipExtensionEntity> pendingMembers = em.createNamedQuery("getMembershipsByStatusAndValidFrom").setParameter("status", MemberStatusEnum.PENDING).setParameter("date", LocalDate.now()).getResultStream();
+            pendingMembers.forEach( member -> {
+                member.setStatus(MemberStatusEnum.ENABLED);
+                update(member);
+                GroupModel group = realm.getGroupById(member.getGroup().getId());
+                UserModel userModel = session.users().getUserById(realm, member.getUser().getId());
+                userModel.joinGroup(group);
+            });
+
             if (eventEntity == null) {
                 //first time, execute also weekly tasks
                 weeklyTaskExecution(customFreeMarkerEmailTemplateProvider, session, serverUrl);
@@ -261,7 +270,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         editorUser.setId(groupAdminId);
         entity.setChangedBy(editorUser);
         entity.setJustification(enrollmentEntity.getAdminJustification());
-        entity.setStatus(MemberStatusEnum.ENABLED);
+        entity.setStatus(entity.getValidFrom() != null && entity.getValidFrom().isAfter(LocalDate.now()) ? MemberStatusEnum.PENDING :MemberStatusEnum.ENABLED);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
         if (enrollmentEntity.getGroupRoles() != null) {
             entity.setGroupRoles(enrollmentEntity.getGroupRoles().stream().map(x -> {
@@ -276,7 +285,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         update(entity);
 
-        if (isNotMember) {
+        if (isNotMember && MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
             GroupModel group = realm.getGroupById(configuration.getGroup().getId());
             UserModel userModel = session.users().getUserById(realm, enrollmentEntity.getUser().getId());
             userModel.joinGroup(group);
@@ -315,16 +324,17 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setUser(userEntity);
         entity.setChangedBy(null);
         entity.setJustification(null);
-        entity.setStatus(MemberStatusEnum.ENABLED);
+        entity.setStatus(entity.getValidFrom() != null && entity.getValidFrom().isAfter(LocalDate.now()) ? MemberStatusEnum.PENDING :MemberStatusEnum.ENABLED);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
         if (rep.getGroupRoles() != null) {
             entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, configuration.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toList()));
         } else {
             entity.setGroupRoles(null);
         }
+
         update(entity);
 
-        if (isNotMember) {
+        if (isNotMember && MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
             GroupModel group = realm.getGroupById(configuration.getGroup().getId());
             user.joinGroup(group);
         }
@@ -355,7 +365,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         userEntity.setId(userModel.getId());
         entity.setUser(userEntity);
         entity.setChangedBy(invitationEntity.getCheckAdmin());
-        entity.setStatus(MemberStatusEnum.ENABLED);
+        entity.setStatus(entity.getValidFrom() != null && entity.getValidFrom().isAfter(LocalDate.now()) ? MemberStatusEnum.PENDING :MemberStatusEnum.ENABLED);
         entity.setJustification(null);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
         if (invitationEntity.getGroupRoles() != null ) {
@@ -371,7 +381,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         update(entity);
 
-        if (isNotMember) {
+        if (isNotMember && MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
             GroupModel group = realm.getGroupById(configuration.getGroup().getId());
             userModel.joinGroup(group);
         }
