@@ -73,7 +73,10 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
             return new GroupsPager(groups, em.createNamedQuery("countSearchGroupsForAdmin", Long.class).setParameter("userId", userId).setParameter("search", "%"+search.toLowerCase()+"%").getSingleResult());
         }
     }
-
+    public GroupsPager getAdminGroups(String userId, Integer first, Integer max) {
+        List<GroupRepresentation> groups = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId",userId).setFirstResult(first).setMaxResults(max).getResultStream().map(id -> realm.getGroupById(id)) .map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+        return new GroupsPager(groups,em.createNamedQuery("countGroupsForAdmin", Long.class).setParameter("userId",userId).getSingleResult());
+    }
     public List<GroupAdminRepresentation> getAdminsForGroup(GroupModel group) {
         //prota to arxiko kai to vazo me true
         //meta ti lista xoris to id mono parent - an parent != null kai an den yparxei idi to vazo me false
