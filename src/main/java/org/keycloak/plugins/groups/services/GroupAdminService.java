@@ -64,7 +64,7 @@ public class GroupAdminService {
             throw new ForbiddenException();
         }
 
-        GroupAdminGroup service = new GroupAdminGroup(session, realm, groupAdmin, group);
+        GroupAdminGroup service = new GroupAdminGroup(session, realm, groupAdmin, group, adminEvent);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

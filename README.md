@@ -59,8 +59,9 @@ Path | Method | Description                                                     
 /account/group-admin/group/{groupId}/role/{id} | DELETE | delete group role                                                             | GroupAdminGroup
 /account/group-admin/group/{groupId}/members | GET    | get all group members pager, being able to search and get by type (fe active) | GroupAdminGroupMembers
 /account/group-admin/group/{groupId}/members/invitation | POST   | send invitation to a user based on email                                      | GroupAdminGroupMembers
-/account/group-admin/group/{groupId}/member/{memberId}/role | POST   | add role to group member                                                      | GroupAdminGroupMember
-/account/group-admin/group/{groupId}/member/{memberId}/role | DELETE | delete role from group member                                                 | GroupAdminGroupMember
+/account/group-admin/group/{groupId}/member/{memberId} | DELETE | delete role from group member                                                 | GroupAdminGroupMember
+/account/group-admin/group/{groupId}/member/{memberId}/role | POST   | delete group member                                                           | GroupAdminGroupMember
+/account/group-admin/group/{groupId}/member/{memberId}/role/{roleid} | DELETE | delete role from group member                                                 | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/suspend | POST   | suspend group member                                                          | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/activate | POST   | activate group member                                                         | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/admin | POST   | add group member as admin                                                     | GroupAdminGroupMember

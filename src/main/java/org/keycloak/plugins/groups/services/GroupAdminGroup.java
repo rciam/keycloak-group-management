@@ -47,6 +47,7 @@ import org.keycloak.plugins.groups.representations.GroupRepresentation;
 import org.keycloak.representations.account.UserRepresentation;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.ServicesLogger;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.timer.TimerProvider;
@@ -63,10 +64,11 @@ public class GroupAdminGroup {
     private final GroupRolesRepository groupRolesRepository;
     private final GroupInvitationRepository groupInvitationRepository;
     private final GeneralJpaService generalService;
+    private final AdminEventBuilder adminEvent;
     //TODO Add real url
     private static final String ADD_ADMIN_URL = "http://localhost:8080/realms/master/agm/dummy";
 
-    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupModel group) {
+    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupModel group, AdminEventBuilder adminEvent) {
         this.session = session;
         this.realm = realm;
         this.voAdmin = voAdmin;
@@ -80,6 +82,7 @@ public class GroupAdminGroup {
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         this.generalService =  new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
+        this.adminEvent = adminEvent;
     }
 
     @GET
@@ -200,7 +203,7 @@ public class GroupAdminGroup {
         if (member == null) {
             throw new NotFoundException("Could not find this group member");
         }
-        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipExtensionRepository, groupAdminRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository);
+        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipExtensionRepository, groupAdminRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, adminEvent);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

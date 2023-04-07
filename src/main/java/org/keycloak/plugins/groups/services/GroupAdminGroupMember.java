@@ -13,18 +13,25 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.keycloak.email.EmailException;
+import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
+import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.helpers.Utils;
+import org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupManagementEventRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.representations.account.UserRepresentation;
 import org.keycloak.services.ServicesLogger;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
 
 public class GroupAdminGroupMember {
 
@@ -37,8 +44,10 @@ public class GroupAdminGroupMember {
     private final GroupRolesRepository groupRolesRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final UserGroupMembershipExtensionEntity member;
+    private final GroupManagementEventRepository eventRepository;
+    private final AdminEventBuilder adminEvent;
 
-    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository) {
+    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, AdminEventBuilder adminEvent) {
         this.session = session;
         this.realm =  realm;
         this.voAdmin = voAdmin;
@@ -48,6 +57,17 @@ public class GroupAdminGroupMember {
         this.groupAdminRepository = groupAdminRepository;
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
         this.member = member;
+        this.eventRepository = new GroupManagementEventRepository(session, realm);
+        this.adminEvent = adminEvent;
+    }
+
+
+    @DELETE
+    public Response deleteMember() {
+        GroupManagementEventEntity eventEntity = eventRepository.getEntity(Utils.eventId);
+        userGroupMembershipExtensionRepository.deleteMember(member, realm, session, group, eventEntity != null ? eventEntity.getServerUrl() : null, groupAdminRepository, customFreeMarkerEmailTemplateProvider);
+        adminEvent.operation(OperationType.DELETE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(member, realm)).resourcePath(session.getContext().getUri()).success();
+        return Response.noContent().build();
     }
 
     @POST
@@ -104,6 +124,7 @@ public class GroupAdminGroupMember {
         }
         try {
             userGroupMembershipExtensionRepository.activateUser(user, member, justification, group);
+            adminEvent.operation(OperationType.UPDATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(member, realm)).resourcePath(session.getContext().getUri()).success();
         } catch (Exception e) {
             e.printStackTrace();
             throw new BadRequestException("problem activate group member");
