@@ -3,7 +3,6 @@ import {FC,useState,useEffect} from 'react';
 import {DataListContent,Tooltip, DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell,Breadcrumb, BreadcrumbItem, InputGroup,TextInput,Button,Pagination} from '@patternfly/react-core';
 import {Link} from 'react-router-dom';
 //import { fa-search } from '@patternfly/react-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 //import { faSearch } from '@fortawesome/free-solid-svg-icons';
 
 // @ts-ignore
