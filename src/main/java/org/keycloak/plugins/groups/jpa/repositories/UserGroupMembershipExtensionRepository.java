@@ -183,7 +183,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             params.put("status", status);
         }
 
-        Query queryList = em.createQuery(sqlQuery).setFirstResult(first).setMaxResults(max);
+        Query queryList = em.createQuery("select f " + sqlQuery).setFirstResult(first).setMaxResults(max);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             queryList.setParameter(entry.getKey(), entry.getValue());
         }
