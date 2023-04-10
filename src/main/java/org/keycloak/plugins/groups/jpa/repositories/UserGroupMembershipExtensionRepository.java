@@ -178,7 +178,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         Map<String, Object> params = new HashMap<>();
         params.put("groupId", groupId);
         if (search != null) {
-            sqlQuery += ", User u where f.group.id = :groupId and f.user.id = u.id and (u.email like :search or u.firstName like :search or u.lastName like :search)";
+            sqlQuery += ", UserEntity u where f.group.id = :groupId and f.user.id = u.id and (u.email like :search or u.firstName like :search or u.lastName like :search)";
             params.put("search", "%" + search + "%");
         } else {
             sqlQuery += "where f.group.id = :groupId";
