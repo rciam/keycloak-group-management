@@ -21,15 +21,11 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
-import org.keycloak.plugins.groups.helpers.Utils;
-import org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupManagementEventRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
-import org.keycloak.representations.account.UserRepresentation;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 
@@ -44,7 +40,6 @@ public class GroupAdminGroupMember {
     private final GroupRolesRepository groupRolesRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final UserGroupMembershipExtensionEntity member;
-    private final GroupManagementEventRepository eventRepository;
     private final AdminEventBuilder adminEvent;
 
     public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, AdminEventBuilder adminEvent) {
@@ -57,15 +52,14 @@ public class GroupAdminGroupMember {
         this.groupAdminRepository = groupAdminRepository;
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
         this.member = member;
-        this.eventRepository = new GroupManagementEventRepository(session, realm);
         this.adminEvent = adminEvent;
     }
 
 
     @DELETE
     public Response deleteMember() {
-        GroupManagementEventEntity eventEntity = eventRepository.getEntity(Utils.eventId);
-        userGroupMembershipExtensionRepository.deleteMember(member, realm, session, group, eventEntity != null ? eventEntity.getServerUrl() : null, groupAdminRepository, customFreeMarkerEmailTemplateProvider);
+        UserModel user = session.users().getUserById(realm, member.getUser().getId());
+        userGroupMembershipExtensionRepository.deleteMember(member,group, user);
         adminEvent.operation(OperationType.DELETE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(member, realm)).resourcePath(session.getContext().getUri()).success();
         return Response.noContent().build();
     }

@@ -32,18 +32,19 @@ Main url : {server_url}/realms/{realm}/agm
 
 **User web services ( Any Keycloak User)**
 
-Path | Method | Description                              | Classes 
------------- |--------|------------------------------------------|--------
-/account/user/groups | GET    | get all user groups                      | UserGroups
-/account/user/invitation/{id} | GET    | get invitation by id                     | UserGroups
+Path | Method | Description                               | Classes 
+------------ |--------|-------------------------------------------|--------
+/account/user/groups | GET    | get all user groups                       | UserGroups
+/account/user/invitation/{id} | GET    | get invitation by id                      | UserGroups
 /account/user/invitation/{id}/accept | POST   | accept invitation and become group member | UserGroups
-/account/user/group/{groupId}/admin | POST   | accept invitation and become group admin | UserGroup 
-/account/user/group/{groupId}/member | GET    | get user group membership                | UserGroupMember
-/account/user/group/{groupId}/member/aup-renew | POST   | renew aup of user group membership       | UserGroupMember
-/account/user/enroll-requests | GET    | get all user ongoing enrollment requests | UserGroups
-/account/user/enroll-request | POST   | create new enrollment request            | UserGroups
-/account/user/enroll-request/{id} | GET    | get enrollment request by id             | UserGroupEnrollmentRequestAction
-/account/user/enroll-request/{id}/respond | POST   | respond t enrollment request by id       | UserGroupEnrollmentRequestAction
+/account/user/group/{groupId}/admin | POST   | accept invitation and become group admin  | UserGroup 
+/account/user/group/{groupId}/member | GET    | get user group membership                 | UserGroupMember
+/account/user/group/{groupId}/member | DELETE | leave user group membership               | UserGroupMember
+/account/user/group/{groupId}/member/aup-renew | POST   | renew aup of user group membership        | UserGroupMember
+/account/user/enroll-requests | GET    | get all user ongoing enrollment requests  | UserGroups
+/account/user/enroll-request | POST   | create new enrollment request             | UserGroups
+/account/user/enroll-request/{id} | GET    | get enrollment request by id              | UserGroupEnrollmentRequestAction
+/account/user/enroll-request/{id}/respond | POST   | respond t enrollment request by id        | UserGroupEnrollmentRequestAction
 
 **Group admin web services ( for group specific web services user must have admin rights to this group)**
 

@@ -87,7 +87,25 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 RealmModel realmModel = session.realms().getRealm(entity.getUser().getRealmId());
                 GroupAdminRepository groupAdminRepository = new GroupAdminRepository(session, realmModel);
                 GroupModel group = realmModel.getGroupById(entity.getGroup().getId());
-                deleteMember(entity, realmModel, session, group, serverUrl, groupAdminRepository, customFreeMarkerEmailTemplateProvider);
+                UserModel user = session.users().getUserById(realmModel, entity.getUser().getId());
+                deleteMember(entity, group, user);
+                customFreeMarkerEmailTemplateProvider.setRealm(realmModel);
+                try {
+                    customFreeMarkerEmailTemplateProvider.setUser(user);
+                    customFreeMarkerEmailTemplateProvider.sendExpiredGroupMemberEmailToUser(group.getName(), group.getId(), serverUrl);
+                } catch (EmailException e) {
+                    logger.info("problem sending email to user " + user.getFirstName() + " " + user.getLastName());
+                }
+                groupAdminRepository.getAllAdminIdsGroupUsers(group.getId()).map(id -> session.users().getUserById(realmModel, id)).forEach(admin -> {
+                    if (admin != null) {
+                        customFreeMarkerEmailTemplateProvider.setUser(admin);
+                        try {
+                            customFreeMarkerEmailTemplateProvider.sendExpiredGroupMemberEmailToAdmin(user, group.getName());
+                        } catch (EmailException e) {
+                            logger.info("problem sending email to group admin " + admin.getFirstName() + " " + admin.getLastName());
+                        }
+                    }
+                });
                 AdminAuth adminAuth = new AdminAuth(realmModel, null, Utils.getChronJobUser(), realmModel.getClientByClientId(adminCli));
                 AdminEventBuilder adminEvent = new AdminEventBuilder(realmModel, adminAuth, session, new DummyClientConnection("127.0.0.1"));
                 adminEvent.realm(realmModel).operation(OperationType.DELETE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(entity, realm)).resourcePath("127.0.0.1").success();
@@ -126,28 +144,10 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     }
 
     @Transactional
-    public void deleteMember(UserGroupMembershipExtensionEntity entity, RealmModel realmModel,KeycloakSession session, GroupModel group, String serverUrl, GroupAdminRepository groupAdminRepository, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider){
-        UserModel user = session.users().getUserById(realmModel, entity.getUser().getId());
+    public void deleteMember(UserGroupMembershipExtensionEntity entity, GroupModel group, UserModel user){
         logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
         deleteEntity(entity.getId());
         user.leaveGroup(group);
-        customFreeMarkerEmailTemplateProvider.setRealm(realmModel);
-        try {
-            customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendExpiredGroupMemberEmailToUser(group.getName(), group.getId(), serverUrl);
-        } catch (EmailException e) {
-            logger.info("problem sending email to user " + user.getFirstName() + " " + user.getLastName());
-        }
-        groupAdminRepository.getAllAdminIdsGroupUsers(group.getId()).map(id -> session.users().getUserById(realmModel, id)).forEach(admin -> {
-            if (admin != null) {
-                customFreeMarkerEmailTemplateProvider.setUser(admin);
-                try {
-                    customFreeMarkerEmailTemplateProvider.sendExpiredGroupMemberEmailToAdmin(user, group.getName());
-                } catch (EmailException e) {
-                    logger.info("problem sending email to group admin " + admin.getFirstName() + " " + admin.getLastName());
-                }
-            }
-        });
     }
 
     private void weeklyTaskExecution(CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, KeycloakSession session, String serverUrl) {
