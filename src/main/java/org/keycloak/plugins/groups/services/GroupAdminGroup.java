@@ -68,14 +68,14 @@ public class GroupAdminGroup {
     //TODO Add real url
     private static final String ADD_ADMIN_URL = "http://localhost:8080/realms/master/agm/dummy";
 
-    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupModel group, AdminEventBuilder adminEvent) {
+    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupModel group, AdminEventBuilder adminEvent, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository) {
         this.session = session;
         this.realm = realm;
         this.voAdmin = voAdmin;
         this.group = group;
-        this.groupEnrollmentConfigurationRepository = new GroupEnrollmentConfigurationRepository(session, realm);
-        this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
-        this.groupAdminRepository = new GroupAdminRepository(session, realm);
+        this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
+        this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
+        this.groupAdminRepository = groupAdminRepository;
         this.groupRolesRepository = new GroupRolesRepository(session, realm, new GroupEnrollmentRequestRepository(session, realm, null), userGroupMembershipExtensionRepository, new GroupInvitationRepository(session, realm), groupEnrollmentConfigurationRepository);
         this.groupEnrollmentConfigurationRepository.setGroupRolesRepository(this.groupRolesRepository);
         this.groupInvitationRepository = new GroupInvitationRepository(session, realm);
@@ -203,7 +203,7 @@ public class GroupAdminGroup {
         if (member == null) {
             throw new NotFoundException("Could not find this group member");
         }
-        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipExtensionRepository, groupAdminRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, adminEvent);
+        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, adminEvent);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
@@ -230,6 +230,21 @@ public class GroupAdminGroup {
         }
 
 
+        return Response.noContent().build();
+
+    }
+
+    @POST
+    @Path("/admin/{userId}")
+    public Response addAsGroupAdmin(@PathParam("userId") String userId){
+        groupAdminRepository.addGroupAdmin(userId, group.getId());
+
+        try {
+            customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm, userId));
+            customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
+        } catch (EmailException e) {
+            ServicesLogger.LOGGER.failedToSendEmail(e);
+        }
         return Response.noContent().build();
 
     }

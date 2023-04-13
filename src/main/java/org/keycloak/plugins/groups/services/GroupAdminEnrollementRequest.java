@@ -41,7 +41,7 @@ public class GroupAdminEnrollementRequest {
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
 
-    public GroupAdminEnrollementRequest(KeycloakSession session, RealmModel realm, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserModel groupAdmin, GroupEnrollmentRequestEntity enrollmentEntity, AdminEventBuilder adminEvent) {
+    public GroupAdminEnrollementRequest(KeycloakSession session, RealmModel realm, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserModel groupAdmin, GroupEnrollmentRequestEntity enrollmentEntity, AdminEventBuilder adminEvent, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository) {
         this.session = session;
         this.realm =  realm;
         this.adminEvent = adminEvent;
@@ -49,7 +49,7 @@ public class GroupAdminEnrollementRequest {
         this.groupEnrollmentRequestRepository = groupEnrollmentRequestRepository;
         this.groupAdmin = groupAdmin;
         this.enrollmentEntity = enrollmentEntity;
-        this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
+        this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
     }

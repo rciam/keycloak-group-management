@@ -36,20 +36,18 @@ public class GroupAdminGroupMember {
     private final UserModel voAdmin;
     private GroupModel group;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
-    private final GroupAdminRepository groupAdminRepository;
     private final GroupRolesRepository groupRolesRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final UserGroupMembershipExtensionEntity member;
     private final AdminEventBuilder adminEvent;
 
-    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, AdminEventBuilder adminEvent) {
+    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, AdminEventBuilder adminEvent) {
         this.session = session;
         this.realm =  realm;
         this.voAdmin = voAdmin;
         this.group = group;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.groupRolesRepository = groupRolesRepository;
-        this.groupAdminRepository = groupAdminRepository;
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
         this.member = member;
         this.adminEvent = adminEvent;
@@ -131,21 +129,5 @@ public class GroupAdminGroupMember {
         }
         return Response.noContent().build();
     }
-
-    @POST
-    @Path("/admin")
-    public Response addAsGroupAdmin(){
-        groupAdminRepository.addGroupAdmin(member.getUser().getId(), group.getId());
-
-        try {
-            customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm, member.getUser().getId()));
-            customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
-        } catch (EmailException e) {
-            ServicesLogger.LOGGER.failedToSendEmail(e);
-        }
-        return Response.noContent().build();
-
-    }
-
 
 }

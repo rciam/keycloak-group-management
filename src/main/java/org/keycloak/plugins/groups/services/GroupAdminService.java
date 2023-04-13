@@ -1,5 +1,6 @@
 package org.keycloak.plugins.groups.services;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,12 +19,16 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
+import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
+import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestPager;
 import org.keycloak.plugins.groups.representations.GroupsPager;
+import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
+import org.keycloak.plugins.groups.representations.UserRepresentationPager;
 import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 
@@ -35,6 +40,7 @@ public class GroupAdminService {
     private final GroupAdminRepository groupAdminRepository;
     private final GroupEnrollmentRequestRepository groupEnrollmentRequestRepository;
     private final AdminEventBuilder adminEvent;
+    private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
 
     public GroupAdminService(KeycloakSession session, RealmModel realm, UserModel user, AdminEventBuilder adminEvent) {
         this.session = session;
@@ -43,6 +49,7 @@ public class GroupAdminService {
         this.adminEvent = adminEvent;
         this.groupAdminRepository =  new GroupAdminRepository(session, realm);
         this.groupEnrollmentRequestRepository =  new GroupEnrollmentRequestRepository(session, realm, new GroupRolesRepository(session, realm));
+        this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
     }
 
 
@@ -64,9 +71,34 @@ public class GroupAdminService {
             throw new ForbiddenException();
         }
 
-        GroupAdminGroup service = new GroupAdminGroup(session, realm, groupAdmin, group, adminEvent);
+        GroupAdminGroup service = new GroupAdminGroup(session, realm, groupAdmin, group, adminEvent, userGroupMembershipExtensionRepository, groupAdminRepository);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
+    }
+
+    @GET
+    @Path("/groupids/all")
+    public List<String> getGroupIdsForAdmin(){
+        return groupAdminRepository.getAllAdminGroupIds(groupAdmin.getId());
+    }
+
+    /**
+     *
+     * @param first
+     * @param max
+     * @param search user search
+     * @param status status search
+     * @return
+     */
+    @GET
+    @Path("groups/members")
+    @Produces("application/json")
+    public UserRepresentationPager memberhipPager(@QueryParam("first") @DefaultValue("0") Integer first,
+                                                  @QueryParam("max") @DefaultValue("10") Integer max,
+                                                  @QueryParam("search") String search,
+                                                  @QueryParam("status") MemberStatusEnum status,
+                                                  @QueryParam("groups") String groupids){
+        return userGroupMembershipExtensionRepository.searchByAdminGroups(Arrays.asList(groupids.split(",")), search, status, first, max);
     }
 
     @GET
@@ -95,7 +127,7 @@ public class GroupAdminService {
             throw new ForbiddenException();
         }
 
-        GroupAdminEnrollementRequest service = new GroupAdminEnrollementRequest(session, realm, groupEnrollmentRequestRepository, groupAdmin, entity, adminEvent);
+        GroupAdminEnrollementRequest service = new GroupAdminEnrollementRequest(session, realm, groupEnrollmentRequestRepository, groupAdmin, entity, adminEvent, userGroupMembershipExtensionRepository);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
