@@ -41,6 +41,7 @@ import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestAttribu
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
+import org.keycloak.plugins.groups.representations.UserRepresentationPager;
 import org.keycloak.services.resources.admin.AdminAuth;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.theme.FreeMarkerUtil;
@@ -196,6 +197,35 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         Long count = (Long) queryCount.getSingleResult();
 
         return new UserGroupMembershipExtensionRepresentationPager(results.map(x-> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList()), count);
+    }
+
+    public UserRepresentationPager searchByAdminGroups(List<String> groupids, String search, MemberStatusEnum status, Integer first, Integer max) {
+
+        String sqlQuery = "from UserGroupMembershipExtensionEntity f join UserEntity u on f.user.id = u.id where f.group.id in (:groupids) ";
+        Map<String, Object> params = new HashMap<>();
+        params.put("groupids", groupids);
+        if (search != null) {
+            sqlQuery += " and (u.email like :search or u.firstName like :search or u.lastName like :search)";
+            params.put("search", "%" + search + "%");
+        }
+        if (status != null) {
+            sqlQuery += " and f.status = :status";
+            params.put("status", status);
+        }
+
+        Query queryList = em.createQuery("select distinct(u) " + sqlQuery).setFirstResult(first).setMaxResults(max);
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            queryList.setParameter(entry.getKey(), entry.getValue());
+        }
+        Stream<UserEntity> results = queryList.getResultStream();
+
+        Query queryCount = em.createQuery("select count(distinct u.id) " + sqlQuery, Long.class);
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            queryCount.setParameter(entry.getKey(), entry.getValue());
+        }
+        Long count = (Long) queryCount.getSingleResult();
+
+        return new UserRepresentationPager(results.map(x-> EntityToRepresentation.toBriefRepresentation(x, realm)).collect(Collectors.toList()), count);
     }
 
     @Transactional

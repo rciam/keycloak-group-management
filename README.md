@@ -50,6 +50,8 @@ Path | Method | Description                              | Classes
 Path | Method | Description                                                                   | Classes 
 ------------ |--------|-------------------------------------------------------------------------------|--------- 
 /account/group-admin/groups | GET    | get all groups that this user has admin rights                                | GroupAdminService 
+/account/group-admin/groupids/all | GET    | get all groups ids that this user has admin rights                            | GroupAdminService
+/account/group-admin/groups/members | GET    | get all groups members given the groupids as comma-separated string           | GroupAdminService
 /account/group-admin/group/{groupId}/all | GET    | get all group information                                                     | GroupAdminGroup
 /account/group-admin/group/{groupId}/configuration/all | GET    | get all group enrollment configurations                                       | GroupAdminGroup
 /account/group-admin/group/{groupId}/configuration/{id} | GET    | get group enrollment configuration                                            | GroupAdminGroup
@@ -63,7 +65,7 @@ Path | Method | Description                                                     
 /account/group-admin/group/{groupId}/member/{memberId}/role | DELETE | delete role from group member                                                 | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/suspend | POST   | suspend group member                                                          | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/activate | POST   | activate group member                                                         | GroupAdminGroupMember
-/account/group-admin/group/{groupId}/member/{memberId}/admin | POST   | add group member as admin                                                     | GroupAdminGroupMember
+/account/group-admin/group/{groupId}/admin/{userId} | POST   | add user as admin                                                             | GroupAdminGroup
 /account/group-admin/group/{groupId}/admin/invite | POST   | invite user as group admin for this groupId group                             | GroupAdminGroup
 /account/group-admin/group/{groupId}/admin/{userId} | DELETE | delete group admin                                                            | GroupAdminService
 /account/group-admin/enroll-requests | GET    | get all group admin enrollment requests                                       | GroupAdminService
