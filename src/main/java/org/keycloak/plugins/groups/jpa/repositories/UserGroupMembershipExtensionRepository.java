@@ -173,29 +173,34 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         });
     }
 
-    public UserGroupMembershipExtensionRepresentationPager searchByGroup(String groupId, String search, MemberStatusEnum status, Integer first, Integer max) {
+    public UserGroupMembershipExtensionRepresentationPager searchByGroup(String groupId, String search, MemberStatusEnum status, String role, Integer first, Integer max) {
 
-        String sqlQuery = "from UserGroupMembershipExtensionEntity f ";
+        StringBuilder fromQuery = new StringBuilder("from UserGroupMembershipExtensionEntity f");
+        StringBuilder sqlQuery= new StringBuilder(" where f.group.id = :groupId");
         Map<String, Object> params = new HashMap<>();
         params.put("groupId", groupId);
+        if (role != null) {
+            fromQuery.append(" join f.groupRoles r ");
+            sqlQuery.append(" and r.name like :role");
+            params.put("role", "%" + role + "%");
+        }
         if (search != null) {
-            sqlQuery += ", UserEntity u where f.group.id = :groupId and f.user.id = u.id and (u.email like :search or u.firstName like :search or u.lastName like :search)";
+            fromQuery.append(", UserEntity u");
+            sqlQuery.append(" and f.user.id = u.id and (u.email like :search or u.firstName like :search or u.lastName like :search)");
             params.put("search", "%" + search + "%");
-        } else {
-            sqlQuery += "where f.group.id = :groupId";
         }
         if (status != null) {
-            sqlQuery += " and f.status = :status";
+            sqlQuery.append(" and f.status = :status");
             params.put("status", status);
         }
 
-        Query queryList = em.createQuery("select f " + sqlQuery).setFirstResult(first).setMaxResults(max);
+        Query queryList = em.createQuery("select f " + fromQuery + sqlQuery).setFirstResult(first).setMaxResults(max);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             queryList.setParameter(entry.getKey(), entry.getValue());
         }
         Stream<UserGroupMembershipExtensionEntity> results = queryList.getResultStream();
 
-        Query queryCount = em.createQuery("select count(f) " + sqlQuery, Long.class);
+        Query queryCount = em.createQuery("select count(f) " + fromQuery +  sqlQuery, Long.class);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             queryCount.setParameter(entry.getKey(), entry.getValue());
         }

@@ -100,8 +100,9 @@ public class GroupAdminGroupMembers {
     public UserGroupMembershipExtensionRepresentationPager memberhipPager(@QueryParam("first") @DefaultValue("0") Integer first,
                                                                           @QueryParam("max") @DefaultValue("10") Integer max,
                                                                           @QueryParam("search") String search,
+                                                                          @QueryParam("role") String role,
                                                                           @QueryParam("status") MemberStatusEnum status){
-        return userGroupMembershipExtensionRepository.searchByGroup(group.getId(), search, status, first, max);
+        return userGroupMembershipExtensionRepository.searchByGroup(group.getId(), search, status, role, first, max);
     }
 
 }
