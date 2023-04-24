@@ -5,6 +5,7 @@ import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupAttributeEntity;
 import org.keycloak.models.jpa.entities.GroupEntity;
+import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.jpa.entities.*;
 import org.keycloak.plugins.groups.representations.GroupAupRepresentation;
@@ -19,6 +20,7 @@ import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -143,6 +145,13 @@ public class EntityToRepresentation {
         rep.setEmail(entity.getEmail());
         rep.setEmailVerified(entity.isEmailVerified());
         rep.setUsername(entity.getUsername());
+        if ( entity.getAttributes() != null && !entity.getAttributes().isEmpty()) {
+            MultivaluedHashMap<String, String> attributes = new MultivaluedHashMap<>();
+            for (UserAttributeEntity attr : entity.getAttributes()) {
+                attributes.add(attr.getName(), attr.getValue());
+            }
+            rep.setAttributes(attributes);
+        }
         if (entity.getFederatedIdentities() != null)
             rep.setFederatedIdentities(entity.getFederatedIdentities().stream().map(fed -> getFederatedIdentityRep(realm, fed.getIdentityProvider())).collect(Collectors.toList()));
         return rep;

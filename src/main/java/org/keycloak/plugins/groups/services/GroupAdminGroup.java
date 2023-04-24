@@ -172,7 +172,7 @@ public class GroupAdminGroup {
     public Response deleteGroupRole(@PathParam("name") String name) {
         GroupRolesEntity entity = groupRolesRepository.getGroupRolesByNameAndGroup(name, group.getId());
         if (entity.getGroupExtensions() != null && entity.getGroupExtensions().size() > 0 )
-            throw new BadRequestException(" You can not delete this role because it is assigned in a group membership");
+            throw new BadRequestException("You can not delete this role because it is assigned in a group membership");
         groupRolesRepository.delete(entity);
         return Response.noContent().build();
     }
