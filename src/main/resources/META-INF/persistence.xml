@@ -55,6 +55,8 @@
         <class>org.keycloak.models.jpa.entities.GroupRoleMappingEntity</class>
         <class>org.keycloak.models.jpa.entities.UserGroupMembershipEntity</class>
         <class>org.keycloak.models.jpa.entities.ClientScopeEntity</class>
+        <class>org.keycloak.models.jpa.entities.ClientScopePolicyEntity</class>
+        <class>org.keycloak.models.jpa.entities.ClientScopePolicyValueEntity</class>
         <class>org.keycloak.models.jpa.entities.ClientScopeAttributeEntity</class>
         <class>org.keycloak.models.jpa.entities.ClientScopeRoleMappingEntity</class>
         <class>org.keycloak.models.jpa.entities.ClientScopeClientMappingEntity</class>
