@@ -292,7 +292,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         if (validFromValue != null) {
             entity.setValidFrom(LocalDate.parse(validFromValue, Utils.formatter));
         } else {
-            entity.setValidFrom(null);
+            entity.setValidFrom(LocalDate.now());
         }
         entity.setGroup(configuration.getGroup());
         entity.setUser(enrollmentEntity.getUser());
@@ -300,7 +300,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         editorUser.setId(groupAdminId);
         entity.setChangedBy(editorUser);
         entity.setJustification(enrollmentEntity.getAdminJustification());
-        entity.setStatus(entity.getValidFrom() != null && entity.getValidFrom().isAfter(LocalDate.now()) ? MemberStatusEnum.PENDING :MemberStatusEnum.ENABLED);
+        entity.setStatus(entity.getValidFrom().isAfter(LocalDate.now()) ? MemberStatusEnum.PENDING :MemberStatusEnum.ENABLED);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
         if (enrollmentEntity.getGroupRoles() != null) {
             entity.setGroupRoles(enrollmentEntity.getGroupRoles().stream().map(x -> {
@@ -338,7 +338,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             entity.setAupExpiresAt(null);
         }
         entity.setMembershipExpiresAt(null);
-        entity.setValidFrom(null);
+        entity.setValidFrom(LocalDate.now());
         for (GroupEnrollmentConfigurationAttributesEntity attributeConfEntity : configuration.getAttributes()){
             if ( GroupEnrollmentAttributeEnum.VALID_THROUGH.equals(attributeConfEntity.getAttribute())) {
                 String validThroughValue = rep.getAttributes().stream().filter(at -> attributeConfEntity.getId().equals(at.getConfigurationAttribute().getId())).findAny().orElse(new GroupEnrollmentRequestAttributesRepresentation()).getValue();
@@ -354,7 +354,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setUser(userEntity);
         entity.setChangedBy(null);
         entity.setJustification(null);
-        entity.setStatus(entity.getValidFrom() != null && entity.getValidFrom().isAfter(LocalDate.now()) ? MemberStatusEnum.PENDING :MemberStatusEnum.ENABLED);
+        entity.setStatus(entity.getValidFrom().isAfter(LocalDate.now()) ? MemberStatusEnum.PENDING :MemberStatusEnum.ENABLED);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
         if (rep.getGroupRoles() != null) {
             entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, configuration.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toList()));
@@ -389,13 +389,13 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         String validThroughValue = configuration.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_THROUGH.equals(at.getAttribute())).findAny().orElse(new GroupEnrollmentConfigurationAttributesEntity()).getDefaultValue();
         entity.setMembershipExpiresAt(validThroughValue != null ? LocalDate.parse(validThroughValue, Utils.formatter) : null);
         String validFromValue = configuration.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_FROM.equals(at.getAttribute())).findAny().orElse(new GroupEnrollmentConfigurationAttributesEntity()).getDefaultValue();
-        entity.setValidFrom(validFromValue != null ? LocalDate.parse(validFromValue, Utils.formatter) : null);
+        entity.setValidFrom(validFromValue != null ? LocalDate.parse(validFromValue, Utils.formatter) : LocalDate.now());
         entity.setGroup(configuration.getGroup());
         UserEntity userEntity = new UserEntity();
         userEntity.setId(userModel.getId());
         entity.setUser(userEntity);
         entity.setChangedBy(invitationEntity.getCheckAdmin());
-        entity.setStatus(entity.getValidFrom() != null && entity.getValidFrom().isAfter(LocalDate.now()) ? MemberStatusEnum.PENDING :MemberStatusEnum.ENABLED);
+        entity.setStatus(entity.getValidFrom().isAfter(LocalDate.now()) ? MemberStatusEnum.PENDING :MemberStatusEnum.ENABLED);
         entity.setJustification(null);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
         if (invitationEntity.getGroupRoles() != null ) {
