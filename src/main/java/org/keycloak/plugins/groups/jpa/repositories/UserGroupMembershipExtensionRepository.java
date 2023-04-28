@@ -50,6 +50,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
     private static final Logger logger = Logger.getLogger(UserGroupMembershipExtensionRepository.class);
     private final String adminCli ="admin-cli";
+    private final String orderbyStr =" order by f.user.lastName, f.user.firstName";
     private final GroupManagementEventRepository eventRepository;
     private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private GroupRolesRepository groupRolesRepository;
@@ -194,7 +195,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             params.put("status", status);
         }
 
-        Query queryList = em.createQuery("select f " + fromQuery + sqlQuery).setFirstResult(first).setMaxResults(max);
+        Query queryList = em.createQuery("select f " + fromQuery + sqlQuery+ orderbyStr).setFirstResult(first).setMaxResults(max);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             queryList.setParameter(entry.getKey(), entry.getValue());
         }
