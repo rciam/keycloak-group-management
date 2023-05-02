@@ -59,7 +59,7 @@ Path | Method | Description                                                     
 /account/group-admin/group/{groupId}/configuration | POST   | create/ update group enrollment configuration                                 | GroupAdminGroup
 /account/group-admin/group/{groupId}/roles | GET    | get all group roles                                                           | GroupAdminGroup
 /account/group-admin/group/{groupId}/roles | POST   | create group role                                                             | GroupAdminGroup
-/account/group-admin/group/{groupId}/role/{id} | DELETE | delete group role                                                             | GroupAdminGroup
+/account/group-admin/group/{groupId}/role/{name} | DELETE | delete group role                                                             | GroupAdminGroup
 /account/group-admin/group/{groupId}/members | GET    | get all group members pager, being able to search and get by type (fe active) | GroupAdminGroupMembers
 /account/group-admin/group/{groupId}/members/invitation | POST   | send invitation to a user based on email                                      | GroupAdminGroupMembers
 /account/group-admin/group/{groupId}/member/{memberId} | DELETE | delete role from group member                                                 | GroupAdminGroupMember
