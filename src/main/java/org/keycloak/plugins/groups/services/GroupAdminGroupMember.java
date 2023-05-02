@@ -78,10 +78,13 @@ public class GroupAdminGroupMember {
     }
 
     @DELETE
-    @Path("/role/{id}")
-    public Response deleteGroupRole(@PathParam("id") String id) {
-        if (member.getGroupRoles() != null && (member.getGroupRoles().removeIf(x -> id.equals(x.getId()))))
-            userGroupMembershipExtensionRepository.update(member);
+    @Path("/role/{name}")
+    public Response deleteGroupRole(@PathParam("name") String name) {
+        if (member.getGroupRoles() == null || member.getGroupRoles().stream().noneMatch(x -> name.equals(x.getName())))
+            throw new NotFoundException("Could not find this user group member role");
+
+        member.getGroupRoles().removeIf(x -> name.equals(x.getName()));
+        userGroupMembershipExtensionRepository.update(member);
         return Response.noContent().build();
     }
 

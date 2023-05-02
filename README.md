@@ -64,7 +64,7 @@ Path | Method | Description                                                     
 /account/group-admin/group/{groupId}/members/invitation | POST   | send invitation to a user based on email                                      | GroupAdminGroupMembers
 /account/group-admin/group/{groupId}/member/{memberId} | DELETE | delete role from group member                                                 | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/role | POST   | delete group member                                                           | GroupAdminGroupMember
-/account/group-admin/group/{groupId}/member/{memberId}/role/{roleid} | DELETE | delete role from group member                                                 | GroupAdminGroupMember
+/account/group-admin/group/{groupId}/member/{memberId}/role/{name} | DELETE | delete role from group member                                                 | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/suspend | POST   | suspend group member                                                          | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/activate | POST   | activate group member                                                         | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/admin/{userId} | POST   | add user as admin                                                             | GroupAdminGroup
