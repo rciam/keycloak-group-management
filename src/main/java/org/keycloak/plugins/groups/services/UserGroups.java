@@ -24,6 +24,7 @@ import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtension
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestPager;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 import org.keycloak.plugins.groups.representations.GroupInvitationRepresentation;
+import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.ServicesLogger;
@@ -79,8 +80,12 @@ public class UserGroups {
     @GET
     @Path("/groups")
     @Produces("application/json")
-    public Stream<GroupRepresentation> getAllUserGroups() {
-        return user.getGroupsStream().map(g-> ModelToRepresentation.toRepresentation(g,true));
+    public UserGroupMembershipExtensionRepresentationPager getAllUserGroups(@QueryParam("search") String search,
+                                                                            @QueryParam("first") @DefaultValue("0") Integer first,
+                                                                            @QueryParam("max") @DefaultValue("10") Integer max,
+                                                                            @QueryParam("order") @DefaultValue("group.name") String order,
+                                                                            @QueryParam("asc") @DefaultValue("true") boolean asc) {
+        return userGroupMembershipExtensionRepository.userpager(user.getId(), search, first, max, order, asc ? "asc" : "desc");
     }
 
     @Path("/group/{groupId}")
