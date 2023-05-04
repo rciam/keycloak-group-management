@@ -21,6 +21,7 @@
 .gm_group_desc {
     font-style: italic;
     margin: -2rem 0 1rem 1.5rem;
+    padding-right: 1.5rem;
 }
 
 .gm_search-icon-container {
@@ -77,6 +78,40 @@
     margin: 0.7rem 0.5rem 0 0.4rem;
 }
 
+.gm_icon {
+    background-size: cover;
+    mask-repeat: no-repeat;
+}
+
+
+.gm_icon-suspended-user {
+    -webkit-mask-image: url('../svg/user-lock-solid.svg') !important;
+    background-color: rgb(201, 25, 11);
+    height:1rem;
+    width:1rem;
+    mask-image: url('../svg/user-lock-solid.svg') !important;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.gm_icon-active-user {
+    -webkit-mask-image: url('../svg/user-check-solid.svg') !important;
+    background-color: #228C3A!important;
+    height:1rem;
+    width:1rem;
+    mask-image: url('../svg/user-check-solid.svg') !important;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.gm_user-status-container {
+    cursor:pointer;
+    height:1.5rem;
+    width: 1.5rem;
+    position:relative;
+}
 
 .gm_epxand-toggle-hidden {
     background-image: url('../svg/angle-right-solid.svg');
@@ -96,4 +131,331 @@
 .gm_search-input-container div {
     margin-left:auto;
     margin-right:0;
+}
+
+.gm_plus-button {
+    background-size: cover;
+    background-color: white;
+    height: 1rem;
+    -webkit-mask-image: url('../svg/plus-solid.svg') !important;
+    mask-image: url('../svg/plus-solid.svg') !important;
+    width: 1rem;
+    mask-repeat: no-repeat;
+}
+
+.gm_plus-button-small {
+    padding: 0.3rem 0.3rem 0.3rem 0.4rem!important;
+}
+
+.gm_x-button{
+    background-size: cover;
+    background-color: white;
+    height: 1rem;
+    -webkit-mask-image: url('../svg/xmark-solid.svg') !important;
+    mask-image: url('../svg/xmark-solid.svg') !important;
+    width: 1rem;
+    mask-repeat: no-repeat;
+}
+
+.gm_ban-button{
+    background-size: cover;
+    background-color: white;
+    height: 1rem;
+    -webkit-mask-image: url('../svg/ban-solid.svg') !important;
+    mask-image: url('../svg/ban-solid.svg') !important;
+    width: 1rem;
+    mask-repeat: no-repeat;
+}
+
+.gm_lock-button{
+    background-size: cover;
+    background-color: white;
+    height: 1rem;
+    -webkit-mask-image: url('../svg/lock-solid.svg') !important;
+    mask-image: url('../svg/lock-solid.svg') !important;
+    width: 1rem;
+    mask-repeat: no-repeat;
+}
+
+.gm_activate-button{
+    background-size: covers;
+    background-color: white;
+    height: 1rem;
+    -webkit-mask-image: url('../svg/circle-check-solid.svg') !important;
+    mask-image: url('../svg/circle-check-solid.svg') !important;
+    width: 1rem;
+    mask-repeat: no-repeat;
+}
+
+.gm_activate-button-small {    
+    background-color: #228C3A!important;
+    padding: 0.3rem 0.3rem 0.3rem 0.4rem!important;
+}
+
+.gm_activate-button-small:hover {
+    background-color: #1B722F
+}
+
+.gm_x-button-small {
+    padding: 0.3rem 0.3rem 0.3rem 0.5rem!important;
+    margin-right:0.5rem!important;
+
+}
+
+
+.gm_ban-button-small {
+    padding: 0.3rem 0.3rem 0.3rem 0.4rem!important;
+}
+
+.gm_role-chip span{
+    font-size:1rem;
+    padding:0.1rem;
+}
+
+.gm_role-chip {
+    margin-right:0.5rem;
+}
+
+.gm_attribute-controls {
+    margin-top: 1rem;
+    margin-left: 1rem;
+    padding-bottom:1rem;
+}
+
+.gm_attribute-controls button {
+    margin-right:1rem;
+
+}
+
+.gm_cell-center {
+    width:5rem;
+    display: flex!important;
+    align-items: center!important;
+    justify-content: center!important;
+} 
+
+.gm_cell-placeholder {
+    width:5rem;
+}
+
+.gm_chip-container {
+    margin-top:1.6rem;
+}
+
+
+.gm_chip-container div {
+    margin-right:1rem!important;
+}
+
+.gm_edit-icon {
+    background-image: url('../svg/pen-solid.svg');
+    background-size: cover;
+    height:0.9rem;
+    width:0.9rem;
+    display: inline-block;
+    margin-left: 0.5rem;
+    margin-bottom: -0.1rem;
+}
+
+
+.gm_edit-icon:hover {
+    opacity: .5;
+}
+
+
+.gm_check-button{
+    background-size: cover;
+    background-color: white;
+    height: 1rem;
+    -webkit-mask-image: url('../svg/check-solid.svg') !important;
+    mask-image: url('../svg/check-solid.svg') !important;
+    width: 1rem;
+    mask-repeat: no-repeat;
+}
+
+
+
+.gm_cancel-button{
+    background-size: cover;
+    background-color: black;
+    height: 1rem;
+    -webkit-mask-image: url('../svg/xmark-solid.svg') !important;
+    mask-image: url('../svg/xmark-solid.svg') !important;
+    width: 1rem;
+    mask-repeat: no-repeat;
+}
+.gm_button-small {
+    padding: 0.3rem 0.3rem 0.3rem 0.5rem!important;
+
+}
+
+.gm_description-input-container {
+    padding: 0 1.5rem;
+}
+
+.gm_description-input-container textarea {
+
+    margin-bottom:0.5rem;
+}
+
+.gm_description-input-container button {
+    margin-right: 0.5rem;
+}
+
+.gm_description-input-container {
+    margin-top:-1.5rem;
+    margin-bottom: 1rem;
+}
+
+.gm_direct-checkbox {
+    margin-left: 1.5rem;
+}
+
+
+.gm_vertical_center_cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+}
+
+.gm_role_badge {
+    margin-right:0.5rem!important;
+}
+
+.gm_email_datalist{
+    color: rgb(106, 110, 115)!important;
+    font-size: 0.8rem!important;
+}
+
+.gm_badge_dropdown ul {
+    max-height:18.1rem;
+    overflow: auto;
+}
+
+
+
+
+
+
+.gm_roles-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #666;
+  }
+  
+.gm_roles-table  th, .gm_roles-table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    vertical-align: middle;
+}
+
+.gm_roles-table tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Add hover effect */
+.gm_roles-table tbody tr:hover {
+    background-color: #ddd;
+}
+
+/* Darken the header background */
+.gm_roles-table thead {
+    background-color: #f2f2f2;
+}
+
+/* Add a dark grey border to the table */
+.gm_roles-table {
+    border: 1px solid #666;
+}
+
+
+.gm_roles-table button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: none;
+    background-color: #ccc;
+  }
+  
+.gm_roles-table svg {
+    width: 0.8rem;
+    height: 0.8rem;
+}
+
+
+.gm_add-admin-container {
+    padding: 1rem;
+}
+
+.gm_add-admin-container h1 {
+    margin-top:0.5rem;
+    font-size: 1.5rem;
+
+}
+
+.gm_add-admin-container p {
+    font-style: italic;
+}
+.gm_add-admin-input {
+    display: flex !important;
+    justify-content: start;
+    margin-top:1rem;
+}
+
+.gm_admin-button {
+    height: 2rem!important;
+    margin-top: 0.2rem!important;
+    margin-left:0.5rem!important;
+}
+
+.gm_add-admin-input > div {
+    max-width:30rem;
+}
+
+.gm_invitation-button div {
+    background-size: cover;
+    background-color: white;
+    height: 1rem;
+    -webkit-mask-image: url('../svg/paper-plane-solid.svg') !important;
+    mask-image: url('../svg/paper-plane-solid.svg') !important;
+    width: 1rem;
+    mask-repeat: no-repeat;
+}
+
+.gm_add-admin-button div {
+    background-size: cover;
+    background-color: white;
+    height: 1rem;
+    -webkit-mask-image: url('../svg/user-plus-solid.svg') !important;
+    mask-image: url('../svg/user-plus-solid.svg') !important;
+    width: 1rem;
+    mask-repeat: no-repeat;
+}
+
+.gm_edit-member-roles {
+    display:inline-block;
+    cursor: pointer;
+}
+
+.gm_edit-member-roles div {
+    background-size: cover;
+    background-color: black;
+    height: 0.7rem;
+    -webkit-mask-image: url('../svg/pen-solid.svg') !important;
+    mask-image: url('../svg/pen-solid.svg') !important;
+    width: 1rem;
+    mask-repeat: no-repeat;
+}
+
+.gm_table-center {
+    margin:auto;
+    margin-top:1rem;
+    margin-bottom:1rem;
 }

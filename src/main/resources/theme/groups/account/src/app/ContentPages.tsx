@@ -24,6 +24,8 @@ import {PageNotFound} from './content/page-not-found/PageNotFound';
 // @ts-ignore
 import { ForbiddenPage } from './content/forbidden-page/ForbiddenPage';
 import {GroupPage} from './content/group-management-pages/GroupPage';
+import {AdminGroupPage} from './content/group-management-pages/AdminGroupPage';
+
 
 export interface ContentItem {
     id?: string;
@@ -40,6 +42,12 @@ let customPages =[
         expandId: "groups",
         parentId: "showgroups",
         componentName: "GroupPage"
+    },
+    {
+        path: "/groups/admingroups/:id",
+        expandId: "groups",
+        parentId: "admingroups",
+        componentName: "AdminGroupPage"
     }
 ]
 
@@ -180,7 +188,8 @@ export function flattenContent(pageDefs: ContentItem[]): PageDef[] {
 export function makeRoutes(): React.ReactNode {
     if (typeof content === 'undefined') return (<span/>);
     const customComponents = {
-        GroupPage:GroupPage
+        GroupPage:GroupPage,
+        AdminGroupPage:AdminGroupPage
     }
     const pageDefs: PageDef[] = flattenContent(content);
 
@@ -199,7 +208,6 @@ export function makeRoutes(): React.ReactNode {
                 {customPages.map((item,index)=>{
                     return <Route path={item.path} component={customComponents[item.componentName]}/>
                 })}
-                <Route path="/group-managment/showgroups/:id" component={GroupPage}/>
                 <Route path="/forbidden" component={ForbiddenPage}/>
                 <Route component={PageNotFound}/>
             </Switch>);
