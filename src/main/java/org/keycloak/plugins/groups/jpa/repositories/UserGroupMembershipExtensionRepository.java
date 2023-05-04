@@ -168,6 +168,33 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         });
     }
 
+    public UserGroupMembershipExtensionRepresentationPager userpager(String userId, String search, Integer first, Integer max, String order, String orderType) {
+
+        String sqlQuery = "from UserGroupMembershipExtensionEntity f ";
+        Map<String, Object> params = new HashMap<>();
+        params.put("userId", userId);
+        if (search != null) {
+            sqlQuery += "join GroupEntity g on f.group.id = g.id where f.user.id = :userId and f.status = 'ENABLED' and g.name like :search";
+            params.put("search", "%" + search + "%");
+        } else {
+            sqlQuery += "where f.user.id = :userId and f.status = 'ENABLED'";
+        }
+
+        Query queryList = em.createQuery("select f " + sqlQuery+" order by "+order+" "+orderType).setFirstResult(first).setMaxResults(max);
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            queryList.setParameter(entry.getKey(), entry.getValue());
+        }
+        Stream<UserGroupMembershipExtensionEntity> results = queryList.getResultStream();
+
+        Query queryCount = em.createQuery("select count(f) " + sqlQuery, Long.class);
+        for (Map.Entry<String, Object> entry : params.entrySet()) {
+            queryCount.setParameter(entry.getKey(), entry.getValue());
+        }
+        Long count = (Long) queryCount.getSingleResult();
+
+        return new UserGroupMembershipExtensionRepresentationPager(results.map(x-> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList()), count);
+    }
+
     public UserGroupMembershipExtensionRepresentationPager searchByGroup(String groupId, String search, MemberStatusEnum status, Integer first, Integer max) {
 
         String sqlQuery = "from UserGroupMembershipExtensionEntity f ";
