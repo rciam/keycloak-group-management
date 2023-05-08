@@ -56,6 +56,7 @@ Path | Method | Description                                                     
 /account/group-admin/group/{groupId}/configuration/all | GET    | get all group enrollment configurations                                       | GroupAdminGroup
 /account/group-admin/group/{groupId}/configuration/{id} | GET    | get group enrollment configuration                                            | GroupAdminGroup
 /account/group-admin/group/{groupId}/configuration | POST   | create/ update group enrollment configuration                                 | GroupAdminGroup
+/account/group-admin/group/{groupId}/configuration/{id} | DELETE | delete group enrollment configuration                                         | GroupAdminGroup
 /account/group-admin/group/{groupId}/roles | GET    | get all group roles                                                           | GroupAdminGroup
 /account/group-admin/group/{groupId}/roles | POST   | create group role                                                             | GroupAdminGroup
 /account/group-admin/group/{groupId}/role/{id} | DELETE | delete group role                                                             | GroupAdminGroup

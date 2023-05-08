@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
@@ -28,11 +29,13 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
+import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.GeneralJpaService;
 import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
@@ -57,6 +60,7 @@ public class GroupAdminGroup {
     private final UserModel voAdmin;
     private GroupModel group;
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
+    private final GroupEnrollmentRequestRepository groupEnrollmentRequestRepository;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final GroupAdminRepository groupAdminRepository;
@@ -66,7 +70,7 @@ public class GroupAdminGroup {
     //TODO Add real url
     private static final String ADD_ADMIN_URL = "http://localhost:8080/realms/master/agm/dummy";
 
-    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupModel group, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository) {
+    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupModel group, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository) {
         this.session = session;
         this.realm = realm;
         this.voAdmin = voAdmin;
@@ -76,6 +80,7 @@ public class GroupAdminGroup {
         this.groupAdminRepository = groupAdminRepository;
         this.groupRolesRepository = new GroupRolesRepository(session, realm, new GroupEnrollmentRequestRepository(session, realm, null), userGroupMembershipExtensionRepository, new GroupInvitationRepository(session, realm), groupEnrollmentConfigurationRepository);
         this.groupEnrollmentConfigurationRepository.setGroupRolesRepository(this.groupRolesRepository);
+        this.groupEnrollmentRequestRepository = groupEnrollmentRequestRepository;
         this.groupInvitationRepository = new GroupInvitationRepository(session, realm);
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
@@ -141,12 +146,33 @@ public class GroupAdminGroup {
         } else {
             GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(rep.getId());
             if (entity != null) {
+                groupEnrollmentRequestRepository.getRequestsByConfigurationAndStatus(entity.getId(), Stream.of(EnrollmentRequestStatusEnum.WAITING_FOR_REPLY, EnrollmentRequestStatusEnum.PENDING_APPROVAL).collect(Collectors.toList())).forEach(request -> {
+                    request.setStatus(EnrollmentRequestStatusEnum.ARCHIVED);
+                    groupEnrollmentRequestRepository.update(request);
+                });
                 groupEnrollmentConfigurationRepository.update(entity, rep);
             } else {
                 throw new NotFoundException("Could not find this group configuration");
             }
         }
         //aup change action
+        return Response.noContent().build();
+    }
+
+    @DELETE
+    @Path("/configuration/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response deleteGroupEnrollmentConfiguration(@PathParam("id") String id) {
+        GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(id);
+        if (entity != null) {
+            groupEnrollmentRequestRepository.getRequestsByConfigurationAndStatus(entity.getId(), Stream.of(EnrollmentRequestStatusEnum.WAITING_FOR_REPLY, EnrollmentRequestStatusEnum.PENDING_APPROVAL).collect(Collectors.toList())).forEach(request -> {
+                request.setStatus(EnrollmentRequestStatusEnum.ARCHIVED);
+                groupEnrollmentRequestRepository.update(request);
+            });
+            groupEnrollmentConfigurationRepository.deleteEntity(id);
+        } else {
+            throw new NotFoundException("Could not find this group configuration");
+        }
         return Response.noContent().build();
     }
 
