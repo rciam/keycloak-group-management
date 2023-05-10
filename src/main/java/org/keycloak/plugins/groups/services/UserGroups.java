@@ -11,10 +11,13 @@ import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
+import org.keycloak.plugins.groups.helpers.Utils;
+import org.keycloak.plugins.groups.jpa.entities.EduPersonEntitlementConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupInvitationEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
+import org.keycloak.plugins.groups.jpa.repositories.EduPersonEntitlementConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
@@ -43,6 +46,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class UserGroups {
@@ -57,6 +63,7 @@ public class UserGroups {
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final GroupAdminRepository groupAdminRepository;
     private final GroupInvitationRepository groupInvitationRepository;
+    private final EduPersonEntitlementConfigurationRepository eduPersonEntitlementConfigurationRepository;
     private final UserModel user;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final AdminEventBuilder adminEvent;
@@ -71,6 +78,7 @@ public class UserGroups {
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm, groupEnrollmentConfigurationRepository, new GroupRolesRepository(session, realm));
         this.groupAdminRepository =  new GroupAdminRepository(session, realm);
         this.groupInvitationRepository =  new GroupInvitationRepository(session, realm);
+        this.eduPersonEntitlementConfigurationRepository =  new EduPersonEntitlementConfigurationRepository(session);
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
     }
@@ -199,6 +207,28 @@ public class UserGroups {
 
         if (invitationEntity.getForMember() ) {
             userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user, adminEvent, session.getContext().getUri());
+            try {
+                EduPersonEntitlementConfigurationEntity eduPersonEntitlement = eduPersonEntitlementConfigurationRepository.getByRealm(realm.getId());
+                List<String> eduPersonEntitlementValues = user.getAttribute(eduPersonEntitlement.getUserAttribute());
+                String groupName = Utils.getGroupNameForEdupersonEntitlement(invitationEntity.getGroupEnrollmentConfiguration().getGroup(), realm);
+                eduPersonEntitlementValues.removeIf(x-> x.startsWith(eduPersonEntitlement.getUrnNamespace()+Utils.groupStr+groupName));
+
+                if (invitationEntity.getGroupRoles() == null || invitationEntity.getGroupRoles().isEmpty()) {
+                    eduPersonEntitlementValues.add(Utils.createEdupersonEntitlement(groupName, null, eduPersonEntitlement.getUrnNamespace(), eduPersonEntitlement.getAuthority()));
+                } else {
+                    eduPersonEntitlementValues.addAll(invitationEntity.getGroupRoles().stream().map(role -> {
+                        try {
+                            return Utils.createEdupersonEntitlement(groupName, role.getName(), "urn:geant:eosc-portal.eu", "aai.eosc?-portal.eu");
+                        } catch (UnsupportedEncodingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }).collect(Collectors.toList()));
+                }
+                user.setAttribute(eduPersonEntitlement.getUserAttribute(),eduPersonEntitlementValues);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+
         } else {
             groupAdminRepository.addGroupAdmin(user.getId(), invitationEntity.getGroup().getId());
         }

@@ -14,6 +14,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -29,12 +30,16 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
+import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.GeneralJpaService;
+import org.keycloak.plugins.groups.jpa.entities.EduPersonEntitlementConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity;
+import org.keycloak.plugins.groups.jpa.repositories.EduPersonEntitlementConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupManagementEventRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
+import org.keycloak.plugins.groups.representations.EduPersonEntitlementConfigurationRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
@@ -58,6 +63,7 @@ public class AdminService {
     private final GeneralJpaService generalJpaService;
 
     private final GroupManagementEventRepository groupManagementEventRepository;
+    private final EduPersonEntitlementConfigurationRepository eduPersonEntitlementConfigurationRepository;
 
     public AdminService(KeycloakSession session, RealmModel realm, ClientConnection clientConnection, AdminPermissionEvaluator realmAuth) {
         this.session = session;
@@ -70,6 +76,7 @@ public class AdminService {
         this.groupManagementEventRepository = new GroupManagementEventRepository (session, realm);
         this.groupRolesRepository = new GroupRolesRepository(session, realm);
         this.adminEvent =  new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
+        this.eduPersonEntitlementConfigurationRepository = new EduPersonEntitlementConfigurationRepository(session);
         adminEvent.realm(realm);
     }
 
@@ -96,6 +103,34 @@ public class AdminService {
         adminEvent.resource(ResourceType.REALM).operation(OperationType.UPDATE).representation(attributes).resourcePath(session.getContext().getUri()).success();
         return Response.noContent().build();
     }
+
+    @GET
+    @Path("/eduPersonEntitlement/configuration")
+    @Produces(MediaType.APPLICATION_JSON)
+    public EduPersonEntitlementConfigurationRepresentation eduPersonEntitlementConfiguration() {
+        EduPersonEntitlementConfigurationEntity eduPersonEntitlementEntity = eduPersonEntitlementConfigurationRepository.getByRealm(realm.getId());
+        return eduPersonEntitlementEntity != null ? EntityToRepresentation.toRepresentation(eduPersonEntitlementEntity) : new EduPersonEntitlementConfigurationRepresentation();
+    }
+
+    @POST
+    @Path("/eduPersonEntitlement/configuration")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response configureEduPersonEntitlement(EduPersonEntitlementConfigurationRepresentation rep) {
+        EduPersonEntitlementConfigurationEntity eduPersonEntitlementEntity = eduPersonEntitlementConfigurationRepository.getByRealm(realm.getId());
+        EduPersonEntitlementConfigurationRepresentation oldRep = new EduPersonEntitlementConfigurationRepresentation(eduPersonEntitlementEntity.getUserAttribute(), eduPersonEntitlementEntity.getUrnNamespace(),eduPersonEntitlementEntity.getAuthority());
+        eduPersonEntitlementEntity.setUserAttribute(rep.getUserAttribute());
+        eduPersonEntitlementEntity.setUrnNamespace(rep.getUrnNamespace());
+        eduPersonEntitlementEntity.setAuthority(rep.getAuthority());
+        eduPersonEntitlementConfigurationRepository.update(eduPersonEntitlementEntity);
+        //TODO update all user attributes
+        //special case for userattribute change
+//        if (!rep.getUserAttribute().equals(oldRep.getUserAttribute()) || !rep.getUrnNamespace().equals(oldRep.getUrnNamespace()) || (rep.getAuthority() == null && oldRep.getAuthority() != null)|| (rep.getAuthority() != null && !rep.getAuthority().equals(oldRep.getAuthority()))) {
+//        }
+
+       // adminEvent.resource(ResourceType.REALM).operation(OperationType.UPDATE).representation(rep).resourcePath(session.getContext().getUri()).success();
+        return Response.noContent().build();
+    }
+
 
     @Path("/group/{groupId}")
     public AdminGroups adminGroups(@PathParam("groupId") String groupId) {
