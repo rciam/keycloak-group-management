@@ -102,7 +102,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 } catch (EmailException e) {
                     logger.info("problem sending email to user " + user.getFirstName() + " " + user.getLastName());
                 }
-                groupAdminRepository.getAllAdminIdsGroupUsers(group.getId()).map(id -> session.users().getUserById(realmModel, id)).forEach(admin -> {
+                groupAdminRepository.getAllAdminIdsGroupUsers(group).map(id -> session.users().getUserById(realmModel, id)).forEach(admin -> {
                     if (admin != null) {
                         customFreeMarkerEmailTemplateProvider.setUser(admin);
                         try {
@@ -309,9 +309,8 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         } else {
             entity.setAupExpiresAt(null);
         }
-        String validThroughValue = enrollmentEntity.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_THROUGH.equals(at.getConfigurationAttribute().getAttribute())).findAny().orElse(new GroupEnrollmentRequestAttributesEntity()).getValue();
-        if (validThroughValue != null) {
-            entity.setMembershipExpiresAt(LocalDate.parse(validThroughValue, Utils.formatter));
+       if (configuration.getMembershipExpirationDays() != null) {
+            entity.setMembershipExpiresAt(LocalDate.now().plusDays(configuration.getMembershipExpirationDays()));
         } else {
             entity.setMembershipExpiresAt(null);
         }
@@ -364,13 +363,15 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         } else {
             entity.setAupExpiresAt(null);
         }
+        if (configuration.getMembershipExpirationDays() != null) {
+            entity.setMembershipExpiresAt(LocalDate.now().plusDays(configuration.getMembershipExpirationDays()));
+        } else {
+            entity.setMembershipExpiresAt(null);
+        }
         entity.setMembershipExpiresAt(null);
         entity.setValidFrom(LocalDate.now());
-        for (GroupEnrollmentConfigurationAttributesEntity attributeConfEntity : configuration.getAttributes()){
-            if ( GroupEnrollmentAttributeEnum.VALID_THROUGH.equals(attributeConfEntity.getAttribute())) {
-                String validThroughValue = rep.getAttributes().stream().filter(at -> attributeConfEntity.getId().equals(at.getConfigurationAttribute().getId())).findAny().orElse(new GroupEnrollmentRequestAttributesRepresentation()).getValue();
-                entity.setMembershipExpiresAt(validThroughValue == null ? null : LocalDate.parse(validThroughValue, Utils.formatter));
-            } else if ( GroupEnrollmentAttributeEnum.VALID_FROM.equals(attributeConfEntity.getAttribute())) {
+        for (GroupEnrollmentConfigurationAttributesEntity attributeConfEntity : configuration.getAttributes()) {
+            if (GroupEnrollmentAttributeEnum.VALID_FROM.equals(attributeConfEntity.getAttribute())) {
                 String validFromValue = rep.getAttributes().stream().filter(at -> attributeConfEntity.getId().equals(at.getConfigurationAttribute().getId())).findAny().orElse(new GroupEnrollmentRequestAttributesRepresentation()).getValue();
                 entity.setValidFrom(validFromValue == null ? null : LocalDate.parse(validFromValue, Utils.formatter));
             }
@@ -413,8 +414,11 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         } else {
             entity.setAupExpiresAt(null);
         }
-        String validThroughValue = configuration.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_THROUGH.equals(at.getAttribute())).findAny().orElse(new GroupEnrollmentConfigurationAttributesEntity()).getDefaultValue();
-        entity.setMembershipExpiresAt(validThroughValue != null ? LocalDate.parse(validThroughValue, Utils.formatter) : null);
+        if (configuration.getMembershipExpirationDays() != null) {
+            entity.setMembershipExpiresAt(LocalDate.now().plusDays(configuration.getMembershipExpirationDays()));
+        } else {
+            entity.setMembershipExpiresAt(null);
+        }
         String validFromValue = configuration.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_FROM.equals(at.getAttribute())).findAny().orElse(new GroupEnrollmentConfigurationAttributesEntity()).getDefaultValue();
         entity.setValidFrom(validFromValue != null ? LocalDate.parse(validFromValue, Utils.formatter) : LocalDate.now());
         entity.setGroup(configuration.getGroup());
