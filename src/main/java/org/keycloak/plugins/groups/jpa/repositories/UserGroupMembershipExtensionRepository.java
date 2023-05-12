@@ -1,5 +1,6 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.helpers.DummyClientConnection;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
+import org.keycloak.plugins.groups.jpa.entities.EduPersonEntitlementConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
@@ -79,6 +81,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     @Transactional
     public void dailyExecutedActions(KeycloakSession session) {
         GroupManagementEventEntity eventEntity = eventRepository.getEntity(Utils.eventId);
+        EduPersonEntitlementConfigurationRepository eduPersonEntitlementConfigurationRepository= new EduPersonEntitlementConfigurationRepository(session);
         CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         if (eventEntity == null || LocalDate.now().isAfter(eventEntity.getDate())) {
             logger.info("group management daily action is executing ...");
@@ -90,6 +93,15 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 UserModel user = session.users().getUserById(realmModel, entity.getUser().getId());
                 GroupModel group = realmModel.getGroupById(entity.getGroup().getId());
                 logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
+                try {
+                    EduPersonEntitlementConfigurationEntity eduPersonEntitlement = eduPersonEntitlementConfigurationRepository.getByRealm(realm.getId());
+                    List<String> eduPersonEntitlementValues = user.getAttribute(eduPersonEntitlement.getUserAttribute());
+                    String groupName = Utils.getGroupNameForEdupersonEntitlement(entity.getGroup(), realm);
+                    eduPersonEntitlementValues.removeIf(x-> x.startsWith(eduPersonEntitlement.getUrnNamespace()+Utils.groupStr+groupName));
+                    user.setAttribute(eduPersonEntitlement.getUserAttribute(),eduPersonEntitlementValues);
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
                 deleteEntity(entity.getId());
                 user.leaveGroup(group);
                 AdminAuth adminAuth = new AdminAuth(realmModel, null, Utils.getChronJobUser(), realmModel.getClientByClientId(adminCli));
