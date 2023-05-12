@@ -27,7 +27,7 @@ public class Utils {
     private static final String space = " ";
     private static final String sharp = "#";
     public static final String groupStr = ":group:";
-    private static final String roleStr = "role=";
+    public static final String roleStr = "role=";
 
     public static UserAdapter getDummyUser(UserRepresentation userRep) {
         UserEntity userEntity = new UserEntity();

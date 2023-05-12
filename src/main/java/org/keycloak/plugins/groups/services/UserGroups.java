@@ -218,7 +218,7 @@ public class UserGroups {
                 } else {
                     eduPersonEntitlementValues.addAll(invitationEntity.getGroupRoles().stream().map(role -> {
                         try {
-                            return Utils.createEdupersonEntitlement(groupName, role.getName(), "urn:geant:eosc-portal.eu", "aai.eosc?-portal.eu");
+                            return Utils.createEdupersonEntitlement(groupName, role.getName(), eduPersonEntitlement.getUrnNamespace(), eduPersonEntitlement.getAuthority());
                         } catch (UnsupportedEncodingException e) {
                             throw new RuntimeException(e);
                         }
