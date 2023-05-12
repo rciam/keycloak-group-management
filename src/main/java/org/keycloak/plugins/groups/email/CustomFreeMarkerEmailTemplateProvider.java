@@ -14,9 +14,9 @@ import org.keycloak.theme.FreeMarkerUtil;
 public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTemplateProvider {
 
     //must be changed to a ui ( account console url)
-    private static final String enrollmentUrl = "/realms/{realmName}/agm/account/group-admin/enroll-request/{id}";
-    private static final String enrollmentStartUrl = "/realms/{realmName}/agm/account/user/group/{id}";
-    private static final String finishGroupInvitation = "/realms/{realmName}/account/#/invitation/{id}";
+    private static final String enrollmentUrl = "realms/{realmName}/agm/account/group-admin/enroll-request/{id}";
+    private static final String enrollmentStartUrl = "realms/{realmName}/agm/account/user/group/{id}";
+    private static final String finishGroupInvitation = "realms/{realmName}/account/#/invitation/{id}";
 
     public CustomFreeMarkerEmailTemplateProvider(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
