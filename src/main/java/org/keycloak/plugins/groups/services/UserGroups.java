@@ -232,13 +232,37 @@ public class UserGroups {
         } else {
             groupAdminRepository.addGroupAdmin(user.getId(), invitationEntity.getGroup().getId());
         }
+        groupAdminRepository.getAllAdminIdsGroupUsers(invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId() : invitationEntity.getGroup().getId()).map(userId -> session.users().getUserById(realm, userId)).forEach(admin -> {
+            try {
+                customFreeMarkerEmailTemplateProvider.setUser(admin);
+                customFreeMarkerEmailTemplateProvider.sendAcceptInvitationEmail(user, invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getName() : invitationEntity.getGroup().getName(), invitationEntity.getForMember());
+            } catch (EmailException e) {
+                ServicesLogger.LOGGER.failedToSendEmail(e);
+            }
+        });
+        return Response.noContent().build();
+    }
 
-        try {
-            customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm,invitationEntity.getCheckAdmin().getId()));
-            customFreeMarkerEmailTemplateProvider.sendAcceptInvitationEmail(user,invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getName() :invitationEntity.getGroup().getName(), invitationEntity.getForMember());
-        } catch (EmailException e) {
-            ServicesLogger.LOGGER.failedToSendEmail(e);
+    @POST
+    @Path("/invitation/{id}/reject")
+    @Produces("application/json")
+    @Consumes("application/json")
+    public Response rejectInvitation(@PathParam("id") String id) {
+        GroupInvitationEntity invitationEntity =  groupInvitationRepository.getEntity(id);
+        if ( invitationEntity == null ) {
+            throw new NotFoundException("This invitation does not exist or has been expired");
         }
+
+        groupInvitationRepository.deleteEntity(id);
+            // rejection email
+        groupAdminRepository.getAllAdminIdsGroupUsers(invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId() : invitationEntity.getGroup().getId()).map(userId -> session.users().getUserById(realm, userId)).forEach(admin -> {
+            try {
+                customFreeMarkerEmailTemplateProvider.setUser(admin);
+                customFreeMarkerEmailTemplateProvider.sendRejectionInvitationEmail(user, invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getName() : invitationEntity.getGroup().getName(), invitationEntity.getForMember());
+            } catch (EmailException e) {
+                ServicesLogger.LOGGER.failedToSendEmail(e);
+            }
+        });
         return Response.noContent().build();
     }
 

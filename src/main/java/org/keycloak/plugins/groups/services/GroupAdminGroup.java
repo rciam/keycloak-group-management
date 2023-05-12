@@ -91,7 +91,7 @@ public class GroupAdminGroup {
     @Path("/configuration/all")
     @Produces("application/json")
     public List<GroupEnrollmentConfigurationRepresentation> getGroupEnrollmentConfigurationsByGroup() {
-       return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf,false)).collect(Collectors.toList());
+       return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf,true)).collect(Collectors.toList());
     }
 
     @GET
@@ -248,6 +248,15 @@ public class GroupAdminGroup {
             UserAdapter user = Utils.getDummyUser(userRep.getEmail(), userRep.getFirstName(), userRep.getLastName());
             customFreeMarkerEmailTemplateProvider.setUser(user);
             customFreeMarkerEmailTemplateProvider.sendInviteGroupAdminEmail(invitationId, voAdmin, group.getName());
+
+            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x->voAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+                try {
+                    customFreeMarkerEmailTemplateProvider.setUser(admin);
+                    customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(userRep.getEmail(), false, group.getName(), voAdmin);
+                } catch (EmailException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         }

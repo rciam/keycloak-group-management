@@ -41,10 +41,11 @@ public class StartUpTasks implements ScheduledTask {
             groupInvitationRepository.getAllByRealm().forEach(entity -> {
                 TimerProvider timer = session.getProvider(TimerProvider.class);
                 long invitationExpirationHour = realm.getAttribute(Utils.invitationExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.invitationExpirationPeriod)) : 72;
-                long interval = entity.getCreationDate().atZone(ZoneId.systemDefault()).toEpochSecond() + (invitationExpirationHour * 3600 * 1000) - LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
-                if (interval <=  60 * 1000)
-                    interval = 60 * 1000;
-                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new DeleteExpiredInvitationTask(entity.getId(), realm.getId()), interval), interval, "DeleteExpiredInvitation_"+entity.getId());
+                long interval = entity.getCreationDate().atZone(ZoneId.systemDefault()).toEpochSecond() + (invitationExpirationHour * 3600 ) - LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
+                if (interval <=  60)
+                    interval = 60;
+                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new DeleteExpiredInvitationTask(entity.getId(), realm.getId()), interval* 1000), interval * 1000, "DeleteExpiredInvitation_"+entity.getId());
+
             });
         });
     }

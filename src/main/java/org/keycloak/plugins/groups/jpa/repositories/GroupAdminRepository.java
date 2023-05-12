@@ -95,10 +95,13 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
         return groupIds;
     }
 
-    public Stream<String> getAllAdminIdsGroupUsers(String groupId){
-        GroupModel group = realm.getGroupById(groupId);
+    public Stream<String> getAllAdminIdsGroupUsers(GroupModel group){
         List<String> groupIds = getThisAndParentGroupIds(group, true);
         return em.createNamedQuery("getAdminsIdsForGroupIds", String.class).setParameter("groupIds", groupIds).getResultStream();
+    }
+
+    public Stream<String> getAllAdminIdsGroupUsers(String groupId){
+        return getAllAdminIdsGroupUsers(realm.getGroupById(groupId));
     }
 
     private Set<String> getLeafGroupsIds(GroupModel group) {
