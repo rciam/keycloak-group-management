@@ -134,5 +134,7 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         em.createNamedQuery("updateEnrollmentByAdminUser").setParameter("userId", userId).executeUpdate();
     }
 
-
+    public Stream<GroupEnrollmentRequestEntity> getRequestsByConfigurationAndStatus(String configurationId, List<EnrollmentRequestStatusEnum> status) {
+        return em.createNamedQuery("getRequestsByConfigurationAndStatus").setParameter("configurationId",configurationId).setParameter("status",status).getResultStream();
+    }
 }

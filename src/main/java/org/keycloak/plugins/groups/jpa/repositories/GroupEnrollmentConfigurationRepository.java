@@ -1,6 +1,7 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -95,22 +96,48 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         entity.setMultiselectRole(rep.getMultiselectRole());
         if ( rep.getAup() != null)
             entity.setAupEntity(toEntity(rep.getAup()));
-        if (rep.getAttributes() != null) {
-            entity.setAttributes(new ArrayList<>());
-            entity.getAttributes().addAll(rep.getAttributes().stream().map(attr-> this.toEntity(attr, entity)).collect(Collectors.toList()));
+        if (rep.getAttributes() != null && entity.getAttributes() != null) {
+            List<String> repIds = rep.getAttributes().stream().map(GroupEnrollmentConfigurationAttributesRepresentation::getId).filter(Objects::nonNull).collect(Collectors.toList());
+            entity.getAttributes().removeIf(x -> !repIds.contains(x.getId()));
+            entity.getAttributes().stream().forEach(attributeEntity -> {
+                GroupEnrollmentConfigurationAttributesRepresentation attributeRep = rep.getAttributes().stream().filter(att -> attributeEntity.getId().equals(att.getId())).findAny().get();
+                toEntity(attributeEntity, attributeRep, entity);
+            });
+            entity.getAttributes().addAll(rep.getAttributes().stream().filter(x -> x.getId() == null).map(attr -> {
+                GroupEnrollmentConfigurationAttributesEntity attributeEntity = new GroupEnrollmentConfigurationAttributesEntity();
+                attributeEntity.setId(KeycloakModelUtils.generateId());
+                toEntity(attributeEntity, attr, entity);
+                return attributeEntity;
+            }).collect(Collectors.toList()));
+        } else if (rep.getAttributes() != null) {
+            entity.setAttributes(rep.getAttributes().stream().filter(x -> x.getId() == null).map(attr -> {
+                GroupEnrollmentConfigurationAttributesEntity attributeEntity = new GroupEnrollmentConfigurationAttributesEntity();
+                attributeEntity.setId(KeycloakModelUtils.generateId());
+                toEntity(attributeEntity, attr, entity);
+                return attributeEntity;
+            }).collect(Collectors.toList()));
         } else if (entity.getAttributes() != null) {
             entity.getAttributes().clear();
         }
         if (rep.getGroupRoles() != null) {
-            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, groupId)).filter(Objects::nonNull).collect(Collectors.toList()));
+            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> {
+                GroupRolesEntity r = groupRolesRepository.getGroupRolesByNameAndGroup(x, groupId);
+                if (r!= null) {
+                    GroupRolesEntity role = new GroupRolesEntity();
+                    role.setId(r.getId());
+                    role.setGroup(r.getGroup());
+                    role.setName(r.getName());
+                    return role;
+                } else {
+                    return null;
+                }
+            }).filter(Objects::nonNull).collect(Collectors.toList()));
         } else {
             entity.setGroupRoles(null);
         }
     }
 
-    private GroupEnrollmentConfigurationAttributesEntity toEntity(GroupEnrollmentConfigurationAttributesRepresentation rep, GroupEnrollmentConfigurationEntity configuration){
-        GroupEnrollmentConfigurationAttributesEntity entity = new GroupEnrollmentConfigurationAttributesEntity();
-        entity.setId(rep.getId() != null ? rep.getId() : KeycloakModelUtils.generateId());
+    private void toEntity(GroupEnrollmentConfigurationAttributesEntity entity, GroupEnrollmentConfigurationAttributesRepresentation rep, GroupEnrollmentConfigurationEntity configuration){
         entity.setLabel(rep.getLabel());
         entity.setGroupEnrollmentConfiguration(configuration);
         entity.setAttribute(rep.getAttribute());
@@ -118,7 +145,6 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         entity.setModifiable(rep.getModifiable());
         entity.setOrder(rep.getOrder());
         entity.setDefaultValue(rep.getDefaultValue());
-        return entity;
     }
 
     private GroupAupEntity toEntity(GroupAupRepresentation rep) {

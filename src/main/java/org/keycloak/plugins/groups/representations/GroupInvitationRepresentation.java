@@ -1,6 +1,7 @@
 package org.keycloak.plugins.groups.representations;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.JoinColumn;
@@ -9,6 +10,7 @@ import javax.persistence.ManyToOne;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
+import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
 public class GroupInvitationRepresentation {
@@ -16,8 +18,11 @@ public class GroupInvitationRepresentation {
     private String id;
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime creationDate;
+    private Boolean forMember;
     private UserRepresentation checkAdmin;
     private GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
+    private org.keycloak.representations.idm.GroupRepresentation group;
+    private List<String> groupRoles;
 
     public String getId() {
         return id;
@@ -49,5 +54,29 @@ public class GroupInvitationRepresentation {
 
     public void setGroupEnrollmentConfiguration(GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration) {
         this.groupEnrollmentConfiguration = groupEnrollmentConfiguration;
+    }
+
+    public Boolean getForMember() {
+        return forMember;
+    }
+
+    public void setForMember(Boolean forMember) {
+        this.forMember = forMember;
+    }
+
+    public GroupRepresentation getGroup() {
+        return group;
+    }
+
+    public void setGroup(GroupRepresentation group) {
+        this.group = group;
+    }
+
+    public List<String> getGroupRoles() {
+        return groupRoles;
+    }
+
+    public void setGroupRoles(List<String> groupRoles) {
+        this.groupRoles = groupRoles;
     }
 }

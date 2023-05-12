@@ -1,18 +1,26 @@
 package org.keycloak.plugins.groups.jpa.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Access;
 import javax.persistence.AccessType;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.engine.internal.Cascade;
 import org.keycloak.plugins.groups.enums.GroupEnrollmentAttributeEnum;
 
 @Entity
@@ -49,6 +57,9 @@ public class GroupEnrollmentConfigurationAttributesEntity {
 
     @Column(name="MODIFIABLE")
     private Boolean modifiable;
+
+    @OneToMany(mappedBy = "configurationAttribute", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private List<GroupEnrollmentRequestAttributesEntity> enrollmentAttributes = new ArrayList<>();
 
     public String getId() {
         return id;
@@ -112,5 +123,13 @@ public class GroupEnrollmentConfigurationAttributesEntity {
 
     public void setModifiable(Boolean modifiable) {
         this.modifiable = modifiable;
+    }
+
+    public List<GroupEnrollmentRequestAttributesEntity> getEnrollmentAttributes() {
+        return enrollmentAttributes;
+    }
+
+    public void setEnrollmentAttributes(List<GroupEnrollmentRequestAttributesEntity> enrollmentAttributes) {
+        this.enrollmentAttributes = enrollmentAttributes;
     }
 }

@@ -168,7 +168,18 @@ public class EntityToRepresentation {
         GroupInvitationRepresentation rep = new GroupInvitationRepresentation();
         rep.setId(entity.getId());
         rep.setCreationDate(entity.getCreationDate());
-        rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration(), true));
+        rep.setForMember(entity.getForMember());
+        if (entity.getGroupEnrollmentConfiguration() != null)
+            rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration(), true));
+        if (entity.getGroupRoles() != null)
+            rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
+        if (entity.getGroup() != null){
+            GroupRepresentation group = new GroupRepresentation();
+            group.setId(entity.getGroup().getId());
+            group.setName(entity.getGroup().getName());
+            rep.setGroup(group);
+        }
+
         return rep;
     }
 

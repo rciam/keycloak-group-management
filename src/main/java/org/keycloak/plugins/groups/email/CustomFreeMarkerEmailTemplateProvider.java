@@ -16,7 +16,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     //must be changed to a ui ( account console url)
     private static final String enrollmentUrl = "/realms/{realmName}/agm/account/group-admin/enroll-request/{id}";
     private static final String enrollmentStartUrl = "/realms/{realmName}/agm/account/user/group/{id}";
-    private static final String finishGroupInvitation = "/realms/{realmName}/agm/account/user/groups/invitation/{id}/accept";
+    private static final String finishGroupInvitation = "/realms/{realmName}/account/#/invitation/{id}";
 
     public CustomFreeMarkerEmailTemplateProvider(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
@@ -138,8 +138,27 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
         attributes.put("userfullname", userModel.getFirstName()+" "+userModel.getLastName());
         attributes.put("email", userModel.getEmail());
+        attributes.put("type", forMember ? "member" : "admin");
         attributes.put("groupname", groupname);
-        attributes.put("type", forMember ? "member" : "group admin");
         send("groupAcceptInvitationSubject", "accept-invitation.ftl", attributes);
     }
+
+    public void sendRejectionInvitationEmail(UserModel userModel, String groupname, boolean forMember) throws EmailException {
+        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
+        attributes.put("userfullname", userModel.getFirstName()+" "+userModel.getLastName());
+        attributes.put("email", userModel.getEmail());
+        attributes.put("type", forMember ? "member" : "admin");
+        attributes.put("groupname", groupname);
+        send("groupRejectionInvitationSubject", "reject-invitation.ftl", attributes);
+    }
+
+    public void sendInvitionAdminInformationEmail(String email, boolean forMember, String groupname, UserModel admin) throws EmailException {
+        attributes.put("fullname", user.getFirstName() + " "+ user.getLastName());
+        attributes.put("email", email);
+        attributes.put("type", forMember ? "member" : "admin");
+        attributes.put("groupname", groupname);
+        attributes.put("adminFullName", admin.getFirstName() + " "+ admin.getLastName());
+        send(forMember ? "groupInvitationSubject" : "groupInvitationAdminInformSubject", "invitation-admin-inform.ftl", attributes);
+    }
+
 }

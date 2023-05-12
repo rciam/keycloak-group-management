@@ -32,19 +32,20 @@ Main url : {server_url}/realms/{realm}/agm
 
 **User web services ( Any Keycloak User)**
 
-Path | Method | Description                               | Classes 
------------- |--------|-------------------------------------------|--------
-/account/user/groups | GET    | get all user groups                       | UserGroups
-/account/user/invitation/{id} | GET    | get invitation by id                      | UserGroups
-/account/user/invitation/{id}/accept | POST   | accept invitation and become group member | UserGroups
-/account/user/group/{groupId}/admin | POST   | accept invitation and become group admin  | UserGroup 
-/account/user/group/{groupId}/member | GET    | get user group membership                 | UserGroupMember
+Path | Method | Description                              | Classes 
+------------ |--------|------------------------------------------|--------
+/account/user/groups | GET    | get all user groups                      | UserGroups
+/account/user/invitation/{id} | GET    | get invitation by id                     | UserGroups
+/account/user/invitation/{id}/accept | POST   | accept invitation and become group member or admin | UserGroups
+/account/user/invitation/{id}/reject | POST   | reject invitation for becoming group member  or admin     | UserGroups
+/account/user/group/{groupId}/admin | POST   | accept invitation and become group admin | UserGroup 
+/account/user/group/{groupId}/member | GET    | get user group membership                | UserGroupMember
 /account/user/group/{groupId}/member | DELETE | leave user group membership               | UserGroupMember
-/account/user/group/{groupId}/member/aup-renew | POST   | renew aup of user group membership        | UserGroupMember
-/account/user/enroll-requests | GET    | get all user ongoing enrollment requests  | UserGroups
-/account/user/enroll-request | POST   | create new enrollment request             | UserGroups
-/account/user/enroll-request/{id} | GET    | get enrollment request by id              | UserGroupEnrollmentRequestAction
-/account/user/enroll-request/{id}/respond | POST   | respond t enrollment request by id        | UserGroupEnrollmentRequestAction
+/account/user/group/{groupId}/member/aup-renew | POST   | renew aup of user group membership       | UserGroupMember
+/account/user/enroll-requests | GET    | get all user ongoing enrollment requests | UserGroups
+/account/user/enroll-request | POST   | create new enrollment request            | UserGroups
+/account/user/enroll-request/{id} | GET    | get enrollment request by id             | UserGroupEnrollmentRequestAction
+/account/user/enroll-request/{id}/respond | POST   | respond t enrollment request by id       | UserGroupEnrollmentRequestAction
 
 **Group admin web services ( for group specific web services user must have admin rights to this group)**
 
@@ -57,13 +58,14 @@ Path | Method | Description                                                     
 /account/group-admin/group/{groupId}/configuration/all | GET    | get all group enrollment configurations                                       | GroupAdminGroup
 /account/group-admin/group/{groupId}/configuration/{id} | GET    | get group enrollment configuration                                            | GroupAdminGroup
 /account/group-admin/group/{groupId}/configuration | POST   | create/ update group enrollment configuration                                 | GroupAdminGroup
+/account/group-admin/group/{groupId}/configuration/{id} | DELETE | delete group enrollment configuration                                         | GroupAdminGroup
 /account/group-admin/group/{groupId}/roles | GET    | get all group roles                                                           | GroupAdminGroup
 /account/group-admin/group/{groupId}/roles | POST   | create group role                                                             | GroupAdminGroup
 /account/group-admin/group/{groupId}/role/{name} | DELETE | delete group role                                                             | GroupAdminGroup
 /account/group-admin/group/{groupId}/members | GET    | get all group members pager, being able to search and get by type (fe active) | GroupAdminGroupMembers
 /account/group-admin/group/{groupId}/members/invitation | POST   | send invitation to a user based on email                                      | GroupAdminGroupMembers
 /account/group-admin/group/{groupId}/member/{memberId} | DELETE | delete role from group member                                                 | GroupAdminGroupMember
-/account/group-admin/group/{groupId}/member/{memberId}/role | POST   | delete group member                                                           | GroupAdminGroupMember
+/account/group-admin/group/{groupId}/member/{memberId}/role | POST   | add role to group member                                                           | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/role/{name} | DELETE | delete role from group member                                                 | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/suspend | POST   | suspend group member                                                          | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/activate | POST   | activate group member                                                         | GroupAdminGroupMember
