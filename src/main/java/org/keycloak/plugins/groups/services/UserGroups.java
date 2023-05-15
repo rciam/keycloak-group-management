@@ -14,6 +14,7 @@ import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupInvitationEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
@@ -43,6 +44,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class UserGroups {
@@ -197,6 +200,8 @@ public class UserGroups {
             throw new BadRequestException("You are already group admin for this group");
         }
 
+        List<String> groupRoles = invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
+
         if (invitationEntity.getForMember() ) {
             userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user, adminEvent, session.getContext().getUri());
         } else {
@@ -205,7 +210,7 @@ public class UserGroups {
         groupAdminRepository.getAllAdminIdsGroupUsers(invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId() : invitationEntity.getGroup().getId()).map(userId -> session.users().getUserById(realm, userId)).forEach(admin -> {
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(admin);
-                customFreeMarkerEmailTemplateProvider.sendAcceptInvitationEmail(user, invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getName() : invitationEntity.getGroup().getName(), invitationEntity.getForMember());
+                customFreeMarkerEmailTemplateProvider.sendAcceptInvitationEmail(user, invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getName() : invitationEntity.getGroup().getName(), invitationEntity.getForMember(), groupRoles);
             } catch (EmailException e) {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
             }
@@ -223,12 +228,13 @@ public class UserGroups {
             throw new NotFoundException("This invitation does not exist or has been expired");
         }
 
+        List<String> groupRoles = invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
         groupInvitationRepository.deleteEntity(id);
             // rejection email
         groupAdminRepository.getAllAdminIdsGroupUsers(invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId() : invitationEntity.getGroup().getId()).map(userId -> session.users().getUserById(realm, userId)).forEach(admin -> {
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(admin);
-                customFreeMarkerEmailTemplateProvider.sendRejectionInvitationEmail(user, invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getName() : invitationEntity.getGroup().getName(), invitationEntity.getForMember());
+                customFreeMarkerEmailTemplateProvider.sendRejectionInvitationEmail(user, invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getName() : invitationEntity.getGroup().getName(), invitationEntity.getForMember(), groupRoles);
             } catch (EmailException e) {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
             }

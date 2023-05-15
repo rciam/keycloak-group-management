@@ -255,7 +255,7 @@ public class GroupAdminGroup {
             groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x->voAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
-                    customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(userRep.getEmail(), false, group.getName(), voAdmin);
+                    customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(userRep.getEmail(), false, group.getName(), voAdmin, null);
                 } catch (EmailException e) {
                     throw new RuntimeException(e);
                 }

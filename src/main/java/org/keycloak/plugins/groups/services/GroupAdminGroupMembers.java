@@ -84,14 +84,16 @@ public class GroupAdminGroupMembers {
             customFreeMarkerEmailTemplateProvider.setUser(user);
             customFreeMarkerEmailTemplateProvider.sendGroupInvitationEmail(voAdmin, group.getName(), groupInvitationInitialRep.isWithoutAcceptance(), groupInvitationInitialRep.getGroupRoles(), emailId);
 
-            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x->voAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
-                try {
-                    customFreeMarkerEmailTemplateProvider.setUser(admin);
-                    customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(user.getEmail(), true, group.getName(), voAdmin);
-                } catch (EmailException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+            if (groupInvitationInitialRep.isWithoutAcceptance()) {
+                groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> voAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+                    try {
+                        customFreeMarkerEmailTemplateProvider.setUser(admin);
+                        customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(user.getEmail(), true, group.getName(), voAdmin, groupInvitationInitialRep.getGroupRoles());
+                    } catch (EmailException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         }

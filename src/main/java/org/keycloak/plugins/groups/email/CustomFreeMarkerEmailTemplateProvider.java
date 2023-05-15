@@ -134,28 +134,43 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send( "groupInvitationSubject", "user-group-invitation.ftl", attributes);
     }
 
-    public void sendAcceptInvitationEmail(UserModel userModel, String groupname, boolean forMember) throws EmailException {
+    public void sendAcceptInvitationEmail(UserModel userModel, String groupname, boolean forMember, List<String> groupRoles) throws EmailException {
         attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
         attributes.put("userfullname", userModel.getFirstName()+" "+userModel.getLastName());
         attributes.put("email", userModel.getEmail());
         attributes.put("type", forMember ? "member" : "admin");
+        if (forMember && groupRoles != null && !groupRoles.isEmpty()) {
+            StringBuilder sb2 = new StringBuilder(groupname).append(" with roles : ");
+            groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
+            groupname= StringUtils.removeEnd(sb2.toString(),", ");
+        }
         attributes.put("groupname", groupname);
         send("groupAcceptInvitationSubject", "accept-invitation.ftl", attributes);
     }
 
-    public void sendRejectionInvitationEmail(UserModel userModel, String groupname, boolean forMember) throws EmailException {
+    public void sendRejectionInvitationEmail(UserModel userModel, String groupname, boolean forMember, List<String> groupRoles) throws EmailException {
         attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
         attributes.put("userfullname", userModel.getFirstName()+" "+userModel.getLastName());
         attributes.put("email", userModel.getEmail());
         attributes.put("type", forMember ? "member" : "admin");
+        if (forMember && groupRoles != null && !groupRoles.isEmpty()) {
+            StringBuilder sb2 = new StringBuilder(groupname).append(" with roles : ");
+            groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
+            groupname= StringUtils.removeEnd(sb2.toString(),", ");
+        }
         attributes.put("groupname", groupname);
         send("groupRejectionInvitationSubject", "reject-invitation.ftl", attributes);
     }
 
-    public void sendInvitionAdminInformationEmail(String email, boolean forMember, String groupname, UserModel admin) throws EmailException {
+    public void sendInvitionAdminInformationEmail(String email, boolean forMember, String groupname, UserModel admin, List<String> groupRoles) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " "+ user.getLastName());
         attributes.put("email", email);
         attributes.put("type", forMember ? "member" : "admin");
+        if (forMember && groupRoles != null && !groupRoles.isEmpty()) {
+            StringBuilder sb2 = new StringBuilder(groupname).append(" with roles : ");
+            groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
+            groupname= StringUtils.removeEnd(sb2.toString(),", ");
+        }
         attributes.put("groupname", groupname);
         attributes.put("adminFullName", admin.getFirstName() + " "+ admin.getLastName());
         send(forMember ? "groupInvitationSubject" : "groupInvitationAdminInformSubject", "invitation-admin-inform.ftl", attributes);
