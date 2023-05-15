@@ -1,19 +1,17 @@
 package org.keycloak.plugins.groups.representations;
 
-import javax.persistence.Column;
-
-public class EduPersonEntitlementConfigurationRepresentation {
+public class MemberUserAttributeConfigurationRepresentation {
 
     private String id;
     private String userAttribute;
     private String urnNamespace;
     private String authority;
 
-    public EduPersonEntitlementConfigurationRepresentation() {
+    public MemberUserAttributeConfigurationRepresentation() {
 
     }
 
-    public EduPersonEntitlementConfigurationRepresentation(String userAttribute, String urnNamespace, String authority) {
+    public MemberUserAttributeConfigurationRepresentation(String userAttribute, String urnNamespace, String authority) {
         this.userAttribute = userAttribute;
         this.urnNamespace = urnNamespace;
         this.authority = authority;

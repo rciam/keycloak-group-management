@@ -82,8 +82,9 @@ Path | Method | Description                                  | Classes |
 ------------ |--|----------------------------------------------|---------| 
 /admin/group | POST | create top level group                       | AdminService
 /admin/configuration | PUT | change realm settings (realm attributes)                  | AdminService
-/admin/eduPersonEntitlement/configuration | GET | get eduPersonEntitlement configuration          | AdminService
-/admin/eduPersonEntitlement/configuration | POST |update eduPersonEntitlement configuration | AdminService
+/admin/memberUserAttribute/configuration | GET | get member user attribute configuration          | AdminService
+/admin/memberUserAttribute/configuration | POST |update member user attribute configuration | AdminService
+/admin/memberUserAttribute/calculation | POST |update member user attribute value for all users | AdminService
 /admin/user/{id} | DELETE | delete user          | AdminService
 /admin/group/{groupId} | DELETE | delete group          | AdminGroups
 /admin/group/{groupId}/configuration/{id} | GET | get  group enrollment configuration          | AdminGroups

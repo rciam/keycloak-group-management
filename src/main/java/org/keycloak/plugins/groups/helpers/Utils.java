@@ -10,7 +10,6 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.representations.account.UserRepresentation;
 
 public class Utils {
@@ -54,7 +53,7 @@ public class Utils {
         return user;
     }
 
-    public static String createEdupersonEntitlement(String groupName,String role , String namespace, String authority) throws UnsupportedEncodingException {
+    public static String createMemberUserAttribute(String groupName, String role , String namespace, String authority) throws UnsupportedEncodingException {
         StringBuilder sb = new StringBuilder(namespace);
         sb.append(groupStr);
         sb.append(groupName);
@@ -67,7 +66,7 @@ public class Utils {
         return sb.toString();
     }
 
-    public static String getGroupNameForEdupersonEntitlement(GroupEntity group, RealmModel realm) throws UnsupportedEncodingException {
+    public static String getGroupNameForMemberUserAttribute(GroupEntity group, RealmModel realm) throws UnsupportedEncodingException {
         String groupName = encode(group.getName());
         GroupModel parent = realm.getGroupById(group.getParentId());
         while (parent != null) {

@@ -10,14 +10,13 @@ import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
-import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
-import org.keycloak.plugins.groups.jpa.entities.EduPersonEntitlementConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupInvitationEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
-import org.keycloak.plugins.groups.jpa.repositories.EduPersonEntitlementConfigurationRepository;
+import org.keycloak.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
@@ -28,7 +27,6 @@ import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestPager;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 import org.keycloak.plugins.groups.representations.GroupInvitationRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
-import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
@@ -49,7 +47,6 @@ import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class UserGroups {
 
@@ -63,7 +60,7 @@ public class UserGroups {
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final GroupAdminRepository groupAdminRepository;
     private final GroupInvitationRepository groupInvitationRepository;
-    private final EduPersonEntitlementConfigurationRepository eduPersonEntitlementConfigurationRepository;
+    private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
     private final UserModel user;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final AdminEventBuilder adminEvent;
@@ -78,7 +75,7 @@ public class UserGroups {
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm, groupEnrollmentConfigurationRepository, new GroupRolesRepository(session, realm));
         this.groupAdminRepository =  new GroupAdminRepository(session, realm);
         this.groupInvitationRepository =  new GroupInvitationRepository(session, realm);
-        this.eduPersonEntitlementConfigurationRepository =  new EduPersonEntitlementConfigurationRepository(session);
+        this.memberUserAttributeConfigurationRepository =  new MemberUserAttributeConfigurationRepository(session);
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
     }
@@ -208,23 +205,23 @@ public class UserGroups {
         if (invitationEntity.getForMember() ) {
             userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user, adminEvent, session.getContext().getUri());
             try {
-                EduPersonEntitlementConfigurationEntity eduPersonEntitlement = eduPersonEntitlementConfigurationRepository.getByRealm(realm.getId());
-                List<String> eduPersonEntitlementValues = user.getAttribute(eduPersonEntitlement.getUserAttribute());
-                String groupName = Utils.getGroupNameForEdupersonEntitlement(invitationEntity.getGroupEnrollmentConfiguration().getGroup(), realm);
-                eduPersonEntitlementValues.removeIf(x-> x.startsWith(eduPersonEntitlement.getUrnNamespace()+Utils.groupStr+groupName));
+                MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+                List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
+                String groupName = Utils.getGroupNameForMemberUserAttribute(invitationEntity.getGroupEnrollmentConfiguration().getGroup(), realm);
+                memberUserAttributeValues.removeIf(x-> x.startsWith(memberUserAttribute.getUrnNamespace()+Utils.groupStr+groupName));
 
                 if (invitationEntity.getGroupRoles() == null || invitationEntity.getGroupRoles().isEmpty()) {
-                    eduPersonEntitlementValues.add(Utils.createEdupersonEntitlement(groupName, null, eduPersonEntitlement.getUrnNamespace(), eduPersonEntitlement.getAuthority()));
+                    memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
                 } else {
-                    eduPersonEntitlementValues.addAll(invitationEntity.getGroupRoles().stream().map(role -> {
+                    memberUserAttributeValues.addAll(invitationEntity.getGroupRoles().stream().map(role -> {
                         try {
-                            return Utils.createEdupersonEntitlement(groupName, role.getName(), eduPersonEntitlement.getUrnNamespace(), eduPersonEntitlement.getAuthority());
+                            return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
                         } catch (UnsupportedEncodingException e) {
                             throw new RuntimeException(e);
                         }
                     }).collect(Collectors.toList()));
                 }
-                user.setAttribute(eduPersonEntitlement.getUserAttribute(),eduPersonEntitlementValues);
+                user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }

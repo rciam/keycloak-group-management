@@ -29,22 +29,26 @@ import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.GeneralJpaService;
-import org.keycloak.plugins.groups.jpa.entities.EduPersonEntitlementConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity;
-import org.keycloak.plugins.groups.jpa.repositories.EduPersonEntitlementConfigurationRepository;
+import org.keycloak.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupManagementEventRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
-import org.keycloak.plugins.groups.representations.EduPersonEntitlementConfigurationRepresentation;
+import org.keycloak.plugins.groups.representations.MemberUserAttributeConfigurationRepresentation;
+import org.keycloak.plugins.groups.scheduled.MemberUserAttributeCalculatorTask;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.GroupsResource;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
+import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
+import org.keycloak.timer.TimerProvider;
 
 public class AdminService {
 
@@ -63,7 +67,7 @@ public class AdminService {
     private final GeneralJpaService generalJpaService;
 
     private final GroupManagementEventRepository groupManagementEventRepository;
-    private final EduPersonEntitlementConfigurationRepository eduPersonEntitlementConfigurationRepository;
+    private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
 
     public AdminService(KeycloakSession session, RealmModel realm, ClientConnection clientConnection, AdminPermissionEvaluator realmAuth) {
         this.session = session;
@@ -76,7 +80,7 @@ public class AdminService {
         this.groupManagementEventRepository = new GroupManagementEventRepository (session, realm);
         this.groupRolesRepository = new GroupRolesRepository(session, realm);
         this.adminEvent =  new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
-        this.eduPersonEntitlementConfigurationRepository = new EduPersonEntitlementConfigurationRepository(session);
+        this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
         adminEvent.realm(realm);
     }
 
@@ -105,29 +109,31 @@ public class AdminService {
     }
 
     @GET
-    @Path("/eduPersonEntitlement/configuration")
+    @Path("/memberUserAttribute/configuration")
     @Produces(MediaType.APPLICATION_JSON)
-    public EduPersonEntitlementConfigurationRepresentation eduPersonEntitlementConfiguration() {
-        EduPersonEntitlementConfigurationEntity eduPersonEntitlementEntity = eduPersonEntitlementConfigurationRepository.getByRealm(realm.getId());
-        return eduPersonEntitlementEntity != null ? EntityToRepresentation.toRepresentation(eduPersonEntitlementEntity) : new EduPersonEntitlementConfigurationRepresentation();
+    public MemberUserAttributeConfigurationRepresentation memberUserAttributeConfiguration() {
+        MemberUserAttributeConfigurationEntity memberUserAttributeEntity = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+        return memberUserAttributeEntity != null ? EntityToRepresentation.toRepresentation(memberUserAttributeEntity) : new MemberUserAttributeConfigurationRepresentation();
     }
 
     @POST
-    @Path("/eduPersonEntitlement/configuration")
+    @Path("/memberUserAttribute/configuration")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response configureEduPersonEntitlement(EduPersonEntitlementConfigurationRepresentation rep) {
-        EduPersonEntitlementConfigurationEntity eduPersonEntitlementEntity = eduPersonEntitlementConfigurationRepository.getByRealm(realm.getId());
-        EduPersonEntitlementConfigurationRepresentation oldRep = new EduPersonEntitlementConfigurationRepresentation(eduPersonEntitlementEntity.getUserAttribute(), eduPersonEntitlementEntity.getUrnNamespace(),eduPersonEntitlementEntity.getAuthority());
-        eduPersonEntitlementEntity.setUserAttribute(rep.getUserAttribute());
-        eduPersonEntitlementEntity.setUrnNamespace(rep.getUrnNamespace());
-        eduPersonEntitlementEntity.setAuthority(rep.getAuthority());
-        eduPersonEntitlementConfigurationRepository.update(eduPersonEntitlementEntity);
-        //TODO update all user attributes
-        //special case for userattribute change
-//        if (!rep.getUserAttribute().equals(oldRep.getUserAttribute()) || !rep.getUrnNamespace().equals(oldRep.getUrnNamespace()) || (rep.getAuthority() == null && oldRep.getAuthority() != null)|| (rep.getAuthority() != null && !rep.getAuthority().equals(oldRep.getAuthority()))) {
-//        }
+    public Response configureMemberUserAttribute(MemberUserAttributeConfigurationRepresentation rep) {
+        MemberUserAttributeConfigurationEntity memberUserAttributeEntity = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+        MemberUserAttributeConfigurationRepresentation oldRep = new MemberUserAttributeConfigurationRepresentation(memberUserAttributeEntity.getUserAttribute(), memberUserAttributeEntity.getUrnNamespace(),memberUserAttributeEntity.getAuthority());
+        memberUserAttributeEntity.setUserAttribute(rep.getUserAttribute());
+        memberUserAttributeEntity.setUrnNamespace(rep.getUrnNamespace());
+        memberUserAttributeEntity.setAuthority(rep.getAuthority());
+        memberUserAttributeConfigurationRepository.update(memberUserAttributeEntity);
+        return Response.noContent().build();
+    }
 
-       // adminEvent.resource(ResourceType.REALM).operation(OperationType.UPDATE).representation(rep).resourcePath(session.getContext().getUri()).success();
+    @POST
+    @Path("/memberUserAttribute/calculation")
+    public Response calculateMemberUserAttribute(){
+        TimerProvider timer = session.getProvider(TimerProvider.class);
+        timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new MemberUserAttributeCalculatorTask(realm.getId()), 1000),  1000, "MemberUserAttributeCalculator_"+ KeycloakModelUtils.generateId());
         return Response.noContent().build();
     }
 

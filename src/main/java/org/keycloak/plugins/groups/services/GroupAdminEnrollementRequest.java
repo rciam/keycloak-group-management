@@ -22,9 +22,9 @@ import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
-import org.keycloak.plugins.groups.jpa.entities.EduPersonEntitlementConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
-import org.keycloak.plugins.groups.jpa.repositories.EduPersonEntitlementConfigurationRepository;
+import org.keycloak.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
@@ -47,7 +47,7 @@ public class GroupAdminEnrollementRequest {
     private final GroupEnrollmentRequestEntity enrollmentEntity;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
-    private final EduPersonEntitlementConfigurationRepository eduPersonEntitlementConfigurationRepository;
+    private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
 
     public GroupAdminEnrollementRequest(KeycloakSession session, RealmModel realm, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserModel groupAdmin, GroupEnrollmentRequestEntity enrollmentEntity, AdminEventBuilder adminEvent, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository) {
         this.session = session;
@@ -58,7 +58,7 @@ public class GroupAdminEnrollementRequest {
         this.groupAdmin = groupAdmin;
         this.enrollmentEntity = enrollmentEntity;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
-        this.eduPersonEntitlementConfigurationRepository = new EduPersonEntitlementConfigurationRepository(session);
+        this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
     }
@@ -88,24 +88,24 @@ public class GroupAdminEnrollementRequest {
 
         userGroupMembershipExtensionRepository.createOrUpdate(enrollmentEntity, session, groupAdmin.getId(),adminEvent);
         try {
-            EduPersonEntitlementConfigurationEntity eduPersonEntitlement = eduPersonEntitlementConfigurationRepository.getByRealm(realm.getId());
+            MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
             UserModel user = session.users().getUserById(realm, enrollmentEntity.getUser().getId());
-            List<String> eduPersonEntitlementValues = user.getAttribute(eduPersonEntitlement.getUserAttribute());
-            String groupName = Utils.getGroupNameForEdupersonEntitlement(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup(), realm);
-            eduPersonEntitlementValues.removeIf(x-> x.startsWith(eduPersonEntitlement.getUrnNamespace()+Utils.groupStr+groupName));
+            List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
+            String groupName = Utils.getGroupNameForMemberUserAttribute(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup(), realm);
+            memberUserAttributeValues.removeIf(x-> x.startsWith(memberUserAttribute.getUrnNamespace()+Utils.groupStr+groupName));
 
             if (enrollmentEntity.getGroupRoles() == null || enrollmentEntity.getGroupRoles().isEmpty()) {
-                eduPersonEntitlementValues.add(Utils.createEdupersonEntitlement(groupName, null, eduPersonEntitlement.getUrnNamespace(), eduPersonEntitlement.getAuthority()));
+                memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
             } else {
-                eduPersonEntitlementValues.addAll(enrollmentEntity.getGroupRoles().stream().map(role -> {
+                memberUserAttributeValues.addAll(enrollmentEntity.getGroupRoles().stream().map(role -> {
                     try {
-                        return Utils.createEdupersonEntitlement(groupName, role.getName(), eduPersonEntitlement.getUrnNamespace(), eduPersonEntitlement.getAuthority());
+                        return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
                     } catch (UnsupportedEncodingException e) {
                         throw new RuntimeException(e);
                     }
                 }).collect(Collectors.toList()));
             }
-            user.setAttribute(eduPersonEntitlement.getUserAttribute(),eduPersonEntitlementValues);
+            user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }

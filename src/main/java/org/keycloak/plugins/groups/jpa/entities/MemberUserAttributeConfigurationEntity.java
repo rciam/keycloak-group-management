@@ -6,21 +6,19 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.RealmEntity;
 
 @Entity
-@Table(name = "EDU_PERSON_ENTITLEMENT_CONFIGURATION")
+@Table(name = "MEMBER_USER_ATTRIBUTE_CONFIGURATION")
 @NamedQueries({
-        @NamedQuery(name = "getConfigurationByRealm", query = "from EduPersonEntitlementConfigurationEntity f where f.realmEntity.id = :realmId")
+        @NamedQuery(name = "getConfigurationByRealm", query = "from MemberUserAttributeConfigurationEntity f where f.realmEntity.id = :realmId")
 })
-public class EduPersonEntitlementConfigurationEntity {
+public class MemberUserAttributeConfigurationEntity {
 
     @Id
     @Column(name = "ID")

@@ -635,7 +635,7 @@
     </changeSet>
 
     <changeSet author="cgeorgilakis@grnet.gr" id="eduPersonEntitlement">
-        <createTable tableName="EDU_PERSON_ENTITLEMENT_CONFIGURATION">
+        <createTable tableName="MEMBER_USER_ATTRIBUTE_CONFIGURATION">
             <column name="ID" type="VARCHAR(36)">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -652,7 +652,7 @@
         </createTable>
         <addForeignKeyConstraint
                 constraintName="eduperson_entitlement_realm_fk"
-                baseTableName="EDU_PERSON_ENTITLEMENT_CONFIGURATION"
+                baseTableName="MEMBER_USER_ATTRIBUTE_CONFIGURATION"
                 baseColumnNames="REALM_ID"
                 referencedTableName="REALM"
                 referencedColumnNames="id"
