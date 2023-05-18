@@ -330,11 +330,9 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         } else {
             entity.setMembershipExpiresAt(null);
         }
-        String validFromValue = enrollmentEntity.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_FROM.equals(at.getConfigurationAttribute().getAttribute())).findAny().orElse(new GroupEnrollmentRequestAttributesEntity()).getValue();
-        if (validFromValue != null) {
-            entity.setValidFrom(LocalDate.parse(validFromValue, Utils.formatter));
-        } else {
-            entity.setValidFrom(LocalDate.now());
+        if (isNotMember) {
+            String validFromValue = enrollmentEntity.getAttributes().stream().filter(at -> GroupEnrollmentAttributeEnum.VALID_FROM.equals(at.getConfigurationAttribute().getAttribute())).findAny().orElse(new GroupEnrollmentRequestAttributesEntity()).getValue();
+            entity.setValidFrom(validFromValue != null ? LocalDate.parse(validFromValue, Utils.formatter) : LocalDate.now());
         }
         entity.setGroup(configuration.getGroup());
         entity.setUser(enrollmentEntity.getUser());
