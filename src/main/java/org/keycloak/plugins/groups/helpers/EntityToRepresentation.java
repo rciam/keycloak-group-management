@@ -8,6 +8,7 @@ import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.jpa.entities.*;
+import org.keycloak.plugins.groups.representations.MemberUserAttributeConfigurationRepresentation;
 import org.keycloak.plugins.groups.representations.GroupAupRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationAttributesRepresentation;
@@ -180,6 +181,12 @@ public class EntityToRepresentation {
             rep.setGroup(group);
         }
 
+        return rep;
+    }
+
+    public static MemberUserAttributeConfigurationRepresentation toRepresentation(MemberUserAttributeConfigurationEntity entity){
+        MemberUserAttributeConfigurationRepresentation rep = new MemberUserAttributeConfigurationRepresentation(entity.getUserAttribute(), entity.getUrnNamespace(), entity.getAuthority());
+        rep.setId(entity.getId());
         return rep;
     }
 

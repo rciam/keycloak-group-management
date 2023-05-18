@@ -1,5 +1,7 @@
 package org.keycloak.plugins.groups.services;
 
+import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,9 +23,11 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
+import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
-import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
+import org.keycloak.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.services.ServicesLogger;
@@ -38,6 +42,8 @@ public class GroupAdminGroupMember {
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final GroupRolesRepository groupRolesRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
+
+    private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
     private final UserGroupMembershipExtensionEntity member;
     private final AdminEventBuilder adminEvent;
 
@@ -48,6 +54,7 @@ public class GroupAdminGroupMember {
         this.group = group;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.groupRolesRepository = groupRolesRepository;
+        this.memberUserAttributeConfigurationRepository =  new MemberUserAttributeConfigurationRepository(session);
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
         this.member = member;
         this.adminEvent = adminEvent;
@@ -74,6 +81,16 @@ public class GroupAdminGroupMember {
             member.getGroupRoles().add(role);
         }
         userGroupMembershipExtensionRepository.update(member);
+        try {
+            MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+            UserModel user = session.users().getUserById(realm, member.getUser().getId());
+            List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
+            String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
+            memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, name, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
+            user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
         return Response.noContent().build();
     }
 
@@ -85,6 +102,16 @@ public class GroupAdminGroupMember {
 
         member.getGroupRoles().removeIf(x -> name.equals(x.getName()));
         userGroupMembershipExtensionRepository.update(member);
+        try {
+            MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+            UserModel user = session.users().getUserById(realm, member.getUser().getId());
+            List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
+            String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
+            memberUserAttributeValues.removeIf(x-> x.startsWith(memberUserAttribute.getUrnNamespace()+Utils.groupStr+groupName+Utils.roleStr+name));
+            user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
         return Response.noContent().build();
     }
 
@@ -97,6 +124,15 @@ public class GroupAdminGroupMember {
         }
         try {
             userGroupMembershipExtensionRepository.suspendUser(user, member, justification, group);
+            try {
+                MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+                List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
+                String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
+                memberUserAttributeValues.removeIf(x-> x.startsWith(memberUserAttribute.getUrnNamespace()+Utils.groupStr+groupName));
+                user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             throw new BadRequestException("problem suspended group member");
@@ -119,7 +155,28 @@ public class GroupAdminGroupMember {
         }
         try {
             userGroupMembershipExtensionRepository.activateUser(user, member, justification, group);
-            adminEvent.operation(OperationType.UPDATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(member, realm)).resourcePath(session.getContext().getUri()).success();
+            try {
+                MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+                List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
+                String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
+                memberUserAttributeValues.removeIf(x-> x.startsWith(memberUserAttribute.getUrnNamespace()+Utils.groupStr+groupName));
+                if (member.getGroupRoles() == null || member.getGroupRoles().isEmpty()) {
+                    memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
+                } else {
+                    memberUserAttributeValues.addAll(member.getGroupRoles().stream().map(role -> {
+                        try {
+                            return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
+                        } catch (UnsupportedEncodingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }).collect(Collectors.toList()));
+                }
+                user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+           adminEvent.operation(OperationType.UPDATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(member, realm)).resourcePath(session.getContext().getUri()).success();
+
         } catch (Exception e) {
             e.printStackTrace();
             throw new BadRequestException("problem activate group member");

@@ -1,5 +1,9 @@
 package org.keycloak.plugins.groups.services;
 
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.GET;
@@ -17,7 +21,10 @@ import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.helpers.Utils;
+import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
+import org.keycloak.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
@@ -40,6 +47,7 @@ public class GroupAdminEnrollementRequest {
     private final GroupEnrollmentRequestEntity enrollmentEntity;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
+    private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
 
     public GroupAdminEnrollementRequest(KeycloakSession session, RealmModel realm, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserModel groupAdmin, GroupEnrollmentRequestEntity enrollmentEntity, AdminEventBuilder adminEvent, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository) {
         this.session = session;
@@ -50,6 +58,7 @@ public class GroupAdminEnrollementRequest {
         this.groupAdmin = groupAdmin;
         this.enrollmentEntity = enrollmentEntity;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
+        this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
     }
@@ -78,10 +87,34 @@ public class GroupAdminEnrollementRequest {
             throw new BadRequestException(statusErrorMessage);
 
         userGroupMembershipExtensionRepository.createOrUpdate(enrollmentEntity, session, groupAdmin.getId(),adminEvent);
+        try {
+            MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+            UserModel user = session.users().getUserById(realm, enrollmentEntity.getUser().getId());
+            List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
+            String groupName = Utils.getGroupNameForMemberUserAttribute(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup(), realm);
+            memberUserAttributeValues.removeIf(x-> x.startsWith(memberUserAttribute.getUrnNamespace()+Utils.groupStr+groupName));
+
+            if (enrollmentEntity.getGroupRoles() == null || enrollmentEntity.getGroupRoles().isEmpty()) {
+                memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
+            } else {
+                memberUserAttributeValues.addAll(enrollmentEntity.getGroupRoles().stream().map(role -> {
+                    try {
+                        return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
+                    } catch (UnsupportedEncodingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toList()));
+            }
+            user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+
         enrollmentEntity.setStatus(EnrollmentRequestStatusEnum.ACCEPTED);
         enrollmentEntity.setAdminJustification(adminJustification);
 
         groupEnrollmentRequestRepository.update(enrollmentEntity);
+
 
         try {
             customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm,enrollmentEntity.getUser().getId()));
