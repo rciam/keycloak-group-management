@@ -1,5 +1,6 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.helpers.DummyClientConnection;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
+import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
@@ -76,9 +78,14 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         return results.isEmpty() ? null : results.get(0);
     }
 
+    public Stream<UserGroupMembershipExtensionEntity> getActiveByUser(String userId){
+        return em.createNamedQuery("getActiveByUser").setParameter("userId",userId).getResultStream();
+    }
+
     @Transactional
     public void dailyExecutedActions(KeycloakSession session) {
         GroupManagementEventEntity eventEntity = eventRepository.getEntity(Utils.eventId);
+        MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
         CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         if (eventEntity == null || LocalDate.now().isAfter(eventEntity.getDate())) {
             logger.info("group management daily action is executing ...");
@@ -90,6 +97,15 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 UserModel user = session.users().getUserById(realmModel, entity.getUser().getId());
                 GroupModel group = realmModel.getGroupById(entity.getGroup().getId());
                 logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
+                try {
+                    MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+                    List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
+                    String groupName = Utils.getGroupNameForMemberUserAttribute(entity.getGroup(), realm);
+                    memberUserAttributeValues.removeIf(x-> x.startsWith(memberUserAttribute.getUrnNamespace()+Utils.groupStr+groupName));
+                    user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
                 deleteEntity(entity.getId());
                 user.leaveGroup(group);
                 AdminAuth adminAuth = new AdminAuth(realmModel, null, Utils.getChronJobUser(), realmModel.getClientByClientId(adminCli));
