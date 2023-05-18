@@ -30,9 +30,7 @@ public class EntityToRepresentation {
 
     public static GroupEnrollmentConfigurationRepresentation toRepresentation(GroupEnrollmentConfigurationEntity entity, boolean containAttributes) {
         GroupEnrollmentConfigurationRepresentation rep = new GroupEnrollmentConfigurationRepresentation(entity.getId());
-        org.keycloak.representations.idm.GroupRepresentation group = new GroupRepresentation();
-        group.setId(entity.getGroup().getId());
-        group.setName(entity.getGroup().getName());
+        GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true);
         rep.setGroup(group);
         rep.setName(entity.getName());
         rep.setActive(entity.isActive());
@@ -80,11 +78,8 @@ public class EntityToRepresentation {
     public static UserGroupMembershipExtensionRepresentation toRepresentation(UserGroupMembershipExtensionEntity entity, RealmModel realm) {
         UserGroupMembershipExtensionRepresentation rep = new UserGroupMembershipExtensionRepresentation();
         rep.setId(entity.getId());
-        GroupRepresentation groupRep = new GroupRepresentation();
-        groupRep.setId(entity.getGroup().getId());
-        groupRep.setName(entity.getGroup().getName());
-        groupRep.setAttributes(getGroupAttributes(entity.getGroup().getAttributes()));
-        rep.setGroup(groupRep);
+        GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true);
+        rep.setGroup(group);
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
         rep.setJustification(entity.getJustification());
         rep.setAupExpiresAt(entity.getAupExpiresAt());
@@ -131,10 +126,12 @@ public class EntityToRepresentation {
     }
 
 
-    public static GroupRepresentation toBriefRepresentation(GroupEntity entity) {
+    public static GroupRepresentation toBriefRepresentation(GroupEntity entity, boolean attributes) {
         GroupRepresentation rep = new GroupRepresentation();
         rep.setId(entity.getId());
         rep.setName(entity.getName());
+        if (attributes && entity.getAttributes() != null)
+            rep.setAttributes(getGroupAttributes(entity.getAttributes()));
         return rep;
     }
 
@@ -175,9 +172,7 @@ public class EntityToRepresentation {
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
         if (entity.getGroup() != null){
-            GroupRepresentation group = new GroupRepresentation();
-            group.setId(entity.getGroup().getId());
-            group.setName(entity.getGroup().getName());
+            GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true);
             rep.setGroup(group);
         }
 
