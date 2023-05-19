@@ -1,16 +1,33 @@
 package org.keycloak.plugins.groups.helpers;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
+import java.util.stream.Collectors;
 
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.keycloak.common.util.ObjectUtil;
+import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
+import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.representations.account.UserRepresentation;
+import org.keycloak.representations.idm.GroupRepresentation;
+import org.keycloak.services.ErrorResponse;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.services.resources.admin.GroupResource;
 
 public class Utils {
 
@@ -78,6 +95,42 @@ public class Utils {
 
     private static String encode(String x) throws UnsupportedEncodingException {
         return URLEncoder.encode(x.replace(space,"%20"), StandardCharsets.UTF_8.toString()).replace("%2520","%20");
+    }
+
+    public static Response addGroupChild(GroupRepresentation rep, RealmModel realm, GroupModel group, KeycloakSession session, AdminEventBuilder adminEvent, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, GroupRolesRepository groupRolesRepository) {
+
+        //GroupResource addGroupChild method except return Response
+        adminEvent.resource(ResourceType.GROUP);
+        String groupName = rep.getName();
+        if (ObjectUtil.isBlank(groupName)) {
+            return ErrorResponse.error("Group name is missing", Response.Status.BAD_REQUEST);
+        }
+
+        GroupModel child = null;
+        if (rep.getId() != null) {
+            child = realm.getGroupById(rep.getId());
+            if (child == null) {
+                throw new NotFoundException("Could not find child by id");
+            }
+            realm.moveGroup(child, group);
+            adminEvent.operation(OperationType.UPDATE);
+        } else {
+            child = realm.createGroup(groupName, group);
+            GroupResource.updateGroup(rep, child);
+            rep.setId(child.getId());
+            adminEvent.operation(OperationType.CREATE);
+
+        }
+        adminEvent.resourcePath(session.getContext().getUri()).representation(rep).success();
+
+        //GroupRepresentation childRep = ModelToRepresentation.toGroupHierarchy(child, true);
+        //custom agm implementation
+        if (groupEnrollmentConfigurationRepository.getByGroup(rep.getId()).collect(Collectors.toList()).isEmpty()) {
+            //group creation
+            groupEnrollmentConfigurationRepository.createDefault(child.getId(), rep.getName());
+            groupRolesRepository.create(Utils.defaultGroupRole,rep.getId());
+        }
+        return Response.noContent().build();
     }
 
 }
