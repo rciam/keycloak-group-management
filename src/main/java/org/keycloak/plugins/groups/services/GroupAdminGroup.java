@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.email.EmailException;
+import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
@@ -90,6 +91,13 @@ public class GroupAdminGroup {
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         this.generalService =  new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
         this.adminEvent = adminEvent;
+    }
+
+    @DELETE
+    public void deleteGroup() {
+        generalService.removeGroup(group);
+
+        adminEvent.operation(OperationType.DELETE).representation(group.getName()).resourcePath(session.getContext().getUri()).success();
     }
 
     @GET
