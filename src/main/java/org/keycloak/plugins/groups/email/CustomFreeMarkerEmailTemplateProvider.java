@@ -176,4 +176,13 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send(forMember ? "groupInvitationSubject" : "groupInvitationAdminInformSubject", "invitation-admin-inform.ftl", attributes);
     }
 
+    public void sendAddRemoveAdminAdminInformationEmail(boolean added, String groupname, UserModel adminAdded,  UserModel adminAction) throws EmailException {
+        attributes.put("text", added ? "added as" : "removed from");
+        attributes.put("groupname", groupname);
+        attributes.put("adminAdded", adminAdded.getFirstName() + " "+ adminAdded.getLastName());
+        attributes.put("adminAction", adminAction.getFirstName() + " "+ adminAction.getLastName());
+        send(added ? "addGroupAdminAdminInformationSubject" : "removeGroupAdminAdminInformationSubject", "add-remove-groupadmin-admin-inform.ftl", attributes);
+    }
+
+
 }

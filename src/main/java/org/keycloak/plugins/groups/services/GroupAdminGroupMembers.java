@@ -85,7 +85,7 @@ public class GroupAdminGroupMembers {
             customFreeMarkerEmailTemplateProvider.sendGroupInvitationEmail(voAdmin, group.getName(), groupInvitationInitialRep.isWithoutAcceptance(), groupInvitationInitialRep.getGroupRoles(), emailId);
 
             if (groupInvitationInitialRep.isWithoutAcceptance()) {
-                groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> voAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+                groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !voAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                     try {
                         customFreeMarkerEmailTemplateProvider.setUser(admin);
                         customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(user.getEmail(), true, group.getName(), voAdmin, groupInvitationInitialRep.getGroupRoles());
