@@ -54,6 +54,7 @@ Path | Method | Description                                                     
 /account/group-admin/groupids/all | GET    | get all groups ids that this user has admin rights                            | GroupAdminService
 /account/group-admin/groups/members | GET    | get all groups members given the groupids as comma-separated string           | GroupAdminService
 /account/group-admin/group/{groupId}/all | GET    | get all group information                                                     | GroupAdminGroup
+/account/group-admin/group/{groupId}/children| POST | create child group                           | GroupAdminGroup
 /account/group-admin/group/{groupId}/configuration/all | GET    | get all group enrollment configurations                                       | GroupAdminGroup
 /account/group-admin/group/{groupId}/configuration/{id} | GET    | get group enrollment configuration                                            | GroupAdminGroup
 /account/group-admin/group/{groupId}/configuration | POST   | create/ update group enrollment configuration                                 | GroupAdminGroup

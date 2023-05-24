@@ -78,10 +78,9 @@ public class AdminGroups {
     @DELETE
     public void deleteGroup() {
         this.realmAuth.groups().requireManage(group);
-        String groupName = group.getName();
         generalJpaService.removeGroup(group);
 
-        adminEvent.operation(OperationType.DELETE).representation(groupName).resourcePath(session.getContext().getUri()).success();
+        adminEvent.operation(OperationType.DELETE).representation(group.getName()).resourcePath(session.getContext().getUri()).success();
     }
 
     @GET
@@ -170,21 +169,9 @@ public class AdminGroups {
     @POST
     @Path("children")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     public Response addChild(GroupRepresentation rep) {
-        adminEvent.resource(ResourceType.GROUP);
-        GroupResource groupResource = new GroupResource(realm, group, session, realmAuth,adminEvent);
-        Response response = groupResource.addChild(rep);
-        if (response.getStatus() >= 400) {
-            //error response from client creation
-            return response;
-        } else if (groupEnrollmentConfigurationRepository.getByGroup(rep.getId()).collect(Collectors.toList()).isEmpty()) {
-            //group creation
-            String groupId = response.readEntity(GroupRepresentation.class).getId();
-            groupEnrollmentConfigurationRepository.createDefault(groupId, rep.getName());
-            groupRolesRepository.create(Utils.defaultGroupRole,rep.getId());
-        }
-        return Response.noContent().build();
+        this.realmAuth.groups().requireManage(group);
+        return Utils.addGroupChild(rep, realm, group, session, adminEvent, groupEnrollmentConfigurationRepository, groupRolesRepository);
     }
 
 

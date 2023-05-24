@@ -23,6 +23,8 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.email.EmailException;
+import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -50,6 +52,8 @@ import org.keycloak.plugins.groups.representations.GroupRepresentation;
 import org.keycloak.representations.account.UserRepresentation;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.ServicesLogger;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.services.resources.admin.GroupResource;
 import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.timer.TimerProvider;
@@ -67,10 +71,11 @@ public class GroupAdminGroup {
     private final GroupRolesRepository groupRolesRepository;
     private final GroupInvitationRepository groupInvitationRepository;
     private final GeneralJpaService generalService;
+    private final AdminEventBuilder adminEvent;
     //TODO Add real url
     private static final String ADD_ADMIN_URL = "http://localhost:8080/realms/master/agm/dummy";
 
-    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupModel group, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository) {
+    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupModel group, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, AdminEventBuilder adminEvent) {
         this.session = session;
         this.realm = realm;
         this.voAdmin = voAdmin;
@@ -85,6 +90,14 @@ public class GroupAdminGroup {
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         this.generalService =  new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
+        this.adminEvent = adminEvent;
+    }
+
+    @DELETE
+    public void deleteGroup() {
+        generalService.removeGroup(group);
+
+        adminEvent.operation(OperationType.DELETE).representation(group.getName()).resourcePath(session.getContext().getUri()).success();
     }
 
     @GET
@@ -122,6 +135,13 @@ public class GroupAdminGroup {
             }
         }
         return Response.noContent().build();
+    }
+
+    @POST
+    @Path("children")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addChild(GroupRepresentation rep) {
+        return Utils.addGroupChild(rep, realm, group, session, adminEvent, groupEnrollmentConfigurationRepository, groupRolesRepository);
     }
 
     @GET
