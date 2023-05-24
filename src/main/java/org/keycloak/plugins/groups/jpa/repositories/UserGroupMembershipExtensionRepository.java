@@ -59,6 +59,8 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     public UserGroupMembershipExtensionRepository(KeycloakSession session, RealmModel realm) {
         super(session, realm);
         this.eventRepository = new GroupManagementEventRepository(session, realm);
+        this.groupEnrollmentConfigurationRepository = new GroupEnrollmentConfigurationRepository(session, realm);
+        this.groupRolesRepository = new GroupRolesRepository(session, realm);
     }
 
     public UserGroupMembershipExtensionRepository(KeycloakSession session, RealmModel realm, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, GroupRolesRepository groupRolesRepository) {
@@ -411,6 +413,49 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             user.joinGroup(group);
         }
         adminEvent.operation(isNotMember? OperationType.CREATE :  OperationType.UPDATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(entity, realm)).resourcePath(session.getContext().getUri()).success();
+    }
+
+    @Transactional
+    public void update(UserGroupMembershipExtensionRepresentation rep, UserGroupMembershipExtensionEntity entity, GroupModel group, KeycloakSession session, AdminEventBuilder adminEvent) throws UnsupportedEncodingException {
+        boolean isNotMember = !MemberStatusEnum.ENABLED.equals(entity.getStatus());
+        entity.setMembershipExpiresAt(rep.getMembershipExpiresAt());
+        entity.setValidFrom(rep.getValidFrom());
+        entity.setStatus(LocalDate.now().isBefore(entity.getValidFrom()) ? MemberStatusEnum.PENDING : MemberStatusEnum.ENABLED);
+        if (rep.getGroupRoles() != null) {
+            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, entity.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toList()));
+        } else {
+            entity.setGroupRoles(null);
+        }
+
+        update(entity);
+        MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
+
+        UserModel user = session.users().getUserById(realm, entity.getUser().getId());
+        if (isNotMember && MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
+            user.joinGroup(group);
+        } else if  (!isNotMember && MemberStatusEnum.PENDING.equals(entity.getStatus())) {
+            user.leaveGroup(group);
+        }
+
+        MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+        List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
+        String groupName = Utils.getGroupNameForMemberUserAttribute(entity.getGroup(), realm);
+        memberUserAttributeValues.removeIf(x-> x.startsWith(memberUserAttribute.getUrnNamespace()+Utils.groupStr+groupName));
+
+        if (MemberStatusEnum.ENABLED.equals(entity.getStatus()) && (rep.getGroupRoles() == null || rep.getGroupRoles().isEmpty())) {
+            memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
+        } else   if (MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
+            memberUserAttributeValues.addAll(rep.getGroupRoles().stream().map(role -> {
+                try {
+                    return Utils.createMemberUserAttribute(groupName, role, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList()));
+        }
+        user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
+
+        adminEvent.operation(OperationType.UPDATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(entity, realm)).resourcePath(session.getContext().getUri()).success();
     }
 
     @Transactional

@@ -6,9 +6,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -27,7 +29,9 @@ import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEnti
 import org.keycloak.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
+import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.keycloak.services.ServicesLogger;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
 
 public class GroupAdminGroupMember {
 
@@ -41,8 +45,9 @@ public class GroupAdminGroupMember {
 
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
     private final UserGroupMembershipExtensionEntity member;
+    private final AdminEventBuilder adminEvent;
 
-    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository) {
+    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, AdminEventBuilder adminEvent) {
         this.session = session;
         this.realm =  realm;
         this.voAdmin = voAdmin;
@@ -52,6 +57,14 @@ public class GroupAdminGroupMember {
         this.memberUserAttributeConfigurationRepository =  new MemberUserAttributeConfigurationRepository(session);
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
         this.member = member;
+        this.adminEvent = adminEvent;
+    }
+
+    @PUT
+    @Consumes("application/json")
+    public Response updateMember(UserGroupMembershipExtensionRepresentation rep) throws UnsupportedEncodingException {
+        userGroupMembershipExtensionRepository.update(rep, member,group, session, adminEvent);
+        return Response.noContent().build();
     }
 
     @POST
