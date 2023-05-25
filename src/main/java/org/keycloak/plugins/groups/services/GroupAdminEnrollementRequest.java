@@ -86,29 +86,8 @@ public class GroupAdminEnrollementRequest {
         if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
             throw new BadRequestException(statusErrorMessage);
 
-        userGroupMembershipExtensionRepository.createOrUpdate(enrollmentEntity, session, groupAdmin.getId(),adminEvent);
-        try {
-            MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-            UserModel user = session.users().getUserById(realm, enrollmentEntity.getUser().getId());
-            List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
-            String groupName = Utils.getGroupNameForMemberUserAttribute(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup(), realm);
-            memberUserAttributeValues.removeIf(x-> x.startsWith(memberUserAttribute.getUrnNamespace()+Utils.groupStr+groupName));
-
-            if (enrollmentEntity.getGroupRoles() == null || enrollmentEntity.getGroupRoles().isEmpty()) {
-                memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
-            } else {
-                memberUserAttributeValues.addAll(enrollmentEntity.getGroupRoles().stream().map(role -> {
-                    try {
-                        return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
-                    } catch (UnsupportedEncodingException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).collect(Collectors.toList()));
-            }
-            user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+        userGroupMembershipExtensionRepository.createOrUpdate(enrollmentEntity, session, groupAdmin.getId(),adminEvent, memberUserAttribute);
 
         enrollmentEntity.setStatus(EnrollmentRequestStatusEnum.ACCEPTED);
         enrollmentEntity.setAdminJustification(adminJustification);

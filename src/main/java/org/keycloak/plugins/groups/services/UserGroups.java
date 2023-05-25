@@ -203,29 +203,8 @@ public class UserGroups {
         }
 
         if (invitationEntity.getForMember() ) {
-            userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user, adminEvent, session.getContext().getUri());
-            try {
-                MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-                List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
-                String groupName = Utils.getGroupNameForMemberUserAttribute(invitationEntity.getGroupEnrollmentConfiguration().getGroup(), realm);
-                memberUserAttributeValues.removeIf(x-> x.startsWith(memberUserAttribute.getUrnNamespace()+Utils.groupStr+groupName));
-
-                if (invitationEntity.getGroupRoles() == null || invitationEntity.getGroupRoles().isEmpty()) {
-                    memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
-                } else {
-                    memberUserAttributeValues.addAll(invitationEntity.getGroupRoles().stream().map(role -> {
-                        try {
-                            return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
-                        } catch (UnsupportedEncodingException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }).collect(Collectors.toList()));
-                }
-                user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e);
-            }
-
+            MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+            userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user, adminEvent, session.getContext().getUri(), memberUserAttribute);
         } else {
             groupAdminRepository.addGroupAdmin(user.getId(), invitationEntity.getGroup().getId());
         }

@@ -133,4 +133,8 @@ public class Utils {
         return Response.noContent().build();
     }
 
+    public static boolean removeMemberUserAttributeCondition(String x, String urnNamespace, String groupName){
+        return x.equals(urnNamespace+groupStr+groupName) || x.startsWith(urnNamespace+groupStr+groupName+roleStr) || x.startsWith(urnNamespace+groupStr+groupName+sharp);
+    }
+
 }
