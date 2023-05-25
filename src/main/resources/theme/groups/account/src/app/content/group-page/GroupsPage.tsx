@@ -1,5 +1,8 @@
 import * as React from 'react';
 import {Link} from 'react-router-dom';
+import {FC,useState,useEffect} from 'react';
+import {LongArrowAltDownIcon,LongArrowAltUpIcon,AngleDownIcon } from '@patternfly/react-icons';
+
 
 import {
   Checkbox,
@@ -8,6 +11,9 @@ import {
   DataListItemRow,
   DataListCell,
   DataListItemCells,
+  Pagination,
+  Tooltip,
+  Badge,
 } from '@patternfly/react-core';
 
 // @ts-ignore
@@ -31,57 +37,58 @@ interface Group {
   path: string;
 }
 
-export class GroupsPage extends React.Component<GroupsPageProps, GroupsPageState> {
+interface Response {
+  results:Group[];
+  count: BigInteger;
+}
+export const GroupsPage: FC<GroupsPageProps> = (props) => {
 
-  groupsService = new GroupsServiceClient();
+  let groupsService = new GroupsServiceClient();
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [groups,setGroups] = useState([]as Group[]);
+  const [totalItems,setTotalItems] = useState<number>(0);
+  const [orderBy,setOrderBy] = useState<string>('');
+  const [asc,setAsc] = useState<boolean>(true);
 
-  public constructor(props: GroupsPageProps) {
-    super(props);
-    this.state = {
-      groups: [],
-      directGroups: [],
-      isDirectMembership: false
-    };
+  useEffect(()=>{
+    fetchGroups();
+  },[]);
 
-    this.fetchGroups();
-  }
 
-  private fetchGroups(): void {
-    this.groupsService!.doGet<Group[]>("/user/groups")
-      .then((response: HttpResponse<Group[]>) => {
-        const directGroups = response.data || [];
-        const groups = [...directGroups];
-        const groupsPaths = directGroups.map(s => s.path);
-        directGroups.forEach((el) => this.getParents(el, groups, groupsPaths))
-        this.setState({
-          groups: groups,
-          directGroups: directGroups
-        });
+
+  useEffect(()=>{
+    fetchGroups();
+  },[perPage,page,orderBy,asc]);
+
+  const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const onPerPageSelect = (
+    _event: React.MouseEvent | React.KeyboardEvent | MouseEvent,
+    newPerPage: number,
+    newPage: number
+  ) => {
+    setPerPage(newPerPage);
+    setPage(newPage);
+  };
+
+
+
+
+  const fetchGroups = () =>  {
+    groupsService!.doGet<Response>("/user/groups",{params:{first:(perPage*(page-1)),max:perPage,...(orderBy?{order:orderBy}:{}),asc:asc?"true":"false"}})
+      .then((response: HttpResponse<Response>) => {
+        console.log(response.data);
+        let count = response?.data?.count||0;
+        setTotalItems(count as number);
+        setGroups(response?.data?.results||[] as Group[]);
       });
   }
 
-  private getParents(el: Group, groups: Group[], groupsPaths: string[]): void {
-    const parentPath = el.path.slice(0, el.path.lastIndexOf('/'));
-    if (parentPath && (groupsPaths.indexOf(parentPath) === -1)) {
-
-      el = {
-        name: parentPath.slice(parentPath.lastIndexOf('/')+1),
-        path: parentPath
-      };
-      groups.push(el);
-      groupsPaths.push(parentPath);
-
-      this.getParents(el, groups, groupsPaths);
-    }
-  }
-
-  private changeDirectMembership = (checked: boolean,event: React.FormEvent<HTMLInputElement> )=> {
-    this.setState({
-      isDirectMembership: checked
-    });
-  }
-
-  private emptyGroup(): React.ReactNode {
+  
+  const emptyGroup= ()=> {
 
     return (
       <DataListItem key='emptyItem' aria-labelledby="empty-item">
@@ -94,22 +101,27 @@ export class GroupsPage extends React.Component<GroupsPageProps, GroupsPageState
     )
   }
 
-  private renderGroupList(group: Group, appIndex: number): React.ReactNode {
+  const renderGroupList = (membership, appIndex: number) => {
     return (
-      <Link to={"/groups/showgroups/"+group.id}>        
+      <Link to={"/groups/showgroups/"+membership.group.id}>        
         <DataListItem id={`${appIndex}-group`} key={'group-' + appIndex} aria-labelledby="groups-list" >
           <DataListItemRow>
             <DataListItemCells
               dataListCells={[
                 <DataListCell id={`${appIndex}-group-name`} width={2} key={'name-' + appIndex}>
-                  {group.name}
+                  {membership.group.name} 
                 </DataListCell>,
-                <DataListCell id={`${appIndex}-group-path`} width={2} key={'path-' + appIndex}>
-                  {group.path}
+                <DataListCell id={`${appIndex}-group-roles`} width={2} key={'directMembership-' + appIndex}>
+                  {membership.groupRoles.map((role,index)=>{
+                        return <Badge key={index} className="gm_role_badge" isRead>{role}</Badge>
+                      })}
                 </DataListCell>,
-                <DataListCell id={`${appIndex}-group-directMembership`} width={2} key={'directMembership-' + appIndex}>
-                  <Checkbox id={`${appIndex}-checkbox-directMembership`} isChecked={group.id != null} isDisabled={true} />
-                </DataListCell>
+                <DataListCell id={`${appIndex}-group-aupExpiration`} width={2} key={'directMembership-' + appIndex}>
+                  {membership.aupExpiresAt||"Never"} 
+                </DataListCell>,
+                <DataListCell id={`${appIndex}-group-membershipExpiration`} width={2} key={'directMembership-' + appIndex}>
+                {membership.membershipExpiresAt||"Never"}
+              </DataListCell>
               ]}
             />
           </DataListItemRow>
@@ -118,52 +130,56 @@ export class GroupsPage extends React.Component<GroupsPageProps, GroupsPageState
     )
   }
 
-  public render(): React.ReactNode {
+  const orderResults = (type) => {
+    if(orderBy!==type){
+      setOrderBy(type); setAsc(true);
+    }
+    else if(asc){
+      setAsc(false);
+    }
+    else{
+      setAsc(true);
+    }
+  }
+  
+  
     return (
       <ContentPage title={Msg.localize('groupLabel')}>
         <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact>
           <DataListItem id="groups-list-header" aria-labelledby="Columns names">
-            <DataListItemRow >
+            <DataListItemRow className="gm_view-groups-header">
               <DataListItemCells
                 dataListCells={[
-                  <DataListCell key='directMembership-header' >
-                    <Checkbox
-                      label={Msg.localize('directMembership')}
-                      id="directMembership-checkbox"
-                      isChecked={this.state.isDirectMembership}
-                      onChange={this.changeDirectMembership}
-                    />
-
-                  </DataListCell>
+                  <DataListCell key='group-name-header' width={2} onClick={()=>{orderResults('')}}>
+                    <strong><Msg msgKey='Name' /></strong>{!orderBy?<AngleDownIcon/>:asc?<LongArrowAltDownIcon />:<LongArrowAltUpIcon/>}
+                  </DataListCell>,
+                  <DataListCell key='group-roles' width={2}>
+                    <strong>Roles</strong>
+                  </DataListCell>,
+                  <DataListCell key='group-aup-expiration-header' width={2} onClick={()=>{orderResults('aupExpiresAt')}}>
+                    <strong>Aup Expiration Date</strong> {orderBy!=='aupExpiresAt'?<AngleDownIcon/>:asc?<LongArrowAltDownIcon/>:<LongArrowAltUpIcon/>}
+                  </DataListCell>,
+                  <DataListCell key='group-membership-expiration-header' width={2} onClick={()=>{orderResults('membershipExpiresAt')}}>
+                  <strong>Membership Expiration Date</strong> {orderBy!=='membershipExpiresAt'?<AngleDownIcon/>:asc?<LongArrowAltDownIcon/>:<LongArrowAltUpIcon/>}
+                </DataListCell>,
                 ]}
               />
             </DataListItemRow>
           </DataListItem>
-          <DataListItem id="groups-list-header" aria-labelledby="Columns names">
-            <DataListItemRow >
-              <DataListItemCells
-                dataListCells={[
-                  <DataListCell key='group-name-header' width={2}>
-                    <strong><Msg msgKey='Name' /></strong>
-                  </DataListCell>,
-                  <DataListCell key='group-path-header' width={2}>
-                    <strong><Msg msgKey='path' /></strong>
-                  </DataListCell>,
-                  <DataListCell key='group-direct-membership-header' width={2}>
-                    <strong><Msg msgKey='directMembership' /></strong>
-                  </DataListCell>,
-                ]}
-              />
-            </DataListItemRow>
-          </DataListItem>
-          {this.state.groups.length === 0
-            ? this.emptyGroup()
-            : (this.state.isDirectMembership ? this.state.directGroups.map((group: Group, appIndex: number) =>
-              this.renderGroupList(group, appIndex)
-            ) : this.state.groups.map((group: Group, appIndex: number) =>
-              this.renderGroupList(group, appIndex)))}
+          {groups.length === 0
+            ? emptyGroup()
+            : groups.map((group: Group, appIndex: number) =>
+              renderGroupList(group, appIndex))}
         </DataList>
+        <Pagination
+            itemCount={totalItems}
+            perPage={perPage}
+            page={page}
+            onSetPage={onSetPage}
+            widgetId="top-example"
+            onPerPageSelect={onPerPageSelect}
+          />
       </ContentPage>
     );
-  }
+  
 };

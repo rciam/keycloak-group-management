@@ -10,6 +10,7 @@ export const SearchInput: FC<any> = (props) => {
 
     return(
         <div className="gm_search-input-container">
+            
             <InputGroup className="gm_search-input">
                 <TextInput
                 name="searchInput"
@@ -34,6 +35,7 @@ export const SearchInput: FC<any> = (props) => {
                     </Button>
                 </Tooltip>
             </InputGroup>
+            {props.childComponent||""}
         </div>
 
 

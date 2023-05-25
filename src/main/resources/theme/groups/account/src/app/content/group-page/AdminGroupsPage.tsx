@@ -10,7 +10,7 @@ import { ContentPage } from '../ContentPage';
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
 import { Msg } from '../../widgets/Msg';
-import { SearchInput } from '../../group-widgets/SearchInput';
+import { SearchInput } from '../../group-widgets/GroupAdminPage/SearchInput';
 
 export interface AdminGroupsPageProps {
   match :any;

@@ -25,7 +25,7 @@ import {PageNotFound} from './content/page-not-found/PageNotFound';
 import { ForbiddenPage } from './content/forbidden-page/ForbiddenPage';
 import {GroupPage} from './content/group-management-pages/GroupPage';
 import {AdminGroupPage} from './content/group-management-pages/AdminGroupPage';
-
+import { InvitationLandingPage } from './content/group-management-pages/InvitationLandingPage';
 
 export interface ContentItem {
     id?: string;
@@ -208,6 +208,7 @@ export function makeRoutes(): React.ReactNode {
                 {customPages.map((item,index)=>{
                     return <Route path={item.path} component={customComponents[item.componentName]}/>
                 })}
+                <Route path="/invitation/:invitation_id" component={InvitationLandingPage}/>
                 <Route path="/forbidden" component={ForbiddenPage}/>
                 <Route component={PageNotFound}/>
             </Switch>);

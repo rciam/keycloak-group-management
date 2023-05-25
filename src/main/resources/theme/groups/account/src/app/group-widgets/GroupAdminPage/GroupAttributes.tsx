@@ -2,9 +2,8 @@ import * as React from 'react';
 import {FC,useState,useEffect,useRef} from 'react';
 import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, Pagination, TextInput} from '@patternfly/react-core';
 // @ts-ignore
-import { HttpResponse, GroupsServiceClient } from '../groups-mngnt-service/groups.service';
 // @ts-ignore
-import { ConfirmationModal } from './Modal';
+import { ConfirmationModal } from '../Modal';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
 
 

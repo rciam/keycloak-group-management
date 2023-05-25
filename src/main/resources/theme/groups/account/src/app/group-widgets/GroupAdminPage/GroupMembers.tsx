@@ -1,13 +1,18 @@
 import * as React from 'react';
 import {FC,useState,useEffect,useRef} from 'react';
-import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, Pagination, InputGroup, TextInput, Dropdown, BadgeToggle, DropdownItem, Badge, Modal, Checkbox} from '@patternfly/react-core';
+import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, Pagination, InputGroup, TextInput, Dropdown, BadgeToggle, DropdownItem, Badge, Modal, Checkbox, FormAlert, Alert} from '@patternfly/react-core';
 // @ts-ignore
-import { HttpResponse, GroupsServiceClient } from '../groups-mngnt-service/groups.service';
+import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
-import { ConfirmationModal } from './Modal';
+import { ConfirmationModal } from '../Modal';
 import { SearchInput } from './SearchInput';
 import {CheckIcon } from '@patternfly/react-icons';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
+import {ValidateEmail} from '../../js/utils.js'
+import { Wizard, WizardStep } from '@patternfly/react-core';
+import { InviteMemberModal } from './InviteMemberModal';
+
+
 
 interface FederatedIdentity {
     identityProvider: string;
@@ -43,8 +48,7 @@ export const GroupMembers: FC<any> = (props) => {
     const [statusSelection,setStatusSelection] = useState("");
     const [roleSelection,setRoleSelection] = useState("")
     const [editMemberRoles,setEditMemberRoles] = useState({});
-
-
+    const [inviteModalActive,setInviteModalActive] = useState(false);
 
 
     let groupsService = new GroupsServiceClient();
@@ -59,6 +63,10 @@ export const GroupMembers: FC<any> = (props) => {
       fetchGroupMembers();
     },[statusSelection]);
 
+    useEffect(()=>{
+      setPage(1);
+      fetchGroupMembers();
+    },[roleSelection]);
 
 
     useEffect(()=>{
@@ -98,9 +106,13 @@ export const GroupMembers: FC<any> = (props) => {
       setPerPage(newPerPage);
       setPage(newPage);
     };
+
+
+  
     
     let fetchGroupMembers = (searchString = undefined)=>{
-      groupsService!.doGet<any>("/group-admin/group/"+props.groupId+"/members?first="+ (perPage*(page-1))+ "&max=" + perPage + (searchString?"&search="+searchString:""),{params:statusSelection.length > 0 ? {status:statusSelection}:{}})
+      groupsService!.doGet<any>("/group-admin/group/"+props.groupId+"/members?first="+ (perPage*(page-1))+ "&max=" + perPage + (searchString?"&search="+searchString:""),{params: { ...(statusSelection.length > 0 ? {status:statusSelection}:{}),...(roleSelection.length > 0 ? {role:roleSelection}:{})}
+    })
       .then((response: HttpResponse<any>) => {
         if(response.status===200&&response.data){
           setTotalItems(response.data.count);
@@ -135,6 +147,8 @@ export const GroupMembers: FC<any> = (props) => {
       })
     }
 
+
+
     const noMembers= ()=>{
         return (
           <DataListItem key='emptyItem' aria-labelledby="empty-item">
@@ -155,7 +169,9 @@ export const GroupMembers: FC<any> = (props) => {
       <React.Fragment>
         <ConfirmationModal modalInfo={modalInfo}/>
         <EditRolesModal member={editMemberRoles} setMember={setEditMemberRoles} groupRoles={props.groupConfiguration?.groupRoles} groupId={props.groupId} fetchGroupMembers={fetchGroupMembers} />
-        <SearchInput searchText={"Search based on Username or Email"} cancelText={"View All Group Members"}search={(searchString)=>{
+        <SearchInput
+          childComponent={<Button className="gm_invite-member-button" onClick={()=>{setInviteModalActive(true)}}>Invite User</Button>}
+          searchText={"Search based on Username or Email"} cancelText={"View All Group Members"}search={(searchString)=>{
             fetchGroupMembers(searchString);
             setPage(1);
           }} cancel={()=>{
@@ -362,7 +378,9 @@ export const GroupMembers: FC<any> = (props) => {
             onSetPage={onSetPage}
             widgetId="top-example"
             onPerPageSelect={onPerPageSelect}
-          />     
+          /> 
+          <InviteMemberModal active={inviteModalActive} setActive={setInviteModalActive} groupId={props.groupId}/>
+         
         </React.Fragment>         
    
     )
@@ -376,6 +394,8 @@ export const GroupMembers: FC<any> = (props) => {
     groupId:any;
     fetchGroupMembers:any;
 };
+
+
 
 
 const EditRolesModal: React.FC<EditRolesModalProps> = (props) =>{

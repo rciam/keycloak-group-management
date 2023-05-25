@@ -126,11 +126,18 @@
 .gm_search-input-container {
     width:100%;
     padding: 0.5rem;
+    height:3.2rem;
 }
 
 .gm_search-input-container div {
-    margin-left:auto;
-    margin-right:0;
+    margin-left: auto;
+    margin-right: 0.5rem;
+    float: right;
+}
+.gm_invite-member-button {
+    float: right;
+    display: inline-block;
+    margin-right: 1rem!important;
 }
 
 .gm_plus-button {
@@ -153,7 +160,7 @@
     height: 1rem;
     -webkit-mask-image: url('../svg/xmark-solid.svg') !important;
     mask-image: url('../svg/xmark-solid.svg') !important;
-    width: 1rem;
+    width: 0.8rem;
     mask-repeat: no-repeat;
 }
 
@@ -197,9 +204,8 @@
 }
 
 .gm_x-button-small {
-    padding: 0.3rem 0.3rem 0.3rem 0.5rem!important;
+    padding: 0.3rem 0.4rem 0.3rem 0.4rem !important; 
     margin-right:0.5rem!important;
-
 }
 
 
@@ -328,13 +334,16 @@
     font-size: 0.8rem!important;
 }
 
-.gm_badge_dropdown ul {
+.gm_badge_dropdown ul, .gm_add-admin-input ul  {
     max-height:18.1rem;
     overflow: auto;
 }
 
 
-
+.gm_invitation-email-input ul {
+    max-height:12.6rem;
+    overflow: auto;
+}
 
 
 
@@ -411,7 +420,7 @@
 
 .gm_admin-button {
     height: 2rem!important;
-    margin-top: 0.2rem!important;
+    margin-top: 0.1rem!important;
     margin-left:0.5rem!important;
 }
 
@@ -458,4 +467,85 @@
     margin:auto;
     margin-top:1rem;
     margin-bottom:1rem;
+}
+
+
+.gm_view-groups-header svg {
+    margin-bottom: -0.1rem;
+    margin-left:0.1rem;
+}
+
+.gm_view-groups-header .pf-c-data-list__cell {
+     cursor:pointer;
+}
+
+.gm_view-groups-header .pf-c-data-list__cell:hover  svg {
+    opacity: 0.4;
+}
+
+.gm_group-enrollment-inactive{
+    color:#DC3545;
+}
+
+
+.gm_group-enrollment-active{
+    color:#4BB563;
+}
+
+.gm_invitation-email-input {
+    margin-top:1rem!important;
+    max-width:20rem!important;
+}
+
+.gm_loader-modal-container {
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4.2rem 0;
+    height: 16rem;
+}
+
+
+.gm_invitation-container {
+    padding: 1.5rem;
+}
+
+.gm_invitation-landing-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+
+.gm_invitation-container .pf-c-hint{
+    margin: 1.5rem 0;
+}
+
+
+.gm_checkbox-container {
+    padding: 1rem;
+    background-color: #d1d1d1;
+}
+
+.gm_invitation-response-container {
+    margin-top:1rem;
+}
+
+.gm_invitation-response-button-container {
+    display:inline-block;
+    margin-right:0.5rem;
+}
+
+.gm_invitation-container p {
+    margin-bottom:0.5rem!important;
+}
+
+.gm_invitation-purpuse h1 {
+    color: #df834d;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.gm_invitation-content-container {
+    margin-top:1rem;
 }

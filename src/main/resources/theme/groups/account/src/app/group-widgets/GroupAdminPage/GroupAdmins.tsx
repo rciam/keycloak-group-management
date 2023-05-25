@@ -2,10 +2,11 @@ import * as React from 'react';
 import {FC,useState,useEffect,useRef} from 'react';
 import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, SelectVariant, Checkbox,Select,SelectOption, FormAlert, Alert} from '@patternfly/react-core';
 // @ts-ignore
-import { HttpResponse, GroupsServiceClient } from '../groups-mngnt-service/groups.service';
+import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
-import { ConfirmationModal } from './Modal';
-import {ValidateEmail} from '../js/utils.js'
+import { ConfirmationModal } from '../Modal';
+import {ValidateEmail} from '../../js/utils.js'
+import { Loading } from '../LoadingModal';
 
 export const GroupAdmins: FC<any> = (props) => {
 
@@ -20,11 +21,32 @@ export const GroupAdmins: FC<any> = (props) => {
     const [selectedUserId,setSelectedUserId] = useState<string>("");
     const [modalInfo,setModalInfo] = useState({});
     const [successMessage,setSuccessMessage] = useState("");
+    const [loading,setLoading] = useState(false);
+    const [groupIds,setGroupIds] = useState([]);
+    const [groupAdminIds,setGroupAdminIds] = useState<any>([]);
 
     useEffect(()=>{
-      fetchGroupMembers()
+      //fetchGroupMembers();
+      fetchGroupAdminIds();
+      console.log('this 1')
     },[]);
 
+    useEffect(()=>{
+      
+      if(groupIds.length>0){
+        fetchGroupMembers();
+      }
+    },[groupIds])
+
+    useEffect(()=>{
+      let groupadminids = [] as any;
+      
+      props.groupConfiguration?.admins?.length>0&&props.groupConfiguration?.admins.map((admin)=> {
+        groupadminids.push(admin.user.id);
+        // groupadminids.push(admin.user.id);
+        })
+      setGroupAdminIds(groupadminids);      
+    },[props.groupConfiguration]);
 
  
 
@@ -48,35 +70,6 @@ export const GroupAdmins: FC<any> = (props) => {
       
     }
 
-    const onSelect = (event, selection, isPlaceholder) => {
-      setInviteAddress("");
-      if (isPlaceholder) clearSelection();
-      else if (!selectUser(selection)&&selection){
-        if(ValidateEmail(selection)){
-          setInviteAddress(selection)
-        }
-        else{
-          setInviteAddress("");
-          setEmailError(true);
-        }
-      }
-      else {
-          setIsOpen(false);
-      }
-      setSelected(selection);
-    };
-    
-    const selectUser = (username)=>{
-      let userId;
-      options.forEach(user=>{
-        if(user.value===username){
-          userId=user.id;
-        }
-      })
-      setSelectedUserId(userId);
-
-      return userId;
-    }
     
     const makeAdmin = (userId) =>{
       groupsService!.doPost<any>("/group-admin/group/"+props.groupId+"/admin/"+userId,{})
@@ -100,23 +93,40 @@ export const GroupAdmins: FC<any> = (props) => {
     }
 
     const sendInvitation = (email) => {
+      setLoading(true);
       groupsService!.doPost<any>("/group-admin/group/"+props.groupId+"/admin/invite",{"email":email})
       .then((response: HttpResponse<any>) => {
+        setLoading(false);
         if(response.status===200||response.status===204){
           disapearingMessage("Invitation was succesfully sent to the email address.")
           props.fetchGroupConfiguration();
           // setGroupMembers(response.data.results);
         }
-      }).catch((err)=>{console.log(err)})
+      }).catch((err)=>{
+        setLoading(false);
+        console.log(err)})
     }
 
+    let fetchGroupAdminIds = () => {
+        groupsService!.doGet<any>("/group-admin/groupids/all")
+        .then((response: HttpResponse<any>) => {
+          if(response.status===200&&response.data){
+            setGroupIds(response.data)
+            // setGroupMembers(response.data.results);
+          }
+        }).catch((err)=>{console.log(err)})
+      
+    } 
+
+
     let  fetchGroupMembers = async (searchString = "")=>{
-      groupsService!.doGet<any>("/group-admin/group/"+props.groupId+"/members",{params:{max:20,search:searchString}})
+      groupsService!.doGet<any>("/group-admin/groups/members",{params:{max:20,search:searchString,groups:groupIds.join(',')}})
       .then((response: HttpResponse<any>) => {
         if(response.status===200&&response.data){
           let members: any = [];
+
           response.data.results.forEach((membership)=>{
-            members.push({value:membership.user.username,description:membership.user.email,id:membership.user.id});
+            members.push({value:getUserIdentifier(membership),description:membership.email,id:membership.id,disabled:groupAdminIds.includes(membership.id)});
           })
           setOptions(members);
           // setGroupMembers(response.data.results);
@@ -124,11 +134,16 @@ export const GroupAdmins: FC<any> = (props) => {
       }).catch((err)=>{console.log(err)})
     }
 
-    const clearSelection = () => {
+    let getUserIdentifier = (user) => {
+      return   (user.firstName || user.lastName?(user.firstName&&user.firstName+" ")+ user.lastName:user.username?user.username:user.email?user.email:user.id?user.id:"Info Not Available")
+    }
 
+    const clearSelection = () => {
+        setInviteAddress("");
         setSelected(null);
         setIsOpen(false);
-        setOptions([]);
+        setEmailError(false);
+        fetchGroupMembers();
     };
 
     const onToggle = (open) => {
@@ -146,6 +161,7 @@ export const GroupAdmins: FC<any> = (props) => {
   
     return (
       <React.Fragment>
+        <Loading active={loading}/>
         <ConfirmationModal modalInfo={modalInfo}/>
         <DataList aria-label="Group Member Datalist" isCompact>
             <DataListItem aria-labelledby="compact-item1">
@@ -242,7 +258,7 @@ export const GroupAdmins: FC<any> = (props) => {
                 variant={SelectVariant.typeahead}
                 typeAheadAriaLabel="Select a state"
                 onToggle={onToggle}
-                onSelect={onSelect}
+                onSelect={()=>{}}
                 onClear={clearSelection}
                 selections={selected}
                 createText="Invite with email"
@@ -254,6 +270,8 @@ export const GroupAdmins: FC<any> = (props) => {
                     setInviteAddress("");
                     setEmailError(true);
                   }
+                  setSelected(value);
+                  setIsOpen(false);
 
                 }}
                 onFilter={(e,searchString)=>{
@@ -267,7 +285,20 @@ export const GroupAdmins: FC<any> = (props) => {
                     <SelectOption
                     isDisabled={option.disabled}
                     key={index}
-                    value={option.value}
+                    onClick={()=>{
+                      setInviteAddress("");
+                      if(option.id){
+                        setSelectedUserId(option.id);
+                        if(option.value==='Name Not Available'){
+                          setSelected(option.description);
+                        }
+                        else{ 
+                          setSelected(option.value);
+                        }
+                      }
+                      setIsOpen(false);
+                    }}
+                    value={option.value+ (option.disabled?' (Already an Admin)':"")}
                     {...(option.description && { description: option.description })}
                     />)
                   ))
@@ -283,7 +314,20 @@ export const GroupAdmins: FC<any> = (props) => {
                   <SelectOption
                   isDisabled={option.disabled}
                   key={index}
-                  value={option.value}
+                  onClick={()=>{
+                    setInviteAddress("");
+                    if(option.id){
+                      setSelectedUserId(option.id);
+                      if(option.value==='Name Not Available'){
+                        setSelected(option.description);
+                      }
+                      else{ 
+                        setSelected(option.value);
+                      }
+                    }
+                    setIsOpen(false);
+                  }}
+                  value={option.value + (option.disabled?' (Already an Admin)':"")}
                   {...(option.description && { description: option.description })}
                   />
               ))}

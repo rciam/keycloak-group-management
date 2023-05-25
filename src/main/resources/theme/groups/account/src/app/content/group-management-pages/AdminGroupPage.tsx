@@ -4,12 +4,13 @@ import { Tabs, Tab,TabTitleText,Breadcrumb, BreadcrumbItem, TextArea, Button} fr
 // @ts-ignore
 import { ContentPage } from '../ContentPage';
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
-import {GroupMembers} from '../../group-widgets/GroupMembers';
+import {GroupMembers} from '../../group-widgets/GroupAdminPage/GroupMembers';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
-import {GroupAttributes} from '../../group-widgets/GroupAttributes';
-import { GroupDetails } from '../../group-widgets/GroupDetails';
-import { GroupAdmins } from '../../group-widgets/GroupAdmins';
+import {GroupAttributes} from '../../group-widgets/GroupAdminPage/GroupAttributes';
+import { GroupDetails } from '../../group-widgets/GroupAdminPage/GroupDetails';
+import { GroupAdmins } from '../../group-widgets/GroupAdminPage/GroupAdmins';
 import { ConfirmationModal } from '../../group-widgets/Modal';
+import { GroupEnrollment } from '../../group-widgets/GroupAdminPage/GroupEnrollment';
 
 
 
@@ -235,10 +236,14 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
             </Tab>
             <Tab eventKey={2} title={<TabTitleText>Group Admins</TabTitleText>} aria-label="Default content - admins">
               <GroupAdmins groupId={groupId} user={user} groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration}/>
+            </Tab>
+            <Tab eventKey={3} title={<TabTitleText>Group Enrollment Configuration</TabTitleText>} aria-label="Default content - attributes">   
+              <GroupEnrollment groupConfiguration={groupConfiguration}  groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
             </Tab>   
-            <Tab eventKey={3} title={<TabTitleText>Group Attributes</TabTitleText>} aria-label="Default content - attributes">   
+            <Tab eventKey={4} title={<TabTitleText>Group Attributes</TabTitleText>} aria-label="Default content - attributes">   
               <GroupAttributes groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
             </Tab>
+            
           </Tabs>
         </ContentPage>
       </div>
