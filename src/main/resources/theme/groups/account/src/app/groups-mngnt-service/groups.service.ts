@@ -19,6 +19,7 @@ export interface HttpResponse<T = {}> extends Response {
 
 export interface RequestInitWithParams extends RequestInit {
     params?: {[name: string]: string | number};
+    target?: any; 
 }
 
 export class GroupsServiceError extends Error {
@@ -31,11 +32,12 @@ export class GroupsServiceError extends Error {
 export class GroupsServiceClient {
     private kcSvc: KeycloakService;
     private groupsUrl: string;
-
+    private baseUrl: string;
     //TODO: UPDATE the groupsUrl value in the constructor to match the base path of the extension's REST endpoints!!!
     public constructor() {
         this.kcSvc = keycloakService;
         this.groupsUrl = this.kcSvc.authServerUrl() + 'realms/' + this.kcSvc.realm() + '/agm/account';
+        this.baseUrl = this.kcSvc.authServerUrl() + 'admin/' + this.kcSvc.realm() + '/console'
     }
 
     public async doGet<T>(endpoint: string,
@@ -108,8 +110,7 @@ export class GroupsServiceClient {
 
     private makeUrl(endpoint: string, config?: RequestInitWithParams): URL {
         if (endpoint.startsWith('http')) return new URL(endpoint);
-        const url = new URL(this.groupsUrl + endpoint);
-
+        const url = new URL((config?.target==='base'?this.baseUrl:this.groupsUrl) + endpoint);
         // add request params
         if (config && config.hasOwnProperty('params')) {
             const params: {[name: string]: string} = config.params as {} || {};

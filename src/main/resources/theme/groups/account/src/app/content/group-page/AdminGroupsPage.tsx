@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {FC,useState,useEffect} from 'react';
-import {DataListContent,Tooltip, DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell,Breadcrumb, BreadcrumbItem, InputGroup,TextInput,Button,Pagination} from '@patternfly/react-core';
+import {DataListContent, DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell,Breadcrumb, BreadcrumbItem,Pagination} from '@patternfly/react-core';
 import {Link} from 'react-router-dom';
 //import { fa-search } from '@patternfly/react-icons';
 //import { faSearch } from '@fortawesome/free-solid-svg-icons';
@@ -10,6 +10,7 @@ import { ContentPage } from '../ContentPage';
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
 import { Msg } from '../../widgets/Msg';
+import { SearchInput } from '../../group-widgets/GroupAdminPage/SearchInput';
 
 export interface AdminGroupsPageProps {
   match :any;
@@ -28,9 +29,18 @@ interface AdminGroup{
   extraSubGroups: AdminGroup[];
 }
 
+interface User {
+
+}
+
 interface Response {
   results: AdminGroup[],
   count: BigInteger;
+}
+
+interface User {
+  userId?: string;
+  displayName: string;
 }
 
 export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
@@ -40,8 +50,6 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
  
 
   const [groups,setGroups] = useState([] as AdminGroup[]);
-  const [searchString,setSearchString] = useState<string>("");
-  const [searchResult,setSearchResult] = useState<boolean>(false);
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [totalItems,setTotalItems] = useState<number>(0);
@@ -60,21 +68,20 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
   };
 
   useEffect(()=>{
-    fetchAdminGroups({});
+    fetchAdminGroups();
   },[perPage,page]);
   
 
 
   useEffect(()=>{
-    fetchAdminGroups({});
+    fetchAdminGroups();
   },[]);
 
 
-  let fetchAdminGroups= (options)=> {
-    let params = [] as string[];
-    options?.search&&params.push("search="+options?.search);
-    setSearchResult(options?.search);
-    groupsService!.doGet<Response>("/group-admin/groups?first="+ (perPage*(page-1))+ "&max=" + perPage + (params.length>0?"&"+params[0]:""))
+
+  let fetchAdminGroups= (searchString = undefined)=> {
+
+    groupsService!.doGet<Response>("/group-admin/groups?first="+ (perPage*(page-1))+ "&max=" + perPage + (searchString?"&search="+searchString:""),{params:{test:"test"}})
       .then((response: HttpResponse<Response>) => {
         let count = response?.data?.count||0;
         setTotalItems(count as number);
@@ -91,7 +98,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
       <DataListItem key='emptyItem' aria-labelledby="empty-item">
         <DataListItemRow key='emptyRow'>
           <DataListItemCells dataListCells={[
-            <DataListCell key='empty'><strong>{searchResult?"No groups match your search":<Msg msgKey='noGroupsText' />}</strong></DataListCell>
+            <DataListCell key='empty'><strong>No groups found</strong></DataListCell>
           ]} />
         </DataListItemRow>
       </DataListItem>
@@ -111,41 +118,10 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
             </BreadcrumbItem>
         </Breadcrumb> 
         <ContentPage title={Msg.localize('adminGroupLabel')}>
-          <div className="gm_search-input-container">
-            <InputGroup className="gm_search-input">
-              <TextInput
-                name="searchInput"
-                id="searchInput1"
-                type="text"
-                onChange={(e)=>{setSearchString(e)}}
-                placeholder="Search..."
-                aria-label="Search Input from admin groups"
-                onKeyDown={(e)=>{e.key=== 'Enter'&&fetchAdminGroups({search:searchString});setPage(1);}}
-              />
-              <Tooltip
-                content={
-                  <div>
-                    Search based on Group Name
-                  </div>
-                }
-              >
-                <Button variant="control" aria-label="popover for input" onClick={()=>{fetchAdminGroups({search:searchString});setPage(1);}}>
-                  <div className='gm_search-icon-container'></div>
-              </Button>
-              </Tooltip>
-              <Tooltip
-                content={
-                  <div>
-                    View All Groups
-                  </div>
-                }
-              >
-                <Button variant="control" aria-label="popover for input" onClick={()=>{fetchAdminGroups({});setPage(1);}}>
-                  <div className='gm_cancel-icon-container'></div>
-                </Button>
-              </Tooltip>
-            </InputGroup>
-          </div>
+          <SearchInput searchText={"Search based on Group Name"} cancelText={"View All Groups"}  search={(searchString)=>{
+            fetchAdminGroups(searchString);
+            setPage(1);
+          }} />
   
           <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact>
             
@@ -208,7 +184,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
                 <div className={expanded?"gm_epxand-toggle-expanded":"gm_epxand-toggle-hidden"}></div>
               </div>
             :null}
-            <Link to={"/groups/showgroups/"+group.id}>
+            <Link to={"/groups/admingroups/"+group.id}>
             <DataListItemCells
               dataListCells={[
                 <DataListCell id={`${appIndex}-group-name`} width={2} key={'name-' + appIndex}>
