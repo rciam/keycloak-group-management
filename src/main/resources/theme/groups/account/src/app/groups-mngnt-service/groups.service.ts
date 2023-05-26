@@ -37,7 +37,7 @@ export class GroupsServiceClient {
     public constructor() {
         this.kcSvc = keycloakService;
         this.groupsUrl = this.kcSvc.authServerUrl() + 'realms/' + this.kcSvc.realm() + '/agm/account';
-        this.baseUrl = this.kcSvc.authServerUrl() + 'admin/master/console'
+        this.baseUrl = this.kcSvc.authServerUrl() + 'admin/' + this.kcSvc.realm() + '/console'
     }
 
     public async doGet<T>(endpoint: string,
