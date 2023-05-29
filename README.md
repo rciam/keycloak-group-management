@@ -85,8 +85,8 @@ Path | Method | Description                                  | Classes |
 ------------ |--|----------------------------------------------|---------| 
 /admin/group | POST | create top level group                       | AdminService
 /admin/configuration | PUT | change realm settings (realm attributes)                  | AdminService
-/admin/memberUserAttribute/configuration | GET | get member user attribute configuration          | AdminService
-/admin/memberUserAttribute/configuration | POST |update member user attribute configuration | AdminService
+/admin/member-user-attribute/configuration | GET | get member user attribute configuration          | AdminService
+/admin/member-user-attribute/configuration | POST |update member user attribute configuration | AdminService
 /admin/memberUserAttribute/calculation | POST |update member user attribute value for all users | AdminService
 /admin/user/{id} | DELETE | delete user          | AdminService
 /admin/group/{groupId} | DELETE | delete group          | AdminGroups

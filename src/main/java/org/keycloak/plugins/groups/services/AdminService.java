@@ -109,7 +109,7 @@ public class AdminService {
     }
 
     @GET
-    @Path("/memberUserAttribute/configuration")
+    @Path("/member-user-attribute/configuration")
     @Produces(MediaType.APPLICATION_JSON)
     public MemberUserAttributeConfigurationRepresentation memberUserAttributeConfiguration() {
         MemberUserAttributeConfigurationEntity memberUserAttributeEntity = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
@@ -117,7 +117,7 @@ public class AdminService {
     }
 
     @POST
-    @Path("/memberUserAttribute/configuration")
+    @Path("/member-user-attribute/configuration")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response configureMemberUserAttribute(MemberUserAttributeConfigurationRepresentation rep) {
         MemberUserAttributeConfigurationEntity memberUserAttributeEntity = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
