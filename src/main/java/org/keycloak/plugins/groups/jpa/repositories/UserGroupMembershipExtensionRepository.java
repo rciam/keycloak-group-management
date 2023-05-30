@@ -52,6 +52,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
     private static final Logger logger = Logger.getLogger(UserGroupMembershipExtensionRepository.class);
     private final String adminCli ="admin-cli";
+    private final String orderbyStr =" order by f.user.lastName, f.user.firstName";
     private final GroupManagementEventRepository eventRepository;
     private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private GroupRolesRepository groupRolesRepository;
@@ -99,20 +100,17 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 UserModel user = session.users().getUserById(realmModel, entity.getUser().getId());
                 GroupModel group = realmModel.getGroupById(entity.getGroup().getId());
                 logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
+                deleteMember(entity, group, user);                
                 try {
                     MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
                     List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
                     String groupName = Utils.getGroupNameForMemberUserAttribute(entity.getGroup(), realm);
-                    memberUserAttributeValues.removeIf(x-> x.startsWith(memberUserAttribute.getUrnNamespace()+Utils.groupStr+groupName));
+                    memberUserAttributeValues.removeIf(x-> Utils.removeMemberUserAttributeCondition(x,memberUserAttribute.getUrnNamespace(),groupName));
                     user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
                 } catch (UnsupportedEncodingException e) {
                     throw new RuntimeException(e);
                 }
-                deleteEntity(entity.getId());
-                user.leaveGroup(group);
-                AdminAuth adminAuth = new AdminAuth(realmModel, null, Utils.getChronJobUser(), realmModel.getClientByClientId(adminCli));
-                AdminEventBuilder adminEvent = new AdminEventBuilder(realmModel, adminAuth, session, new DummyClientConnection("127.0.0.1"));
-                adminEvent.realm(realmModel).operation(OperationType.DELETE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(entity, realm)).resourcePath("127.0.0.1").success();
+
                 customFreeMarkerEmailTemplateProvider.setRealm(realmModel);
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(user);
@@ -130,15 +128,37 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                         }
                     }
                 });
+                AdminAuth adminAuth = new AdminAuth(realmModel, null, Utils.getChronJobUser(), realmModel.getClientByClientId(adminCli));
+                AdminEventBuilder adminEvent = new AdminEventBuilder(realmModel, adminAuth, session, new DummyClientConnection("127.0.0.1"));
+                adminEvent.realm(realmModel).operation(OperationType.DELETE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(entity, realm)).resourcePath("127.0.0.1").success();
             });
 
             Stream<UserGroupMembershipExtensionEntity> pendingMembers = em.createNamedQuery("getMembershipsByStatusAndValidFrom").setParameter("status", MemberStatusEnum.PENDING).setParameter("date", LocalDate.now()).getResultStream();
-            pendingMembers.forEach( member -> {
+            pendingMembers.forEach(member -> {
                 member.setStatus(MemberStatusEnum.ENABLED);
                 update(member);
                 GroupModel group = realm.getGroupById(member.getGroup().getId());
                 UserModel userModel = session.users().getUserById(realm, member.getUser().getId());
                 userModel.joinGroup(group);
+                MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+                List<String> memberUserAttributeValues = userModel.getAttribute(memberUserAttribute.getUserAttribute());
+                try {
+                    String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
+                    if (member.getGroupRoles() == null || member.getGroupRoles().isEmpty()) {
+                        memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
+                    } else {
+                        memberUserAttributeValues.addAll(member.getGroupRoles().stream().map(role -> {
+                            try {
+                                return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
+                            } catch (UnsupportedEncodingException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }).collect(Collectors.toList()));
+                    }
+                    userModel.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
             });
 
             if (eventEntity == null) {
@@ -162,6 +182,13 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             }
         }
 
+    }
+
+    @Transactional
+    public void deleteMember(UserGroupMembershipExtensionEntity entity, GroupModel group, UserModel user){
+        logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
+        deleteEntity(entity.getId());
+        user.leaveGroup(group);
     }
 
     private void weeklyTaskExecution(CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, KeycloakSession session, String serverUrl) {
@@ -213,29 +240,35 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         return new UserGroupMembershipExtensionRepresentationPager(results.map(x-> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList()), count);
     }
 
-    public UserGroupMembershipExtensionRepresentationPager searchByGroup(String groupId, String search, MemberStatusEnum status, Integer first, Integer max) {
+   public UserGroupMembershipExtensionRepresentationPager searchByGroup(String groupId, String search, MemberStatusEnum status, String role, Integer first, Integer max) {
 
-        String sqlQuery = "from UserGroupMembershipExtensionEntity f ";
+
+        StringBuilder fromQuery = new StringBuilder("from UserGroupMembershipExtensionEntity f");
+        StringBuilder sqlQuery= new StringBuilder(" where f.group.id = :groupId");
         Map<String, Object> params = new HashMap<>();
         params.put("groupId", groupId);
+        if (role != null) {
+            fromQuery.append(" join f.groupRoles r ");
+            sqlQuery.append(" and r.name like :role");
+            params.put("role", "%" + role + "%");
+        }
         if (search != null) {
-            sqlQuery += ", UserEntity u where f.group.id = :groupId and f.user.id = u.id and (u.email like :search or u.firstName like :search or u.lastName like :search)";
+            fromQuery.append(", UserEntity u");
+            sqlQuery.append(" and f.user.id = u.id and (u.email like :search or u.firstName like :search or u.lastName like :search)");
             params.put("search", "%" + search + "%");
-        } else {
-            sqlQuery += "where f.group.id = :groupId";
         }
         if (status != null) {
-            sqlQuery += " and f.status = :status";
+            sqlQuery.append(" and f.status = :status");
             params.put("status", status);
         }
 
-        Query queryList = em.createQuery("select f " + sqlQuery).setFirstResult(first).setMaxResults(max);
+        Query queryList = em.createQuery("select f " + fromQuery + sqlQuery+ orderbyStr).setFirstResult(first).setMaxResults(max);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             queryList.setParameter(entry.getKey(), entry.getValue());
         }
         Stream<UserGroupMembershipExtensionEntity> results = queryList.getResultStream();
 
-        Query queryCount = em.createQuery("select count(f) " + sqlQuery, Long.class);
+        Query queryCount = em.createQuery("select count(f) " + fromQuery +  sqlQuery, Long.class);
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             queryCount.setParameter(entry.getKey(), entry.getValue());
         }
@@ -314,7 +347,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     }
 
     @Transactional
-    public void createOrUpdate(GroupEnrollmentRequestEntity enrollmentEntity, KeycloakSession session, String groupAdminId, AdminEventBuilder adminEvent){
+    public void createOrUpdate(GroupEnrollmentRequestEntity enrollmentEntity, KeycloakSession session, String groupAdminId, AdminEventBuilder adminEvent, MemberUserAttributeConfigurationEntity memberUserAttribute){
         UserGroupMembershipExtensionEntity entity = getByUserAndGroup(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getId(), enrollmentEntity.getUser().getId());
         boolean isNotMember = entity == null || !MemberStatusEnum.ENABLED.equals(entity.getStatus());
         if (entity == null) {
@@ -357,10 +390,31 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         update(entity);
 
+        UserModel user = session.users().getUserById(realm, enrollmentEntity.getUser().getId());
         if (isNotMember && MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
             GroupModel group = realm.getGroupById(configuration.getGroup().getId());
-            UserModel userModel = session.users().getUserById(realm, enrollmentEntity.getUser().getId());
-            userModel.joinGroup(group);
+            user.joinGroup(group);
+        }
+
+        try {
+            List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
+            String groupName = Utils.getGroupNameForMemberUserAttribute(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup(), realm);
+            memberUserAttributeValues.removeIf(x-> Utils.removeMemberUserAttributeCondition(x,memberUserAttribute.getUrnNamespace(),groupName));
+
+            if (MemberStatusEnum.ENABLED.equals(entity.getStatus()) && (enrollmentEntity.getGroupRoles() == null || enrollmentEntity.getGroupRoles().isEmpty())) {
+                memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
+            } else if (MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
+                memberUserAttributeValues.addAll(enrollmentEntity.getGroupRoles().stream().map(role -> {
+                    try {
+                        return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
+                    } catch (UnsupportedEncodingException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toList()));
+            }
+            user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
         }
         adminEvent.operation(isNotMember? OperationType.CREATE :  OperationType.UPDATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(entity, realm)).resourcePath(session.getContext().getUri()).success();
     }
@@ -459,15 +513,13 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     }
 
     @Transactional
-    public void create(GroupInvitationRepository groupInvitationRepository, GroupInvitationEntity invitationEntity, UserModel userModel, AdminEventBuilder adminEvent, KeycloakUriInfo uri) {
+    public void create(GroupInvitationRepository groupInvitationRepository, GroupInvitationEntity invitationEntity, UserModel userModel, AdminEventBuilder adminEvent, KeycloakUriInfo uri, MemberUserAttributeConfigurationEntity memberUserAttribute) {
         GroupEnrollmentConfigurationEntity configuration = invitationEntity.getGroupEnrollmentConfiguration();
-        UserGroupMembershipExtensionEntity entity = getByUserAndGroup(configuration.getGroup().getId(), userModel.getId());
-        boolean isNotMember = entity == null || !MemberStatusEnum.ENABLED.equals(entity.getStatus());
-        if (entity == null) {
-            entity = new UserGroupMembershipExtensionEntity();
-            entity.setId(KeycloakModelUtils.generateId());
-        }
-
+//        UserGroupMembershipExtensionEntity entity = getByUserAndGroup(configuration.getGroup().getId(), userModel.getId());
+//        boolean isNotMember = entity == null || !MemberStatusEnum.ENABLED.equals(entity.getStatus());
+//        if (entity == null) {
+        UserGroupMembershipExtensionEntity entity = new UserGroupMembershipExtensionEntity();
+        entity.setId(KeycloakModelUtils.generateId());
         if (configuration.getAupExpiryDays() != null) {
             entity.setAupExpiresAt(LocalDate.now().plusDays(configuration.getAupExpiryDays()));
         } else {
@@ -485,10 +537,10 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         userEntity.setId(userModel.getId());
         entity.setUser(userEntity);
         entity.setChangedBy(invitationEntity.getCheckAdmin());
-        entity.setStatus(entity.getValidFrom().isAfter(LocalDate.now()) ? MemberStatusEnum.PENDING :MemberStatusEnum.ENABLED);
+        entity.setStatus(entity.getValidFrom().isAfter(LocalDate.now()) ? MemberStatusEnum.PENDING : MemberStatusEnum.ENABLED);
         entity.setJustification(null);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
-        if (invitationEntity.getGroupRoles() != null ) {
+        if (invitationEntity.getGroupRoles() != null) {
             entity.setGroupRoles(invitationEntity.getGroupRoles().stream().map(x -> {
                 GroupRolesEntity r = new GroupRolesEntity();
                 r.setId(x.getId());
@@ -501,11 +553,32 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         update(entity);
 
-        if (isNotMember && MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
+        if (MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
             GroupModel group = realm.getGroupById(configuration.getGroup().getId());
             userModel.joinGroup(group);
+
+            try {
+                List<String> memberUserAttributeValues = userModel.getAttribute(memberUserAttribute.getUserAttribute());
+                String groupName = Utils.getGroupNameForMemberUserAttribute(configuration.getGroup(), realm);
+
+                if (entity.getGroupRoles() == null || entity.getGroupRoles().isEmpty()) {
+                    memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
+                } else {
+                    memberUserAttributeValues.addAll(entity.getGroupRoles().stream().map(role -> {
+                        try {
+                            return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
+                        } catch (UnsupportedEncodingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }).collect(Collectors.toList()));
+                }
+                userModel.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
         }
-        adminEvent.operation(isNotMember? OperationType.CREATE :  OperationType.UPDATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(entity, realm)).resourcePath(uri).success();
+        //isNotMember ? OperationType.CREATE : OperationType.UPDATE
+        adminEvent.operation(OperationType.CREATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(entity, realm)).resourcePath(uri).success();
         groupInvitationRepository.deleteEntity(invitationEntity.getId());
     }
 

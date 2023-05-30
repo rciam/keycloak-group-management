@@ -23,6 +23,8 @@ import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.email.EmailException;
+import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -51,6 +53,7 @@ import org.keycloak.representations.account.UserRepresentation;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.services.resources.admin.GroupResource;
 import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 import org.keycloak.theme.FreeMarkerUtil;
 import org.keycloak.timer.TimerProvider;
@@ -90,6 +93,13 @@ public class GroupAdminGroup {
         this.adminEvent = adminEvent;
     }
 
+    @DELETE
+    public void deleteGroup() {
+        generalService.removeGroup(group);
+
+        adminEvent.operation(OperationType.DELETE).representation(group.getName()).resourcePath(session.getContext().getUri()).success();
+    }
+
     @GET
     @Path("/configuration/all")
     @Produces("application/json")
@@ -125,6 +135,13 @@ public class GroupAdminGroup {
             }
         }
         return Response.noContent().build();
+    }
+
+    @POST
+    @Path("children")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addChild(GroupRepresentation rep) {
+        return Utils.addGroupChild(rep, realm, group, session, adminEvent, groupEnrollmentConfigurationRepository, groupRolesRepository);
     }
 
     @GET
@@ -194,11 +211,11 @@ public class GroupAdminGroup {
     }
 
     @DELETE
-    @Path("/role/{id}")
-    public Response deleteGroupRole(@PathParam("id") String id) {
-        GroupRolesEntity entity = groupRolesRepository.getEntity(id);
+    @Path("/role/{name}")
+    public Response deleteGroupRole(@PathParam("name") String name) {
+        GroupRolesEntity entity = groupRolesRepository.getGroupRolesByNameAndGroup(name, group.getId());
         if (entity.getGroupExtensions() != null && entity.getGroupExtensions().size() > 0 )
-            throw new BadRequestException(" You can not delete this role because it is assigned in a group membership");
+            throw new BadRequestException("You can not delete this role because it is assigned in a group membership");
         groupRolesRepository.delete(entity);
         return Response.noContent().build();
     }
@@ -252,10 +269,10 @@ public class GroupAdminGroup {
             customFreeMarkerEmailTemplateProvider.setUser(user);
             customFreeMarkerEmailTemplateProvider.sendInviteGroupAdminEmail(invitationId, voAdmin, group.getName());
 
-            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x->voAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x->!voAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
-                    customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(userRep.getEmail(), false, group.getName(), voAdmin);
+                    customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(userRep.getEmail(), false, group.getName(), voAdmin, null);
                 } catch (EmailException e) {
                     throw new RuntimeException(e);
                 }
@@ -272,11 +289,23 @@ public class GroupAdminGroup {
     @POST
     @Path("/admin/{userId}")
     public Response addAsGroupAdmin(@PathParam("userId") String userId){
+        if (groupAdminRepository.getGroupAdminByUserAndGroup(userId, group.getId()) != null){
+            throw new BadRequestException("You are already group admin for this group");
+        }
         groupAdminRepository.addGroupAdmin(userId, group.getId());
 
         try {
-            customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm, userId));
+            UserModel userAdded = session.users().getUserById(realm, userId);
+            customFreeMarkerEmailTemplateProvider.setUser(userAdded);
             customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
+            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x->!voAdmin.getId().equals(x) && !userId.equals(x) ).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+                try {
+                    customFreeMarkerEmailTemplateProvider.setUser(admin);
+                    customFreeMarkerEmailTemplateProvider.sendAddRemoveAdminAdminInformationEmail(true, group.getName(), userAdded, voAdmin);
+                } catch (EmailException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         }
@@ -298,6 +327,14 @@ public class GroupAdminGroup {
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(user);
                 customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), false);
+                groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x->!voAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(a -> {
+                    try {
+                        customFreeMarkerEmailTemplateProvider.setUser(a);
+                        customFreeMarkerEmailTemplateProvider.sendAddRemoveAdminAdminInformationEmail(false, group.getName(), user, voAdmin);
+                    } catch (EmailException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             } catch (EmailException e) {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
             }

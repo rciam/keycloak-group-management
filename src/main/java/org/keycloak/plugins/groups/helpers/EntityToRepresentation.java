@@ -5,6 +5,7 @@ import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupAttributeEntity;
 import org.keycloak.models.jpa.entities.GroupEntity;
+import org.keycloak.models.jpa.entities.UserAttributeEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.jpa.entities.*;
 import org.keycloak.plugins.groups.representations.MemberUserAttributeConfigurationRepresentation;
@@ -20,6 +21,7 @@ import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,9 +30,7 @@ public class EntityToRepresentation {
 
     public static GroupEnrollmentConfigurationRepresentation toRepresentation(GroupEnrollmentConfigurationEntity entity, boolean containAttributes) {
         GroupEnrollmentConfigurationRepresentation rep = new GroupEnrollmentConfigurationRepresentation(entity.getId());
-        org.keycloak.representations.idm.GroupRepresentation group = new GroupRepresentation();
-        group.setId(entity.getGroup().getId());
-        group.setName(entity.getGroup().getName());
+        GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true);
         rep.setGroup(group);
         rep.setName(entity.getName());
         rep.setActive(entity.isActive());
@@ -78,11 +78,8 @@ public class EntityToRepresentation {
     public static UserGroupMembershipExtensionRepresentation toRepresentation(UserGroupMembershipExtensionEntity entity, RealmModel realm) {
         UserGroupMembershipExtensionRepresentation rep = new UserGroupMembershipExtensionRepresentation();
         rep.setId(entity.getId());
-        GroupRepresentation groupRep = new GroupRepresentation();
-        groupRep.setId(entity.getGroup().getId());
-        groupRep.setName(entity.getGroup().getName());
-        groupRep.setAttributes(getGroupAttributes(entity.getGroup().getAttributes()));
-        rep.setGroup(groupRep);
+        GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true);
+        rep.setGroup(group);
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
         rep.setJustification(entity.getJustification());
         rep.setAupExpiresAt(entity.getAupExpiresAt());
@@ -129,10 +126,12 @@ public class EntityToRepresentation {
     }
 
 
-    public static GroupRepresentation toBriefRepresentation(GroupEntity entity) {
+    public static GroupRepresentation toBriefRepresentation(GroupEntity entity, boolean attributes) {
         GroupRepresentation rep = new GroupRepresentation();
         rep.setId(entity.getId());
         rep.setName(entity.getName());
+        if (attributes && entity.getAttributes() != null)
+            rep.setAttributes(getGroupAttributes(entity.getAttributes()));
         return rep;
     }
 
@@ -144,6 +143,13 @@ public class EntityToRepresentation {
         rep.setEmail(entity.getEmail());
         rep.setEmailVerified(entity.isEmailVerified());
         rep.setUsername(entity.getUsername());
+        if ( entity.getAttributes() != null && !entity.getAttributes().isEmpty()) {
+            MultivaluedHashMap<String, String> attributes = new MultivaluedHashMap<>();
+            for (UserAttributeEntity attr : entity.getAttributes()) {
+                attributes.add(attr.getName(), attr.getValue());
+            }
+            rep.setAttributes(attributes);
+        }
         if (entity.getFederatedIdentities() != null)
             rep.setFederatedIdentities(entity.getFederatedIdentities().stream().map(fed -> getFederatedIdentityRep(realm, fed.getIdentityProvider())).collect(Collectors.toList()));
         return rep;
@@ -166,9 +172,7 @@ public class EntityToRepresentation {
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
         if (entity.getGroup() != null){
-            GroupRepresentation group = new GroupRepresentation();
-            group.setId(entity.getGroup().getId());
-            group.setName(entity.getGroup().getName());
+            GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true);
             rep.setGroup(group);
         }
 

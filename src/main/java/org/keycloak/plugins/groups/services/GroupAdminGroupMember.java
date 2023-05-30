@@ -17,14 +17,18 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 
 import org.keycloak.email.EmailException;
+import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
+import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
+import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
@@ -64,6 +68,15 @@ public class GroupAdminGroupMember {
     @Consumes("application/json")
     public Response updateMember(UserGroupMembershipExtensionRepresentation rep) throws UnsupportedEncodingException {
         userGroupMembershipExtensionRepository.update(rep, member,group, session, adminEvent);
+        return Response.noContent().build();
+    }
+
+
+    @DELETE
+    public Response deleteMember() {
+        UserModel user = session.users().getUserById(realm, member.getUser().getId());
+        userGroupMembershipExtensionRepository.deleteMember(member,group, user);
+        adminEvent.operation(OperationType.DELETE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(member, realm)).resourcePath(session.getContext().getUri()).success();
         return Response.noContent().build();
     }
 
@@ -126,7 +139,7 @@ public class GroupAdminGroupMember {
                 MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
                 List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
                 String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
-                memberUserAttributeValues.removeIf(x-> x.startsWith(memberUserAttribute.getUrnNamespace()+Utils.groupStr+groupName));
+                memberUserAttributeValues.removeIf(x-> Utils.removeMemberUserAttributeCondition(x,memberUserAttribute.getUrnNamespace(),groupName));
                 user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
@@ -157,7 +170,7 @@ public class GroupAdminGroupMember {
                 MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
                 List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
                 String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
-                memberUserAttributeValues.removeIf(x-> x.startsWith(memberUserAttribute.getUrnNamespace()+Utils.groupStr+groupName));
+                memberUserAttributeValues.removeIf(x-> Utils.removeMemberUserAttributeCondition(x,memberUserAttribute.getUrnNamespace(),groupName));
                 if (member.getGroupRoles() == null || member.getGroupRoles().isEmpty()) {
                     memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
                 } else {
@@ -173,6 +186,8 @@ public class GroupAdminGroupMember {
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }
+           adminEvent.operation(OperationType.UPDATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(member, realm)).resourcePath(session.getContext().getUri()).success();
+
         } catch (Exception e) {
             e.printStackTrace();
             throw new BadRequestException("problem activate group member");
