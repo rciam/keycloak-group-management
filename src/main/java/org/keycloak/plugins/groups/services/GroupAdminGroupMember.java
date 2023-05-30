@@ -30,6 +30,7 @@ import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfiguration
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
+import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
@@ -48,16 +49,18 @@ public class GroupAdminGroupMember {
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
 
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
+    private final GroupAdminRepository groupAdminRepository;
     private final UserGroupMembershipExtensionEntity member;
     private final AdminEventBuilder adminEvent;
 
-    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, AdminEventBuilder adminEvent) {
+    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, GroupAdminRepository groupAdminRepository, AdminEventBuilder adminEvent) {
         this.session = session;
         this.realm =  realm;
         this.voAdmin = voAdmin;
         this.group = group;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.groupRolesRepository = groupRolesRepository;
+        this.groupAdminRepository = groupAdminRepository;
         this.memberUserAttributeConfigurationRepository =  new MemberUserAttributeConfigurationRepository(session);
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
         this.member = member;
@@ -67,7 +70,25 @@ public class GroupAdminGroupMember {
     @PUT
     @Consumes("application/json")
     public Response updateMember(UserGroupMembershipExtensionRepresentation rep) throws UnsupportedEncodingException {
-        userGroupMembershipExtensionRepository.update(rep, member,group, session, adminEvent);
+        userGroupMembershipExtensionRepository.update(rep, member, group, session, adminEvent);
+        adminEvent.operation(OperationType.UPDATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(rep).resourcePath(session.getContext().getUri()).success();
+
+        try {
+            UserModel memberUser = session.users().getUserById(realm, member.getUser().getId());
+            customFreeMarkerEmailTemplateProvider.setUser(memberUser);
+            customFreeMarkerEmailTemplateProvider.sendMemberUpdateUserInformEmail(group.getName(), voAdmin);
+
+            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !voAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+                try {
+                    customFreeMarkerEmailTemplateProvider.setUser(admin);
+                    customFreeMarkerEmailTemplateProvider.sendMemberUpdateAdminInformEmail(group.getName(), memberUser, voAdmin);
+                } catch (EmailException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (EmailException e) {
+            ServicesLogger.LOGGER.failedToSendEmail(e);
+        }
         return Response.noContent().build();
     }
 

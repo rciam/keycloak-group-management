@@ -246,7 +246,7 @@ public class GroupAdminGroup {
         if (member == null) {
             throw new NotFoundException("Could not find this group member");
         }
-        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, adminEvent);
+        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository,adminEvent);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
