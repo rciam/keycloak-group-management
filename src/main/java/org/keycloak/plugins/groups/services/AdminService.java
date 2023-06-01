@@ -41,6 +41,7 @@ import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfiguration
 import org.keycloak.plugins.groups.jpa.repositories.GroupManagementEventRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.representations.MemberUserAttributeConfigurationRepresentation;
+import org.keycloak.plugins.groups.scheduled.AgmTimerProvider;
 import org.keycloak.plugins.groups.scheduled.MemberUserAttributeCalculatorTask;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ErrorResponse;
@@ -132,7 +133,7 @@ public class AdminService {
     @POST
     @Path("/memberUserAttribute/calculation")
     public Response calculateMemberUserAttribute(){
-        TimerProvider timer = session.getProvider(TimerProvider.class);
+        AgmTimerProvider timer = (AgmTimerProvider) session.getProvider(TimerProvider.class, "agm");
         timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new MemberUserAttributeCalculatorTask(realm.getId()), 1000),  1000, "MemberUserAttributeCalculator_"+ KeycloakModelUtils.generateId());
         return Response.noContent().build();
     }

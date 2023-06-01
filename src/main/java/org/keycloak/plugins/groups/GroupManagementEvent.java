@@ -10,6 +10,7 @@ import javax.enterprise.event.Observes;
 import io.quarkus.runtime.StartupEvent;
 import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.plugins.groups.scheduled.AgmTimerProvider;
 import org.keycloak.plugins.groups.scheduled.GroupManagementTasks;
 import org.keycloak.plugins.groups.scheduled.StartUpTasks;
 import org.keycloak.quarkus.runtime.integration.QuarkusKeycloakSessionFactory;
@@ -27,7 +28,7 @@ public class GroupManagementEvent {
         QuarkusKeycloakSessionFactory instance = QuarkusKeycloakSessionFactory.getInstance();
         instance.init();
         KeycloakSession session = instance.create();
-        TimerProvider timer = session.getProvider(TimerProvider.class);
+        AgmTimerProvider timer = (AgmTimerProvider) session.getProvider(TimerProvider.class, "agm");
         //schedule task once a day at 02.00
         long interval = 24 * 3600 * 1000;
         long delay = (LocalDate.now().plusDays(1).atTime(2, 0).atZone(ZoneId.systemDefault()).toEpochSecond() - LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond()) * 1000;
