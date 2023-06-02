@@ -39,7 +39,7 @@ public class StartUpTasks implements ScheduledTask {
 
             GroupInvitationRepository groupInvitationRepository = new GroupInvitationRepository(session, realm);
             groupInvitationRepository.getAllByRealm().forEach(entity -> {
-                TimerProvider timer = session.getProvider(TimerProvider.class);
+                AgmTimerProvider timer = (AgmTimerProvider) session.getProvider(TimerProvider.class, "agm");
                 long invitationExpirationHour = realm.getAttribute(Utils.invitationExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.invitationExpirationPeriod)) : 72;
                 long interval = entity.getCreationDate().atZone(ZoneId.systemDefault()).toEpochSecond() + (invitationExpirationHour * 3600 ) - LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
                 if (interval <=  60)

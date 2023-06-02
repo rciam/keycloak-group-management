@@ -26,6 +26,7 @@ import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupInvitationInitialRepresentation;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
+import org.keycloak.plugins.groups.scheduled.AgmTimerProvider;
 import org.keycloak.plugins.groups.scheduled.DeleteExpiredInvitationTask;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.ServicesLogger;
@@ -73,7 +74,7 @@ public class GroupAdminGroupMembers {
                 return ErrorResponse.error("Wrong group enrollment configuration", Response.Status.BAD_REQUEST);
             emailId = groupInvitationRepository.createForMember(groupInvitationInitialRep, voAdmin.getId(),conf);
             //execute once delete invitation after "url-expiration-period" ( default 72 hours)
-            TimerProvider timer = session.getProvider(TimerProvider.class);
+            AgmTimerProvider timer = (AgmTimerProvider) session.getProvider(TimerProvider.class, "agm");
             long invitationExpirationHour = realm.getAttribute(Utils.invitationExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.invitationExpirationPeriod)) : 72;
             long interval = invitationExpirationHour * 3600 * 1000;
             timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new DeleteExpiredInvitationTask(emailId, realm.getId()), interval), interval, "DeleteExpiredInvitation_"+emailId);

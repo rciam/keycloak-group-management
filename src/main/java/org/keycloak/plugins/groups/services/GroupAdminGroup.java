@@ -47,6 +47,7 @@ import org.keycloak.plugins.groups.jpa.repositories.GroupInvitationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
+import org.keycloak.plugins.groups.scheduled.AgmTimerProvider;
 import org.keycloak.plugins.groups.scheduled.DeleteExpiredInvitationTask;
 import org.keycloak.plugins.groups.representations.GroupRepresentation;
 import org.keycloak.representations.account.UserRepresentation;
@@ -259,7 +260,7 @@ public class GroupAdminGroup {
 
         String invitationId = groupInvitationRepository.createForAdmin(group.getId(), voAdmin.getId());
         //execute once delete invitation after "url-expiration-period" ( default 72 hours)
-        TimerProvider timer = session.getProvider(TimerProvider.class);
+        AgmTimerProvider timer = (AgmTimerProvider) session.getProvider(TimerProvider.class, "agm");
         long invitationExpirationHour = realm.getAttribute(Utils.invitationExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.invitationExpirationPeriod)) : 72;
         long interval = invitationExpirationHour * 3600 * 1000;
         timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new DeleteExpiredInvitationTask(invitationId, realm.getId()), interval), interval, "DeleteExpiredInvitation_" + invitationId);
