@@ -42,7 +42,7 @@ public class GroupAdminGroupMember {
 
     private final KeycloakSession session;
     private final RealmModel realm;
-    private final UserModel voAdmin;
+    private final UserModel groupAdmin;
     private GroupModel group;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final GroupRolesRepository groupRolesRepository;
@@ -53,10 +53,10 @@ public class GroupAdminGroupMember {
     private final UserGroupMembershipExtensionEntity member;
     private final AdminEventBuilder adminEvent;
 
-    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, GroupAdminRepository groupAdminRepository, AdminEventBuilder adminEvent) {
+    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel groupAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, GroupAdminRepository groupAdminRepository, AdminEventBuilder adminEvent) {
         this.session = session;
         this.realm =  realm;
-        this.voAdmin = voAdmin;
+        this.groupAdmin = groupAdmin;
         this.group = group;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.groupRolesRepository = groupRolesRepository;
@@ -76,12 +76,12 @@ public class GroupAdminGroupMember {
         try {
             UserModel memberUser = session.users().getUserById(realm, member.getUser().getId());
             customFreeMarkerEmailTemplateProvider.setUser(memberUser);
-            customFreeMarkerEmailTemplateProvider.sendMemberUpdateUserInformEmail(group.getName(), voAdmin);
+            customFreeMarkerEmailTemplateProvider.sendMemberUpdateUserInformEmail(group.getName(), groupAdmin);
 
-            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !voAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
-                    customFreeMarkerEmailTemplateProvider.sendMemberUpdateAdminInformEmail(group.getName(), memberUser, voAdmin);
+                    customFreeMarkerEmailTemplateProvider.sendMemberUpdateAdminInformEmail(group.getName(), memberUser, groupAdmin);
                 } catch (EmailException e) {
                     throw new RuntimeException(e);
                 }

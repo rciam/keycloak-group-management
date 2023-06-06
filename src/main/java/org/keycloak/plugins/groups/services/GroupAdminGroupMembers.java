@@ -37,7 +37,7 @@ public class GroupAdminGroupMembers {
 
     private final KeycloakSession session;
     private final RealmModel realm;
-    private final UserModel voAdmin;
+    private final UserModel groupAdmin;
     private GroupModel group;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
@@ -45,10 +45,10 @@ public class GroupAdminGroupMembers {
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final GroupAdminRepository groupAdminRepository;
 
-    public GroupAdminGroupMembers(KeycloakSession session, RealmModel realm, UserModel voAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider) {
+    public GroupAdminGroupMembers(KeycloakSession session, RealmModel realm, UserModel groupAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider) {
         this.session = session;
         this.realm =  realm;
-        this.voAdmin = voAdmin;
+        this.groupAdmin = groupAdmin;
         this.group = group;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
@@ -72,7 +72,7 @@ public class GroupAdminGroupMembers {
             GroupEnrollmentConfigurationEntity conf = groupEnrollmentConfigurationRepository.getEntity(groupInvitationInitialRep.getGroupEnrollmentConfiguration().getId());
             if ( conf == null)
                 return ErrorResponse.error("Wrong group enrollment configuration", Response.Status.BAD_REQUEST);
-            emailId = groupInvitationRepository.createForMember(groupInvitationInitialRep, voAdmin.getId(),conf);
+            emailId = groupInvitationRepository.createForMember(groupInvitationInitialRep, groupAdmin.getId(),conf);
             //execute once delete invitation after "url-expiration-period" ( default 72 hours)
             AgmTimerProvider timer = (AgmTimerProvider) session.getProvider(TimerProvider.class, "agm");
             long invitationExpirationHour = realm.getAttribute(Utils.invitationExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.invitationExpirationPeriod)) : 72;
@@ -83,13 +83,13 @@ public class GroupAdminGroupMembers {
         try {
             UserAdapter user = Utils.getDummyUser(groupInvitationInitialRep.getEmail(), groupInvitationInitialRep.getFirstName(), groupInvitationInitialRep.getLastName());
             customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendGroupInvitationEmail(voAdmin, group.getName(), groupInvitationInitialRep.isWithoutAcceptance(), groupInvitationInitialRep.getGroupRoles(), emailId);
+            customFreeMarkerEmailTemplateProvider.sendGroupInvitationEmail(groupAdmin, group.getName(), groupInvitationInitialRep.isWithoutAcceptance(), groupInvitationInitialRep.getGroupRoles(), emailId);
 
             if (groupInvitationInitialRep.isWithoutAcceptance()) {
-                groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !voAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+                groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                     try {
                         customFreeMarkerEmailTemplateProvider.setUser(admin);
-                        customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(user.getEmail(), true, group.getName(), voAdmin, groupInvitationInitialRep.getGroupRoles());
+                        customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(user.getEmail(), true, group.getName(), groupAdmin, groupInvitationInitialRep.getGroupRoles());
                     } catch (EmailException e) {
                         throw new RuntimeException(e);
                     }

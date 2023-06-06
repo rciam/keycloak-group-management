@@ -49,7 +49,7 @@ public class AccountService {
     }
 
     @Path("/group-admin")
-    public GroupAdminService voAdminService() {
+    public GroupAdminService groupAdminService() {
         GroupAdminService service = new GroupAdminService(session, realm, user, adminEvent);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;

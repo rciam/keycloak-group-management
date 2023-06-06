@@ -62,7 +62,7 @@ import org.keycloak.timer.TimerProvider;
 public class GroupAdminGroup {
     private final KeycloakSession session;
     private final RealmModel realm;
-    private final UserModel voAdmin;
+    private final UserModel groupAdmin;
     private GroupModel group;
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final GroupEnrollmentRequestRepository groupEnrollmentRequestRepository;
@@ -76,10 +76,10 @@ public class GroupAdminGroup {
     //TODO Add real url
     private static final String ADD_ADMIN_URL = "http://localhost:8080/realms/master/agm/dummy";
 
-    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel voAdmin, GroupModel group, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, AdminEventBuilder adminEvent) {
+    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel groupAdmin, GroupModel group, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, AdminEventBuilder adminEvent) {
         this.session = session;
         this.realm = realm;
-        this.voAdmin = voAdmin;
+        this.groupAdmin = groupAdmin;
         this.group = group;
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
@@ -236,7 +236,7 @@ public class GroupAdminGroup {
 
     @Path("/members")
     public GroupAdminGroupMembers groupMember() {
-        GroupAdminGroupMembers service = new GroupAdminGroupMembers(session, realm, voAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider);
+        GroupAdminGroupMembers service = new GroupAdminGroupMembers(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
@@ -247,7 +247,7 @@ public class GroupAdminGroup {
         if (member == null) {
             throw new NotFoundException("Could not find this group member");
         }
-        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, voAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository,adminEvent);
+        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository,adminEvent);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
@@ -258,7 +258,7 @@ public class GroupAdminGroup {
         if (userRep.getEmail() == null)
             return ErrorResponse.error("Wrong data", Response.Status.BAD_REQUEST);
 
-        String invitationId = groupInvitationRepository.createForAdmin(group.getId(), voAdmin.getId());
+        String invitationId = groupInvitationRepository.createForAdmin(group.getId(), groupAdmin.getId());
         //execute once delete invitation after "url-expiration-period" ( default 72 hours)
         AgmTimerProvider timer = (AgmTimerProvider) session.getProvider(TimerProvider.class, "agm");
         long invitationExpirationHour = realm.getAttribute(Utils.invitationExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.invitationExpirationPeriod)) : 72;
@@ -268,12 +268,12 @@ public class GroupAdminGroup {
         try {
             UserAdapter user = Utils.getDummyUser(userRep.getEmail(), userRep.getFirstName(), userRep.getLastName());
             customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendInviteGroupAdminEmail(invitationId, voAdmin, group.getName());
+            customFreeMarkerEmailTemplateProvider.sendInviteGroupAdminEmail(invitationId, groupAdmin, group.getName());
 
-            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x->!voAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x->!groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
-                    customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(userRep.getEmail(), false, group.getName(), voAdmin, null);
+                    customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(userRep.getEmail(), false, group.getName(), groupAdmin, null);
                 } catch (EmailException e) {
                     throw new RuntimeException(e);
                 }
@@ -299,10 +299,10 @@ public class GroupAdminGroup {
             UserModel userAdded = session.users().getUserById(realm, userId);
             customFreeMarkerEmailTemplateProvider.setUser(userAdded);
             customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
-            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x->!voAdmin.getId().equals(x) && !userId.equals(x) ).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x->!groupAdmin.getId().equals(x) && !userId.equals(x) ).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
-                    customFreeMarkerEmailTemplateProvider.sendAddRemoveAdminAdminInformationEmail(true, group.getName(), userAdded, voAdmin);
+                    customFreeMarkerEmailTemplateProvider.sendAddRemoveAdminAdminInformationEmail(true, group.getName(), userAdded, groupAdmin);
                 } catch (EmailException e) {
                     throw new RuntimeException(e);
                 }
@@ -328,10 +328,10 @@ public class GroupAdminGroup {
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(user);
                 customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), false);
-                groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x->!voAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(a -> {
+                groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x->!groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(a -> {
                     try {
                         customFreeMarkerEmailTemplateProvider.setUser(a);
-                        customFreeMarkerEmailTemplateProvider.sendAddRemoveAdminAdminInformationEmail(false, group.getName(), user, voAdmin);
+                        customFreeMarkerEmailTemplateProvider.sendAddRemoveAdminAdminInformationEmail(false, group.getName(), user, groupAdmin);
                     } catch (EmailException e) {
                         throw new RuntimeException(e);
                     }

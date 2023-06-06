@@ -46,10 +46,10 @@ target
 # react #
 #########
 node
-src/main/resources/theme/groups/account/src/web_modules
-src/main/resources/theme/groups/account/src/node_modules
-src/main/resources/theme/groups/account/resources/content
-src/main/resources/theme/groups/account/group-widgets
-src/main/resources/theme/groups/account/resources/group-widgets
-src/main/resources/theme/groups/account/resources/groups-mngnt-service
-src/main/resources/theme/groups/account/resources/widgets
+src/main/resources/theme/rciam-group/account/src/web_modules
+src/main/resources/theme/rciam-group/account/src/node_modules
+src/main/resources/theme/rciam-group/account/resources/content
+src/main/resources/theme/rciam-group/account/group-widgets
+src/main/resources/theme/rciam-group/account/resources/group-widgets
+src/main/resources/theme/rciam-group/account/resources/groups-mngnt-service
+src/main/resources/theme/rciam-group/account/resources/widgets
