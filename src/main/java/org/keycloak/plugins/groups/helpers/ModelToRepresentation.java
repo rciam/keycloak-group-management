@@ -6,7 +6,6 @@ import org.keycloak.plugins.groups.representations.GroupRepresentation;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ModelToRepresentation extends org.keycloak.models.utils.ModelToRepresentation {
 
@@ -23,7 +22,7 @@ public class ModelToRepresentation extends org.keycloak.models.utils.ModelToRepr
         GroupRepresentation rep = new GroupRepresentation();
         rep.setId(group.getId());
         rep.setName(group.getName());
-        if ( full)
+        if (full)
            rep.setPath(buildGroupPath(group));
         return rep;
     }

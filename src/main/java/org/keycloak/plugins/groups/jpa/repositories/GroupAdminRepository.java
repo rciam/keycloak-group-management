@@ -31,9 +31,9 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
         return GroupAdminEntity.class;
     }
 
-    public boolean isGroupAdmin(String userId, GroupModel group){
+    public boolean isGroupAdmin(String userId, GroupModel group) {
         List<String> groupIds = getThisAndParentGroupIds(group, true);
-        Long count = em.createNamedQuery("countByUserAndGroups", Long.class).setParameter("groupIds",groupIds).setParameter("userId",userId).getSingleResult();
+        Long count = em.createNamedQuery("countByUserAndGroups", Long.class).setParameter("groupIds", groupIds).setParameter("userId", userId).getSingleResult();
         return count > 0;
     }
 
@@ -41,7 +41,7 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
         List<String> groupIds =  new ArrayList<>();
         if (includeThis)
             groupIds.add(group.getId());
-        while ( group.getParent() != null){
+        while (group.getParent() != null) {
             group = group.getParent();
             groupIds.add(group.getId());
         }
@@ -61,27 +61,28 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
     }
 
     public GroupAdminEntity getGroupAdminByUserAndGroup(String userId, String groupId) {
-        return em.createNamedQuery("getAdminByUserAndGroup", GroupAdminEntity.class).setParameter("groupId",groupId).setParameter("userId",userId).getResultStream().findAny().orElse(null);
+        return em.createNamedQuery("getAdminByUserAndGroup", GroupAdminEntity.class).setParameter("groupId", groupId).setParameter("userId", userId).getResultStream().findAny().orElse(null);
     }
 
     public GroupsPager getAdminGroups(String userId, String search, Integer first, Integer max) {
-        if ( search == null) {
+        if (search == null) {
             List<GroupRepresentation> groups = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).setFirstResult(first).setMaxResults(max).getResultStream().map(id -> realm.getGroupById(id)).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
             return new GroupsPager(groups, em.createNamedQuery("countGroupsForAdmin", Long.class).setParameter("userId", userId).getSingleResult());
         } else {
-            List<GroupRepresentation> groups = em.createNamedQuery("searchGroupsForAdmin", String.class).setParameter("userId", userId).setParameter("search", "%"+search.toLowerCase()+"%").setFirstResult(first).setMaxResults(max).getResultStream().map(id -> realm.getGroupById(id)).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
-            return new GroupsPager(groups, em.createNamedQuery("countSearchGroupsForAdmin", Long.class).setParameter("userId", userId).setParameter("search", "%"+search.toLowerCase()+"%").getSingleResult());
+            List<GroupRepresentation> groups = em.createNamedQuery("searchGroupsForAdmin", String.class).setParameter("userId", userId).setParameter("search", "%" + search.toLowerCase() + "%").setFirstResult(first).setMaxResults(max).getResultStream().map(id -> realm.getGroupById(id)).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+            return new GroupsPager(groups, em.createNamedQuery("countSearchGroupsForAdmin", Long.class).setParameter("userId", userId).setParameter("search", "%" + search.toLowerCase() + "%").getSingleResult());
         }
     }
+
     public GroupsPager getAdminGroups(String userId, Integer first, Integer max) {
-        List<GroupRepresentation> groups = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId",userId).setFirstResult(first).setMaxResults(max).getResultStream().map(id -> realm.getGroupById(id)) .map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
-        return new GroupsPager(groups,em.createNamedQuery("countGroupsForAdmin", Long.class).setParameter("userId",userId).getSingleResult());
+        List<GroupRepresentation> groups = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).setFirstResult(first).setMaxResults(max).getResultStream().map(id -> realm.getGroupById(id)).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+        return new GroupsPager(groups, em.createNamedQuery("countGroupsForAdmin", Long.class).setParameter("userId", userId).getSingleResult());
     }
     public List<GroupAdminRepresentation> getAdminsForGroup(GroupModel group) {
         //prota to arxiko kai to vazo me true
         //meta ti lista xoris to id mono parent - an parent != null kai an den yparxei idi to vazo me false
-        List<UserEntity> admins =  em.createNamedQuery("getAdminsForGroup", GroupAdminEntity.class).setParameter("groupId",group.getId()).getResultStream().map(GroupAdminEntity::getUser).collect(Collectors.toList());
-        List<GroupAdminRepresentation> adminsRep= admins.stream().map(x-> new GroupAdminRepresentation(EntityToRepresentation.toBriefRepresentation(x, realm), true)).collect(Collectors.toList());
+        List<UserEntity> admins = em.createNamedQuery("getAdminsForGroup", GroupAdminEntity.class).setParameter("groupId", group.getId()).getResultStream().map(GroupAdminEntity::getUser).collect(Collectors.toList());
+        List<GroupAdminRepresentation> adminsRep = admins.stream().map(x -> new GroupAdminRepresentation(EntityToRepresentation.toBriefRepresentation(x, realm), true)).collect(Collectors.toList());
         List<String> groupIds = getThisAndParentGroupIds(group, false);
         if (!groupIds.isEmpty()) {
             Stream<UserEntity> parentAdmins = em.createNamedQuery("getAdminsForGroupIds", UserEntity.class).setParameter("groupIds", groupIds).getResultStream().filter(x -> !admins.contains(x));
@@ -91,7 +92,7 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
     }
 
     public List<String> getAllAdminGroupIds(String userId) {
-        List<String> groupIds = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).getResultStream().map(id -> realm.getGroupById(id)).flatMap(g ->this.getLeafGroupsIds(g).stream()).collect(Collectors.toList());
+        List<String> groupIds = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).getResultStream().map(id -> realm.getGroupById(id)).flatMap(g -> this.getLeafGroupsIds(g).stream()).collect(Collectors.toList());
         return groupIds;
     }
 

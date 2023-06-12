@@ -70,7 +70,7 @@ public class GroupAdminGroupMembers {
         String emailId = group.getId();
         if (groupInvitationInitialRep.isWithoutAcceptance()) {
             GroupEnrollmentConfigurationEntity conf = groupEnrollmentConfigurationRepository.getEntity(groupInvitationInitialRep.getGroupEnrollmentConfiguration().getId());
-            if ( conf == null)
+            if (conf == null)
                 return ErrorResponse.error("Wrong group enrollment configuration", Response.Status.BAD_REQUEST);
             emailId = groupInvitationRepository.createForMember(groupInvitationInitialRep, groupAdmin.getId(),conf);
             //execute once delete invitation after "url-expiration-period" ( default 72 hours)

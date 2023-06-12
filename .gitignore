@@ -53,3 +53,4 @@ src/main/resources/theme/rciam-group/account/group-widgets
 src/main/resources/theme/rciam-group/account/resources/group-widgets
 src/main/resources/theme/rciam-group/account/resources/groups-mngnt-service
 src/main/resources/theme/rciam-group/account/resources/widgets
+megalinter-reports/

@@ -2,8 +2,6 @@ package org.keycloak.plugins.groups.representations;
 
 import java.util.List;
 
-import org.keycloak.representations.idm.UserRepresentation;
-
 public class GroupRepresentation extends org.keycloak.representations.idm.GroupRepresentation {
 
     private List<GroupRepresentation> subGroups;

@@ -170,7 +170,7 @@ public class UserGroups {
         GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.getEntity(id);
         if (entity == null)
             throw new NotFoundException("Could not find this group enrollment configuration");
-        if ( !entity.getUser().getId().equals(user.getId()))
+        if (!entity.getUser().getId().equals(user.getId()))
             throw new ForbiddenException("You do not have access to this group enrollment");
 
         UserGroupEnrollmentRequestAction service = new UserGroupEnrollmentRequestAction(session, realm, groupEnrollmentConfigurationRepository, groupEnrollmentRequestRepository, user, entity);
@@ -182,8 +182,8 @@ public class UserGroups {
     @Path("/invitation/{id}")
     @Produces("application/json")
     public GroupInvitationRepresentation getInvitation(@PathParam("id") String id) {
-        GroupInvitationEntity entity =  groupInvitationRepository.getEntity(id);
-        if ( entity == null ) {
+        GroupInvitationEntity entity = groupInvitationRepository.getEntity(id);
+        if (entity == null) {
             throw new NotFoundException("This invitation does not exist or has been expired");
         }
         return EntityToRepresentation.toRepresentation(entity);
@@ -194,14 +194,14 @@ public class UserGroups {
     @Produces("application/json")
     @Consumes("application/json")
     public Response acceptInvitation(@PathParam("id") String id) {
-        GroupInvitationEntity invitationEntity =  groupInvitationRepository.getEntity(id);
-        if ( invitationEntity == null ) {
+        GroupInvitationEntity invitationEntity = groupInvitationRepository.getEntity(id);
+        if (invitationEntity == null) {
             throw new NotFoundException("This invitation does not exist or has been expired");
         }
-        if (invitationEntity.getForMember() && userGroupMembershipExtensionRepository.getByUserAndGroup(invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId(), user.getId()) != null){
+        if (invitationEntity.getForMember() && userGroupMembershipExtensionRepository.getByUserAndGroup(invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId(), user.getId()) != null) {
             throw new BadRequestException("You are already member of this group");
         }
-        if (!invitationEntity.getForMember() && groupAdminRepository.getGroupAdminByUserAndGroup(user.getId(), invitationEntity.getGroup().getId()) != null){
+        if (!invitationEntity.getForMember() && groupAdminRepository.getGroupAdminByUserAndGroup(user.getId(), invitationEntity.getGroup().getId()) != null) {
             throw new BadRequestException("You are already group admin for this group");
         }
 
@@ -229,7 +229,7 @@ public class UserGroups {
     @Consumes("application/json")
     public Response rejectInvitation(@PathParam("id") String id) {
         GroupInvitationEntity invitationEntity =  groupInvitationRepository.getEntity(id);
-        if ( invitationEntity == null ) {
+        if (invitationEntity == null) {
             throw new NotFoundException("This invitation does not exist or has been expired");
         }
 

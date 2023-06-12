@@ -21,6 +21,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     public CustomFreeMarkerEmailTemplateProvider(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
     }
+
     public void sendGroupAdminEmail(String groupName, boolean isAdded) throws EmailException {
         String title = isAdded ? "addGroupAdminSubject" : "removeGroupAdminSubject";
         String text1 = isAdded ? "added" : "removed";
@@ -31,13 +32,13 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send(title, "add-remove-group-admin.ftl", attributes);
     }
 
-    public void sendSuspensionEmail(String groupName,String justification) throws EmailException {
+    public void sendSuspensionEmail(String groupName, String justification) throws EmailException {
         attributes.put("justification", justification);
         attributes.put("groupname", groupName);
         send("suspendMemberSubject", "suspend-member.ftl", attributes);
     }
 
-    public void sendActivationEmail(String groupName,String justification) throws EmailException {
+    public void sendActivationEmail(String groupName, String justification) throws EmailException {
         attributes.put("justification", justification);
         attributes.put("groupname", groupName);
         send("activateMemberSubject", "activate-member.ftl", attributes);
@@ -45,25 +46,25 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
 
     public void sendInviteGroupAdminEmail(String invitationId, UserModel groupadmin, String groupname) throws EmailException {
         StringBuilder sb = new StringBuilder();
-        if (user.getFirstName() != null){
+        if (user.getFirstName() != null) {
             sb.append(user.getFirstName()).append(" ");
         }
-        if (user.getLastName() != null){
+        if (user.getLastName() != null) {
             sb.append(user.getLastName());
-        } else  if (user.getFirstName() == null){
+        } else if (user.getFirstName() == null) {
             sb.append("Sir/Madam");
         }
         attributes.put("fullname", sb.toString());
-        attributes.put("groupadmin", groupadmin.getFirstName()+" "+groupadmin.getLastName());
+        attributes.put("groupadmin", groupadmin.getFirstName() + " " + groupadmin.getLastName());
         attributes.put("groupname", groupname);
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();
-        attributes.put("url",baseUri.toString() + finishGroupInvitation.replace("{realmName}",realm.getName()).replace("{id}",invitationId));
+        attributes.put("url", baseUri.toString() + finishGroupInvitation.replace("{realmName}", realm.getName()).replace("{id}", invitationId));
         send("inviteGroupAdminSubject", "invite-group-admin.ftl", attributes);
     }
 
-    public void sendAcceptRejectEnrollmentEmail(boolean isAccepted, String groupname, String justification) throws EmailException{
-        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
+    public void sendAcceptRejectEnrollmentEmail(boolean isAccepted, String groupname, String justification) throws EmailException {
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("groupname", groupname);
         attributes.put("action", isAccepted ? "accepted" : "rejected");
         attributes.put("justification", justification != null ? justification : "");
@@ -71,67 +72,67 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendGroupAdminEnrollmentCreationEmail(UserModel userRequest, String groupname, List<String> groupRoles, String reason, String enrollmentId) throws EmailException {
-        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
-        attributes.put("user", userRequest.getFirstName()+" "+userRequest.getLastName());
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("user", userRequest.getFirstName() + " " + userRequest.getLastName());
         if (groupRoles != null && !groupRoles.isEmpty()) {
             StringBuilder sb = new StringBuilder(groupname).append(" with roles : ");
             groupRoles.stream().forEach(role -> sb.append(role).append(", "));
-            groupname= StringUtils.removeEnd(sb.toString(),", ")+" and ";
+            groupname = StringUtils.removeEnd(sb.toString(), ", ") + " and ";
         }
         attributes.put("groupname", groupname);
         attributes.put("reason", reason != null ? reason : "");
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();
-        attributes.put("url",baseUri.toString() + enrollmentUrl.replace("{realmName}",realm.getName()).replace("{id}",enrollmentId));
-        send( "groupadminEnrollmentRequestCreationSubject", "groupadmin-enrollment-creation.ftl", attributes);
+        attributes.put("url", baseUri.toString() + enrollmentUrl.replace("{realmName}", realm.getName()).replace("{id}", enrollmentId));
+        send("groupadminEnrollmentRequestCreationSubject", "groupadmin-enrollment-creation.ftl", attributes);
     }
 
     public void sendExpiredGroupMemberEmailToAdmin(UserModel userRequest, String groupname) throws EmailException {
-        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
-        attributes.put("user", userRequest.getFirstName()+" "+userRequest.getLastName());
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("user", userRequest.getFirstName() + " " + userRequest.getLastName());
         attributes.put("groupname", groupname);
-        send( "adminGroupUserRemovalSubject", "expired-group-membership-admin.ftl", attributes);
+        send("adminGroupUserRemovalSubject", "expired-group-membership-admin.ftl", attributes);
     }
 
     public void sendExpiredGroupMemberEmailToUser(String groupname, String groupId, String serverUrl) throws EmailException {
-        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("groupname", groupname);
-        attributes.put("url",(serverUrl != null ? serverUrl : "localhost:8080") + enrollmentUrl.replace("{realmName}",realm.getName()).replace("{id}",groupId));
-        send( "userRemovalSubject", "expired-group-membership-user.ftl", attributes);
+        attributes.put("url", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
+        send("userRemovalSubject", "expired-group-membership-user.ftl", attributes);
     }
 
     public void sendExpiredGroupMembershipNotification(String groupname, String date, String groupId, String serverUrl) throws EmailException {
-        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("groupname", groupname);
         attributes.put("date", date);
-        attributes.put("url",(serverUrl != null ? serverUrl : "localhost:8080") + enrollmentUrl.replace("{realmName}",realm.getName()).replace("{id}",groupId));
+        attributes.put("url", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
         session.getContext().setRealm(this.realm);
-        send( "groupMembershipExpirationNotificationSubject", "group-membership-expiration-notification.ftl", attributes);
+        send("groupMembershipExpirationNotificationSubject", "group-membership-expiration-notification.ftl", attributes);
     }
 
     public void sendGroupInvitationEmail(UserModel groupadmin, String groupname, boolean withoutAcceptance, List<String> groupRoles, String id) throws EmailException {
         StringBuilder sb = new StringBuilder();
-        if (user.getFirstName() != null){
+        if (user.getFirstName() != null) {
             sb.append(user.getFirstName()).append(" ");
         }
-        if (user.getLastName() != null){
+        if (user.getLastName() != null) {
             sb.append(user.getLastName());
-        } else  if (user.getFirstName() == null){
+        } else if (user.getFirstName() == null) {
             sb.append("Sir/Madam");
         }
 
         attributes.put("fullname", sb.toString());
-        attributes.put("groupadmin", groupadmin.getFirstName()+" "+groupadmin.getLastName());
+        attributes.put("groupadmin", groupadmin.getFirstName() + " " + groupadmin.getLastName());
         if (withoutAcceptance && groupRoles != null && !groupRoles.isEmpty()) {
             StringBuilder sb2 = new StringBuilder(groupname).append(" with roles : ");
             groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
-            groupname= StringUtils.removeEnd(sb2.toString(),", ");
+            groupname = StringUtils.removeEnd(sb2.toString(), ", ");
         }
         attributes.put("groupname", groupname);
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();
-        attributes.put("url",baseUri.toString() + (withoutAcceptance ? finishGroupInvitation:enrollmentStartUrl).replace("{realmName}",realm.getName()).replace("{id}",id));
-        send( "groupInvitationSubject", "user-group-invitation.ftl", attributes);
+        attributes.put("url", baseUri.toString() + (withoutAcceptance ? finishGroupInvitation : enrollmentStartUrl).replace("{realmName}", realm.getName()).replace("{id}", id));
+        send("groupInvitationSubject", "user-group-invitation.ftl", attributes);
     }
 
     public void sendAcceptInvitationEmail(UserModel userModel, String groupname, boolean forMember, List<String> groupRoles) throws EmailException {
@@ -172,7 +173,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
             groupname= StringUtils.removeEnd(sb2.toString(),", ");
         }
         attributes.put("groupname", groupname);
-        attributes.put("adminFullName", admin.getFirstName() + " "+ admin.getLastName());
+        attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
         send(forMember ? "groupInvitationSubject" : "groupInvitationAdminInformSubject", "invitation-admin-inform.ftl", attributes);
     }
 
