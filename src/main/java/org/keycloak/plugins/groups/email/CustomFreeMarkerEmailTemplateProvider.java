@@ -200,5 +200,12 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("memberUpdateUserInformSubject", "member-update-user-inform.ftl", attributes);
     }
 
+    public void sendDeleteGroupAdminInformationEmail(String groupPath, UserModel admin) throws EmailException {
+        attributes.put("fullname", user.getFirstName() + " "+ user.getLastName());
+        attributes.put("groupPath", groupPath);
+        attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
+        send("deleteGroupAdminInformationSubject", "delete-group-admin-inform.ftl", attributes);
+    }
+
 
 }

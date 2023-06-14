@@ -19,12 +19,11 @@ public class StartUpTasks implements ScheduledTask {
 
     @Override
     public void run(KeycloakSession session) {
-        //same as daily task (only if not executed before this day)
-        UserGroupMembershipExtensionRepository repository = new UserGroupMembershipExtensionRepository(session, null);
-        MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
-        repository.dailyExecutedActions(session);
-
         session.realms().getRealmsStream().forEach(realm -> {
+            //same as daily task (only if not executed before this day)
+            UserGroupMembershipExtensionRepository repository = new UserGroupMembershipExtensionRepository(session, realm);
+            MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
+            repository.dailyExecutedActions(session);
             //create default eduPersonEntitlement configuration entity if not exist
             if (memberUserAttributeConfigurationRepository.getByRealm(realm.getId()) == null) {
                 MemberUserAttributeConfigurationEntity configurationEntity = new MemberUserAttributeConfigurationEntity();
