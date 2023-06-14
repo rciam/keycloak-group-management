@@ -1,10 +1,10 @@
 import * as React from 'react';
-import {FC,useState,useEffect,useRef} from 'react';
+import {FC,useState,useEffect} from 'react';
 import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, SelectVariant, Checkbox,Select,SelectOption, FormAlert, Alert} from '@patternfly/react-core';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
-import { ConfirmationModal } from '../Modal';
+import { ConfirmationModal } from '../Modals';
 import {ValidateEmail} from '../../js/utils.js'
 import { Loading } from '../LoadingModal';
 
@@ -28,7 +28,6 @@ export const GroupAdmins: FC<any> = (props) => {
     useEffect(()=>{
       //fetchGroupMembers();
       fetchGroupAdminIds();
-      console.log('this 1')
     },[]);
 
     useEffect(()=>{
@@ -151,7 +150,7 @@ export const GroupAdmins: FC<any> = (props) => {
       };
 
 
-
+      
     
 
 
@@ -211,7 +210,7 @@ export const GroupAdmins: FC<any> = (props) => {
                       </DataListCell>
                     ]}
                   />
-                  {admin.direct?
+                  
                     <DataListAction
                             className="gm_cell-center"
                             aria-labelledby="check-action-item1 check-action-action1"
@@ -219,6 +218,7 @@ export const GroupAdmins: FC<any> = (props) => {
                             aria-label="Actions"
                             isPlainButtonAction
                     >
+                      {admin.direct?
                         <Tooltip
                         content={
                             <div>
@@ -242,8 +242,9 @@ export const GroupAdmins: FC<any> = (props) => {
                                 <div className={"gm_x-button"}></div>
                             </Button>
                         </Tooltip>
+                         :<div className="gm_cell-placeholder"></div>}
                     </DataListAction>
-                  :""}
+                 
                 </DataListItemRow>
               </DataListItem>
             }):noAdmins()}

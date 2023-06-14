@@ -3,7 +3,7 @@ import {FC,useState,useEffect,useRef} from 'react';
 import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, Pagination, TextInput} from '@patternfly/react-core';
 // @ts-ignore
 // @ts-ignore
-import { ConfirmationModal } from '../Modal';
+import { ConfirmationModal } from '../Modals';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
 
 

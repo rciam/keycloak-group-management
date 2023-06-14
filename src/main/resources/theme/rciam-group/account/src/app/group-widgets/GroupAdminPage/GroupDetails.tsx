@@ -2,7 +2,7 @@ import * as React from 'react';
 import {FC,useState,useRef} from 'react';
 import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, TextInput, InputGroup, Chip, Tooltip} from '@patternfly/react-core';
 // @ts-ignore
-import { ConfirmationModal } from '../Modal';
+import { ConfirmationModal } from '../Modals';
 import { GroupsServiceClient, HttpResponse } from '../../groups-mngnt-service/groups.service';
 import {MinusIcon,PlusIcon } from '@patternfly/react-icons';
 

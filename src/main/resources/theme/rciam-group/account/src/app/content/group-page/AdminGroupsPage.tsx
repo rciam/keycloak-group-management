@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {FC,useState,useEffect} from 'react';
-import {DataListContent, DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell,Breadcrumb, BreadcrumbItem,Pagination} from '@patternfly/react-core';
+import {DataListContent, DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell,Breadcrumb, BreadcrumbItem,Pagination, DataListAction, Dropdown, KebabToggle, DropdownItem} from '@patternfly/react-core';
 import {Link} from 'react-router-dom';
 //import { fa-search } from '@patternfly/react-icons';
 //import { faSearch } from '@fortawesome/free-solid-svg-icons';
@@ -11,6 +11,7 @@ import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/gr
 // @ts-ignore
 import { Msg } from '../../widgets/Msg';
 import { SearchInput } from '../../group-widgets/GroupAdminPage/SearchInput';
+import { CreateSubgroupModal, DeleteSubgroupModal } from '../../group-widgets/Modals';
 
 export interface AdminGroupsPageProps {
   match :any;
@@ -138,13 +139,20 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
                     </DataListCell>
                   ]}
                 />
+                <DataListAction
+                      className="gm_cell-center"
+                      aria-labelledby="check-action-item1 check-action-action2"
+                      id="check-action-action1"
+                      aria-label="Actions"
+                      isPlainButtonAction
+                ><div className="gm_cell-placeholder"></div></DataListAction>
               </DataListItemRow>
             </DataListItem>
             {groups.length===0 ?
               emptyGroup():
               groups.map((group:AdminGroup,appIndex:number)=>{
                 return(
-                <GroupListItem group={group as AdminGroup} appIndex={appIndex} depth={0} />
+                <GroupListItem group={group as AdminGroup} fetchAdminGroups={fetchAdminGroups} appIndex={appIndex} depth={0} />
                 )
               })
               }
@@ -162,21 +170,51 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
     );
   }
 
+  
 
   export interface GroupListItemProps {
     group: AdminGroup,
     appIndex: number;
     depth:number;
+    fetchAdminGroups: Function;
   }
   
  
-  const GroupListItem: FC<GroupListItemProps> = ({group,appIndex,depth}) =>{
+  const GroupListItem: FC<GroupListItemProps> = ({group,appIndex,depth,fetchAdminGroups}) =>{
     useEffect(()=>{
       setExpanded(false);
     },[group]);
     const [expanded,setExpanded]= useState<boolean>(false);
+    const [isOpen,setIsOpen] = useState(false);
+    const [createSubGroup,setCreateSubGroup] = useState(false);
+    const [deleteGroup,setDeleteGroup] = useState(false);
 
-    return(     
+    const onToggle = (isOpen: boolean) => {
+      setIsOpen(isOpen);
+    };
+  
+    const onFocus = () => {
+      const element = document.getElementById('toggle-kebab');
+      element&&element.focus();
+    };
+  
+    const onSelect = () => {
+      setIsOpen(false);
+      onFocus();
+    };
+
+    const dropdownItems = [
+      <DropdownItem key="link" onClick={()=>{setCreateSubGroup(true);}}>Create Sub Group</DropdownItem>,
+      ...(('/'+group.name!==group.path)&& !(group?.extraSubGroups.length>0)?[<DropdownItem key="action" onClick={()=>{setDeleteGroup(true);}} component="button">
+        Delete Group 
+      </DropdownItem>]:[])
+    ];
+  
+
+    return(  
+      <React.Fragment>
+        <CreateSubgroupModal groupId={group.id} active={createSubGroup} afterSuccess={()=>{fetchAdminGroups();}} close={()=>{setCreateSubGroup(false);}}/> 
+        <DeleteSubgroupModal groupId={group.id} active={deleteGroup} afterSuccess={()=>{fetchAdminGroups();}} close={()=>{setDeleteGroup(false);}}/>  
         <DataListItem id={`${appIndex}-group`} key={'group-' + appIndex} className={"gm_expandable-list" + (group?.extraSubGroups.length>0?" gm_expandable-list-item":"")} aria-labelledby="groups-list" isExpanded={expanded}>
           <DataListItemRow style={{"paddingLeft": ((depth===0?2:(3+depth-1))+ (group?.extraSubGroups.length>0?0:0.4))+"rem"}}>
             {group?.extraSubGroups.length>0?
@@ -196,6 +234,29 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
               ]}
             />
             </Link>
+            <DataListAction
+                      className="gm_cell-center gm_kebab-menu-cell"
+                      aria-labelledby="check-action-item1 check-action-action2"
+                      id="check-action-action1"
+                      aria-label="Actions"
+                      isPlainButtonAction
+            >
+              <Dropdown
+                alignments={{
+                  sm: 'right',
+                  md: 'right',
+                  lg: 'right',
+                  xl: 'right',
+                  '2xl': 'right'
+                }}
+                onSelect={onSelect}
+                toggle={<KebabToggle id="toggle-kebab" onToggle={onToggle} />}
+                isOpen={isOpen}
+                isPlain
+                dropdownItems={dropdownItems}
+              />
+              
+              </DataListAction>
           </DataListItemRow>
           <DataListContent
             aria-label="First expandable content details"
@@ -204,10 +265,11 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
           >
             {group?.extraSubGroups.length>0?group?.extraSubGroups.map((subGroup:AdminGroup,appSubIndex:number)=>{
                 return(
-                  <GroupListItem group={subGroup as AdminGroup} appIndex={appSubIndex} depth={depth+1} />
+                  <GroupListItem group={subGroup as AdminGroup} appIndex={appSubIndex} depth={depth + 1} fetchAdminGroups={fetchAdminGroups} />
                 )
               }):null}
           </DataListContent>
         </DataListItem>
+      </React.Fragment>
     )
   }

@@ -4,7 +4,7 @@ import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, 
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
-import { ConfirmationModal } from '../Modal';
+import { ConfirmationModal } from '../Modals';
 import { SearchInput } from './SearchInput';
 import {ExternalLinkAltIcon } from '@patternfly/react-icons';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
