@@ -43,7 +43,11 @@ export const GroupEnrollment: FC<any> = (props) => {
     let groupsService = new GroupsServiceClient();
     useEffect(()=>{
       fetchGroupEnrollments();
-    },[])
+    },[]);
+
+    useEffect(()=>{
+      fetchGroupEnrollments();
+    },[props.groupId]);
 
     let fetchGroupEnrollments = ()=>{
       groupsService!.doGet<any>("/group-admin/group/"+props.groupId+"/configuration/all")

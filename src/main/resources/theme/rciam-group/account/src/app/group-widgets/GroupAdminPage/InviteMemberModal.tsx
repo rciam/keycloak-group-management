@@ -290,10 +290,22 @@ const EmailStep: React.FC<any> = (props) => {
     const [isOpen,setIsOpen] = useState(false);
     const [selected,setSelected] = useState<any>(null);
     const [options,setOptions] = useState<any>([])
+    const [groupIds,setGroupIds] = useState([]);
+
+
 
     useEffect(()=>{
-      fetchGroupMembers();
-    },[])
+      //fetchGroupMembers();
+      fetchGroupAdminIds();
+    },[]);
+
+
+    useEffect(()=>{
+      if(groupIds.length>0){
+        fetchGroupMembers();
+      }
+    },[groupIds])
+
 
     useEffect(()=>{
         props.setIsStep2Complete(inviteAddress&&!emailError);
@@ -349,20 +361,31 @@ const EmailStep: React.FC<any> = (props) => {
       setIsOpen(open);
     };
 
-
+    let fetchGroupAdminIds = () => {
+      groupsService!.doGet<any>("/group-admin/groupids/all")
+      .then((response: HttpResponse<any>) => {
+        if(response.status===200&&response.data){
+          setGroupIds(response.data)
+          // setGroupMembers(response.data.results);
+        }
+      }).catch((err)=>{console.log(err)})
+    
+  } 
     let  fetchGroupMembers = async (searchString = "")=>{
-      groupsService!.doGet<any>("/group-admin/group/"+props.groupId+"/members",{params:{max:20,search:searchString}})
+      groupsService!.doGet<any>("/group-admin/groups/members",{params:{max:20,search:searchString,groups:groupIds.join(',')}})
       .then((response: HttpResponse<any>) => {
         if(response.status===200&&response.data){
           let members: any = [];
-          response.data.results.forEach((membership)=>{
-            members.push({value:getUserIdentifier(membership.user),description:membership.user.email,id:membership.user.id});
+          response.data.results.forEach((user)=>{
+            members.push({value:getUserIdentifier(user),description:user.email,id:user.id});
           })
           setOptions(members);
           // setGroupMembers(response.data.results);
         }
       }).catch((err)=>{console.log(err)})
     }
+
+
 
     let getUserIdentifier = (user) => {
       return   (user.firstName || user.lastName?(user.firstName&&user.firstName+" ")+ user.lastName:user.username?user.username:user.email?user.email:user.id?user.id:"Info Not Available")

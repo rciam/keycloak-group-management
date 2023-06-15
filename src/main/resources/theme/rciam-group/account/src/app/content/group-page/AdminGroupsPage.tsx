@@ -180,7 +180,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
   }
   
  
-  const GroupListItem: FC<GroupListItemProps> = ({group,appIndex,depth,fetchAdminGroups}) =>{
+  export const GroupListItem: FC<GroupListItemProps> = ({group,appIndex,depth,fetchAdminGroups}) =>{
     useEffect(()=>{
       setExpanded(false);
     },[group]);

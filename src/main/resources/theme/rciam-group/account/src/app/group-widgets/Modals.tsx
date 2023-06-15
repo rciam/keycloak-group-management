@@ -60,6 +60,7 @@ export const DeleteSubgroupModal:React.FC<any> = (props) => {
                 accept_message: "YES",
                 cancel_message: "NO",
                 accept: function(){
+                    setModalInfo({});
                     deleteGroup();},
                 cancel: function(){
                   setModalInfo({});
@@ -109,6 +110,7 @@ export const CreateSubgroupModal:React.FC<any> = (props) => {
 
     useEffect(()=>{
         setIsModalOpen(props.active);
+        setSubGroup(subgroupDefault);
     },[props.active])
 
     const [isModalOpen, setIsModalOpen] = React.useState(false);
