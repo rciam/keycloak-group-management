@@ -115,11 +115,12 @@ public class Utils {
             realm.moveGroup(child, group);
             adminEvent.operation(OperationType.UPDATE);
         } else {
+            if (group.getSubGroupsStream().anyMatch(g -> groupName.equals(g.getName())))
+                return ErrorResponse.error("This subgroup has already existed", Response.Status.BAD_REQUEST);
             child = realm.createGroup(groupName, group);
             GroupResource.updateGroup(rep, child);
             rep.setId(child.getId());
             adminEvent.operation(OperationType.CREATE);
-
         }
         adminEvent.resourcePath(session.getContext().getUri()).representation(rep).success();
 

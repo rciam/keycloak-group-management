@@ -2,20 +2,21 @@ import * as React from 'react';
 import {FC,useState,useEffect} from 'react';
 import { Tabs, Tab,TabTitleText,Breadcrumb, BreadcrumbItem, TextArea, Button} from '@patternfly/react-core';
 // @ts-ignore
-import { ContentPage } from '../ContentPage';
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 import {GroupMembers} from '../../group-widgets/GroupAdminPage/GroupMembers';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import {GroupAttributes} from '../../group-widgets/GroupAdminPage/GroupAttributes';
 import { GroupDetails } from '../../group-widgets/GroupAdminPage/GroupDetails';
+import { ConfirmationModal, DeleteSubgroupModal } from '../../group-widgets/Modals';
 import { GroupAdmins } from '../../group-widgets/GroupAdminPage/GroupAdmins';
-import { ConfirmationModal } from '../../group-widgets/Modal';
+import { GroupSubGroups } from '../../group-widgets/GroupAdminPage/GroupSubgroups';
 import { GroupEnrollment } from '../../group-widgets/GroupAdminPage/GroupEnrollment';
-
+import {TrashIcon } from '@patternfly/react-icons';
 
 
 export interface AdminGroupPageProps {
   match:any;
+  history:any;
 }
 
 
@@ -88,7 +89,7 @@ interface GroupConfiguration {
     aupExpiresAt: string;
     validFrom: string;
     admins: Admin[];
-    extraSubgroups: Group[];
+    extraSubGroups: Group[];
   }
 
 
@@ -107,7 +108,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
   const [editDescription,setEditDescription] = useState<boolean>(false);
   const [user,setUser] = useState<User>({} as User);
   const [modalInfo,setModalInfo] = useState({});
-
+  const [deleteGroup,setDeleteGroup] = useState(false);
 
   let groupsService = new GroupsServiceClient();
   useEffect(()=>{
@@ -172,6 +173,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
     <>
       <div className="gm_content">
         <ConfirmationModal modalInfo={modalInfo}/>
+        <DeleteSubgroupModal groupId={groupId} active={deleteGroup} afterSuccess={()=>{props.history.push('/groups/admingroups');}} close={()=>{setDeleteGroup(false);}}/>  
         <Breadcrumb className="gm_breadcumb">
           <BreadcrumbItem to="#">
             Account Console
@@ -183,7 +185,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
             {groupConfiguration?.name}
           </BreadcrumbItem>
         </Breadcrumb>
-        <ContentPage title={groupConfiguration?.name||""}>
+          <h1 className="pf-c-title pf-m-2xl pf-u-mb-xl gm_group-title">{groupConfiguration?.name} {("/"+groupConfiguration?.name)!==groupConfiguration?.path&&!(groupConfiguration?.extraSubGroups&&groupConfiguration?.extraSubGroups.length>0)&&<TrashIcon onClick={()=>{setDeleteGroup(true)}}/>}</h1>
           {editDescription?
             <div className="gm_description-input-container">
               <TextArea value={descriptionInput} onChange={value => setDescriptionInput(value)} aria-label="text area example" />
@@ -243,9 +245,11 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
             <Tab eventKey={4} title={<TabTitleText>Group Attributes</TabTitleText>} aria-label="Default content - attributes">   
               <GroupAttributes groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
             </Tab>
+            {/* <Tab eventKey={5} title={<TabTitleText>Sub Groups</TabTitleText>} aria-label="Default content - attributes">   
+              <GroupSubGroups groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
+            </Tab> */}
             
           </Tabs>
-        </ContentPage>
       </div>
     </>  
   )

@@ -30,6 +30,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
@@ -95,7 +96,16 @@ public class GroupAdminGroup {
 
     @DELETE
     public void deleteGroup() {
+        List<String> groupAdminsIds = groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).collect(Collectors.toList());
         generalService.removeGroup(group);
+        groupAdminsIds.stream().map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+            try {
+                customFreeMarkerEmailTemplateProvider.setUser(admin);
+                customFreeMarkerEmailTemplateProvider.sendDeleteGroupAdminInformationEmail(ModelToRepresentation.buildGroupPath(group), groupAdmin);
+            } catch (EmailException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         adminEvent.operation(OperationType.DELETE).representation(group.getName()).resourcePath(session.getContext().getUri()).success();
     }
