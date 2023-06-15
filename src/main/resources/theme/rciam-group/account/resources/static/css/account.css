@@ -549,3 +549,27 @@
 .gm_invitation-content-container {
     margin-top:1rem;
 }
+
+
+.gm_kebab-menu-cell {
+    font-size:0.9rem;
+}
+
+.gm_group-title svg {
+    font-size: 1.1rem;
+    margin-left: 0.2rem;
+}
+
+.gm_group-title svg:hover {
+    opacity: .5;
+}
+
+.gm_group-title {
+    margin-top: 1.5rem!important;
+    margin-left: 1.5rem!important;
+}
+
+.gm_createsub-button{
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.8rem;
+}

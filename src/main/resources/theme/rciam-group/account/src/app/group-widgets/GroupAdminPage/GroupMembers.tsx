@@ -56,7 +56,10 @@ export const GroupMembers: FC<any> = (props) => {
       fetchGroupMembers();
     },[])
 
-
+    useEffect(()=>{
+      setPage(1);
+      fetchGroupMembers();
+    },[props.groupId])
 
     useEffect(()=>{
       setPage(1);

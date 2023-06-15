@@ -102,7 +102,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
 
 
   const [groupConfiguration,setGroupConfiguration] = useState({} as GroupConfiguration);
-  const [groupId] = useState(props.match.params.id);
+  const [groupId,setGroupId] = useState(props.match.params.id);
   const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
   const [descriptionInput,setDescriptionInput] = useState<string>("");
   const [editDescription,setEditDescription] = useState<boolean>(false);
@@ -118,10 +118,13 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
 
 
   useEffect(()=>{
-    
-  },[groupConfiguration]);
-
-
+    setGroupId(props.match.params.id);
+  },[props.match.params.id]);
+  
+  useEffect(()=>{
+    fetchGroupConfiguration();
+    setActiveTabKey(0);
+  },[groupId]);
 
   
 
@@ -245,9 +248,9 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
             <Tab eventKey={4} title={<TabTitleText>Group Attributes</TabTitleText>} aria-label="Default content - attributes">   
               <GroupAttributes groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
             </Tab>
-            {/* <Tab eventKey={5} title={<TabTitleText>Sub Groups</TabTitleText>} aria-label="Default content - attributes">   
+            <Tab eventKey={5} title={<TabTitleText>Sub Groups</TabTitleText>} aria-label="Default content - attributes">   
               <GroupSubGroups groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
-            </Tab> */}
+            </Tab>
             
           </Tabs>
       </div>

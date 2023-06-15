@@ -31,6 +31,10 @@ export const GroupAdmins: FC<any> = (props) => {
     },[]);
 
     useEffect(()=>{
+      fetchGroupAdminIds();
+    },[props.groupId]);
+
+    useEffect(()=>{
       
       if(groupIds.length>0){
         fetchGroupMembers();
