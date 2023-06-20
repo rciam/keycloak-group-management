@@ -4,6 +4,7 @@ import * as React from 'react';
 import { GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 
 import { DataList, DataListItem, DataListItemRow, DataListItemCells, DataListCell, Divider, Label } from '@patternfly/react-core';
+import { Msg } from '../../widgets/Msg';
 
 
 

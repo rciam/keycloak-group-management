@@ -8,6 +8,7 @@ import { ConfirmationModal } from '../Modals';
 import { SearchInput } from './SearchInput';
 import {ExternalLinkAltIcon } from '@patternfly/react-icons';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
+import { Msg } from '../../widgets/Msg';
 
 interface FederatedIdentity {
     identityProvider: string;
@@ -63,7 +64,7 @@ export const GroupEnrollment: FC<any> = (props) => {
           <DataListItem key='emptyItem' aria-labelledby="empty-item">
             <DataListItemRow key='emptyRow'>
               <DataListItemCells dataListCells={[
-                <DataListCell key='empty'><strong>No group enrollments found</strong></DataListCell>
+                <DataListCell key='empty'><strong><Msg msgKey='adminGroupNoEnrollments' /></strong></DataListCell>
               ]} />
             </DataListItemRow>
           </DataListItem>
@@ -82,13 +83,13 @@ export const GroupEnrollment: FC<any> = (props) => {
               <DataListItemRow>
                 <DataListItemCells dataListCells={[
                   <DataListCell className="gm_vertical_center_cell" width={3} key="id-hd">
-                    <strong>Name</strong>
+                    <strong><Msg msgKey='Name' /></strong>
                   </DataListCell>,
                   <DataListCell className="gm_vertical_center_cell" width={3} key="username-hd">
-                    <strong>Status</strong>
+                    <strong><Msg msgKey='Status' /></strong>
                   </DataListCell>,
                   <DataListCell className="gm_vertical_center_cell" width={3} key="email-hd">
-                    <strong>Aup</strong>
+                    <strong><Msg msgKey='Aup' /></strong>
                   </DataListCell>,
                 ]}>
                 </DataListItemCells>
@@ -100,13 +101,13 @@ export const GroupEnrollment: FC<any> = (props) => {
                   <DataListItemCells
                     dataListCells={[
                       <DataListCell width={3} key="primary content">
-                        {enrollment.name||"Not Available"}
+                        {enrollment.name||Msg.localize('notAvailable')}
                       </DataListCell>,
                       <DataListCell width={3} className={enrollment.active?"gm_group-enrollment-active":"gm_group-enrollment-inactive"} key="secondary content ">
-                        <strong>{enrollment.active?"Active":"Inactive"}</strong>
+                        <strong>{enrollment.active?Msg.localize('Active'):Msg.localize('Inactive')}</strong>
                       </DataListCell>,
                       <DataListCell width={3} key="secondary content ">
-                        {enrollment?.aup?.url?<a href={enrollment?.aup?.url} target="_blank" rel="noreferrer">link <ExternalLinkAltIcon/> </a>:"Not Available"}
+                        {enrollment?.aup?.url?<a href={enrollment?.aup?.url} target="_blank" rel="noreferrer">link <ExternalLinkAltIcon/> </a>:Msg.localize('notAvailable')}
                       </DataListCell>,                    
                     ]}
                   />

@@ -148,13 +148,17 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
               <DataListItemCells
                 dataListCells={[
                   <DataListCell key='group-name-header' width={2} onClick={()=>{orderResults('')}}>
-                    <strong><Msg msgKey='Name' /></strong>{!orderBy?<AngleDownIcon/>:asc?<LongArrowAltDownIcon />:<LongArrowAltUpIcon/>}
+                    <strong><Msg msgKey='nameDatalistTitle' /></strong>{!orderBy?<AngleDownIcon/>:asc?<LongArrowAltDownIcon />:<LongArrowAltUpIcon/>}
                   </DataListCell>,
                   <DataListCell key='group-roles' width={2}>
-                    <strong>Roles</strong>
+                    <strong><Msg msgKey='rolesDatalistTitle' /></strong>
+                  </DataListCell>,
+
+                  <DataListCell key='group-aup-expiration-header' width={2} onClick={()=>{orderResults('aupExpiresAt')}}>
+                    <strong><Msg msgKey='aupDatalistTitle'/></strong> {orderBy!=='aupExpiresAt'?<AngleDownIcon/>:asc?<LongArrowAltDownIcon/>:<LongArrowAltUpIcon/>}
                   </DataListCell>,
                   <DataListCell key='group-membership-expiration-header' width={2} onClick={()=>{orderResults('membershipExpiresAt')}}>
-                  <strong>Membership Expiration Date</strong> {orderBy!=='membershipExpiresAt'?<AngleDownIcon/>:asc?<LongArrowAltDownIcon/>:<LongArrowAltUpIcon/>}
+                  <strong><Msg msgKey='membershipDatalistTitle'/></strong> {orderBy!=='membershipExpiresAt'?<AngleDownIcon/>:asc?<LongArrowAltDownIcon/>:<LongArrowAltUpIcon/>}
                 </DataListCell>,
                 ]}
               />

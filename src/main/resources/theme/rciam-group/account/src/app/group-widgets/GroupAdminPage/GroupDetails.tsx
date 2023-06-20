@@ -5,6 +5,7 @@ import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, 
 import { ConfirmationModal } from '../Modals';
 import { GroupsServiceClient, HttpResponse } from '../../groups-mngnt-service/groups.service';
 import {MinusIcon,PlusIcon } from '@patternfly/react-icons';
+import { Msg } from '../../widgets/Msg';
 
 
 export const GroupDetails: FC<any> = (props) => {
@@ -55,7 +56,7 @@ export const GroupDetails: FC<any> = (props) => {
                         <DataListItemCells
                             dataListCells={[
                             <DataListCell key="primary content">
-                                <span id="compact-item1"><strong>Path</strong></span>
+                                <span id="compact-item1"><strong><Msg msgKey='Path' /></strong></span>
                             </DataListCell>,
                             <DataListCell width={3} key="secondary content ">
                                 <span>{props.groupConfiguration?.path}</span>  
@@ -69,7 +70,7 @@ export const GroupDetails: FC<any> = (props) => {
                         <DataListItemCells
                             dataListCells={[
                                 <DataListCell key="primary content">
-                                    <span id="compact-item1"><strong>Group Roles</strong></span>
+                                    <span id="compact-item1"><strong><Msg msgKey='adminGroupRoles' /></strong></span>
                                 </DataListCell>,
                                 <DataListCell width={3} key="roles">
                                 <table className="gm_roles-table">
@@ -77,28 +78,28 @@ export const GroupDetails: FC<any> = (props) => {
                                     <tr>
                                     <th>
                                         <InputGroup>
-                                            <TextInput id="textInput-basic-1" value={roleInput} placeholder='Add new role' onChange={(e)=>{setRoleInput(e.trim());}} onKeyDown={(e)=>{e.key=== 'Enter'&&roleRef?.current?.click(); }} type="email" aria-label="email input field" />
+                                            <TextInput id="textInput-basic-1" value={roleInput} placeholder={Msg.localize('adminGroupRolesAddPlaceholder')} onChange={(e)=>{setRoleInput(e.trim());}} onKeyDown={(e)=>{e.key=== 'Enter'&&roleRef?.current?.click(); }} type="email" aria-label="email input field" />
                                         </InputGroup>
                                     </th>
                                     <th>
-                                        <Tooltip content={<div>Add Role</div>}>
+                                        <Tooltip content={<div><Msg msgKey='adminGroupRolesAdd' /></div>}>
 
                                             <Button ref={roleRef} onClick={()=>{
                                                 if(props.groupConfiguration?.groupRoles.includes(roleInput)){
                                                     setModalInfo({
-                                                    title:"Invalid Role",
-                                                    accept_message: "OK",
-                                                    message: ("The role ("+ roleInput + ") cannot be added because it already exists in this group."),
+                                                    title:(Msg.localize('adminGroupRoleExistsTitle')),
+                                                    accept_message: Msg.localize('OK'),
+                                                    message: (Msg.localize('adminGroupRoleExistsMessage1')+" ("+ roleInput + ") "+Msg.localize('adminGroupRoleExistsMessage2')),
                                                     accept: function(){setModalInfo({})},
                                                     cancel: function(){setModalInfo({})}
                                                     });
                                                 }
                                                 else{
                                                     setModalInfo({
-                                                        title:"Confirmation",
-                                                        accept_message: "Yes",
-                                                        cancel_message: "No",
-                                                        message: ("Are you sure you want to add the role "+ roleInput + " to this group."),
+                                                        title:(Msg.localize('Confirmation')),
+                                                        accept_message: (Msg.localize('Yes')),
+                                                        cancel_message: Msg.localize('No'),
+                                                        message: (Msg.localize('adminGroupRoleAddConfirmation1')+" "+ roleInput + Msg.localize('adminGroupRoleAddConfirmation2')),
                                                         accept: function(){addGroupRole(roleInput)},
                                                         cancel: function(){setModalInfo({})}
                                                         });
@@ -115,13 +116,13 @@ export const GroupDetails: FC<any> = (props) => {
                                                 {role}
                                             </td>
                                             <td>
-                                                <Tooltip content={<div>Remove Role</div>}>
+                                                <Tooltip content={<div><Msg msgKey='adminGroupRoleRemove' /></div>}>
                                                     <Button variant="danger" onClick={()=>{
                                                         setModalInfo({
-                                                            title:"Confirmation",
-                                                            accept_message: "Yes",
-                                                            cancel_message: "No",
-                                                            message: ("Are you sure you want to remove the role " + role + " from this group."),
+                                                            title:(Msg.localize('Confirmation')),
+                                                            accept_message: (Msg.localize('Yes')),
+                                                            cancel_message: (Msg.localize('No')),
+                                                            message: (Msg.localize('adminGroupRoleRemoveConfirmation1')+" " + role + " "+Msg.localize('adminGroupRoleRemoveConfirmation2')),
                                                             accept: function(){removeGroupRole(role)},
                                                             cancel: function(){setModalInfo({})}
                                                         });

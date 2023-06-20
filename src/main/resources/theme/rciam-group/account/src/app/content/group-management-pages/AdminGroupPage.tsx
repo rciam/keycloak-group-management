@@ -12,6 +12,7 @@ import { GroupAdmins } from '../../group-widgets/GroupAdminPage/GroupAdmins';
 import { GroupSubGroups } from '../../group-widgets/GroupAdminPage/GroupSubgroups';
 import { GroupEnrollment } from '../../group-widgets/GroupAdminPage/GroupEnrollment';
 import {TrashIcon } from '@patternfly/react-icons';
+import { Msg } from '../../widgets/Msg';
 
 
 export interface AdminGroupPageProps {
@@ -178,10 +179,10 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
         <DeleteSubgroupModal groupId={groupId} active={deleteGroup} afterSuccess={()=>{props.history.push('/groups/admingroups');}} close={()=>{setDeleteGroup(false);}}/>  
         <Breadcrumb className="gm_breadcumb">
           <BreadcrumbItem to="#">
-            Account Console
+            <Msg msgKey='accountConsole' />
           </BreadcrumbItem>
           <BreadcrumbItem to="#/groups/admingroups">
-            Manage Groups
+            <Msg msgKey='adminGroupLabel' />
           </BreadcrumbItem>
           <BreadcrumbItem isActive>
             {groupConfiguration?.name}
@@ -194,10 +195,10 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
               <Button className={"gm_button-small"} 
                   onClick={()=>{
                     setModalInfo({
-                      title:"Confirmation",
-                      accept_message: "Yes",
-                      cancel_message: "No",
-                      message: ("Are you sure you want to update group's description?"),
+                      title:Msg.localize('confirmation'),
+                      accept_message: Msg.localize('yes'),
+                      cancel_message: Msg.localize('no'),
+                      message: (Msg.localize('descriptionUpdateConfirmation')),
                       accept: function(){if(groupConfiguration.attributes){
                         groupConfiguration.attributes.description = [descriptionInput];
                         updateAttributes(groupConfiguration);
@@ -217,7 +218,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
               </Button>            
             </div>
             :<p className="gm_group_desc">
-              {(groupConfiguration?.attributes?.description&&groupConfiguration?.attributes?.description[0])||"No descritption available."}
+              {(groupConfiguration?.attributes?.description&&groupConfiguration?.attributes?.description[0])||Msg.localize('noDescription')}
               <div className="gm_edit-icon" onClick={()=>{setEditDescription(true)}}></div>
 
             </p>
@@ -231,23 +232,23 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
           aria-label="Tabs in the default example"
           role="region"
           >
-            <Tab eventKey={0} title={<TabTitleText>Group Details</TabTitleText>} aria-label="Default content - users">
+            <Tab eventKey={0} title={<TabTitleText><Msg msgKey='adminGroupDetailsTab' /></TabTitleText>} aria-label="Default content - users">
               <GroupDetails groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration}/>
             </Tab>    
             
-            <Tab eventKey={1} title={<TabTitleText>Group Members</TabTitleText>} aria-label="Default content - members">
+            <Tab eventKey={1} title={<TabTitleText><Msg msgKey='adminGroupMembersTab' /></TabTitleText>} aria-label="Default content - members">
               <GroupMembers groupConfiguration={groupConfiguration} groupId={groupId} user={user}/>
             </Tab>
-            <Tab eventKey={2} title={<TabTitleText>Group Admins</TabTitleText>} aria-label="Default content - admins">
+            <Tab eventKey={2} title={<TabTitleText><Msg msgKey='adminGroupAdminsTab' /></TabTitleText>} aria-label="Default content - admins">
               <GroupAdmins groupId={groupId} user={user} groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration}/>
             </Tab>
-            <Tab eventKey={3} title={<TabTitleText>Group Enrollment Configuration</TabTitleText>} aria-label="Default content - attributes">   
+            <Tab eventKey={3} title={<TabTitleText><Msg msgKey='adminGroupEnrollmentTab' /></TabTitleText>} aria-label="Default content - attributes">   
               <GroupEnrollment groupConfiguration={groupConfiguration}  groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
             </Tab>   
-            <Tab eventKey={4} title={<TabTitleText>Group Attributes</TabTitleText>} aria-label="Default content - attributes">   
+            <Tab eventKey={4} title={<TabTitleText><Msg msgKey='adminGroupAttributesTab' /></TabTitleText>} aria-label="Default content - attributes">   
               <GroupAttributes groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
             </Tab>
-            <Tab eventKey={5} title={<TabTitleText>Sub Groups</TabTitleText>} aria-label="Default content - attributes">   
+            <Tab eventKey={5} title={<TabTitleText><Msg msgKey='adminGroupSubgroupsTab' /></TabTitleText>} aria-label="Default content - attributes">   
               <GroupSubGroups groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
             </Tab>
             

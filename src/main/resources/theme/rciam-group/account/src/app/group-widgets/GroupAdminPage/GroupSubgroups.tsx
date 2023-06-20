@@ -22,7 +22,7 @@ export const GroupSubGroups: FC<any> = (props) => {
       <DataListItem key='emptyItem' aria-labelledby="empty-item">
         <DataListItemRow key='emptyRow'>
           <DataListItemCells dataListCells={[
-            <DataListCell key='empty'><strong>No subgroups</strong></DataListCell>
+            <DataListCell key='empty'><strong><Msg msgKey='adminGroupSubgroupNo' /></strong></DataListCell>
           ]} />
         </DataListItemRow>
       </DataListItem>

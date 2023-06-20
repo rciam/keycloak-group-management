@@ -80,18 +80,18 @@ export const GroupPage: FC<GroupsPageProps> = (props)=> {
         <div className="gm_content">
           <Breadcrumb className="gm_breadcumb">
             <BreadcrumbItem to="#">
-              Account Console
+              <Msg msgKey='accountConsole' />
             </BreadcrumbItem>
             <BreadcrumbItem to="#/groups/showgroups">
-              My Groups
-            </BreadcrumbItem>
+              <Msg msgKey='groupLabel' />
+              </BreadcrumbItem>
             <BreadcrumbItem isActive>
               {groupMembership?.group?.name}
             </BreadcrumbItem>
           </Breadcrumb>
           <ContentPage title={groupMembership?.group?.name||""}>
             <p className="gm_group_desc">
-              {(groupMembership?.group?.attributes?.description&&groupMembership?.group?.attributes?.description[0])||"No descritption available."}
+              {(groupMembership?.group?.attributes?.description&&groupMembership?.group?.attributes?.description[0])||Msg.localize('noDescription')}
             </p>
             <Tabs
             className="gm_tabs"
@@ -101,17 +101,17 @@ export const GroupPage: FC<GroupsPageProps> = (props)=> {
             aria-label="Tabs in the default example"
             role="region"
             >
-              <Tab eventKey={0} title={<TabTitleText>Membership Details</TabTitleText>} aria-label="Default content - users">
+              <Tab eventKey={0} title={<TabTitleText><Msg msgKey='groupMembershipTab' /></TabTitleText>} aria-label="Default content - users">
                 <DataList className="gm_datalist" aria-label="Compact data list example" isCompact>
                 <DataListItem aria-labelledby="compact-item2">
                     <DataListItemRow>
                       <DataListItemCells
                         dataListCells={[
                           <DataListCell key="primary content">
-                            <span id="compact-item2"><strong>Member Since</strong></span>
+                            <span id="compact-item2"><strong><Msg msgKey='groupDatalistCellMembershipSince' /></strong></span>
                           </DataListCell>,
                           <DataListCell key="secondary content ">
-                             <span>{groupMembership?.validFrom||"Not Available"}</span>  
+                             <span>{groupMembership?.validFrom||Msg.localize('notAvailable')}</span>  
                           </DataListCell>
                         ]}
                       />
@@ -122,9 +122,9 @@ export const GroupPage: FC<GroupsPageProps> = (props)=> {
                       <DataListItemCells
                         dataListCells={[
                           <DataListCell key="primary content">
-                            <span id="compact-item1"><strong>Memberhip Expiration</strong></span>
+                            <span id="compact-item1"><strong><Msg msgKey='groupDatalistCellMembershipExp' /></strong></span>
                           </DataListCell>,
-                          <DataListCell key="secondary content">{groupMembership?.membershipExpiresAt||"Never"}</DataListCell>
+                          <DataListCell key="secondary content">{groupMembership?.membershipExpiresAt||<Msg msgKey='Never' />}</DataListCell>
                         ]}
                       />
                     </DataListItemRow>
@@ -134,10 +134,10 @@ export const GroupPage: FC<GroupsPageProps> = (props)=> {
                       <DataListItemCells
                         dataListCells={[
                           <DataListCell key="primary content">
-                            <span id="compact-item2"><strong>AUP Expiration</strong></span>
+                            <span id="compact-item2"><strong><Msg msgKey='groupDatalistCellAupExp' /></strong></span>
                           </DataListCell>,
                           <DataListCell key="secondary content ">
-                            <span>{groupMembership?.aupExpiresAt||"Never"}</span>
+                            <span>{groupMembership?.aupExpiresAt||<Msg msgKey='Never' />}</span>
                           </DataListCell>
                         ]}
                       />
@@ -148,10 +148,10 @@ export const GroupPage: FC<GroupsPageProps> = (props)=> {
                       <DataListItemCells
                         dataListCells={[
                           <DataListCell key="primary content">
-                            <span id="compact-item2"><strong>Group Roles</strong></span>
+                            <span id="compact-item2"><strong><Msg msgKey='groupDatalistCellRoles' /></strong></span>
                           </DataListCell>,
                           <DataListCell key="secondary content ">
-                            {groupMembership?.groupRoles&&groupMembership?.groupRoles.join(', ')||"No Roles"}  
+                            {groupMembership?.groupRoles&&groupMembership?.groupRoles.join(', ')||Msg.localize('groupDatalistCellNoRoles')}  
                           </DataListCell>
                         ]}
                       />
