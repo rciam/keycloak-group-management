@@ -14,6 +14,7 @@ import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupInvitationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupRepresentation;
@@ -27,6 +28,7 @@ public class GeneralJpaService {
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final GroupEnrollmentRequestRepository groupEnrollmentRequestRepository;
     private final GroupRolesRepository groupRolesRepository;
+    private final GroupInvitationRepository groupInvitationRepository;
 
     public GeneralJpaService(KeycloakSession session, RealmModel realm, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository) {
         this.realm = realm;
@@ -36,6 +38,7 @@ public class GeneralJpaService {
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
         this.groupEnrollmentRequestRepository = new GroupEnrollmentRequestRepository(session, realm, null);
         this.groupRolesRepository = new GroupRolesRepository(session, realm);
+        this.groupInvitationRepository = new GroupInvitationRepository(session, realm);
 
     }
 
@@ -43,6 +46,7 @@ public class GeneralJpaService {
     public void removeGroup(GroupModel group) {
         //extra delete UserGroupMembershipExtensionEntity, GroupEnrollmentConfigurationEntity, GroupAdminEntity, GroupEnrollmentRequestEntity
         groupEnrollmentRequestRepository.deleteByGroup(group.getId());
+        groupInvitationRepository.deleteByGroup(group.getId());
         userGroupMembershipExtensionRepository.deleteByGroup(group.getId());
         groupEnrollmentConfigurationRepository.deleteByGroup(group.getId());
         groupAdminRepository.deleteByGroup(group.getId());

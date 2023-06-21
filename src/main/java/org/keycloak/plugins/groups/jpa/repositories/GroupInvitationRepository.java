@@ -68,4 +68,9 @@ public class GroupInvitationRepository extends GeneralRepository<GroupInvitation
         return em.createNamedQuery("getAllGroupInvitations").setParameter("realmId", realm.getId()).getResultStream();
     }
 
+    public void deleteByGroup(String groupId){
+        em.createNamedQuery("deleteInvitationByGroup").setParameter("groupId", groupId).executeUpdate();
+    }
+
+
 }

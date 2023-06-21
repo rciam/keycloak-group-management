@@ -22,7 +22,8 @@ import org.keycloak.models.jpa.entities.UserEntity;
 @Entity
 @Table(name = "GROUP_INVITATION")
 @NamedQueries({
-        @NamedQuery(name = "getAllGroupInvitations", query = "from GroupInvitationEntity f where f.realmId= :realmId")
+        @NamedQuery(name = "getAllGroupInvitations", query = "from GroupInvitationEntity f where f.realmId= :realmId"),
+        @NamedQuery(name="deleteInvitationByGroup", query="delete from GroupInvitationEntity g where g.group.id = :groupId or g.groupEnrollmentConfiguration.id in (select conf.id from GroupEnrollmentConfigurationEntity conf where conf.group.id = :groupId)")
 })
 public class GroupInvitationEntity {
 
