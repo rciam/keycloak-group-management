@@ -32,7 +32,7 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         return GroupEnrollmentConfigurationEntity.class;
     }
 
-    public void create(GroupEnrollmentConfigurationRepresentation rep, String groupId){
+    public void create(GroupEnrollmentConfigurationRepresentation rep, String groupId) {
         GroupEnrollmentConfigurationEntity entity = new GroupEnrollmentConfigurationEntity();
         entity.setId(KeycloakModelUtils.generateId());
         GroupEntity group = new GroupEntity();
@@ -42,7 +42,7 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         create(entity);
     }
 
-    public void createDefault(String groupId, String groupName){
+    public void createDefault(String groupId, String groupName) {
         //default values, hide by default
         GroupEnrollmentConfigurationEntity entity = new GroupEnrollmentConfigurationEntity();
         entity.setId(KeycloakModelUtils.generateId());
@@ -65,17 +65,17 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         create(entity);
     }
 
-    public void update(GroupEnrollmentConfigurationEntity entity, GroupEnrollmentConfigurationRepresentation rep){
+    public void update(GroupEnrollmentConfigurationEntity entity, GroupEnrollmentConfigurationRepresentation rep) {
         toEntity(entity, rep, entity.getGroup().getId());
         update(entity);
     }
 
     public Stream<GroupEnrollmentConfigurationEntity> getGroupAdminGroups(String userId) {
-        return em.createNamedQuery("getAdminGroups").setParameter("userId",userId).getResultStream();
+        return em.createNamedQuery("getAdminGroups").setParameter("userId", userId).getResultStream();
     }
 
     public Stream<GroupEnrollmentConfigurationEntity> getByGroup(String groupId) {
-        return em.createNamedQuery("getByGroup").setParameter("groupId",groupId).getResultStream();
+        return em.createNamedQuery("getByGroup").setParameter("groupId", groupId).getResultStream();
     }
 
     private void toEntity(GroupEnrollmentConfigurationEntity entity, GroupEnrollmentConfigurationRepresentation rep, String groupId) {
@@ -91,12 +91,12 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         entity.setInvitationConclusion(rep.getInvitationConclusion());
         entity.setInvitationIntroduction(rep.getInvitationIntroduction());
         entity.setMultiselectRole(rep.getMultiselectRole());
-        if ( rep.getAup() != null)
+        if (rep.getAup() != null)
             entity.setAupEntity(toEntity(rep.getAup()));
         if (rep.getGroupRoles() != null) {
             entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> {
                 GroupRolesEntity r = groupRolesRepository.getGroupRolesByNameAndGroup(x, groupId);
-                if (r!= null) {
+                if (r != null) {
                     GroupRolesEntity role = new GroupRolesEntity();
                     role.setId(r.getId());
                     role.setGroup(r.getGroup());
@@ -121,7 +121,7 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         return entity;
     }
 
-    public void deleteByGroup(String groupId){
+    public void deleteByGroup(String groupId) {
         em.createNamedQuery("deleteEnrollmentConfigurationByGroup").setParameter("groupId", groupId).executeUpdate();
     }
 

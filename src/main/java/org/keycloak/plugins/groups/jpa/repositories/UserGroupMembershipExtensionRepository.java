@@ -96,7 +96,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 UserModel user = session.users().getUserById(realmModel, entity.getUser().getId());
                 GroupModel group = realmModel.getGroupById(entity.getGroup().getId());
                 logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
-                deleteMember(entity, group, user);                
+                deleteMember(entity, group, user);
                 try {
                     MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
                     List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
@@ -137,21 +137,8 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 UserModel userModel = session.users().getUserById(realm, member.getUser().getId());
                 userModel.joinGroup(group);
                 MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-                List<String> memberUserAttributeValues = userModel.getAttribute(memberUserAttribute.getUserAttribute());
                 try {
-                    String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
-                    if (member.getGroupRoles() == null || member.getGroupRoles().isEmpty()) {
-                        memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
-                    } else {
-                        memberUserAttributeValues.addAll(member.getGroupRoles().stream().map(role -> {
-                            try {
-                                return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
-                            } catch (UnsupportedEncodingException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }).collect(Collectors.toList()));
-                    }
-                    userModel.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
+                    Utils.changeUserAttributeValue(userModel, member, Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm), memberUserAttribute);
                 } catch (UnsupportedEncodingException e) {
                     throw new RuntimeException(e);
                 }
@@ -385,22 +372,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
 
         try {
-            List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
-            String groupName = Utils.getGroupNameForMemberUserAttribute(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup(), realm);
-            memberUserAttributeValues.removeIf(x-> Utils.removeMemberUserAttributeCondition(x,memberUserAttribute.getUrnNamespace(),groupName));
-
-            if (MemberStatusEnum.ENABLED.equals(entity.getStatus()) && (enrollmentEntity.getGroupRoles() == null || enrollmentEntity.getGroupRoles().isEmpty())) {
-                memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
-            } else if (MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
-                memberUserAttributeValues.addAll(enrollmentEntity.getGroupRoles().stream().map(role -> {
-                    try {
-                        return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
-                    } catch (UnsupportedEncodingException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).collect(Collectors.toList()));
-            }
-            user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
+            Utils.changeUserAttributeValue(user, entity,  Utils.getGroupNameForMemberUserAttribute(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup(), realm), memberUserAttribute);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -469,22 +441,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
 
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-        List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
-        String groupName = Utils.getGroupNameForMemberUserAttribute(entity.getGroup(), realm);
-        memberUserAttributeValues.removeIf(x-> x.startsWith(memberUserAttribute.getUrnNamespace()+Utils.groupStr+groupName));
-
-        if (MemberStatusEnum.ENABLED.equals(entity.getStatus()) && (rep.getGroupRoles() == null || rep.getGroupRoles().isEmpty())) {
-            memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
-        } else   if (MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
-            memberUserAttributeValues.addAll(rep.getGroupRoles().stream().map(role -> {
-                try {
-                    return Utils.createMemberUserAttribute(groupName, role, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
-                } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException(e);
-                }
-            }).collect(Collectors.toList()));
-        }
-        user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
+        Utils.changeUserAttributeValue(user, entity, Utils.getGroupNameForMemberUserAttribute(entity.getGroup(), realm), memberUserAttribute);
 
         adminEvent.operation(OperationType.UPDATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(entity, realm)).resourcePath(session.getContext().getUri()).success();
     }
@@ -534,21 +491,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             userModel.joinGroup(group);
 
             try {
-                List<String> memberUserAttributeValues = userModel.getAttribute(memberUserAttribute.getUserAttribute());
-                String groupName = Utils.getGroupNameForMemberUserAttribute(configuration.getGroup(), realm);
-
-                if (entity.getGroupRoles() == null || entity.getGroupRoles().isEmpty()) {
-                    memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
-                } else {
-                    memberUserAttributeValues.addAll(entity.getGroupRoles().stream().map(role -> {
-                        try {
-                            return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
-                        } catch (UnsupportedEncodingException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }).collect(Collectors.toList()));
-                }
-                userModel.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
+                Utils.changeUserAttributeValue(userModel, entity, Utils.getGroupNameForMemberUserAttribute(configuration.getGroup(), realm), memberUserAttribute);
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }

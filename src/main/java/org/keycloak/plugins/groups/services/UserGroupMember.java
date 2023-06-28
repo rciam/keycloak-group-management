@@ -46,8 +46,8 @@ public class UserGroupMember {
 
     public UserGroupMember(KeycloakSession session, RealmModel realm, UserModel user, UserGroupMembershipExtensionEntity member, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, AdminEventBuilder adminEvent) {
         this.session = session;
-        this.realm =  realm;
-        this.userGroupMembershipExtensionRepository =  userGroupMembershipExtensionRepository;
+        this.realm = realm;
+        this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.user = user;
         this.member = member;
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;

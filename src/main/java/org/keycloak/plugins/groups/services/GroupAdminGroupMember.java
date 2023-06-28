@@ -189,21 +189,7 @@ public class GroupAdminGroupMember {
             userGroupMembershipExtensionRepository.activateUser(user, member, justification, group);
             try {
                 MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-                List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
-                String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
-                memberUserAttributeValues.removeIf(x-> Utils.removeMemberUserAttributeCondition(x,memberUserAttribute.getUrnNamespace(),groupName));
-                if (member.getGroupRoles() == null || member.getGroupRoles().isEmpty()) {
-                    memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
-                } else {
-                    memberUserAttributeValues.addAll(member.getGroupRoles().stream().map(role -> {
-                        try {
-                            return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
-                        } catch (UnsupportedEncodingException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }).collect(Collectors.toList()));
-                }
-                user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
+                Utils.changeUserAttributeValue(user, member, Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm), memberUserAttribute);
             } catch (UnsupportedEncodingException e) {
                 throw new RuntimeException(e);
             }

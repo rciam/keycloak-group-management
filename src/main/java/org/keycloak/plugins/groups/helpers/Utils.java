@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.NotFoundException;
@@ -17,10 +18,13 @@ import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.representations.account.UserRepresentation;
@@ -136,6 +140,23 @@ public class Utils {
 
     public static boolean removeMemberUserAttributeCondition(String x, String urnNamespace, String groupName){
         return x.equals(urnNamespace+groupStr+groupName) || x.startsWith(urnNamespace+groupStr+groupName+roleStr) || x.startsWith(urnNamespace+groupStr+groupName+sharp);
+    }
+
+    public static void changeUserAttributeValue(UserModel user, UserGroupMembershipExtensionEntity member, String groupName, MemberUserAttributeConfigurationEntity memberUserAttribute) throws UnsupportedEncodingException {
+        List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
+        memberUserAttributeValues.removeIf(x-> Utils.removeMemberUserAttributeCondition(x,memberUserAttribute.getUrnNamespace(),groupName));
+        if (member.getGroupRoles() == null || member.getGroupRoles().isEmpty()) {
+            memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
+        } else {
+            memberUserAttributeValues.addAll(member.getGroupRoles().stream().map(role -> {
+                try {
+                    return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+            }).collect(Collectors.toList()));
+        }
+        user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
     }
 
 }

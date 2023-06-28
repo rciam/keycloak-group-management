@@ -41,7 +41,7 @@ public class EntityToRepresentation {
         rep.setInvitationConclusion(entity.getInvitationConclusion());
         rep.setInvitationIntroduction(entity.getInvitationIntroduction());
         rep.setMultiselectRole(entity.isMultiselectRole());
-        if ( entity.getAupEntity() != null)
+        if (entity.getAupEntity() != null)
             rep.setAup(toRepresentation(entity.getAupEntity()));
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
@@ -85,7 +85,7 @@ public class EntityToRepresentation {
         GroupEnrollmentRequestRepresentation rep = new GroupEnrollmentRequestRepresentation();
         rep.setId(entity.getId());
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
-        if (entity.getCheckAdmin() != null )
+        if (entity.getCheckAdmin() != null)
             rep.setCheckAdmin(toBriefRepresentation(entity.getCheckAdmin(), realm));
         rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration()));
         rep.setAdminJustification(entity.getAdminJustification());
@@ -114,7 +114,7 @@ public class EntityToRepresentation {
         rep.setEmail(entity.getEmail());
         rep.setEmailVerified(entity.isEmailVerified());
         rep.setUsername(entity.getUsername());
-        if ( entity.getAttributes() != null && !entity.getAttributes().isEmpty()) {
+        if (entity.getAttributes() != null && !entity.getAttributes().isEmpty()) {
             MultivaluedHashMap<String, String> attributes = new MultivaluedHashMap<>();
             for (UserAttributeEntity attr : entity.getAttributes()) {
                 attributes.add(attr.getName(), attr.getValue());
@@ -126,7 +126,7 @@ public class EntityToRepresentation {
         return rep;
     }
 
-    private static FederatedIdentityRepresentation getFederatedIdentityRep(RealmModel realm, String idPAlias){
+    private static FederatedIdentityRepresentation getFederatedIdentityRep(RealmModel realm, String idPAlias) {
         FederatedIdentityRepresentation rep = new FederatedIdentityRepresentation();
         IdentityProviderModel idp = realm.getIdentityProviderByAlias(idPAlias);
         rep.setIdentityProvider(idp.getDisplayName() != null ? idp.getDisplayName() : idPAlias);
@@ -142,7 +142,7 @@ public class EntityToRepresentation {
             rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration()));
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
-        if (entity.getGroup() != null){
+        if (entity.getGroup() != null) {
             GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true);
             rep.setGroup(group);
         }
@@ -150,7 +150,7 @@ public class EntityToRepresentation {
         return rep;
     }
 
-    public static MemberUserAttributeConfigurationRepresentation toRepresentation(MemberUserAttributeConfigurationEntity entity){
+    public static MemberUserAttributeConfigurationRepresentation toRepresentation(MemberUserAttributeConfigurationEntity entity) {
         MemberUserAttributeConfigurationRepresentation rep = new MemberUserAttributeConfigurationRepresentation(entity.getUserAttribute(), entity.getUrnNamespace(), entity.getAuthority());
         rep.setId(entity.getId());
         return rep;

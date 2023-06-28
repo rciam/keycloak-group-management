@@ -1,8 +1,6 @@
 package org.keycloak.plugins.groups.services;
 
 
-import java.util.stream.Collectors;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -38,7 +36,6 @@ import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationR
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
-import org.keycloak.services.resources.admin.GroupResource;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.theme.FreeMarkerUtil;
 
@@ -60,20 +57,20 @@ public class AdminGroups {
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final AdminEventBuilder adminEvent;
 
-    public AdminGroups(KeycloakSession session, AdminPermissionEvaluator realmAuth, GroupModel group,  RealmModel realm, GeneralJpaService generalJpaService, AdminEventBuilder adminEvent, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, GroupRolesRepository groupRolesRepository) {
+    public AdminGroups(KeycloakSession session, AdminPermissionEvaluator realmAuth, GroupModel group, RealmModel realm, GeneralJpaService generalJpaService, AdminEventBuilder adminEvent, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, GroupRolesRepository groupRolesRepository) {
         this.session = session;
-        this.realm =  realm;
+        this.realm = realm;
         this.realmAuth = realmAuth;
         this.group = group;
-        this.groupEnrollmentConfigurationRepository =  groupEnrollmentConfigurationRepository;
+        this.groupEnrollmentConfigurationRepository = groupEnrollmentConfigurationRepository;
         this.groupEnrollmentConfigurationRepository.setGroupRolesRepository(new GroupRolesRepository(session, realm));
-        this.groupAdminRepository =  new GroupAdminRepository(session, realm);
+        this.groupAdminRepository = new GroupAdminRepository(session, realm);
         this.groupRolesRepository = groupRolesRepository;
-        this.generalJpaService =  generalJpaService;
+        this.generalJpaService = generalJpaService;
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         this.adminEvent = adminEvent.resource(ResourceType.GROUP);
-  }
+    }
 
     @DELETE
     public void deleteGroup() {
@@ -89,7 +86,7 @@ public class AdminGroups {
     public GroupEnrollmentConfigurationRepresentation getGroupConfiguration(@PathParam("id") String id) {
         GroupEnrollmentConfigurationEntity groupConfiguration = groupEnrollmentConfigurationRepository.getEntity(id);
         //if not exist, group have only created from main Keycloak
-        if(groupConfiguration == null) {
+        if (groupConfiguration == null) {
             throw new NotFoundException("Could not find this Group Configuration");
         } else {
             return EntityToRepresentation.toRepresentation(groupConfiguration);
@@ -101,7 +98,7 @@ public class AdminGroups {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response saveGroupEnrollmentConfiguration(GroupEnrollmentConfigurationRepresentation rep) {
         realmAuth.groups().requireManage(group);
-        if (rep.getId() == null ) {
+        if (rep.getId() == null) {
             groupEnrollmentConfigurationRepository.create(rep, group.getId());
         } else {
             GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(rep.getId());
@@ -119,7 +116,7 @@ public class AdminGroups {
     @Path("/admin/{userId}")
     public Response addGroupAdmin(@PathParam("userId") String userId) {
         UserModel user = session.users().getUserById(realm, userId);
-        if ( user == null ) {
+        if (user == null) {
             throw new NotFoundException("Could not find this User");
         }
         realmAuth.users().requireManageGroupMembership(user);
@@ -135,7 +132,7 @@ public class AdminGroups {
                 }
                 return Response.noContent().build();
             } else {
-                return Response.status(Response.Status.BAD_REQUEST).entity(user.getUsername() + " is already group admin for the "+group.getName()+" group or one of its parent.").build();
+                return Response.status(Response.Status.BAD_REQUEST).entity(user.getUsername() + " is already group admin for the " + group.getName() + " group or one of its parent.").build();
             }
         } catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(ModelDuplicateException.class.equals(e.getClass()) ? "Admin has already been existed" : "Problem during admin save").build();
@@ -146,7 +143,7 @@ public class AdminGroups {
     @Path("/admin/{userId}")
     public Response removeGroupAdmin(@PathParam("userId") String userId) {
         UserModel user = session.users().getUserById(realm, userId);
-        if ( user == null ) {
+        if (user == null) {
             throw new NotFoundException("Could not find this User");
         }
         realmAuth.users().requireManageGroupMembership(user);
