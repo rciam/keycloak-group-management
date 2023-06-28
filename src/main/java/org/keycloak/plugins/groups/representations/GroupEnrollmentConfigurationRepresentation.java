@@ -1,6 +1,13 @@
 package org.keycloak.plugins.groups.representations;
 
+import java.time.LocalDate;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 public class GroupEnrollmentConfigurationRepresentation {
 
@@ -8,21 +15,20 @@ public class GroupEnrollmentConfigurationRepresentation {
     private org.keycloak.representations.idm.GroupRepresentation group;
     private String name;
     private Boolean active;
-    private Boolean requireAupAcceptance;
+    private Boolean requireApprovalForExtension;
     private Boolean requireApproval;
-    private Long aupExpiryDays;
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate validFrom;
     private Long membershipExpirationDays;
-    private Integer expirationNotificationPeriod;
     private GroupAupRepresentation aup;
     private String enrollmentIntroduction;
     private String invitationIntroduction;
     private String enrollmentConclusion;
     private String invitationConclusion;
-    private Boolean hideConfiguration;
+    private Boolean visibleToNotMembers;
     private Boolean multiselectRole;
-
-    private List<GroupEnrollmentConfigurationAttributesRepresentation> attributes;
-
     private List<String> groupRoles;
 
     public GroupEnrollmentConfigurationRepresentation(String id){
@@ -63,14 +69,6 @@ public class GroupEnrollmentConfigurationRepresentation {
         this.active = active;
     }
 
-    public Boolean getRequireAupAcceptance() {
-        return requireAupAcceptance;
-    }
-
-    public void setRequireAupAcceptance(Boolean requireAupAcceptance) {
-        this.requireAupAcceptance = requireAupAcceptance;
-    }
-
     public Boolean getRequireApproval() {
         return requireApproval;
     }
@@ -79,28 +77,12 @@ public class GroupEnrollmentConfigurationRepresentation {
         this.requireApproval = requireApproval;
     }
 
-    public Long getAupExpiryDays() {
-        return aupExpiryDays;
-    }
-
-    public void setAupExpiryDays(Long aupExpiryDays) {
-        this.aupExpiryDays = aupExpiryDays;
-    }
-
     public Long getMembershipExpirationDays() {
         return membershipExpirationDays;
     }
 
     public void setMembershipExpirationDays(Long membershipExpirationDays) {
         this.membershipExpirationDays = membershipExpirationDays;
-    }
-
-    public Integer getExpirationNotificationPeriod() {
-        return expirationNotificationPeriod;
-    }
-
-    public void setExpirationNotificationPeriod(Integer expirationNotificationPeriod) {
-        this.expirationNotificationPeriod = expirationNotificationPeriod;
     }
 
     public GroupAupRepresentation getAup() {
@@ -143,20 +125,28 @@ public class GroupEnrollmentConfigurationRepresentation {
         this.invitationConclusion = invitationConclusion;
     }
 
-    public Boolean isHideConfiguration() {
-        return hideConfiguration;
+    public Boolean isVisibleToNotMembers() {
+        return visibleToNotMembers;
     }
 
-    public void setHideConfiguration(Boolean hideConfiguration) {
-        this.hideConfiguration = hideConfiguration;
+    public void setVisibleToNotMembers(Boolean visibleToNotMembers) {
+        this.visibleToNotMembers = visibleToNotMembers;
     }
 
-    public List<GroupEnrollmentConfigurationAttributesRepresentation> getAttributes() {
-        return attributes;
+    public Boolean getRequireApprovalForExtension() {
+        return requireApprovalForExtension;
     }
 
-    public void setAttributes(List<GroupEnrollmentConfigurationAttributesRepresentation> attributes) {
-        this.attributes = attributes;
+    public void setRequireApprovalForExtension(Boolean requireApprovalForExtension) {
+        this.requireApprovalForExtension = requireApprovalForExtension;
+    }
+
+    public LocalDate getValidFrom() {
+        return validFrom;
+    }
+
+    public void setValidFrom(LocalDate validFrom) {
+        this.validFrom = validFrom;
     }
 
     public Boolean getMultiselectRole() {

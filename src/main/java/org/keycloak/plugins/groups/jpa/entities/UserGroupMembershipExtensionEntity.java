@@ -30,9 +30,9 @@ import javax.persistence.Table;
 @NamedQueries({
         @NamedQuery(name="getByUserAndGroup", query="from UserGroupMembershipExtensionEntity f where f.group.id = :groupId and f.user.id = :userId"),
         @NamedQuery(name="getActiveByUser", query="from UserGroupMembershipExtensionEntity f where f.user.id = :userId and f.status = 'ENABLED'"),
-        @NamedQuery(name="getExpiredMemberships", query="from UserGroupMembershipExtensionEntity f where f.membershipExpiresAt < :date or f.aupExpiresAt < :date"),
+        @NamedQuery(name="getExpiredMemberships", query="from UserGroupMembershipExtensionEntity f where f.membershipExpiresAt < :date"),
         @NamedQuery(name="getMembershipsByStatusAndValidFrom", query="from UserGroupMembershipExtensionEntity f where f.status = :status and f.validFrom <= :date"),
-        @NamedQuery(name="getExpiredMembershipsByGroup", query="from UserGroupMembershipExtensionEntity f where f.group.id = :groupId and f.membershipExpiresAt < :date or f.aupExpiresAt < :date"),
+        @NamedQuery(name="getExpiredMembershipsByGroup", query="from UserGroupMembershipExtensionEntity f where f.group.id = :groupId and f.membershipExpiresAt < :date"),
         @NamedQuery(name="deleteMembershipExtensionByGroup", query="delete from UserGroupMembershipExtensionEntity g where g.group.id = :groupId"),
         @NamedQuery(name="deleteMembershipExtensionByUser", query="delete from UserGroupMembershipExtensionEntity g where g.user.id = :userId")
 })
@@ -64,10 +64,6 @@ public class UserGroupMembershipExtensionEntity {
 
     @Column(name="MEMBERSHIP_EXPIRES_AT")
     protected LocalDate membershipExpiresAt;
-
-    @Column(name="AUP_EXPIRES_AT")
-    protected LocalDate aupExpiresAt;
-
     @Column(name="JUSTIFICATION")
     protected String justification;
 
@@ -132,14 +128,6 @@ public class UserGroupMembershipExtensionEntity {
 
     public void setMembershipExpiresAt(LocalDate membershipExpiresAt) {
         this.membershipExpiresAt = membershipExpiresAt;
-    }
-
-    public LocalDate getAupExpiresAt() {
-        return aupExpiresAt;
-    }
-
-    public void setAupExpiresAt(LocalDate aupExpiresAt) {
-        this.aupExpiresAt = aupExpiresAt;
     }
 
     public String getJustification() {

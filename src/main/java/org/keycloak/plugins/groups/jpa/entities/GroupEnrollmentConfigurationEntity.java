@@ -1,5 +1,6 @@
 package org.keycloak.plugins.groups.jpa.entities;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.keycloak.models.jpa.entities.GroupEntity;
@@ -48,20 +49,17 @@ public class GroupEnrollmentConfigurationEntity {
     @JoinColumn(name = "AUP_ID")
     protected GroupAupEntity aupEntity;
 
-    @Column(name="REQUIRE_AUP_ACCEPTANCE")
-    protected Boolean requireAupAcceptance;
-
     @Column(name="REQUIRE_APPROVAL")
     protected Boolean requireApproval;
 
-    @Column(name="AUP_EXPIRY_DAYS")
-    protected Long aupExpiryDays;
+    @Column(name="REQUIRE_APPROVAL_FOR_EXTENSION")
+    protected Boolean requireApprovalForExtension;
+
+    @Column(name="VALID_FROM")
+    protected LocalDate validFrom;
 
     @Column(name="MEMBERSHIP_EXPIRATION_DAYS")
     protected Long membershipExpirationDays;
-
-    @Column(name="EXPIRATION_NOTIFICATION_PERIOD")
-    protected Integer expirationNotificationPeriod;
 
     @Column(name="ENROLLMENT_INTRODUCTION")
     protected String enrollmentIntroduction;
@@ -75,14 +73,11 @@ public class GroupEnrollmentConfigurationEntity {
     @Column(name="INVITATION_CONCLUSION")
     protected String invitationConclusion;
 
-    @Column(name="HIDE_CONFIGURATION")
-    protected Boolean hideConfiguration;
+    @Column(name="VISIBLE_TO_NOT_MEMBERS")
+    protected Boolean visibleToNotMembers;
 
     @Column(name="MULTISELECT_ROLE")
     private Boolean multiselectRole;
-
-    @OneToMany(cascade =CascadeType.ALL, orphanRemoval = true, mappedBy = "groupEnrollmentConfiguration")
-    private List<GroupEnrollmentConfigurationAttributesEntity> attributes;
 
     @ManyToMany
     @JoinTable(name = "GROUP_ENROLLMENT_CONFIGURATION_ROLES", joinColumns = @JoinColumn(name = "GROUP_ENROLLMENT_CONFIGURATION_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
@@ -112,14 +107,6 @@ public class GroupEnrollmentConfigurationEntity {
         this.aupEntity = aupEntity;
     }
 
-    public Boolean getRequireAupAcceptance() {
-        return requireAupAcceptance;
-    }
-
-    public void setRequireAupAcceptance(Boolean requireAupAcceptance) {
-        this.requireAupAcceptance = requireAupAcceptance;
-    }
-
     public Boolean getRequireApproval() {
         return requireApproval;
     }
@@ -128,12 +115,20 @@ public class GroupEnrollmentConfigurationEntity {
         this.requireApproval = requireApproval;
     }
 
-    public Long getAupExpiryDays() {
-        return aupExpiryDays;
+    public Boolean getRequireApprovalForExtension() {
+        return requireApprovalForExtension;
     }
 
-    public void setAupExpiryDays(Long aupExpiryDays) {
-        this.aupExpiryDays = aupExpiryDays;
+    public void setRequireApprovalForExtension(Boolean requireApprovalForExtension) {
+        this.requireApprovalForExtension = requireApprovalForExtension;
+    }
+
+    public LocalDate getValidFrom() {
+        return validFrom;
+    }
+
+    public void setValidFrom(LocalDate validFrom) {
+        this.validFrom = validFrom;
     }
 
     public Long getMembershipExpirationDays() {
@@ -142,14 +137,6 @@ public class GroupEnrollmentConfigurationEntity {
 
     public void setMembershipExpirationDays(Long membershipExpirationDays) {
         this.membershipExpirationDays = membershipExpirationDays;
-    }
-
-    public Integer getExpirationNotificationPeriod() {
-        return expirationNotificationPeriod;
-    }
-
-    public void setExpirationNotificationPeriod(Integer expirationNotificationPeriod) {
-        this.expirationNotificationPeriod = expirationNotificationPeriod;
     }
 
     public String getId() {
@@ -200,20 +187,12 @@ public class GroupEnrollmentConfigurationEntity {
         this.invitationConclusion = invitationConclusion;
     }
 
-    public Boolean isHideConfiguration() {
-        return hideConfiguration;
+    public Boolean isVisibleToNotMembers() {
+        return visibleToNotMembers;
     }
 
-    public void setHideConfiguration(Boolean hideConfiguration) {
-        this.hideConfiguration = hideConfiguration;
-    }
-
-    public List<GroupEnrollmentConfigurationAttributesEntity> getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(List<GroupEnrollmentConfigurationAttributesEntity> attributes) {
-        this.attributes = attributes;
+    public void setVisibleToNotMembers(Boolean visibleToNotMembers) {
+        this.visibleToNotMembers = visibleToNotMembers;
     }
 
     public List<GroupRolesEntity> getGroupRoles() {

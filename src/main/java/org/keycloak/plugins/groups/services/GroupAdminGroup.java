@@ -114,7 +114,7 @@ public class GroupAdminGroup {
     @Path("/configuration/all")
     @Produces("application/json")
     public List<GroupEnrollmentConfigurationRepresentation> getGroupEnrollmentConfigurationsByGroup() {
-       return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf,true)).collect(Collectors.toList());
+       return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf)).collect(Collectors.toList());
     }
 
     @GET
@@ -163,7 +163,7 @@ public class GroupAdminGroup {
         if (groupConfiguration == null) {
             throw new NotFoundException("Could not find this group configuration");
         } else {
-            return EntityToRepresentation.toRepresentation(groupConfiguration, true);
+            return EntityToRepresentation.toRepresentation(groupConfiguration);
         }
     }
 

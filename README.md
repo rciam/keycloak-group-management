@@ -41,7 +41,6 @@ Path | Method | Description                              | Classes
 /account/user/group/{groupId}/admin | POST   | accept invitation and become group admin | UserGroup 
 /account/user/group/{groupId}/member | GET    | get user group membership                | UserGroupMember
 /account/user/group/{groupId}/member | DELETE | leave user group membership               | UserGroupMember
-/account/user/group/{groupId}/member/aup-renew | POST   | renew aup of user group membership       | UserGroupMember
 /account/user/enroll-requests | GET    | get all user ongoing enrollment requests | UserGroups
 /account/user/enroll-request | POST   | create new enrollment request            | UserGroups
 /account/user/enroll-request/{id} | GET    | get enrollment request by id             | UserGroupEnrollmentRequestAction

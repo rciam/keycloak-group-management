@@ -69,22 +69,22 @@ public class UserGroupMember {
         return Response.noContent().build();
     }
 
-    @POST
-    @Path("/aup-renew")
-    public Response aupRenew() {
-
-        if (!MemberStatusEnum.ENABLED.equals(member.getStatus())) {
-            throw new NotFoundException("You are not active member of this group");
-        }
-        GroupEnrollmentConfigurationEntity configuration = groupEnrollmentConfigurationRepository.getEntity(member.getGroupEnrollmentConfigurationId());
-        if (configuration == null) {
-            throw new NotFoundException("This configuration does not exist. You need to create new enrollment flow.");
-        }
-        if (configuration.getAupExpiryDays() == null) {
-            throw new BadRequestException("This configuration does not have aup renew configuration.");
-        }
-        member.setAupExpiresAt((member.getAupExpiresAt()!=null ? member.getAupExpiresAt() : LocalDate.now()).plusDays(configuration.getAupExpiryDays()));
-        userGroupMembershipExtensionRepository.update(member);
-        return Response.noContent().build();
-    }
+//    @POST
+//    @Path("/aup-renew")
+//    public Response aupRenew() {
+//
+//        if (!MemberStatusEnum.ENABLED.equals(member.getStatus())) {
+//            throw new NotFoundException("You are not active member of this group");
+//        }
+//        GroupEnrollmentConfigurationEntity configuration = groupEnrollmentConfigurationRepository.getEntity(member.getGroupEnrollmentConfigurationId());
+//        if (configuration == null) {
+//            throw new NotFoundException("This configuration does not exist. You need to create new enrollment flow.");
+//        }
+//        if (configuration.getAupExpiryDays() == null) {
+//            throw new BadRequestException("This configuration does not have aup renew configuration.");
+//        }
+//        member.setAupExpiresAt((member.getAupExpiresAt()!=null ? member.getAupExpiresAt() : LocalDate.now()).plusDays(configuration.getAupExpiryDays()));
+//        userGroupMembershipExtensionRepository.update(member);
+//        return Response.noContent().build();
+//    }
 }

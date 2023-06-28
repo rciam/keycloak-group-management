@@ -27,10 +27,6 @@ public class UserGroupMembershipExtensionRepresentation {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     protected LocalDate membershipExpiresAt;
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
-    @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonDeserialize(using = LocalDateDeserializer.class)
-    protected LocalDate aupExpiresAt;
     protected String justification;
     protected GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
     protected List<String> groupRoles;
@@ -91,14 +87,6 @@ public class UserGroupMembershipExtensionRepresentation {
 
     public void setMembershipExpiresAt(LocalDate membershipExpiresAt) {
         this.membershipExpiresAt = membershipExpiresAt;
-    }
-
-    public LocalDate getAupExpiresAt() {
-        return aupExpiresAt;
-    }
-
-    public void setAupExpiresAt(LocalDate aupExpiresAt) {
-        this.aupExpiresAt = aupExpiresAt;
     }
 
     public String getJustification() {

@@ -15,8 +15,6 @@ public class GroupEnrollmentRequestRepresentation {
     private String reason;
     private String adminJustification;
     private String comment;
-    private List<GroupEnrollmentRequestAttributesRepresentation> attributes;
-
     private List<String> groupRoles;
 
     public GroupEnrollmentRequestRepresentation() {
@@ -84,14 +82,6 @@ public class GroupEnrollmentRequestRepresentation {
 
     public void setComment(String comment) {
         this.comment = comment;
-    }
-
-    public List<GroupEnrollmentRequestAttributesRepresentation> getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(List<GroupEnrollmentRequestAttributesRepresentation> attributes) {
-        this.attributes = attributes;
     }
 
     public List<String> getGroupRoles() {

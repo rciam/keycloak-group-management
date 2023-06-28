@@ -15,11 +15,8 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestAttributesEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestPager;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 
@@ -49,21 +46,8 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         if (rep.getGroupRoles() != null) {
             entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, configuration.getGroup().getId())).filter(Objects::nonNull).limit(configuration.isMultiselectRole() ? Integer.MAX_VALUE : 1).collect(Collectors.toList()));
         }
-        if (rep.getAttributes() != null)
-            entity.setAttributes(rep.getAttributes().stream().map(x -> toEntity(x, entity)).collect(Collectors.toList()));
         create(entity);
         return  entity;
-    }
-
-    private GroupEnrollmentRequestAttributesEntity toEntity(GroupEnrollmentRequestAttributesRepresentation rep, GroupEnrollmentRequestEntity enrollment){
-        GroupEnrollmentRequestAttributesEntity entity = new GroupEnrollmentRequestAttributesEntity();
-        entity.setId(rep.getId()!= null ? rep.getId() : KeycloakModelUtils.generateId());
-        entity.setValue(rep.getValue());
-        GroupEnrollmentConfigurationAttributesEntity confAttrEntity = new GroupEnrollmentConfigurationAttributesEntity();
-        confAttrEntity.setId(rep.getConfigurationAttribute().getId());
-        entity.setConfigurationAttribute(confAttrEntity);
-        entity.setEnrollment(enrollment);
-        return entity;
     }
 
     public Long countOngoingByUserAndGroup(String userId, String groupId) {
@@ -124,12 +108,10 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
     }
 
     public void deleteByGroup(String groupId){
-        em.createNamedQuery("deleteEnrollmentAttrByGroup").setParameter("groupId", groupId).executeUpdate();
         em.createNamedQuery("deleteEnrollmentByGroup").setParameter("groupId", groupId).executeUpdate();
     }
 
     public void deleteByUser(String userId){
-        em.createNamedQuery("deleteEnrollmentAttrByUser").setParameter("userId", userId).executeUpdate();
         em.createNamedQuery("deleteEnrollmentByUser").setParameter("userId", userId).executeUpdate();
         em.createNamedQuery("updateEnrollmentByAdminUser").setParameter("userId", userId).executeUpdate();
     }

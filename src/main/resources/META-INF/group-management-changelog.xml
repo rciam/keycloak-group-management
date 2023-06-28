@@ -659,5 +659,23 @@
         />
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="groupEnrollmentConfiguration">
+        <delete tableName="GROUP_ENROLLMENT_CONFIGURATION_ATTRIBUTES"/>
+        <delete tableName="GROUP_ENROLLMENT_REQUEST_ATTRIBUTES"/>
+        <addColumn tableName="GROUP_ENROLLMENT_CONFIGURATION">
+            <column name="VALID_FROM" type="timestamp"/>
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT_CONFIGURATION">
+            <column name="REQUIRE_APPROVAL_FOR_EXTENSION" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <renameColumn tableName="GROUP_ENROLLMENT_CONFIGURATION" oldColumnName="HIDE_CONFIGURATION" newColumnName="VISIBLE_TO_NOT_MEMBERS" columnDataType="boolean"/>
+        <dropColumn tableName="GROUP_ENROLLMENT_CONFIGURATION" columnName="REQUIRE_AUP_ACCEPTANCE" />
+        <dropColumn tableName="GROUP_ENROLLMENT_CONFIGURATION" columnName="AUP_EXPIRY_DAYS" />
+        <dropColumn tableName="GROUP_ENROLLMENT_CONFIGURATION" columnName="EXPIRATION_NOTIFICATION_PERIOD" />
+        <dropColumn tableName="USER_GROUP_MEMBERSHIP_EXTENSION" columnName="AUP_EXPIRES_AT" />
+    </changeSet>
+
 
 </databaseChangeLog>

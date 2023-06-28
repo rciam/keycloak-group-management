@@ -65,9 +65,6 @@ public class GroupEnrollmentRequestEntity {
     @Column(name="COMMENTS")
     private String comments;
 
-    @OneToMany(cascade =CascadeType.ALL, orphanRemoval = true, mappedBy = "enrollment")
-    private List<GroupEnrollmentRequestAttributesEntity> attributes;
-
     @ManyToMany
     @JoinTable(name = "GROUP_ENROLLMENT_ROLES", joinColumns = @JoinColumn(name = "GROUP_ENROLLMENT_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
     private List<GroupRolesEntity> groupRoles;
@@ -139,14 +136,6 @@ public class GroupEnrollmentRequestEntity {
     public void setComment(String comment) {
         //add comment to existing comments after line separator
         this.comments = this.comments != null ? this.comments + System.lineSeparator()+comment : comment;
-    }
-
-    public List<GroupEnrollmentRequestAttributesEntity> getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(List<GroupEnrollmentRequestAttributesEntity> attributes) {
-        this.attributes = attributes;
     }
 
     public List<GroupRolesEntity> getGroupRoles() {
