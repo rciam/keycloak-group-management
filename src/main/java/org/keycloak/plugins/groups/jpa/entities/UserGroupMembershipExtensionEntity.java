@@ -41,34 +41,34 @@ public class UserGroupMembershipExtensionEntity {
     @Id
     @Column(name="ID")
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
-    protected String id;
+    private String id;
 
     @ManyToOne()
     @JoinColumn(name = "GROUP_ID")
-    protected GroupEntity group;
+    private GroupEntity group;
 
     @ManyToOne()
     @JoinColumn(name = "USER_ID")
-    protected UserEntity user;
+    private UserEntity user;
 
     @Column(name="STATUS")
     @Enumerated(EnumType.STRING)
-    protected MemberStatusEnum status;
+    private MemberStatusEnum status;
 
     @ManyToOne()
     @JoinColumn(name = "CHANGED_BY")
-    protected UserEntity changedBy;
+    private UserEntity changedBy;
 
     @Column(name="VALID_FROM")
-    protected LocalDate validFrom;
+    private LocalDate validFrom;
 
     @Column(name="MEMBERSHIP_EXPIRES_AT")
-    protected LocalDate membershipExpiresAt;
+    private LocalDate membershipExpiresAt;
     @Column(name="JUSTIFICATION")
-    protected String justification;
+    private String justification;
 
     @Column(name="GROUP_ENROLLMENT_CONFIGURATION_ID")
-    protected String groupEnrollmentConfigurationId;
+    private String groupEnrollmentConfigurationId;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "GROUP_MEMBERSHIP_ROLES", joinColumns = @JoinColumn(name = "USER_GROUP_MEMBERSHIP_EXTENSION_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))

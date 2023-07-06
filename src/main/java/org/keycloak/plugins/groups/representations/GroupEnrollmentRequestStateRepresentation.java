@@ -4,11 +4,11 @@ import java.util.Date;
 
 public class GroupEnrollmentRequestStateRepresentation {
 
-    protected String id;
-    protected String enrollmentId;
-    protected String state;
-    protected Date timestamp;
-    protected String justification;
+    private String id;
+    private String enrollmentId;
+    private String state;
+    private Date timestamp;
+    private String justification;
 
     public GroupEnrollmentRequestStateRepresentation() {
     }

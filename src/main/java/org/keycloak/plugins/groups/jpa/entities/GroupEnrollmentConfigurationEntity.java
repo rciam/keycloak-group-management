@@ -22,61 +22,61 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="GROUP_ENROLLMENT_CONFIGURATION")
+@Table(name = "GROUP_ENROLLMENT_CONFIGURATION")
 @NamedQueries({
-        @NamedQuery(name="getAdminGroups", query="select g from GroupEnrollmentConfigurationEntity g, UserGroupMembershipExtensionEntity m where m.group.id = g.id and m.user.id = :userId and m.isAdmin = true"),
-        @NamedQuery(name="getByGroup", query="select g from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId"),
-        @NamedQuery(name="deleteEnrollmentConfigurationByGroup", query="delete from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId")
+        @NamedQuery(name = "getAdminGroups", query = "select g from GroupEnrollmentConfigurationEntity g, UserGroupMembershipExtensionEntity m where m.group.id = g.id and m.user.id = :userId and m.isAdmin = true"),
+        @NamedQuery(name = "getByGroup", query = "select g from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId"),
+        @NamedQuery(name = "deleteEnrollmentConfigurationByGroup", query = "delete from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId")
 })
 public class GroupEnrollmentConfigurationEntity {
 
     @Id
-    @Column(name="ID")
+    @Column(name = "ID")
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
     private String id;
 
     @ManyToOne()
     @JoinColumn(name = "GROUP_ID")
-    protected GroupEntity group;
+    private GroupEntity group;
 
-    @Column(name="NAME")
-    protected String name;
+    @Column(name = "NAME")
+    private String name;
 
-    @Column(name="ACTIVE")
-    protected Boolean active;
+    @Column(name = "ACTIVE")
+    private Boolean active;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "AUP_ID")
-    protected GroupAupEntity aupEntity;
+    private GroupAupEntity aupEntity;
 
-    @Column(name="REQUIRE_APPROVAL")
-    protected Boolean requireApproval;
+    @Column(name = "REQUIRE_APPROVAL")
+    private Boolean requireApproval;
 
-    @Column(name="REQUIRE_APPROVAL_FOR_EXTENSION")
-    protected Boolean requireApprovalForExtension;
+    @Column(name = "REQUIRE_APPROVAL_FOR_EXTENSION")
+    private Boolean requireApprovalForExtension;
 
-    @Column(name="VALID_FROM")
-    protected LocalDate validFrom;
+    @Column(name = "VALID_FROM")
+    private LocalDate validFrom;
 
-    @Column(name="MEMBERSHIP_EXPIRATION_DAYS")
-    protected Long membershipExpirationDays;
+    @Column(name = "MEMBERSHIP_EXPIRATION_DAYS")
+    private Long membershipExpirationDays;
 
-    @Column(name="ENROLLMENT_INTRODUCTION")
-    protected String enrollmentIntroduction;
+    @Column(name = "ENROLLMENT_INTRODUCTION")
+    private String enrollmentIntroduction;
 
-    @Column(name="INVITATION_INTRODUCTION")
-    protected String invitationIntroduction;
+    @Column(name = "INVITATION_INTRODUCTION")
+    private String invitationIntroduction;
 
-    @Column(name="ENROLLMENT_CONCLUSION")
-    protected String enrollmentConclusion;
+    @Column(name = "ENROLLMENT_CONCLUSION")
+    private String enrollmentConclusion;
 
-    @Column(name="INVITATION_CONCLUSION")
-    protected String invitationConclusion;
+    @Column(name = "INVITATION_CONCLUSION")
+    private String invitationConclusion;
 
-    @Column(name="VISIBLE_TO_NOT_MEMBERS")
-    protected Boolean visibleToNotMembers;
+    @Column(name = "VISIBLE_TO_NOT_MEMBERS")
+    private Boolean visibleToNotMembers;
 
-    @Column(name="MULTISELECT_ROLE")
+    @Column(name = "MULTISELECT_ROLE")
     private Boolean multiselectRole;
 
     @ManyToMany

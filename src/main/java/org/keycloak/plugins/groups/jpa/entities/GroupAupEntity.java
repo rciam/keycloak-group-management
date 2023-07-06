@@ -22,21 +22,21 @@ public class GroupAupEntity {
     @Id
     @Column(name="ID")
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
-    protected String id;
+    private String id;
 
     @Column(name="TYPE")
     @Enumerated(EnumType.STRING)
-    protected GroupAupTypeEnum type;
+    private GroupAupTypeEnum type;
 
     @Column(name="MIMETYPE")
-    protected String mimeType;
+    private String mimeType;
 
     @Column(name="CONTENT")
     @Lob
-    protected Object content;
+    private Object content;
 
     @Column(name="URL")
-    protected String url;
+    private String url;
 
 
     public String getId() {

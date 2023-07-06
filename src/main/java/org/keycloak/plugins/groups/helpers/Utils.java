@@ -1,7 +1,6 @@
 package org.keycloak.plugins.groups.helpers;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
@@ -9,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.keycloak.common.util.ObjectUtil;
@@ -22,7 +20,6 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
-import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
@@ -36,13 +33,13 @@ import org.keycloak.services.resources.admin.GroupResource;
 public class Utils {
 
     public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-    public static final String expirationNotificationPeriod="expiration-notification-period";
-    public static final String invitationExpirationPeriod ="invitation-expiration-period";
-    public static final String defaultGroupRole ="member";
+    public static final String expirationNotificationPeriod = "expiration-notification-period";
+    public static final String invitationExpirationPeriod = "invitation-expiration-period";
+    public static final String defaultGroupRole = "member";
 
     public static final String eventId = "1";
 
-    private static final String chronJobUserId ="chron-job";
+    private static final String chronJobUserId = "chron-job";
     private static final String colon = ":";
     private static final String space = " ";
     private static final String sharp = "#";
@@ -74,14 +71,14 @@ public class Utils {
         return user;
     }
 
-    public static String createMemberUserAttribute(String groupName, String role , String namespace, String authority) throws UnsupportedEncodingException {
+    public static String createMemberUserAttribute(String groupName, String role, String namespace, String authority) throws UnsupportedEncodingException {
         StringBuilder sb = new StringBuilder(namespace);
         sb.append(groupStr);
         sb.append(groupName);
-        if (role!= null){
-          sb.append(colon).append(roleStr).append(encode(role));
+        if (role != null) {
+            sb.append(colon).append(roleStr).append(encode(role));
         }
-        if (authority != null){
+        if (authority != null) {
             sb.append(sharp).append(authority);
         }
         return sb.toString();
@@ -98,7 +95,7 @@ public class Utils {
     }
 
     private static String encode(String x) throws UnsupportedEncodingException {
-        return URLEncoder.encode(x.replace(space,"%20"), StandardCharsets.UTF_8.toString()).replace("%2520","%20");
+        return URLEncoder.encode(x.replace(space, "%20"), StandardCharsets.UTF_8.toString()).replace("%2520", "%20");
     }
 
     public static Response addGroupChild(GroupRepresentation rep, RealmModel realm, GroupModel group, KeycloakSession session, AdminEventBuilder adminEvent, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, GroupRolesRepository groupRolesRepository) {
@@ -133,18 +130,18 @@ public class Utils {
         if (groupEnrollmentConfigurationRepository.getByGroup(rep.getId()).collect(Collectors.toList()).isEmpty()) {
             //group creation
             groupEnrollmentConfigurationRepository.createDefault(child.getId(), rep.getName());
-            groupRolesRepository.create(Utils.defaultGroupRole,rep.getId());
+            groupRolesRepository.create(Utils.defaultGroupRole, rep.getId());
         }
         return Response.noContent().build();
     }
 
-    public static boolean removeMemberUserAttributeCondition(String x, String urnNamespace, String groupName){
-        return x.equals(urnNamespace+groupStr+groupName) || x.startsWith(urnNamespace+groupStr+groupName+roleStr) || x.startsWith(urnNamespace+groupStr+groupName+sharp);
+    public static boolean removeMemberUserAttributeCondition(String x, String urnNamespace, String groupName) {
+        return x.equals(urnNamespace + groupStr + groupName) || x.startsWith(urnNamespace + groupStr + groupName + roleStr) || x.startsWith(urnNamespace + groupStr + groupName + sharp);
     }
 
     public static void changeUserAttributeValue(UserModel user, UserGroupMembershipExtensionEntity member, String groupName, MemberUserAttributeConfigurationEntity memberUserAttribute) throws UnsupportedEncodingException {
         List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
-        memberUserAttributeValues.removeIf(x-> Utils.removeMemberUserAttributeCondition(x,memberUserAttribute.getUrnNamespace(),groupName));
+        memberUserAttributeValues.removeIf(x -> Utils.removeMemberUserAttributeCondition(x, memberUserAttribute.getUrnNamespace(), groupName));
         if (member.getGroupRoles() == null || member.getGroupRoles().isEmpty()) {
             memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
         } else {
@@ -156,7 +153,7 @@ public class Utils {
                 }
             }).collect(Collectors.toList()));
         }
-        user.setAttribute(memberUserAttribute.getUserAttribute(),memberUserAttributeValues);
+        user.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
     }
 
 }

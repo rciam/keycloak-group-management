@@ -1,13 +1,7 @@
 package org.keycloak.plugins.groups.services;
 
-import java.time.LocalDate;
-
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
@@ -19,11 +13,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
-import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
-import org.keycloak.plugins.groups.helpers.Utils;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;

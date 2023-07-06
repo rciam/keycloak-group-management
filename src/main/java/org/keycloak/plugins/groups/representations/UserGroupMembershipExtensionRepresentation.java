@@ -14,24 +14,25 @@ import org.keycloak.representations.idm.GroupRepresentation;
 
 public class UserGroupMembershipExtensionRepresentation {
 
-    protected String id;
-    protected GroupRepresentation group;
-    protected UserRepresentation user;
-    protected MemberStatusEnum status;
-    protected String changedByUserId;
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    private String id;
+    private GroupRepresentation group;
+    private UserRepresentation user;
+    private MemberStatusEnum status;
+    private String changedByUserId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
-    protected LocalDate validFrom;
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    private LocalDate validFrom;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
-    protected LocalDate membershipExpiresAt;
-    protected String justification;
-    protected GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
-    protected List<String> groupRoles;
+    private LocalDate membershipExpiresAt;
+    private String justification;
+    private GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
+    private List<String> groupRoles;
 
-    public UserGroupMembershipExtensionRepresentation(){}
+    public UserGroupMembershipExtensionRepresentation() {
+    }
 
     public String getId() {
         return id;

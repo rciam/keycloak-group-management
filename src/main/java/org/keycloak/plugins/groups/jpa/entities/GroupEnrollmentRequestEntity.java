@@ -24,19 +24,19 @@ import javax.persistence.Table;
 import java.util.List;
 
 @Entity
-@Table(name="GROUP_ENROLLMENT_REQUEST")
+@Table(name = "GROUP_ENROLLMENT_REQUEST")
 @NamedQueries({
-        @NamedQuery(name="getAllUserGroupEnrollments", query="from GroupEnrollmentRequestEntity ge where ge.user.id = :userId"),
-        @NamedQuery(name="getRequestsByConfigurationAndStatus", query="from GroupEnrollmentRequestEntity f where f.groupEnrollmentConfiguration.id = :configurationId and f.status in (:status)"),
-        @NamedQuery(name="countOngoingByUserAndGroup", query="select count(f) from GroupEnrollmentRequestEntity f, GroupEnrollmentConfigurationEntity c  where f.groupEnrollmentConfiguration.id = c.id and f.user.id = :userId and c.group.id = :groupId and f.status in (:status)"),
-        @NamedQuery(name="deleteEnrollmentByGroup", query="delete from GroupEnrollmentRequestEntity g where g.groupEnrollmentConfiguration.id in (select conf.id from GroupEnrollmentConfigurationEntity conf where conf.group.id = :groupId)"),
-        @NamedQuery(name="deleteEnrollmentByUser", query="delete from GroupEnrollmentRequestEntity g where g.user.id = :userId"),
-        @NamedQuery(name="updateEnrollmentByAdminUser", query="update GroupEnrollmentRequestEntity g set g.checkAdmin = null where g.checkAdmin.id = :userId")
+        @NamedQuery(name = "getAllUserGroupEnrollments", query = "from GroupEnrollmentRequestEntity ge where ge.user.id = :userId"),
+        @NamedQuery(name = "getRequestsByConfigurationAndStatus", query = "from GroupEnrollmentRequestEntity f where f.groupEnrollmentConfiguration.id = :configurationId and f.status in (:status)"),
+        @NamedQuery(name = "countOngoingByUserAndGroup", query = "select count(f) from GroupEnrollmentRequestEntity f, GroupEnrollmentConfigurationEntity c  where f.groupEnrollmentConfiguration.id = c.id and f.user.id = :userId and c.group.id = :groupId and f.status in (:status)"),
+        @NamedQuery(name = "deleteEnrollmentByGroup", query = "delete from GroupEnrollmentRequestEntity g where g.groupEnrollmentConfiguration.id in (select conf.id from GroupEnrollmentConfigurationEntity conf where conf.group.id = :groupId)"),
+        @NamedQuery(name = "deleteEnrollmentByUser", query = "delete from GroupEnrollmentRequestEntity g where g.user.id = :userId"),
+        @NamedQuery(name = "updateEnrollmentByAdminUser", query = "update GroupEnrollmentRequestEntity g set g.checkAdmin = null where g.checkAdmin.id = :userId")
 })
 public class GroupEnrollmentRequestEntity {
 
     @Id
-    @Column(name="ID")
+    @Column(name = "ID")
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
     private String id;
 
@@ -52,17 +52,17 @@ public class GroupEnrollmentRequestEntity {
     @JoinColumn(name = "GROUP_ENROLLMENT_CONFIGURATION_ID")
     private GroupEnrollmentConfigurationEntity groupEnrollmentConfiguration;
 
-    @Column(name="STATE")
+    @Column(name = "STATE")
     @Enumerated(EnumType.STRING)
     private EnrollmentRequestStatusEnum status;
 
-    @Column(name="REASON")
+    @Column(name = "REASON")
     private String reason;
 
-    @Column(name="ADMIN_JUSTIFICATION")
+    @Column(name = "ADMIN_JUSTIFICATION")
     private String adminJustification;
 
-    @Column(name="COMMENTS")
+    @Column(name = "COMMENTS")
     private String comments;
 
     @ManyToMany
@@ -135,7 +135,7 @@ public class GroupEnrollmentRequestEntity {
 
     public void setComment(String comment) {
         //add comment to existing comments after line separator
-        this.comments = this.comments != null ? this.comments + System.lineSeparator()+comment : comment;
+        this.comments = this.comments != null ? this.comments + System.lineSeparator() + comment : comment;
     }
 
     public List<GroupRolesEntity> getGroupRoles() {

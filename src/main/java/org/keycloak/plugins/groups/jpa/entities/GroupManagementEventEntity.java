@@ -16,16 +16,16 @@ public class GroupManagementEventEntity {
     @Id
     @Column(name = "ID")
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
-    protected String id;
+    private String id;
 
     @Column(name="DATE")
-    protected LocalDate date;
+    private LocalDate date;
 
     @Column(name="DATE_FOR_WEEK_TASKS")
-    protected LocalDate dateForWeekTasks;
+    private LocalDate dateForWeekTasks;
 
     @Column(name = "SERVER_URL")
-    protected String serverUrl;
+    private String serverUrl;
 
     public String getId() {
         return id;

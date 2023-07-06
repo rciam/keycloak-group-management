@@ -30,10 +30,10 @@ public class GroupInvitationEntity {
     @Id
     @Column(name = "ID")
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
-    protected String id;
+    private String id;
 
     @Column(name="CREATION_DATE")
-    protected LocalDateTime creationDate;
+    private LocalDateTime creationDate;
 
     @ManyToOne()
     @JoinColumn(name = "CHECK_ADMIN_ID")

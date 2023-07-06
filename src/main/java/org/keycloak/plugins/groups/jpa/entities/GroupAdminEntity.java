@@ -35,15 +35,15 @@ public class GroupAdminEntity {
     @Id
     @Column(name="ID")
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
-    protected String id;
+    private String id;
 
     @ManyToOne()
     @JoinColumn(name = "USER_ID")
-    protected UserEntity user;
+    private UserEntity user;
 
     @ManyToOne()
     @JoinColumn(name = "GROUP_ID")
-    protected GroupEntity group;
+    private GroupEntity group;
 
     public String getId() {
         return id;

@@ -30,14 +30,14 @@ public class GroupRolesEntity {
     @Id
     @Column(name = "ID")
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
-    protected String id;
+    private String id;
 
     @ManyToOne()
     @JoinColumn(name = "GROUP_ID")
-    protected GroupEntity group;
+    private GroupEntity group;
 
     @Column(name="NAME")
-    protected String name;
+    private String name;
 
     @ManyToMany(mappedBy = "groupRoles", fetch = FetchType.LAZY)
     private List<GroupEnrollmentRequestEntity> enrollments = new ArrayList<>();
