@@ -103,7 +103,7 @@ public class UserGroups {
             throw new NotFoundException("Could not find group by id");
         }
 
-        UserGroup service = new UserGroup(session, realm, groupEnrollmentConfigurationRepository, user, group, customFreeMarkerEmailTemplateProvider, groupAdminRepository);
+        UserGroup service = new UserGroup(session, realm, groupEnrollmentConfigurationRepository, user, group);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

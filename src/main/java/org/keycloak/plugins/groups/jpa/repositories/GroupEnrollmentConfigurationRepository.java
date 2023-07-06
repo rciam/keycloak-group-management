@@ -77,6 +77,10 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         return em.createNamedQuery("getByGroup").setParameter("groupId", groupId).getResultStream();
     }
 
+    public Stream<GroupEnrollmentConfigurationEntity> getAvailableByGroup(String groupId) {
+        return em.createNamedQuery("getAvailableByGroup").setParameter("groupId", groupId).getResultStream();
+    }
+
     private void toEntity(GroupEnrollmentConfigurationEntity entity, GroupEnrollmentConfigurationRepresentation rep, String groupId) {
         entity.setName(rep.getName());
         entity.setActive(rep.isActive());

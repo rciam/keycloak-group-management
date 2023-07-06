@@ -26,6 +26,7 @@ import javax.persistence.Table;
 @NamedQueries({
         @NamedQuery(name = "getAdminGroups", query = "select g from GroupEnrollmentConfigurationEntity g, UserGroupMembershipExtensionEntity m where m.group.id = g.id and m.user.id = :userId and m.isAdmin = true"),
         @NamedQuery(name = "getByGroup", query = "select g from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId"),
+        @NamedQuery(name = "getAvailableByGroup", query = "select g from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId and g.active = true and g.visibleToNotMembers = true"),
         @NamedQuery(name = "deleteEnrollmentConfigurationByGroup", query = "delete from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId")
 })
 public class GroupEnrollmentConfigurationEntity {
