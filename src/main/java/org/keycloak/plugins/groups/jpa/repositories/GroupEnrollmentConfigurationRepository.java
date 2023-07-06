@@ -1,6 +1,5 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
