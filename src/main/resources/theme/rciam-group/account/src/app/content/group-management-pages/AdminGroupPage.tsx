@@ -86,7 +86,6 @@ interface GroupConfiguration {
     enrollmentConfigurationList: EnrollmentConfiration[];
     status: string;
     membershipExpiresAt: string;
-    aupExpiresAt: string;
     validFrom: string;
     admins: Admin[];
     extraSubGroups: Group[];

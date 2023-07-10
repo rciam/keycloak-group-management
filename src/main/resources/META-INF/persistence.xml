@@ -9,11 +9,9 @@
 
         <class>org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity</class>
-        <class>org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationAttributesEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.GroupAupEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity</class>
-        <class>org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestAttributesEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.GroupInvitationEntity</class>
         <class>org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity</class>

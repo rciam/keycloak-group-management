@@ -26,53 +26,49 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="USER_GROUP_MEMBERSHIP_EXTENSION")
+@Table(name = "USER_GROUP_MEMBERSHIP_EXTENSION")
 @NamedQueries({
-        @NamedQuery(name="getByUserAndGroup", query="from UserGroupMembershipExtensionEntity f where f.group.id = :groupId and f.user.id = :userId"),
-        @NamedQuery(name="getActiveByUser", query="from UserGroupMembershipExtensionEntity f where f.user.id = :userId and f.status = 'ENABLED'"),
-        @NamedQuery(name="getExpiredMemberships", query="from UserGroupMembershipExtensionEntity f where f.membershipExpiresAt < :date or f.aupExpiresAt < :date"),
-        @NamedQuery(name="getMembershipsByStatusAndValidFrom", query="from UserGroupMembershipExtensionEntity f where f.status = :status and f.validFrom <= :date"),
-        @NamedQuery(name="getExpiredMembershipsByGroup", query="from UserGroupMembershipExtensionEntity f where f.group.id = :groupId and f.membershipExpiresAt < :date or f.aupExpiresAt < :date"),
-        @NamedQuery(name="deleteMembershipExtensionByGroup", query="delete from UserGroupMembershipExtensionEntity g where g.group.id = :groupId"),
-        @NamedQuery(name="deleteMembershipExtensionByUser", query="delete from UserGroupMembershipExtensionEntity g where g.user.id = :userId")
+        @NamedQuery(name = "getByUserAndGroup", query = "from UserGroupMembershipExtensionEntity f where f.group.id = :groupId and f.user.id = :userId"),
+        @NamedQuery(name = "getActiveByUser", query = "from UserGroupMembershipExtensionEntity f where f.user.id = :userId and f.status = 'ENABLED'"),
+        @NamedQuery(name = "getExpiredMemberships", query = "from UserGroupMembershipExtensionEntity f where f.membershipExpiresAt < :date"),
+        @NamedQuery(name = "getMembershipsByStatusAndValidFrom", query = "from UserGroupMembershipExtensionEntity f where f.status = :status and f.validFrom <= :date"),
+        @NamedQuery(name = "getExpiredMembershipsByGroup", query = "from UserGroupMembershipExtensionEntity f where f.group.id = :groupId and f.membershipExpiresAt < :date"),
+        @NamedQuery(name = "deleteMembershipExtensionByGroup", query = "delete from UserGroupMembershipExtensionEntity g where g.group.id = :groupId"),
+        @NamedQuery(name = "deleteMembershipExtensionByUser", query = "delete from UserGroupMembershipExtensionEntity g where g.user.id = :userId")
 })
 public class UserGroupMembershipExtensionEntity {
 
     @Id
-    @Column(name="ID")
+    @Column(name = "ID")
     @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
-    protected String id;
+    private String id;
 
     @ManyToOne()
     @JoinColumn(name = "GROUP_ID")
-    protected GroupEntity group;
+    private GroupEntity group;
 
     @ManyToOne()
     @JoinColumn(name = "USER_ID")
-    protected UserEntity user;
+    private UserEntity user;
 
-    @Column(name="STATUS")
+    @Column(name = "STATUS")
     @Enumerated(EnumType.STRING)
-    protected MemberStatusEnum status;
+    private MemberStatusEnum status;
 
     @ManyToOne()
     @JoinColumn(name = "CHANGED_BY")
-    protected UserEntity changedBy;
+    private UserEntity changedBy;
 
-    @Column(name="VALID_FROM")
-    protected LocalDate validFrom;
+    @Column(name = "VALID_FROM")
+    private LocalDate validFrom;
 
-    @Column(name="MEMBERSHIP_EXPIRES_AT")
-    protected LocalDate membershipExpiresAt;
+    @Column(name = "MEMBERSHIP_EXPIRES_AT")
+    private LocalDate membershipExpiresAt;
+    @Column(name = "JUSTIFICATION")
+    private String justification;
 
-    @Column(name="AUP_EXPIRES_AT")
-    protected LocalDate aupExpiresAt;
-
-    @Column(name="JUSTIFICATION")
-    protected String justification;
-
-    @Column(name="GROUP_ENROLLMENT_CONFIGURATION_ID")
-    protected String groupEnrollmentConfigurationId;
+    @Column(name = "GROUP_ENROLLMENT_CONFIGURATION_ID")
+    private String groupEnrollmentConfigurationId;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "GROUP_MEMBERSHIP_ROLES", joinColumns = @JoinColumn(name = "USER_GROUP_MEMBERSHIP_EXTENSION_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
@@ -132,14 +128,6 @@ public class UserGroupMembershipExtensionEntity {
 
     public void setMembershipExpiresAt(LocalDate membershipExpiresAt) {
         this.membershipExpiresAt = membershipExpiresAt;
-    }
-
-    public LocalDate getAupExpiresAt() {
-        return aupExpiresAt;
-    }
-
-    public void setAupExpiresAt(LocalDate aupExpiresAt) {
-        this.aupExpiresAt = aupExpiresAt;
     }
 
     public String getJustification() {

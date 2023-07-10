@@ -10,8 +10,6 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.jpa.entities.*;
 import org.keycloak.plugins.groups.representations.MemberUserAttributeConfigurationRepresentation;
 import org.keycloak.plugins.groups.representations.GroupAupRepresentation;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestAttributesRepresentation;
-import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationAttributesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 import org.keycloak.plugins.groups.representations.GroupInvitationRepresentation;
@@ -21,47 +19,32 @@ import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class EntityToRepresentation {
 
-    public static GroupEnrollmentConfigurationRepresentation toRepresentation(GroupEnrollmentConfigurationEntity entity, boolean containAttributes) {
+    public static GroupEnrollmentConfigurationRepresentation toRepresentation(GroupEnrollmentConfigurationEntity entity) {
         GroupEnrollmentConfigurationRepresentation rep = new GroupEnrollmentConfigurationRepresentation(entity.getId());
         GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true);
         rep.setGroup(group);
         rep.setName(entity.getName());
         rep.setActive(entity.isActive());
-        rep.setHideConfiguration(entity.isHideConfiguration());
+        rep.setVisibleToNotMembers(entity.isVisibleToNotMembers());
         rep.setRequireApproval(entity.getRequireApproval());
-        rep.setRequireAupAcceptance(entity.getRequireAupAcceptance());
-        rep.setAupExpiryDays(entity.getAupExpiryDays());
+        rep.setRequireApprovalForExtension(entity.getRequireApprovalForExtension());
+        rep.setValidFrom(entity.getValidFrom());
         rep.setMembershipExpirationDays(entity.getMembershipExpirationDays());
         rep.setEnrollmentConclusion(entity.getEnrollmentConclusion());
         rep.setEnrollmentIntroduction(entity.getEnrollmentIntroduction());
         rep.setInvitationConclusion(entity.getInvitationConclusion());
         rep.setInvitationIntroduction(entity.getInvitationIntroduction());
         rep.setMultiselectRole(entity.isMultiselectRole());
-        if ( entity.getAupEntity() != null)
+        if (entity.getAupEntity() != null)
             rep.setAup(toRepresentation(entity.getAupEntity()));
-        if ( containAttributes && entity.getAttributes() != null)
-            rep.setAttributes(entity.getAttributes().stream().map(EntityToRepresentation::toRepresentation).collect(Collectors.toList()));
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
-        return rep;
-    }
-
-    private static GroupEnrollmentConfigurationAttributesRepresentation toRepresentation(GroupEnrollmentConfigurationAttributesEntity entity){
-        GroupEnrollmentConfigurationAttributesRepresentation rep = new GroupEnrollmentConfigurationAttributesRepresentation();
-        rep.setId(entity.getId());
-        rep.setAttribute(entity.getAttribute());
-        rep.setDefaultValue(entity.getDefaultValue());
-        rep.setHidden(entity.getHidden());
-        rep.setLabel(entity.getLabel());
-        rep.setModifiable(entity.getModifiable());
-        rep.setOrder(entity.getOrder());
         return rep;
     }
 
@@ -82,7 +65,6 @@ public class EntityToRepresentation {
         rep.setGroup(group);
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
         rep.setJustification(entity.getJustification());
-        rep.setAupExpiresAt(entity.getAupExpiresAt());
         rep.setMembershipExpiresAt(entity.getMembershipExpiresAt());
         rep.setValidFrom(entity.getValidFrom());
         rep.setStatus(entity.getStatus());
@@ -103,28 +85,17 @@ public class EntityToRepresentation {
         GroupEnrollmentRequestRepresentation rep = new GroupEnrollmentRequestRepresentation();
         rep.setId(entity.getId());
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
-        if (entity.getCheckAdmin() != null )
+        if (entity.getCheckAdmin() != null)
             rep.setCheckAdmin(toBriefRepresentation(entity.getCheckAdmin(), realm));
-        rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration(), false));
+        rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration()));
         rep.setAdminJustification(entity.getAdminJustification());
         rep.setComment(entity.getComments());
         rep.setStatus(entity.getStatus());
         rep.setReason(entity.getReason());
-        if ( entity.getAttributes()!= null)
-            rep.setAttributes(entity.getAttributes().stream().map(attr-> EntityToRepresentation.toRepresentation(attr)).collect(Collectors.toList()));
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
         return rep;
     }
-
-    private static GroupEnrollmentRequestAttributesRepresentation toRepresentation(GroupEnrollmentRequestAttributesEntity entity){
-        GroupEnrollmentRequestAttributesRepresentation rep = new GroupEnrollmentRequestAttributesRepresentation();
-        rep.setId(entity.getId());
-        rep.setValue(entity.getValue());
-        rep.setConfigurationAttribute(toRepresentation(entity.getConfigurationAttribute()));
-        return rep;
-    }
-
 
     public static GroupRepresentation toBriefRepresentation(GroupEntity entity, boolean attributes) {
         GroupRepresentation rep = new GroupRepresentation();
@@ -143,7 +114,7 @@ public class EntityToRepresentation {
         rep.setEmail(entity.getEmail());
         rep.setEmailVerified(entity.isEmailVerified());
         rep.setUsername(entity.getUsername());
-        if ( entity.getAttributes() != null && !entity.getAttributes().isEmpty()) {
+        if (entity.getAttributes() != null && !entity.getAttributes().isEmpty()) {
             MultivaluedHashMap<String, String> attributes = new MultivaluedHashMap<>();
             for (UserAttributeEntity attr : entity.getAttributes()) {
                 attributes.add(attr.getName(), attr.getValue());
@@ -155,7 +126,7 @@ public class EntityToRepresentation {
         return rep;
     }
 
-    private static FederatedIdentityRepresentation getFederatedIdentityRep(RealmModel realm, String idPAlias){
+    private static FederatedIdentityRepresentation getFederatedIdentityRep(RealmModel realm, String idPAlias) {
         FederatedIdentityRepresentation rep = new FederatedIdentityRepresentation();
         IdentityProviderModel idp = realm.getIdentityProviderByAlias(idPAlias);
         rep.setIdentityProvider(idp.getDisplayName() != null ? idp.getDisplayName() : idPAlias);
@@ -168,10 +139,10 @@ public class EntityToRepresentation {
         rep.setCreationDate(entity.getCreationDate());
         rep.setForMember(entity.getForMember());
         if (entity.getGroupEnrollmentConfiguration() != null)
-            rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration(), true));
+            rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration()));
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
-        if (entity.getGroup() != null){
+        if (entity.getGroup() != null) {
             GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true);
             rep.setGroup(group);
         }
@@ -179,7 +150,7 @@ public class EntityToRepresentation {
         return rep;
     }
 
-    public static MemberUserAttributeConfigurationRepresentation toRepresentation(MemberUserAttributeConfigurationEntity entity){
+    public static MemberUserAttributeConfigurationRepresentation toRepresentation(MemberUserAttributeConfigurationEntity entity) {
         MemberUserAttributeConfigurationRepresentation rep = new MemberUserAttributeConfigurationRepresentation(entity.getUserAttribute(), entity.getUrnNamespace(), entity.getAuthority());
         rep.setId(entity.getId());
         return rep;

@@ -116,9 +116,6 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
                         return <Badge key={index} className="gm_role_badge" isRead>{role}</Badge>
                       })}
                 </DataListCell>,
-                <DataListCell id={`${appIndex}-group-aupExpiration`} width={2} key={'directMembership-' + appIndex}>
-                  {membership.aupExpiresAt||"Never"} 
-                </DataListCell>,
                 <DataListCell id={`${appIndex}-group-membershipExpiration`} width={2} key={'directMembership-' + appIndex}>
                 {membership.membershipExpiresAt||"Never"}
               </DataListCell>
@@ -155,9 +152,6 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
                   </DataListCell>,
                   <DataListCell key='group-roles' width={2}>
                     <strong>Roles</strong>
-                  </DataListCell>,
-                  <DataListCell key='group-aup-expiration-header' width={2} onClick={()=>{orderResults('aupExpiresAt')}}>
-                    <strong>Aup Expiration Date</strong> {orderBy!=='aupExpiresAt'?<AngleDownIcon/>:asc?<LongArrowAltDownIcon/>:<LongArrowAltUpIcon/>}
                   </DataListCell>,
                   <DataListCell key='group-membership-expiration-header' width={2} onClick={()=>{orderResults('membershipExpiresAt')}}>
                   <strong>Membership Expiration Date</strong> {orderBy!=='membershipExpiresAt'?<AngleDownIcon/>:asc?<LongArrowAltDownIcon/>:<LongArrowAltUpIcon/>}
