@@ -336,13 +336,13 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             entity.setId(KeycloakModelUtils.generateId());
         }
         GroupEnrollmentConfigurationEntity configuration = enrollmentEntity.getGroupEnrollmentConfiguration();
-        if (configuration.getMembershipExpirationDays() != null) {
-            entity.setMembershipExpiresAt(LocalDate.now().plusDays(configuration.getMembershipExpirationDays()));
-        } else {
-            entity.setMembershipExpiresAt(null);
-        }
         if (isNotMember) {
             entity.setValidFrom(configuration.getValidFrom() == null || !configuration.getValidFrom().isAfter(LocalDate.now()) ? LocalDate.now() : configuration.getValidFrom());
+        }
+        if (configuration.getMembershipExpirationDays() != null) {
+            entity.setMembershipExpiresAt(entity.getValidFrom().plusDays(configuration.getMembershipExpirationDays()));
+        } else {
+            entity.setMembershipExpiresAt(null);
         }
         entity.setGroup(configuration.getGroup());
         entity.setUser(enrollmentEntity.getUser());
@@ -454,17 +454,17 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 //        if (entity == null) {
         UserGroupMembershipExtensionEntity entity = new UserGroupMembershipExtensionEntity();
         entity.setId(KeycloakModelUtils.generateId());
-        if (configuration.getMembershipExpirationDays() != null) {
-            entity.setMembershipExpiresAt(LocalDate.now().plusDays(configuration.getMembershipExpirationDays()));
-        } else {
-            entity.setMembershipExpiresAt(null);
-        }
         if (configuration.getValidFrom() == null || !configuration.getValidFrom().isAfter(LocalDate.now())) {
             entity.setValidFrom(LocalDate.now());
             entity.setStatus(MemberStatusEnum.ENABLED);
         } else {
             entity.setValidFrom(configuration.getValidFrom());
             entity.setStatus(MemberStatusEnum.PENDING);
+        }
+        if (configuration.getMembershipExpirationDays() != null) {
+            entity.setMembershipExpiresAt(entity.getValidFrom().plusDays(configuration.getMembershipExpirationDays()));
+        } else {
+            entity.setMembershipExpiresAt(null);
         }
         entity.setGroup(configuration.getGroup());
         UserEntity userEntity = new UserEntity();
