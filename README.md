@@ -50,7 +50,8 @@ Path | Method | Description                                                     
 
 Path | Method | Description                                                                   | Classes 
 ------------ |--|-------------------------------------------------------------------------------|--------- 
-/account/group-admin/groups | GET | get all groups that this user has admin rights                                | GroupAdminService 
+/account/group-admin/groups | GET | get all groups that this user has admin rights                                | GroupAdminService
+/account/group-admin/configuration-rules | GET | get group enrollment configuration rules based on group type         | GroupAdminService
 /account/group-admin/groupids/all | GET | get all groups ids that this user has admin rights                            | GroupAdminService
 /account/group-admin/groups/members | GET | get all groups members given the groupids as comma-separated string           | GroupAdminService
 /account/group-admin/group/{groupId} | DELETE | delete group                                                | GroupAdminGroup
@@ -88,6 +89,10 @@ Path | Method | Description                                  | Classes |
 /admin/configuration | PUT | change realm settings (realm attributes)                  | AdminService
 /admin/member-user-attribute/configuration | GET | get member user attribute configuration          | AdminService
 /admin/member-user-attribute/configuration | POST |update member user attribute configuration | AdminService
+/admin/configuration-rules | GET | get group enrollment configuration rules          | AdminEnrollmentConfigurationRules
+/admin/configuration-rules | POST |create group enrollment configuration rule | AdminEnrollmentConfigurationRules
+/admin/configuration-rules/{id}| GET | get group enrollment configuration rule by id       | AdminEnrollmentConfigurationRules
+/admin/configuration-rules/{id} | PUT |update group enrollment configuration rule | AdminEnrollmentConfigurationRules
 /admin/memberUserAttribute/calculation | POST |update member user attribute value for all users | AdminService
 /admin/user/{id} | DELETE | delete user          | AdminService
 /admin/group/{groupId} | DELETE | delete group          | AdminGroups

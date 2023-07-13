@@ -29,17 +29,22 @@ import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.plugins.groups.enums.FieldEnum;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.GeneralJpaService;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationRulesEntity;
 import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupManagementEventEntity;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRulesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupManagementEventRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRulesRepresentation;
 import org.keycloak.plugins.groups.representations.MemberUserAttributeConfigurationRepresentation;
 import org.keycloak.plugins.groups.scheduled.AgmTimerProvider;
 import org.keycloak.plugins.groups.scheduled.MemberUserAttributeCalculatorTask;
@@ -139,6 +144,12 @@ public class AdminService {
     }
 
 
+    @Path("/configuration-rules")
+    public AdminEnrollmentConfigurationRules adminEnrollmentConfigurationRules() {
+        AdminEnrollmentConfigurationRules service = new AdminEnrollmentConfigurationRules(realm, session, adminEvent);
+        ResteasyProviderFactory.getInstance().injectProperties(service);
+        return service;
+    }
     @Path("/group/{groupId}")
     public AdminGroups adminGroups(@PathParam("groupId") String groupId) {
         GroupModel group = realm.getGroupById(groupId);
