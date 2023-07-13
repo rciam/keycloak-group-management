@@ -31,10 +31,10 @@ public class AdminEnrollmentConfigurationRules {
     private final GroupEnrollmentConfigurationRulesRepository groupEnrollmentConfigurationRulesRepository;
     private final AdminEventBuilder adminEvent;
 
-    public AdminEnrollmentConfigurationRules(RealmModel realm, KeycloakSession session, AdminEventBuilder adminEvent){
+    public AdminEnrollmentConfigurationRules(RealmModel realm, KeycloakSession session, AdminEventBuilder adminEvent) {
         this.realm = realm;
         this.groupEnrollmentConfigurationRulesRepository = new GroupEnrollmentConfigurationRulesRepository(session);
-        this.adminEvent =  adminEvent;
+        this.adminEvent = adminEvent;
     }
 
     @GET
@@ -80,7 +80,7 @@ public class AdminEnrollmentConfigurationRules {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public GroupEnrollmentConfigurationRulesRepresentation getConfigureRule( @PathParam("id") String id) {
+    public GroupEnrollmentConfigurationRulesRepresentation getConfigureRule(@PathParam("id") String id) {
         GroupEnrollmentConfigurationRulesEntity entity = groupEnrollmentConfigurationRulesRepository.getEntity(id);
         if (entity == null) {
             throw new NotFoundException("Could not find GroupEnrollmentConfigurationRules by id");
