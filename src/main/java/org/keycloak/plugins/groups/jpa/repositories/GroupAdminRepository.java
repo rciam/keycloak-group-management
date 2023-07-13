@@ -96,6 +96,10 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
         return groupIds;
     }
 
+    public boolean hasAdminRights(String userId) {
+        return em.createNamedQuery("countGroupsForAdmin", Long.class).setParameter("userId", userId).getSingleResult() > 0;
+    }
+
     public Stream<String> getAllAdminIdsGroupUsers(GroupModel group){
         List<String> groupIds = getThisAndParentGroupIds(group, true);
         return em.createNamedQuery("getAdminsIdsForGroupIds", String.class).setParameter("groupIds", groupIds).getResultStream();

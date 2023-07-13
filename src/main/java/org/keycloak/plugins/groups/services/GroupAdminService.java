@@ -19,12 +19,16 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
+import org.keycloak.plugins.groups.enums.GroupTypeEnum;
 import org.keycloak.plugins.groups.enums.MemberStatusEnum;
+import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
+import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRulesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
+import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRulesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestPager;
 import org.keycloak.plugins.groups.representations.GroupsPager;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
@@ -42,6 +46,8 @@ public class GroupAdminService {
     private final AdminEventBuilder adminEvent;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
 
+    private final GroupEnrollmentConfigurationRulesRepository groupEnrollmentConfigurationRulesRepository;
+
     public GroupAdminService(KeycloakSession session, RealmModel realm, UserModel user, AdminEventBuilder adminEvent) {
         this.session = session;
         this.realm =  realm;
@@ -50,6 +56,7 @@ public class GroupAdminService {
         this.groupAdminRepository =  new GroupAdminRepository(session, realm);
         this.groupEnrollmentRequestRepository =  new GroupEnrollmentRequestRepository(session, realm, new GroupRolesRepository(session, realm));
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
+        this.groupEnrollmentConfigurationRulesRepository = new GroupEnrollmentConfigurationRulesRepository(session);
     }
 
 
@@ -64,12 +71,13 @@ public class GroupAdminService {
     @Path("/group/{groupId}")
     public GroupAdminGroup group(@PathParam("groupId") String groupId) {
         GroupModel group = realm.getGroupById(groupId);
-        if (group == null) {
-            throw new NotFoundException("Could not find group by id");
-        }
         if (!groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group)){
             throw new ForbiddenException();
         }
+        if (group == null) {
+            throw new NotFoundException("Could not find group by id");
+        }
+
 
         GroupAdminGroup service = new GroupAdminGroup(session, realm, groupAdmin, group, userGroupMembershipExtensionRepository, groupAdminRepository, groupEnrollmentRequestRepository, adminEvent);
         ResteasyProviderFactory.getInstance().injectProperties(service);
@@ -80,6 +88,16 @@ public class GroupAdminService {
     @Path("/groupids/all")
     public List<String> getGroupIdsForAdmin(){
         return groupAdminRepository.getAllAdminGroupIds(groupAdmin.getId());
+    }
+
+    @GET
+    @Path("/configuration-rules")
+    @Produces("application/json")
+    public  List<GroupEnrollmentConfigurationRulesRepresentation> getEnrollmentConfigurationRules(@QueryParam("type") @DefaultValue("TOP_LEVEL") GroupTypeEnum type) {
+        if (!groupAdminRepository.hasAdminRights(groupAdmin.getId())){
+            throw new ForbiddenException();
+        }
+        return groupEnrollmentConfigurationRulesRepository.getByRealmAndType(realm.getId(), type).map(EntityToRepresentation::toRepresentation).collect(Collectors.toList());
     }
 
     /**

@@ -678,4 +678,35 @@
     </changeSet>
 
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="enrollmentConfigurationRules">
+        <createTable tableName="GROUP_ENROLLMENT_CONFIGURATION_RULES">
+            <column name="ID" type="VARCHAR(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="FIELD" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="TYPE" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+            <column name="DEFAULT_VALUE" type="VARCHAR(36)" />
+            <column name="MAX" type="VARCHAR(36)" />
+            <column name="REQUIRED" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="REALM_ID" type="VARCHAR(36)" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                constraintName="enrollment_configuration_rules_realm_fk"
+                baseTableName="GROUP_ENROLLMENT_CONFIGURATION_RULES"
+                baseColumnNames="REALM_ID"
+                referencedTableName="REALM"
+                referencedColumnNames="id"
+        />
+        <addUniqueConstraint columnNames="REALM_ID, FIELD, TYPE" constraintName="UK_GROUP_ENROLLMENT_CONFIGURATION_RULES" tableName="GROUP_ENROLLMENT_CONFIGURATION_RULES"/>
+    </changeSet>
+
+
 </databaseChangeLog>
