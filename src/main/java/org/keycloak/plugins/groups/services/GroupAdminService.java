@@ -31,7 +31,6 @@ import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtension
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRulesRepresentation;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestPager;
 import org.keycloak.plugins.groups.representations.GroupsPager;
-import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
 import org.keycloak.plugins.groups.representations.UserRepresentationPager;
 import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
