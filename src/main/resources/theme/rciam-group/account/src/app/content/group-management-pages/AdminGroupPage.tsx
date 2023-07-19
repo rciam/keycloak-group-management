@@ -55,7 +55,7 @@ interface EnrollmentConfiration {
     aupExpiryDays: number;
     membershipExpirationDays: number;
     aup: AUP;
-    hideConfiguration: boolean;
+    visibleToNotMembers: boolean;
     attributes: EnrollmentAttributes[];
     groupRoles: string[];
 }

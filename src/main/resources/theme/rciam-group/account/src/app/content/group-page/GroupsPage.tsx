@@ -80,7 +80,6 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
   const fetchGroups = () =>  {
     groupsService!.doGet<Response>("/user/groups",{params:{first:(perPage*(page-1)),max:perPage,...(orderBy?{order:orderBy}:{}),asc:asc?"true":"false"}})
       .then((response: HttpResponse<Response>) => {
-        console.log(response.data);
         let count = response?.data?.count||0;
         setTotalItems(count as number);
         setGroups(response?.data?.results||[] as Group[]);

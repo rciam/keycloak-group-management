@@ -17,7 +17,7 @@ public class GroupEnrollmentConfigurationRepresentation {
     private Boolean active;
     private Boolean requireApprovalForExtension;
     private Boolean requireApproval;
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="dd-MM-yyyy")
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate validFrom;

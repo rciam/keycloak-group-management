@@ -164,7 +164,7 @@ export const CreateSubgroupModal:React.FC<any> = (props) => {
             <ConfirmationModal modalInfo={modalInfo}/>
             <Modal
                 variant={ModalVariant.medium}
-                title={"Create Subgroup"}
+                title={Msg.localize('createSubgroup')}
                 isOpen={isModalOpen}
                 onClose={()=>{props.close()}}
                 actions={[

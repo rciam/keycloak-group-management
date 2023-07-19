@@ -9,6 +9,8 @@ import { SearchInput } from './SearchInput';
 import {ExternalLinkAltIcon } from '@patternfly/react-icons';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
 import { Msg } from '../../widgets/Msg';
+import { EnrollmentModal } from '../GroupEnrollment/EnrollmentModal';
+import { Link } from 'react-router-dom';
 
 interface FederatedIdentity {
     identityProvider: string;
@@ -36,18 +38,49 @@ interface Memberships {
 
 
 export const GroupEnrollment: FC<any> = (props) => {
+
+ 
+    
+
+
+
+
     const [modalInfo,setModalInfo] = useState({});
     const [groupEnrollments,setGroupEnrollments] = useState<any>([]);
-
-
+    const [enrollmentModal,setEnrollmentModal] = useState({});
+    const [enrollmentRules, setEnrollmentRules] = useState({});
+    const [defaultEnrollmentConfiguration,setDefaultEnrollmentConfiguration] = useState({
+      group: {id:""},
+      aupExpiryDays : 10,
+      membershipExpirationDays : 3,
+      expirationNotificationPeriod : 12,
+      name: "",
+      active: true,
+      requireAupAcceptance: true,
+      requireApproval: true,
+      aup: {
+          type: "URL",
+          url: ""
+      },
+      requireApprovalForExtension:false,
+      visibleToNotMembers: false,
+      validFrom: null,
+      groupRoles : []
+    })
 
     let groupsService = new GroupsServiceClient();
-    useEffect(()=>{
-      fetchGroupEnrollments();
-    },[]);
+    
 
     useEffect(()=>{
-      fetchGroupEnrollments();
+      if(Object.keys(props.groupConfiguration).length !== 0){
+        fetchGroupEnrollmentRules();
+      }
+    },[props.groupConfiguration])
+
+    useEffect(()=>{
+      if(props.groupId){
+        fetchGroupEnrollments();
+      }
     },[props.groupId]);
 
     let fetchGroupEnrollments = ()=>{
@@ -55,6 +88,37 @@ export const GroupEnrollment: FC<any> = (props) => {
       .then((response: HttpResponse<any>) => {
         if(response.status===200&&response.data){
           setGroupEnrollments(response.data);
+        }
+      })
+    }
+
+    let fetchGroupEnrollmentRules = ()=>{
+      groupsService!.doGet<any>("/group-admin/configuration-rules",{params:{type:(("/"+props.groupConfiguration?.name)!==props.groupConfiguration?.path?'SUBGROUP':'TOP_LEVEL')}})
+      .then((response: HttpResponse<any>) => {
+        if(response.status===200&&response.data){
+          if(response.data.length>0){
+            let rules = {};
+            response.data.forEach(field_rules=>{
+              rules[field_rules.field] = {
+                "max": parseInt(field_rules.max),
+                "required": field_rules.required
+              }
+              if(field_rules.defaultValue){
+                  if(isIntegerOrNumericString(field_rules.defaultValue)){
+                    defaultEnrollmentConfiguration[field_rules.field] = parseInt(field_rules.defaultValue); 
+                  }
+                  else{
+                    defaultEnrollmentConfiguration[field_rules.field] = field_rules.defaultValue; 
+
+                  }
+              }
+            })
+            setDefaultEnrollmentConfiguration({...defaultEnrollmentConfiguration});
+            setEnrollmentRules(rules);
+          }
+          else{
+            setEnrollmentRules({});
+          }
         }
       })
     }
@@ -78,6 +142,7 @@ export const GroupEnrollment: FC<any> = (props) => {
     return (
       <React.Fragment>
         <ConfirmationModal modalInfo={modalInfo}/>
+        <EnrollmentModal enrollment={enrollmentModal} validationRules={enrollmentRules}  groupRoles={props.groupConfiguration.groupRoles} close={()=>{setEnrollmentModal({}); fetchGroupEnrollments();}} groupId={props.groupId}/>
         <DataList aria-label="Group Member Datalist" isCompact>
             <DataListItem aria-labelledby="compact-item1">
               <DataListItemRow>
@@ -93,6 +158,19 @@ export const GroupEnrollment: FC<any> = (props) => {
                   </DataListCell>,
                 ]}>
                 </DataListItemCells>
+                <DataListAction
+                      className="gm_cell-center"
+                      aria-labelledby="check-action-item1 check-action-action2"
+                      id="check-action-action1"
+                      aria-label="Actions"
+                      isPlainButtonAction
+                >
+                  <Tooltip content={<div><Msg msgKey='createEnrollmentButton'/></div>}>
+                    <Button className={"gm_plus-button-small"} onClick={()=>{defaultEnrollmentConfiguration.group.id=props.groupId; setEnrollmentModal(defaultEnrollmentConfiguration);}}>
+                        <div className={"gm_plus-button"}></div>
+                    </Button>
+                  </Tooltip>
+                </DataListAction>
               </DataListItemRow>
             </DataListItem>
             {groupEnrollments.length>0?groupEnrollments.map((enrollment,index)=>{
@@ -100,8 +178,19 @@ export const GroupEnrollment: FC<any> = (props) => {
                 <DataListItemRow>
                   <DataListItemCells
                     dataListCells={[
-                      <DataListCell width={3} key="primary content">
-                        {enrollment.name||Msg.localize('notAvailable')}
+                      <DataListCell width={3} key="primary content" onClick={()=>{                        
+                        enrollment?.aup?.id && delete enrollment.aup.id;
+                        if(!enrollment.validFrom){
+                          enrollment.validFrom=null;
+                        }
+                        if(!enrollment.aup){
+                          enrollment.aup=  {
+                            type: "URL",
+                            url: ""
+                          }
+                        }
+                        setEnrollmentModal(enrollment)}}>
+                        <Link to={"/groups/admingroups/"+props.groupId}>{enrollment.name||Msg.localize('notAvailable')}</Link>
                       </DataListCell>,
                       <DataListCell width={3} className={enrollment.active?"gm_group-enrollment-active":"gm_group-enrollment-inactive"} key="secondary content ">
                         <strong>{enrollment.active?Msg.localize('Active'):Msg.localize('Inactive')}</strong>
@@ -111,7 +200,13 @@ export const GroupEnrollment: FC<any> = (props) => {
                       </DataListCell>,                    
                     ]}
                   />
-                  
+                  <DataListAction
+                    className="gm_cell-center"
+                    aria-labelledby="check-action-item1 check-action-action2"
+                    id="check-action-action1"
+                    aria-label="Actions"
+                    isPlainButtonAction
+                  ><div className="gm_cell-placeholder"></div></DataListAction>
                 </DataListItemRow>
               </DataListItem>
             }):noGroupEnrollments()}
@@ -120,5 +215,21 @@ export const GroupEnrollment: FC<any> = (props) => {
         </React.Fragment>         
    
     )
+  }
+
+
+  function isIntegerOrNumericString(value) {
+    if (Number.isInteger(value)) {
+      // If the value is already an integer, return true
+      return true;
+    }
+  
+    if (typeof value === 'string' && /^\d+$/.test(value)) {
+      // If the value is a string containing only numbers, return true
+      return true;
+    }
+  
+    // Otherwise, return false
+    return false;
   }
 

@@ -55,8 +55,10 @@ export const GroupSubGroups: FC<any> = (props) => {
                       aria-label="Actions"
                       isPlainButtonAction
                 >
-                  <Tooltip content={"Create Subgroup"}>
-                    <Button className={"gm_createsub-button"} onClick={()=>{setCreateSubgroup(true)}}><PlusIcon/></Button>
+                  <Tooltip content={<div><Msg msgKey='createSubgroup'/></div>}>
+                    <Button className={"gm_plus-button-small"} onClick={()=>{setCreateSubgroup(true)}}>
+                        <div className={"gm_plus-button"}></div>
+                    </Button>
                   </Tooltip>
                 </DataListAction>
                   
