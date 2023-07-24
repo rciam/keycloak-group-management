@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -18,7 +19,6 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
-import org.keycloak.plugins.groups.enums.FieldEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationRulesEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRulesRepository;
@@ -52,7 +52,7 @@ public class AdminEnrollmentConfigurationRules {
         realmEntity.setId(realm.getId());
         entity.setRealmEntity(realmEntity);
         entity.setType(rep.getType());
-        entity.setField(FieldEnum.of(rep.getField()));
+        entity.setField(rep.getField());
         entity.setDefaultValue(rep.getDefaultValue());
         entity.setMax(rep.getMax());
         entity.setRequired(rep.getRequired());
@@ -69,7 +69,7 @@ public class AdminEnrollmentConfigurationRules {
             throw new NotFoundException("Could not find GroupEnrollmentConfigurationRules by id");
         }
         entity.setType(rep.getType());
-        entity.setField(FieldEnum.of(rep.getField()));
+        entity.setField(rep.getField());
         entity.setDefaultValue(rep.getDefaultValue());
         entity.setMax(rep.getMax());
         entity.setRequired(rep.getRequired());
@@ -86,5 +86,13 @@ public class AdminEnrollmentConfigurationRules {
             throw new NotFoundException("Could not find GroupEnrollmentConfigurationRules by id");
         }
         return EntityToRepresentation.toRepresentation(entity);
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteConfigureRule(@PathParam("id") String id) {
+        groupEnrollmentConfigurationRulesRepository.deleteEntity(id);
+        return Response.noContent().build();
     }
 }

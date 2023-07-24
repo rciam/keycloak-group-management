@@ -59,6 +59,15 @@ public class GroupEnrollmentConfigurationEntity {
     @Column(name = "VALID_FROM")
     private LocalDate validFrom;
 
+    @Column(name = "COMMENTS_NEEDED")
+    private Boolean commentsNeeded;
+
+    @Column(name = "COMMENTS_LABEL")
+    private String commentsLabel;
+
+    @Column(name = "COMMENTS_DESCRIPTION")
+    private String commentsDescription;
+
     @Column(name = "MEMBERSHIP_EXPIRATION_DAYS")
     private Long membershipExpirationDays;
 
@@ -210,5 +219,29 @@ public class GroupEnrollmentConfigurationEntity {
 
     public void setMultiselectRole(Boolean multiselectRole) {
         this.multiselectRole = multiselectRole;
+    }
+
+    public Boolean getCommentsNeeded() {
+        return commentsNeeded;
+    }
+
+    public void setCommentsNeeded(Boolean commentsNeeded) {
+        this.commentsNeeded = commentsNeeded;
+    }
+
+    public String getCommentsLabel() {
+        return commentsLabel;
+    }
+
+    public void setCommentsLabel(String commentsLabel) {
+        this.commentsLabel = commentsLabel;
+    }
+
+    public String getCommentsDescription() {
+        return commentsDescription;
+    }
+
+    public void setCommentsDescription(String commentsDescription) {
+        this.commentsDescription = commentsDescription;
     }
 }

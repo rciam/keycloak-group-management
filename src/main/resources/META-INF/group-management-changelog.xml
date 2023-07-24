@@ -708,5 +708,20 @@
         <addUniqueConstraint columnNames="REALM_ID, FIELD, TYPE" constraintName="UK_GROUP_ENROLLMENT_CONFIGURATION_RULES" tableName="GROUP_ENROLLMENT_CONFIGURATION_RULES"/>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="comments-enrollment-configuration">
+
+        <addColumn tableName="GROUP_ENROLLMENT_CONFIGURATION">
+            <column name="COMMENTS_NEEDED" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT_CONFIGURATION">
+            <column name="COMMENTS_LABEL" type="VARCHAR(256)"/>
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT_CONFIGURATION">
+            <column name="COMMENTS_LABEL_DESCRIPTION" type="VARCHAR(256)"/>
+        </addColumn>
+    </changeSet>
+
 
 </databaseChangeLog>
