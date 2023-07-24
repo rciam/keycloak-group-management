@@ -719,7 +719,7 @@
             <column name="COMMENTS_LABEL" type="VARCHAR(256)"/>
         </addColumn>
         <addColumn tableName="GROUP_ENROLLMENT_CONFIGURATION">
-            <column name="COMMENTS_LABEL_DESCRIPTION" type="VARCHAR(256)"/>
+            <column name="COMMENTS_DESCRIPTION" type="VARCHAR(256)"/>
         </addColumn>
     </changeSet>
 
