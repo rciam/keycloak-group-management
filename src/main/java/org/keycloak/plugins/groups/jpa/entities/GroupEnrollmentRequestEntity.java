@@ -6,7 +6,6 @@ import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -18,7 +17,6 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import java.util.List;
@@ -56,14 +54,14 @@ public class GroupEnrollmentRequestEntity {
     @Enumerated(EnumType.STRING)
     private EnrollmentRequestStatusEnum status;
 
-    @Column(name = "REASON")
-    private String reason;
+    @Column(name = "COMMENTS")
+    private String comments;
 
     @Column(name = "ADMIN_JUSTIFICATION")
     private String adminJustification;
 
-    @Column(name = "COMMENTS")
-    private String comments;
+    @Column(name = "REVIEW_COMMENTS")
+    private String reviewComments;
 
     @ManyToMany
     @JoinTable(name = "GROUP_ENROLLMENT_ROLES", joinColumns = @JoinColumn(name = "GROUP_ENROLLMENT_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
@@ -109,12 +107,12 @@ public class GroupEnrollmentRequestEntity {
         this.status = status;
     }
 
-    public String getReason() {
-        return reason;
+    public String getComments() {
+        return comments;
     }
 
-    public void setReason(String reason) {
-        this.reason = reason;
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 
     public String getAdminJustification() {
@@ -125,17 +123,17 @@ public class GroupEnrollmentRequestEntity {
         this.adminJustification = adminJustification;
     }
 
-    public String getComments() {
-        return comments;
+    public String getReviewComments() {
+        return reviewComments;
     }
 
-    public void setComments(String comments) {
-        this.comments = comments;
+    public void setReviewComments(String reviewComments) {
+        this.reviewComments = reviewComments;
     }
 
-    public void setComment(String comment) {
-        //add comment to existing comments after line separator
-        this.comments = this.comments != null ? this.comments + System.lineSeparator() + comment : comment;
+    public void setComment(String reviewComment) {
+        //add reviewComment to existing reviewComments after line separator
+        this.reviewComments = this.reviewComments != null ? this.reviewComments + System.lineSeparator() + reviewComment : reviewComment;
     }
 
     public List<GroupRolesEntity> getGroupRoles() {

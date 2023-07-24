@@ -12,9 +12,9 @@ public class GroupEnrollmentRequestRepresentation {
     private UserRepresentation checkAdmin;
     private GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
     private EnrollmentRequestStatusEnum status;
-    private String reason;
+    private String comments;
     private String adminJustification;
-    private String comment;
+    private String reviewComments;
     private List<String> groupRoles;
 
     public GroupEnrollmentRequestRepresentation() {
@@ -60,12 +60,12 @@ public class GroupEnrollmentRequestRepresentation {
         this.status = status;
     }
 
-    public String getReason() {
-        return reason;
+    public String getComments() {
+        return comments;
     }
 
-    public void setReason(String reason) {
-        this.reason = reason;
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 
     public String getAdminJustification() {
@@ -76,12 +76,12 @@ public class GroupEnrollmentRequestRepresentation {
         this.adminJustification = adminJustification;
     }
 
-    public String getComment() {
-        return comment;
+    public String getReviewComments() {
+        return reviewComments;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setReviewComments(String reviewComments) {
+        this.reviewComments = reviewComments;
     }
 
     public List<String> getGroupRoles() {

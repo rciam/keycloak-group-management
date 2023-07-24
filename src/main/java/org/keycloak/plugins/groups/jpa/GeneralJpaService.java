@@ -1,13 +1,17 @@
 package org.keycloak.plugins.groups.jpa;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
+import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
@@ -98,5 +102,10 @@ public class GeneralJpaService {
         rep.setEnrollmentConfigurationList(groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(x -> EntityToRepresentation.toRepresentation(x)).collect(Collectors.toList()));
         rep.setAdmins(groupAdminRepository.getAdminsForGroup(group));
         return rep;
+    }
+
+    public List<GroupEntity> getGroupByName(String name){
+        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+        return em.createQuery("from GroupEntity f where f.name = :name",GroupEntity.class).setParameter("name",name).getResultList();
     }
 }

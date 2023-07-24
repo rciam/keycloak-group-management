@@ -41,7 +41,7 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         user.setId(userId);
         entity.setUser(user);
         entity.setGroupEnrollmentConfiguration(configuration);
-        entity.setReason(rep.getReason());
+        entity.setComments(rep.getComments());
         entity.setStatus(EnrollmentRequestStatusEnum.PENDING_APPROVAL);
         if (rep.getGroupRoles() != null) {
             entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, configuration.getGroup().getId())).filter(Objects::nonNull).limit(configuration.isMultiselectRole() ? Integer.MAX_VALUE : 1).collect(Collectors.toList()));

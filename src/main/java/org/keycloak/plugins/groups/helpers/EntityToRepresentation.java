@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 
 public class EntityToRepresentation {
 
+    private EntityToRepresentation(){}
+
     public static GroupEnrollmentConfigurationRepresentation toRepresentation(GroupEnrollmentConfigurationEntity entity) {
         GroupEnrollmentConfigurationRepresentation rep = new GroupEnrollmentConfigurationRepresentation(entity.getId());
         GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true);
@@ -95,9 +97,9 @@ public class EntityToRepresentation {
             rep.setCheckAdmin(toBriefRepresentation(entity.getCheckAdmin(), realm));
         rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration()));
         rep.setAdminJustification(entity.getAdminJustification());
-        rep.setComment(entity.getComments());
+        rep.setReviewComments(entity.getReviewComments());
         rep.setStatus(entity.getStatus());
-        rep.setReason(entity.getReason());
+        rep.setComments(entity.getComments());
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
         return rep;
