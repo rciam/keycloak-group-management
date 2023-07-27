@@ -25,7 +25,6 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.plugins.groups.services.AccountService;
 import org.keycloak.plugins.groups.services.AdminService;
-import org.keycloak.plugins.groups.ui.UserInterfaceService;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 
@@ -69,18 +68,6 @@ public class ResourcesProvider implements RealmResourceProvider {
         AuthenticationHelper authHelper = new AuthenticationHelper(session);
         AdminPermissionEvaluator realmAuth = authHelper.authenticateRealmAdminRequest();
         AdminService service = new AdminService(session, realm, clientConnection, realmAuth);
-        ResteasyProviderFactory.getInstance().injectProperties(service);
-        return service;
-    }
-
-
-
-
-    //PLEASE REMOVE THIS FUNCTION
-    @Deprecated
-    @Path("ui")
-    public UserInterfaceService getUserInterfaceService() {
-        UserInterfaceService service = new UserInterfaceService(session);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
