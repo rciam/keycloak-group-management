@@ -1,11 +1,11 @@
 import * as React from 'react';
 import {FC,useState,useEffect} from 'react';
-import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, SelectVariant, Checkbox,Select,SelectOption, FormAlert, Alert, Form, FormGroup, TextInput, Modal, ModalVariant, Switch, FormFieldGroupHeader, FormFieldGroup, DatePicker, Popover, NumberInput} from '@patternfly/react-core';
+import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, SelectVariant, Checkbox,Select,SelectOption, FormAlert, Alert, Form, FormGroup, TextInput, Modal, ModalVariant, Switch, FormFieldGroupHeader, FormFieldGroup, DatePicker, Popover, NumberInput, HelperTextItem} from '@patternfly/react-core';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
 import { ConfirmationModal } from '../Modals';
-import {ValidateEmail} from '../../js/utils.js'
+import {isIntegerOrNumericString} from '../../js/utils.js'
 import { Loading } from '../LoadingModal';
 import { Msg } from '../../widgets/Msg';
 import { HelpIcon } from '@patternfly/react-icons';
@@ -23,16 +23,24 @@ export const EnrollmentModal: FC<any> = (props) => {
 
     let currentYear = date.getFullYear();
 
-    // we will display the date as DD-MM-YYYY 
+    // we will display the date as YYYY-MM-DD 
 
-    let currentDate = `${currentDay}-${currentMonth}-${currentYear}`;
+    let currentDate = `${currentYear}-${currentMonth}-${currentDay}`;
 
 
-
+    const touchDefault = {
+      name: false,
+      groupRoles: false,
+      aup_url:false,
+      membershipExpirationDays:false,
+      validFrom:false,
+      commentsLabel:false,
+      commentsDescription:false
+  };
 
 
     const dateFormat = (date: Date) =>
-        date.toLocaleDateString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
+        date.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
     
     const dateParse = (date: string) => {
         const split = date.split('-');
@@ -40,8 +48,8 @@ export const EnrollmentModal: FC<any> = (props) => {
         return new Date();
         }
         const month = split[1];
-        const day = split[0];
-        const year = split[2];
+        const day = split[2];
+        const year = split[0];
         return new Date(`${year.padStart(4, '0')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T00:00:00`);
     };
 
@@ -52,31 +60,19 @@ export const EnrollmentModal: FC<any> = (props) => {
     const [enrollment,setEnrollment] = useState<any>({});
     const [isModalOpen,setIsModalOpen] = useState<boolean>(false)
     const [errors,setErrors] = useState<any>({});
-    const [validationRules,setValidationRules] = useState({});
-    const [touched,setTouched] = useState<any>({
-        name: false,
-        groupRoles: false,
-        aup_url:false,
-        membershipExpirationDays:false,
-        validFrom:false
-    });
+    const [validationRules,setValidationRules] = useState<any>({});
+    const [touched,setTouched] = useState<any>(touchDefault);
 
     useEffect(()=>{
         if(Object.keys(props.enrollment).length !== 0) {
             setIsModalOpen(true);
-            setEnrollment(props.enrollment);
+            setEnrollment({...props.enrollment});
         }
         else{
             setIsModalOpen(false);
             setEnrollment({});
         }
-        
-    },[props.enrollment])
-
-
-    
-
-
+    },[props.enrollment]);
 
     useEffect(()=>{
         if(Object.keys(enrollment).length !== 0){
@@ -97,6 +93,8 @@ export const EnrollmentModal: FC<any> = (props) => {
         !(enrollment?.groupRoles?.length>0) && (errors.groupRoles=Msg.localize('groupRolesFormError'));
         (enrollment?.membershipExpirationDays&&!(enrollment?.membershipExpirationDays>0)) && (errors.membershipExpirationDays=Msg.localize('expirationDaysPositiveFormError'));        
         (typeof(enrollment?.membershipExpirationDays)!=='number') && (errors.membershipExpirationDays=Msg.localize('expirationDaysNumberFormError'));
+        (enrollment?.commentsNeeded&& (!enrollment?.commentsLabel||enrollment?.commentsLabel.length<1) && (errors.commentsLabel=Msg.localize('requredFormError')));
+        (enrollment?.commentsNeeded&& (!enrollment?.commentsDescription||enrollment?.commentsDescription.length<1) && (errors.commentsDescription=Msg.localize('requredFormError')));        
         if(enrollment?.validFrom){
           let parsedDate = dateParse(enrollment?.validFrom);
           if(parsedDate instanceof Date &&isFinite(parsedDate.getTime())){
@@ -170,9 +168,11 @@ export const EnrollmentModal: FC<any> = (props) => {
       };
     
       const onChange = (event: React.FormEvent<HTMLInputElement>) => {
+        touched.membershipExpirationDay = true;
         enrollment.membershipExpirationDays = (event.target as HTMLInputElement).value;
         enrollment.membershipExpirationDays = enrollment.membershipExpirationDays === '' ? enrollment.membershipExpirationDays : +enrollment.membershipExpirationDays
         setEnrollment({...enrollment});
+        setTouched({...touched});
       };
     
       const onPlus = () => {
@@ -235,7 +235,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                     </Tooltip>
                     ,
                     
-                    <Button key="cancel" variant="link" onClick={()=>{props.close()}}>
+                    <Button key="cancel" variant="link" onClick={()=>{ props.close()}}>
                         <Msg msgKey='Cancel' />
                     </Button>
                     
@@ -266,52 +266,67 @@ export const EnrollmentModal: FC<any> = (props) => {
                             onChange={(value)=>{updateEnrollment('name',value)}}
                             />
                         </FormGroup>
-                        <FormGroup
-                            label={Msg.localize('enrollmentConfigurationMembExpTitle')}
-                            isRequired
-                            fieldId="simple-form-name-01"
-                            helperTextInvalid={touched.membershipExpirationDays&&errors.membershipExpirationDays}
-                            validated={errors.membershipExpirationDays&&touched.membershipExpirationDays?'error':'default'}
-                            onBlur={()=>{
-                                touched.membershipExpirationDays = true;
-                                setTouched({...touched});
-                            }}
-                            labelIcon={
-                                <Popover
-                                  bodyContent={
-                                    <div>
-                                        <Msg msgKey='enrollmentConfigurationTooltipMembExp' />
-                                    </div>
-                                  }
-                                >
-                                  <button
-                                    type="button"
-                                    aria-label="More info for name field"
-                                    onClick={e => e.preventDefault()}
-                                    aria-describedby="simple-form-name-01"
-                                    className="pf-c-form__group-label-help"
-                                  >
-                                    <HelpIcon noVerticalAlign />
-                                  </button>
-                                </Popover>
-                              }
-                            // helperText=""
-                        >
-                          <NumberInput
-                            value={enrollment?.membershipExpirationDays}
-                            onMinus={onMinus}
-                            onBlur={()=>{
-                              touched.membershipExpirationDay = true;
-                              setTouched({...touched});
-                            }}
-                            onChange={onChange}
-                            onPlus={onPlus}
-                            inputName="input"
-                            inputAriaLabel="number input"
-                            minusBtnAriaLabel="minus"
-                            plusBtnAriaLabel="plus"
-                          />
-                        </FormGroup>
+                          <FormGroup
+                              label={Msg.localize('enrollmentConfigurationMembExpTitle')}
+                              fieldId="simple-form-name-01"
+                              helperTextInvalid={touched.membershipExpirationDays&&errors.membershipExpirationDays}
+                              validated={errors.membershipExpirationDays&&touched.membershipExpirationDays?'error':'default'}
+                              onBlur={()=>{
+                                  touched.membershipExpirationDays = true;
+                                  setTouched({...touched});
+                              }}
+                              // helperText=""
+                          >
+                          <Tooltip  {...((validationRules?.membershipExpirationDays?.max&&parseInt(validationRules.membershipExpirationDays.max)>0&&!(isIntegerOrNumericString(enrollment?.membershipExpirationDays)&&enrollment.membershipExpirationDays!==0)) ? { trigger:'manual', isVisible:false }:{trigger:'mouseenter'})} content={<div><Msg msgKey='enrollmentConfigurationExpirationSwitchDisabledTooltip' /></div>}>
+                                                          
+                              <Switch
+                                id="simple-switch-membershipExpirationDays"
+                                aria-label="simple-switch-membershipExpirationDays"
+                                isDisabled={!(validationRules?.membershipExpirationDays?.max&&parseInt(validationRules.membershipExpirationDays.max)>0&&enrollment.membershipExpirationDays===0)}
+                                isChecked={isIntegerOrNumericString(enrollment?.membershipExpirationDays)&&enrollment.membershipExpirationDays!==0}
+                                onChange={(value)=>{
+                                    
+                                    if(isIntegerOrNumericString(enrollment?.membershipExpirationDays)&&enrollment.membershipExpirationDays!==0){
+                                        enrollment.membershipExpirationDays = 0;
+                                        setEnrollment({...enrollment});
+                                    }
+                                    else{
+                                        enrollment.membershipExpirationDays = ((validationRules?.membershipExpirationDays?.defaultValue&& isIntegerOrNumericString(validationRules?.membershipExpirationDays?.defaultValue))?parseInt(validationRules.membershipExpirationDays.defaultValue):3)   
+                                        setEnrollment({...enrollment});
+                                    }
+                                }}
+                                />
+                            
+                            </Tooltip>
+                            
+                            {enrollment.membershipExpirationDays===0?
+                              <HelperTextItem className="gm_expiration-warning-label" variant="warning" hasIcon>
+                                <Msg msgKey='enrollmentConfigurationExpirationWaring' />
+                              </HelperTextItem>
+                            :null}
+                            
+                            {enrollment.membershipExpirationDays !== 0?
+                              <div className="gm_number-input-container"> 
+                                <NumberInput
+                                value={enrollment?.membershipExpirationDays}
+                                onMinus={onMinus}
+                                onBlur={()=>{
+                                  touched.membershipExpirationDay = true;
+                                  setTouched({...touched});
+                                }}
+                                onChange={onChange}
+                                onPlus={onPlus}
+                                inputName="input"
+                                inputAriaLabel="number input"
+                                minusBtnAriaLabel="minus"
+                                plusBtnAriaLabel="plus"
+                              />
+                              </div>
+                            :null}
+                          </FormGroup>
+
+                              
+                  
                         <FormGroup
                             label={Msg.localize('enrollmentConfigurationValidFromTitle')}
                             fieldId="simple-form-name-09"
@@ -366,22 +381,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                                     }} 
                                 />
                         :null}
-                        {/* <FormGroup
-                            label="Expiration Notification Period (days)"
-                            isRequired
-                            fieldId="simple-form-name-01"
-                            // helperText=""
-                        >
-                            <TextInput
-                            isRequired
-                            type="number"
-                            id="simple-form-name-01"
-                            name="simple-form-name-01"
-                            aria-describedby="simple-form-name-01-helper"
-                            value={enrollment?.expirationNotificationPeriod}
-                            onChange={(value)=>{updateEnrollment('expirationNotificationPeriod',value)}}
-                            />
-                        </FormGroup> */}
+                        
                         <FormGroup
                             label={Msg.localize('enrollmentConfigurationApprovalTitle')}
                             fieldId="simple-form-name-01"
@@ -394,6 +394,111 @@ export const EnrollmentModal: FC<any> = (props) => {
                             onChange={(value)=>{updateEnrollment('requireApproval',value)}}
                             />
                         </FormGroup>
+                        <FormFieldGroup
+                          header={
+                          <FormFieldGroupHeader
+                              titleText={{ text: Msg.localize('enrollmentConfigurationCommentSectionTitle'), id: 'field-group4-non-expandable-titleText-id' }}
+                          />
+                          }                          
+                        >
+                          <FormGroup
+                              label={Msg.localize('enrollmentConfigurationCommentEnableLabel')}
+                              isRequired
+                              fieldId="simple-form-name-01"
+                              labelIcon={
+                                  <Popover
+                                    bodyContent={
+                                      <div>
+                                          <Msg msgKey='enrollmentConfigurationCommentEnableTooltip' />
+                                      </div>
+                                    }
+                                  >
+                                    <button
+                                      type="button"
+                                      aria-label="More info for name field"
+                                      onClick={e => e.preventDefault()}
+                                      aria-describedby="simple-form-name-01"
+                                      className="pf-c-form__group-label-help"
+                                    >
+                                      <HelpIcon noVerticalAlign />
+                                    </button>
+                                  </Popover>
+                                }
+                              // helperText=""
+                          >
+                            <Switch
+                              id="simple-switch-comments"
+                              aria-label="simple-switch-membershipExpirationDays"
+                              isChecked={enrollment.commentsNeeded}
+                              onChange={(value)=>{
+                                enrollment.commentsNeeded = !enrollment.commentsNeeded;
+                                setEnrollment({...enrollment});
+                              }}
+                              />
+
+                          </FormGroup>
+                          {enrollment.commentsNeeded?
+                            <React.Fragment>
+                              <FormGroup
+                                label={Msg.localize('enrollmentConfigurationCommentLabelLabel')}
+                                isRequired
+                                fieldId="simple-form-name-01"
+                                helperTextInvalid={touched.commentsLabel&&errors.commentsLabel}
+                                validated={errors.commentsLabel&&touched.commentsLabel?'error':'default'}
+                                onBlur={()=>{
+                                    touched.commentsLabel = true;
+                                    setTouched({...touched});
+                                }}
+                                // helperText=""
+                              >
+                                <TextInput
+                                  isRequired
+                                  type="url"
+                                  id="simple-form-name-01"
+                                  name="simple-form-name-01"
+                                  aria-describedby="simple-form-name-01-helper"
+                                  value={enrollment?.commentsLabel}
+                                  onBlur={()=>{touched.commentsLabel=true; setTouched({...touched});}}
+                                  validated={errors.commentsLabel&&touched.commentsLabel?'error':'default'}
+                                  onChange={(value)=>{
+                                      enrollment.commentsLabel=value;
+                                      setEnrollment({...enrollment});
+                                  }}
+                                />
+                              </FormGroup>
+                              <FormGroup
+                              label={Msg.localize('enrollmentConfigurationCommentDescriptionLabel')}
+                              isRequired
+                              fieldId="simple-form-name-01"
+                              helperTextInvalid={touched.commentsDescription&&errors.commentsDescription}
+                              validated={errors.commentsDescription&&touched.commentsDescription?'error':'default'}
+                              onBlur={()=>{
+                                  touched.commentsDescription = true;
+                                  setTouched({...touched});
+                              }}
+                              // helperText=""
+                            >
+                              <TextInput
+                                isRequired
+                                type="url"
+                                id="simple-form-name-01"
+                                name="simple-form-name-01"
+                                aria-describedby="simple-form-name-01-helper"
+                                value={enrollment?.commentsDescription}
+                                onBlur={()=>{touched.commentsDescription=true; setTouched({...touched});}}
+                                validated={errors.commentsDescription&&touched.commentsDescription?'error':'default'}
+                                onChange={(value)=>{
+                                    enrollment.commentsDescription=value;
+                                    setEnrollment({...enrollment});
+                                }}
+                              />
+                            </FormGroup>
+                            </React.Fragment>
+                            
+                          :null}
+
+                        </FormFieldGroup>
+                        
                         <FormFieldGroup
                             header={
                             <FormFieldGroupHeader

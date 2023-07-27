@@ -11,6 +11,8 @@ import {ExternalLinkAltIcon } from '@patternfly/react-icons';
 import { Msg } from '../../widgets/Msg';
 import { EnrollmentModal } from '../GroupEnrollment/EnrollmentModal';
 import { Link } from 'react-router-dom';
+import {isIntegerOrNumericString} from '../../js/utils.js'
+
 
 interface FederatedIdentity {
     identityProvider: string;
@@ -39,24 +41,15 @@ interface Memberships {
 
 export const GroupEnrollment: FC<any> = (props) => {
 
- 
-    
-
-
-
-
     const [modalInfo,setModalInfo] = useState({});
     const [groupEnrollments,setGroupEnrollments] = useState<any>([]);
     const [enrollmentModal,setEnrollmentModal] = useState({});
     const [enrollmentRules, setEnrollmentRules] = useState({});
     const [defaultEnrollmentConfiguration,setDefaultEnrollmentConfiguration] = useState({
       group: {id:""},
-      aupExpiryDays : 10,
       membershipExpirationDays : 3,
-      expirationNotificationPeriod : 12,
       name: "",
       active: true,
-      requireAupAcceptance: true,
       requireApproval: true,
       aup: {
           type: "URL",
@@ -65,11 +58,15 @@ export const GroupEnrollment: FC<any> = (props) => {
       requireApprovalForExtension:false,
       visibleToNotMembers: false,
       validFrom: null,
+      commentsNeeded:true,
+      commentsLabel: Msg.localize('enrollmentConfigurationCommentsDefaultLabel'),
+      commentsDescription: Msg.localize('enrollmentConfigurationCommentsDefaultDescription'),
       groupRoles : []
     })
 
     let groupsService = new GroupsServiceClient();
     
+
 
     useEffect(()=>{
       if(Object.keys(props.groupConfiguration).length !== 0){
@@ -101,7 +98,8 @@ export const GroupEnrollment: FC<any> = (props) => {
             response.data.forEach(field_rules=>{
               rules[field_rules.field] = {
                 "max": parseInt(field_rules.max),
-                "required": field_rules.required
+                "required": field_rules.required,
+                ...(field_rules.defaultValue&&{"defaultValue":field_rules.defaultValue}) 
               }
               if(field_rules.defaultValue){
                   if(isIntegerOrNumericString(field_rules.defaultValue)){
@@ -166,7 +164,7 @@ export const GroupEnrollment: FC<any> = (props) => {
                       isPlainButtonAction
                 >
                   <Tooltip content={<div><Msg msgKey='createEnrollmentButton'/></div>}>
-                    <Button className={"gm_plus-button-small"} onClick={()=>{defaultEnrollmentConfiguration.group.id=props.groupId; setEnrollmentModal(defaultEnrollmentConfiguration);}}>
+                    <Button className={"gm_plus-button-small"} onClick={()=>{defaultEnrollmentConfiguration.group.id=props.groupId;  setEnrollmentModal(defaultEnrollmentConfiguration);}}>
                         <div className={"gm_plus-button"}></div>
                     </Button>
                   </Tooltip>
@@ -217,19 +215,4 @@ export const GroupEnrollment: FC<any> = (props) => {
     )
   }
 
-
-  function isIntegerOrNumericString(value) {
-    if (Number.isInteger(value)) {
-      // If the value is already an integer, return true
-      return true;
-    }
-  
-    if (typeof value === 'string' && /^\d+$/.test(value)) {
-      // If the value is a string containing only numbers, return true
-      return true;
-    }
-  
-    // Otherwise, return false
-    return false;
-  }
 

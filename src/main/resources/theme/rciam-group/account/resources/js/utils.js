@@ -13,4 +13,18 @@ export function deepEqual(x, y) {
         ty = typeof y;
   return x && y && tx === 'object' && tx === ty ? ok(x).length === ok(y).length && ok(x).every(key => deepEqual(x[key], y[key])) : x === y;
 }
+export function isIntegerOrNumericString(value) {
+  if (Number.isInteger(value)) {
+    // If the value is already an integer, return true
+    return true;
+  }
+
+  if (typeof value === 'string' && /^\d+$/.test(value)) {
+    // If the value is a string containing only numbers, return true
+    return true;
+  } // Otherwise, return false
+
+
+  return false;
+}
 //# sourceMappingURL=utils.js.map

@@ -588,3 +588,20 @@
     -webkit-transform: rotate(-45deg);
     z-index: 1000;
   }
+
+.gm_expiration-warning-label {
+    display: inline-block!important;
+    margin-left: 1rem!important;
+    height: 1.5rem;
+    vertical-align: middle!important;
+    line-height: 1.5rem;
+    color: #795600;
+  }
+
+  .gm_expiration-warning-label span {
+    margin-right:0.3rem;
+  }
+
+  .gm_number-input-container {
+    margin-top:1rem;
+  }
