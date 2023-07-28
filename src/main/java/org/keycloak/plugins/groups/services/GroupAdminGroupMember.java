@@ -19,16 +19,12 @@ import javax.ws.rs.core.Response;
 
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
-import org.keycloak.events.EventType;
-import org.keycloak.events.admin.OperationType;
-import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
-import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.LoginEventHelper;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
@@ -58,9 +54,8 @@ public class GroupAdminGroupMember {
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
     private final GroupAdminRepository groupAdminRepository;
     private final UserGroupMembershipExtensionEntity member;
-    private final AdminEventBuilder adminEvent;
 
-    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel groupAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, GroupAdminRepository groupAdminRepository, AdminEventBuilder adminEvent) {
+    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel groupAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, GroupAdminRepository groupAdminRepository) {
         this.session = session;
         this.realm = realm;
         this.groupAdmin = groupAdmin;
@@ -71,7 +66,6 @@ public class GroupAdminGroupMember {
         this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
         this.member = member;
-        this.adminEvent = adminEvent;
     }
 
     @PUT
@@ -126,27 +120,28 @@ public class GroupAdminGroupMember {
         String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
         memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, name, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
         user.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
+        LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
+                , Utils.GROUP_MEMBERSHIP_UPDATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
         return Response.noContent().build();
     }
 
     @DELETE
     @Path("/role/{name}")
-    public Response deleteGroupRole(@PathParam("name") String name) {
+    public Response deleteGroupRole(@PathParam("name") String name) throws UnsupportedEncodingException{
         if (member.getGroupRoles() == null || member.getGroupRoles().stream().noneMatch(x -> name.equals(x.getName())))
             throw new NotFoundException("Could not find this user group member role");
 
         member.getGroupRoles().removeIf(x -> name.equals(x.getName()));
         userGroupMembershipExtensionRepository.update(member);
-        try {
-            MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-            UserModel user = session.users().getUserById(realm, member.getUser().getId());
-            List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
-            String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
-            memberUserAttributeValues.removeIf(x -> x.startsWith(memberUserAttribute.getUrnNamespace() + Utils.groupStr + groupName + Utils.roleStr + name));
-            user.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+        UserModel user = session.users().getUserById(realm, member.getUser().getId());
+        List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
+        String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
+        memberUserAttributeValues.removeIf(x -> x.startsWith(memberUserAttribute.getUrnNamespace() + Utils.groupStr + groupName + Utils.roleStr + name));
+        user.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
+        LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
+                , Utils.GROUP_MEMBERSHIP_UPDATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
+
         return Response.noContent().build();
     }
 
@@ -164,6 +159,8 @@ public class GroupAdminGroupMember {
             String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
             memberUserAttributeValues.removeIf(x -> Utils.removeMemberUserAttributeCondition(x, memberUserAttribute.getUrnNamespace(), groupName));
             user.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
+            LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
+                    , Utils.GROUP_MEMBERSHIP_SUSPEND, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -190,7 +187,8 @@ public class GroupAdminGroupMember {
             MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
             Utils.changeUserAttributeValue(user, member, Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm), memberUserAttribute);
 
-            adminEvent.operation(OperationType.UPDATE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(member, realm)).resourcePath(session.getContext().getUri()).success();
+            LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
+                    , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
 
         } catch (Exception e) {
             e.printStackTrace();
