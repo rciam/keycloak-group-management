@@ -14,11 +14,13 @@ public abstract class GeneralRepository<T> {
 
     protected final RealmModel realm;
     protected final EntityManager em;
+    protected final KeycloakSession session;
 
     protected abstract Class<T> getTClass();
 
     public GeneralRepository(KeycloakSession session, RealmModel realm) {
         this.realm = realm;
+        this.session = session;
         this.em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
     }
 

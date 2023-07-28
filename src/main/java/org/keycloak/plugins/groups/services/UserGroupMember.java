@@ -1,48 +1,47 @@
 package org.keycloak.plugins.groups.services;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-
-import org.jboss.logging.Logger;
-import org.keycloak.events.admin.OperationType;
-import org.keycloak.events.admin.ResourceType;
+import org.keycloak.common.ClientConnection;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.helpers.LoginEventHelper;
+import org.keycloak.plugins.groups.helpers.Utils;
+import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
-import org.keycloak.services.resources.admin.AdminEventBuilder;
 
 public class UserGroupMember {
 
-    private static final Logger logger = Logger.getLogger(UserGroups.class);
+    @Context
+    private ClientConnection clientConnection;
 
-    protected KeycloakSession session;
-    private RealmModel realm;
+    private final KeycloakSession session;
+    private final RealmModel realm;
     private final UserGroupMembershipExtensionEntity member;
 
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
-    private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final UserModel user;
-    private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
-    private final AdminEventBuilder adminEvent;
 
-    public UserGroupMember(KeycloakSession session, RealmModel realm, UserModel user, UserGroupMembershipExtensionEntity member, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, AdminEventBuilder adminEvent) {
+    public UserGroupMember(KeycloakSession session, RealmModel realm, UserModel user, UserGroupMembershipExtensionEntity member, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository) {
         this.session = session;
         this.realm = realm;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.user = user;
         this.member = member;
-        this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
-        this.groupEnrollmentConfigurationRepository = groupEnrollmentConfigurationRepository;
-        this.adminEvent = adminEvent;
     }
 
     @GET
@@ -54,8 +53,10 @@ public class UserGroupMember {
     @DELETE
     public Response leaveGroup() {
         GroupModel group = realm.getGroupById(member.getGroup().getId());
+        List<String> roleNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
         userGroupMembershipExtensionRepository.deleteMember(member, group, user);
-        adminEvent.operation(OperationType.DELETE).resource(ResourceType.GROUP_MEMBERSHIP).representation(EntityToRepresentation.toRepresentation(member, realm)).resourcePath(session.getContext().getUri()).success();
+        LoginEventHelper.createGroupEvent(realm, session, clientConnection, user,  user.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(user.getId())
+                , Utils.GROUP_MEMBERSHIP_DELETE, ModelToRepresentation.buildGroupPath(group), roleNames, null);
         return Response.noContent().build();
     }
 

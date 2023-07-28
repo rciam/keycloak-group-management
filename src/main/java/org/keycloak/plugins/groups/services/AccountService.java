@@ -1,6 +1,5 @@
 package org.keycloak.plugins.groups.services;
 
-import org.jboss.logging.Logger;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.models.KeycloakSession;
@@ -15,8 +14,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 
 public class AccountService {
-
-    private static final Logger logger = Logger.getLogger(AccountService.class);
 
     protected KeycloakSession session;
 
@@ -43,7 +40,7 @@ public class AccountService {
 
     @Path("/user")
     public UserGroups userGroups() {
-        UserGroups service = new UserGroups(session, realm, user, adminEvent);
+        UserGroups service = new UserGroups(session, realm, user);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

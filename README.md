@@ -67,7 +67,7 @@ Path | Method | Description                                                     
 /account/group-admin/group/{groupId}/members | GET | get all group members pager, being able to search and get by type (fe active) | GroupAdminGroupMembers
 /account/group-admin/group/{groupId}/members/invitation | POST | send invitation to a user based on email  
 /account/group-admin/group/{groupId}/member/{memberId} | PUT | update specific fields of group member                                    | GroupAdminGroupMembers
-/account/group-admin/group/{groupId}/member/{memberId} | DELETE | delete role from group member                                                 | GroupAdminGroupMember
+/account/group-admin/group/{groupId}/member/{memberId} | DELETE | delete group member                                                 | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/role | POST | add role to group member                                                           | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/role/{name} | DELETE | delete role from group member                                                 | GroupAdminGroupMember
 /account/group-admin/group/{groupId}/member/{memberId}/suspend | POST | suspend group member                                                          | GroupAdminGroupMember

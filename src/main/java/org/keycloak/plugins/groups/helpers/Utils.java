@@ -32,7 +32,7 @@ import org.keycloak.services.resources.admin.GroupResource;
 
 public class Utils {
 
-    public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public static final String expirationNotificationPeriod = "expiration-notification-period";
     public static final String invitationExpirationPeriod = "invitation-expiration-period";
     public static final String defaultGroupRole = "member";
@@ -45,6 +45,15 @@ public class Utils {
     private static final String sharp = "#";
     public static final String groupStr = ":group:";
     public static final String roleStr = "role=";
+    public static final String EVENT_GROUP = "group";
+    public static final String EVENT_ACTION_USER = "actionUser";
+    public static final String EVENT_ROLES = "roles";
+    public static final String EVENT_MEMBERSHIP_EXPIRATION = "membership expiration";
+    public static final String VO_PERSON_ID ="voPersonID";
+    public static final String GROUP_MEMBERSHIP_CREATE = "GROUP_MEMBERSHIP_CREATE";
+    public static final String GROUP_MEMBERSHIP_UPDATE = "GROUP_MEMBERSHIP_UPDATE";
+    public static final String GROUP_MEMBERSHIP_DELETE = "GROUP_MEMBERSHIP_DELETE";
+    public static final String GROUP_MEMBERSHIP_SUSPEND = "GROUP_MEMBERSHIP_SUSPEND";
 
     public static UserAdapter getDummyUser(UserRepresentation userRep) {
         UserEntity userEntity = new UserEntity();
