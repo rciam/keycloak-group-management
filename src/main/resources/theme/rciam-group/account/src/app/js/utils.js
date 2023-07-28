@@ -18,3 +18,11 @@ export function deepEqual(x, y) {
       ok(x).every(key => deepEqual(x[key], y[key]))
   ) : (x === y);
 }
+
+export function isIntegerOrNumericString(value) {
+  if (Number.isInteger(value)||typeof value === 'string' && /^\d+$/.test(value)) {
+    // If the value is already an integer or is a string containing only numbers, return true
+    return true;
+  }
+  return false;
+}
