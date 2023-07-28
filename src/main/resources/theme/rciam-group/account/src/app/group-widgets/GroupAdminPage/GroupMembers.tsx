@@ -1,6 +1,6 @@
 import * as React from 'react';
-import {FC,useState,useEffect,useRef} from 'react';
-import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, Pagination, InputGroup, TextInput, Dropdown, BadgeToggle, DropdownItem, Badge, Modal, Checkbox, FormAlert, Alert} from '@patternfly/react-core';
+import {FC,useState,useEffect} from 'react';
+import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, Pagination, Dropdown, BadgeToggle, DropdownItem, Badge, Modal, Checkbox} from '@patternfly/react-core';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
@@ -8,9 +8,8 @@ import { ConfirmationModal } from '../Modals';
 import { SearchInput } from './SearchInput';
 import {CheckIcon } from '@patternfly/react-icons';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
-import {ValidateEmail} from '../../js/utils.js'
-import { Wizard, WizardStep } from '@patternfly/react-core';
 import { InviteMemberModal } from './InviteMemberModal';
+import { Msg } from '../../widgets/Msg';
 
 
 
@@ -157,7 +156,7 @@ export const GroupMembers: FC<any> = (props) => {
           <DataListItem key='emptyItem' aria-labelledby="empty-item">
             <DataListItemRow key='emptyRow'>
               <DataListItemCells dataListCells={[
-                <DataListCell key='empty'><strong>No group members found</strong></DataListCell>
+                <DataListCell key='empty'><strong><Msg msgKey='adminGroupNoMembers' /></strong></DataListCell>
               ]} />
             </DataListItemRow>
           </DataListItem>
@@ -173,8 +172,8 @@ export const GroupMembers: FC<any> = (props) => {
         <ConfirmationModal modalInfo={modalInfo}/>
         <EditRolesModal member={editMemberRoles} setMember={setEditMemberRoles} groupRoles={props.groupConfiguration?.groupRoles} groupId={props.groupId} fetchGroupMembers={fetchGroupMembers} />
         <SearchInput
-          childComponent={<Button className="gm_invite-member-button" onClick={()=>{setInviteModalActive(true)}}>Invite User</Button>}
-          searchText={"Search based on Username or Email"} cancelText={"View All Group Members"}search={(searchString)=>{
+          childComponent={<Button className="gm_invite-member-button" onClick={()=>{setInviteModalActive(true)}}><Msg msgKey='adminGroupInviteMemberButton' /></Button>}
+          searchText={Msg.localize('adminGroupSearchMember')} cancelText={Msg.localize('adminGroupSearchCancel')}search={(searchString)=>{
             fetchGroupMembers(searchString);
             setPage(1);
           }} cancel={()=>{
@@ -186,16 +185,16 @@ export const GroupMembers: FC<any> = (props) => {
               <DataListItemRow>
                 <DataListItemCells dataListCells={[
                   <DataListCell className="gm_vertical_center_cell" width={3} key="id-hd">
-                    <strong>Community User Identifier</strong>
+                    <strong><Msg msgKey='adminGroupMemberCellId' /></strong>
                   </DataListCell>,
                   <DataListCell className="gm_vertical_center_cell" width={3} key="username-hd">
-                    <strong>Username</strong>
+                    <strong><Msg msgKey='Username' /></strong>
                   </DataListCell>,
                   <DataListCell className="gm_vertical_center_cell" width={3} key="email-hd">
-                    <strong>Name / email</strong>
+                    <strong><Msg msgKey='adminGroupMemberCellNameEmail' /></strong>
                   </DataListCell>,
                   <DataListCell className="gm_vertical_center_cell" width={3} key="email-hd">
-                    <strong>Roles</strong>
+                    <strong><Msg msgKey='Roles' /></strong>
                     <Dropdown
                         onSelect={()=>{onSelect('roles')}}
                         toggle={
@@ -207,7 +206,7 @@ export const GroupMembers: FC<any> = (props) => {
                         isOpen={isOpen.roles}
                         dropdownItems={[
                           <DropdownItem key="all" component="button" onClick={()=>{setRoleSelection('')}} icon={!roleSelection&&<CheckIcon />}>
-                                all
+                                <Msg msgKey='all' />
                           </DropdownItem>,
                           ...(props.groupConfiguration && props.groupConfiguration.groupRoles ? props.groupConfiguration.groupRoles.map((role)=>{
                             return (
@@ -220,10 +219,10 @@ export const GroupMembers: FC<any> = (props) => {
                       />
                   </DataListCell>,
                   <DataListCell className="gm_vertical_center_cell" width={3} key="expiration-hd">
-                    <strong>Membership Expiration</strong>
+                    <strong><Msg msgKey='adminGroupMemberCellMembershipExp' /></strong>
                   </DataListCell>,
                   <DataListCell className="gm_vertical_center_cell" width={2} key="status-hd">
-                    <strong>Status
+                    <strong><Msg msgKey='Status' />
                       <Dropdown
                         onSelect={()=>{onSelect('status')}}
                         toggle={
@@ -235,16 +234,16 @@ export const GroupMembers: FC<any> = (props) => {
                         isOpen={isOpen.status}
                         dropdownItems={[                            
                           <DropdownItem key="All" component="button" onClick={()=>{setStatusSelection("")}} icon={!statusSelection&&<CheckIcon />}>
-                            All
+                            <Msg msgKey='All' />
                           </DropdownItem>,
                           <DropdownItem key="Enabled" component="button" onClick={()=>{setStatusSelection("ENABLED")}} icon={statusSelection==="ENABLED"&&<CheckIcon />}>
-                            Active
+                            <Msg msgKey='Active' />
                           </DropdownItem>,
                           <DropdownItem key="Suspended" component="button" onClick={()=>{setStatusSelection("SUSPENDED")}} icon={statusSelection==="SUSPENDED"&&<CheckIcon />}>
-                            Suspended
+                            <Msg msgKey='Suspended' />
                           </DropdownItem>,
                           <DropdownItem key="Pending" component="button" onClick={()=>{setStatusSelection("PENDING")}} icon={statusSelection==="PENDING"&&<CheckIcon />}>
-                            Pending
+                            <Msg msgKey='Pending' />
                           </DropdownItem>
                         ]}
                       />
@@ -267,13 +266,13 @@ export const GroupMembers: FC<any> = (props) => {
                   <DataListItemCells
                     dataListCells={[
                       <DataListCell width={3} key="primary content">
-                        {member.user?.attributes?.voPersonID||"Not Available"}
+                        {member.user?.attributes?.voPersonID||Msg.localize('notAvailable')}
                       </DataListCell>,
                       <DataListCell width={3} key="secondary content ">
                         {member.user.username}
                       </DataListCell>,
                       <DataListCell width={3} key="secondary content ">
-                        <span className="gm_fullname_datalist pf-c-select__menu-item-main">{member.user.firstName && member.user.lastName?member.user.firstName + " " + member.user.lastName:"Not Available"}</span>
+                        <span className="gm_fullname_datalist pf-c-select__menu-item-main">{member.user.firstName && member.user.lastName?member.user.firstName + " " + member.user.lastName:Msg.localize('notAvailable')}</span>
                         <span className="gm_email_datalist pf-c-select__menu-item-description">{member.user.email}</span>
                       </DataListCell>,
                       <DataListCell width={3} key="secondary content ">
@@ -283,7 +282,7 @@ export const GroupMembers: FC<any> = (props) => {
                       <Tooltip
                         content={
                           <div>
-                            {"Edit Member Roles"}
+                            <Msg msgKey='adminGroupMemberCellRolesTooltip' />
                           </div>
                         }
                       >
@@ -291,13 +290,13 @@ export const GroupMembers: FC<any> = (props) => {
                       </Tooltip>
                       </DataListCell>,
                       <DataListCell width={3} key="secondary content ">
-                      {member.membershipExpiresAt||"Never"}
+                      {member.membershipExpiresAt||<Msg msgKey='Never' />}
                       </DataListCell>,
                       <DataListCell width={2} key="secondary content ">
                         <Tooltip
                           content={
                             <div>
-                              {member.status==='ENABLED'?"User is Active":member.status==="SUSPENDED"?"User is Suspended":""}
+                              {member.status==='ENABLED'?Msg.localize('adminGroupMemberUserActiveTooltip'):member.status==="SUSPENDED"?Msg.localize('adminGroupMemberUserSuspendedTooltip'):""}
                             </div>
                           }
                         >
@@ -319,16 +318,16 @@ export const GroupMembers: FC<any> = (props) => {
                         <Tooltip
                           content={
                             <div>
-                              {member.user.id===props.user.userId?"Leave Group":"Remove Member"}
+                              {member.user.id===props.user.userId?Msg.localize('adminGroupMemberLeave'):Msg.localize('adminGroupMemberRemove')}
                             </div>
                           }
                         >
                           <Button className={"gm_x-button-small"} onClick={()=>{
                               setModalInfo({
-                                title:"Confirmation",
-                                accept_message: "YES",
-                                cancel_message: "NO",
-                                message: ("Are you sure you want to remove this user from the group?"),
+                                title:(Msg.localize('Confirmation')),
+                                accept_message: (Msg.localize('YES')),
+                                cancel_message: (Msg.localize('NO')),
+                                message: (Msg.localize('adminGroupMemberRemoveConfirmation')),
                                 accept: function(){
                                     deleteGroupMember(member.id);
                                     setModalInfo({})},
@@ -343,7 +342,7 @@ export const GroupMembers: FC<any> = (props) => {
                         <Tooltip
                           content={
                             <div>
-                              {member.status==='ENABLED'?"Suspend User from Group":member.status==="SUSPENDED"?"Activate User":""}
+                              {member.status==='ENABLED'?Msg.localize('adminGroupMemberSuspendTooltip'):member.status==="SUSPENDED"?Msg.localize('adminGroupMemberActivateTooltip'):""}
                             </div>
                           }
                         >
@@ -352,7 +351,7 @@ export const GroupMembers: FC<any> = (props) => {
                                 title:"Confirmation",
                                 accept_message: "YES",
                                 cancel_message: "NO",
-                                message: (member.status==="ENABLED"?"Are you sure you want to suspend this user from the group?":"Are you sure you want to revoke suspension and ative this user?"),
+                                message: (member.status==="ENABLED"?Msg.localize('adminGroupMemberSuspendConfirmation'):Msg.localize('adminGroupMemberRevokeSuspendConfirmation')),
                                 accept: function(){
                                     if(member.status==="ENABLED"){
                                       suspendGroupMember(member.id);
@@ -445,7 +444,7 @@ const EditRolesModal: React.FC<EditRolesModalProps> = (props) =>{
         <React.Fragment>
             <Modal
             variant={"small"}
-            title={"Edit Μember Roles"}
+            title={Msg.localize('adminGroupMemberEditRole')}
             isOpen={isModalOpen}
             onClose={handleModalToggle}
             actions={[

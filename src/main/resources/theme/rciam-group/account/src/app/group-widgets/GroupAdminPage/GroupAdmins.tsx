@@ -7,6 +7,8 @@ import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/gr
 import { ConfirmationModal } from '../Modals';
 import {ValidateEmail} from '../../js/utils.js'
 import { Loading } from '../LoadingModal';
+import { Msg } from '../../widgets/Msg';
+
 
 export const GroupAdmins: FC<any> = (props) => {
 
@@ -58,7 +60,7 @@ export const GroupAdmins: FC<any> = (props) => {
           <DataListItem key='emptyItem' aria-labelledby="empty-item">
             <DataListItemRow key='emptyRow'>
               <DataListItemCells dataListCells={[
-                <DataListCell key='empty'><strong>This group has no admins</strong></DataListCell>
+                <DataListCell key='empty'><strong><Msg msgKey='adminGroupNoAdmins' /></strong></DataListCell>
               ]} />
             </DataListItemRow>
           </DataListItem>
@@ -79,7 +81,7 @@ export const GroupAdmins: FC<any> = (props) => {
       .then((response: HttpResponse<any>) => {
         if(response.status===200||response.status===204){
           props.fetchGroupConfiguration();
-          disapearingMessage("Admin Succesfully Added.")
+          disapearingMessage(Msg.localize('adminGroupAdded'))
           // setGroupMembers(response.data.results);
         }
       }).catch((err)=>{console.log(err)})
@@ -101,7 +103,7 @@ export const GroupAdmins: FC<any> = (props) => {
       .then((response: HttpResponse<any>) => {
         setLoading(false);
         if(response.status===200||response.status===204){
-          disapearingMessage("Invitation was succesfully sent to the email address.")
+          disapearingMessage(Msg.localize('adminGroupInvitationSent'))
           props.fetchGroupConfiguration();
           // setGroupMembers(response.data.results);
         }
@@ -138,7 +140,7 @@ export const GroupAdmins: FC<any> = (props) => {
     }
 
     let getUserIdentifier = (user) => {
-      return   (user.firstName || user.lastName?(user.firstName&&user.firstName+" ")+ user.lastName:user.username?user.username:user.email?user.email:user.id?user.id:"Info Not Available")
+      return   (user.firstName || user.lastName?(user.firstName&&user.firstName+" ")+ user.lastName:user.username?user.username:user.email?user.email:user.id?user.id:Msg.localize('infoNotAvailable'))
     }
 
     const clearSelection = () => {
@@ -171,16 +173,16 @@ export const GroupAdmins: FC<any> = (props) => {
               <DataListItemRow>
                 <DataListItemCells dataListCells={[
                   <DataListCell width={1} key="id-hd">
-                    <strong>Id</strong>
+                    <strong><Msg msgKey='Id' /></strong>
                   </DataListCell>,
                   <DataListCell width={1} key="username-hd">
-                    <strong>Username</strong>
+                    <strong><Msg msgKey='Username' /></strong>
                   </DataListCell>,
                   <DataListCell width={1} key="email-hd">
-                  <strong>Email</strong>
+                  <strong><Msg msgKey='Email' /></strong>
                   </DataListCell>,
                   <DataListCell width={1} key="email-hd">
-                  <strong>Direct Admin</strong>
+                  <strong><Msg msgKey='directAdmin' /></strong>
                   </DataListCell> 
                 ]}>
                 </DataListItemCells>
@@ -208,7 +210,7 @@ export const GroupAdmins: FC<any> = (props) => {
                         {admin.user.email}
                       </DataListCell>,
                       <DataListCell width={1} key="secondary content ">
-                        <Tooltip content={<div>{admin.direct?"This user is a direct admin in this group":"This user is not a direct admin in this group"}</div>}>
+                        <Tooltip content={<div>{admin.direct?Msg.localize('adminGroupIsDirect'):Msg.localize('adminGroupIsNotDirect')}</div>}>
                             <Checkbox id="disabled-check-1" className="gm_direct-checkbox" defaultChecked={admin.direct?true:false} isDisabled />
                         </Tooltip>
                       </DataListCell>
@@ -226,7 +228,7 @@ export const GroupAdmins: FC<any> = (props) => {
                         <Tooltip
                         content={
                             <div>
-                            {admin.user.id===props.user.userId?"Revoke Admin Rights for this group":"Revoke Admin Rights for this group"}
+                            {admin.user.id===props.user.userId?Msg.localize('adminGroupRevokeAdminTooltip'):Msg.localize('adminGroupRevokeAdminTooltip')}
                             </div>
                         }
                         >
@@ -235,7 +237,7 @@ export const GroupAdmins: FC<any> = (props) => {
                                   title:"Confirmation",
                                   accept_message: "YES",
                                   cancel_message: "NO",
-                                  message: ("Are you sure you want to remove this user as an admin to this group."),
+                                  message: (Msg.localize('adminGroupRevokeAdminConfirmation')),
                                   accept: function(){
                                     removeAdmin(admin.user.id);
                                     setModalInfo({})},
@@ -254,8 +256,8 @@ export const GroupAdmins: FC<any> = (props) => {
             }):noAdmins()}
           </DataList> 
           <div className="gm_add-admin-container">
-            <h1>Add New Group Admin</h1>
-            <p>Use the input to search for a user to add as a group admin, or type a valid email address to send an invitation.</p>
+            <h1><Msg msgKey='adminGroupAddNewTitle' /></h1>
+            <p><Msg msgKey='adminGroupAddNewDescription' /></p>
 
             <div className="gm_add-admin-input">
               <div>
@@ -266,7 +268,7 @@ export const GroupAdmins: FC<any> = (props) => {
                 onSelect={()=>{}}
                 onClear={clearSelection}
                 selections={selected}
-                createText="Invite with email"
+                createText={Msg.localize('adminGroupInviteTypeahead')}
                 onCreateOption={(value)=>{
                   if(ValidateEmail(value)){
                     setInviteAddress(value)
@@ -294,7 +296,7 @@ export const GroupAdmins: FC<any> = (props) => {
                       setInviteAddress("");
                       if(option.id){
                         setSelectedUserId(option.id);
-                        if(option.value==='Name Not Available'){
+                        if(option.value===Msg.localize('adminGroupNameNotAvailable')){
                           setSelected(option.description);
                         }
                         else{ 
@@ -303,7 +305,7 @@ export const GroupAdmins: FC<any> = (props) => {
                       }
                       setIsOpen(false);
                     }}
-                    value={option.value+ (option.disabled?' (Already an Admin)':"")}
+                    value={option.value+ (option.disabled?' ' +Msg.localize('adminGroupAlreadyAdmin'):"")}
                     {...(option.description && { description: option.description })}
                     />)
                   ))
@@ -312,7 +314,7 @@ export const GroupAdmins: FC<any> = (props) => {
                 isOpen={isOpen}
                 aria-labelledby={titleId}
                 isInputValuePersisted={true}
-                placeholderText="Select a user"
+                placeholderText={Msg.localize('adminGroupSelectUser')}
                 isCreatable={true}
               >
               {options.map((option, index) => (
@@ -323,7 +325,7 @@ export const GroupAdmins: FC<any> = (props) => {
                     setInviteAddress("");
                     if(option.id){
                       setSelectedUserId(option.id);
-                      if(option.value==='Name Not Available'){
+                      if(option.value===Msg.localize('adminGroupNameNotAvailable')){
                         setSelected(option.description);
                       }
                       else{ 
@@ -332,7 +334,7 @@ export const GroupAdmins: FC<any> = (props) => {
                     }
                     setIsOpen(false);
                   }}
-                  value={option.value + (option.disabled?' (Already an Admin)':"")}
+                  value={option.value + (option.disabled?' '+Msg.localize('adminGroupAlreadyAdmin'):"")}
                   {...(option.description && { description: option.description })}
                   />
               ))}
@@ -341,17 +343,17 @@ export const GroupAdmins: FC<any> = (props) => {
                 <Alert variant="success" title={successMessage} aria-live="polite" isInline />
               </FormAlert>:null}
               {emailError?<FormAlert>
-                <Alert variant="danger" title="Invalid Email" aria-live="polite" isInline />
+                <Alert variant="danger" title={Msg.localize('adminGroupInvalidEmail')} aria-live="polite" isInline />
               </FormAlert>:null}
               </div>
-              <Tooltip content={<div>{selectedUserId?"Add selected user as an admin to this group.":emailError?"To send an invitation please provide a valid email address.":inviteAddress?"Send invitation to become a group admin.":"Select a user or provide a valid a valid email address to add/invite a user to become a group admin."}</div>}>
+              <Tooltip content={<div>{selectedUserId?Msg.localize('adminGroupAddTooltip'):emailError?Msg.localize('adminGroupEmailErrorTooltip'):inviteAddress?Msg.localize('adminGroupSendEmailTooltip'):Msg.localize('adminGroupAddDescriptionTooltip')}</div>}>
                 <Button isDisabled={!(selectedUserId||(!emailError&&inviteAddress))}  className={"gm_admin-button "+(inviteAddress||emailError?"gm_invitation-button":"gm_add-admin-button")} onClick={()=>{
                     if(selectedUserId){
                       setModalInfo({
-                        title:"Confirmation",
+                        title:Msg.localize('Confirmation'),
                         accept_message: "YES",
                         cancel_message: "NO",
-                        message: ("Are you sure you want to add this user ("+  selected +") as an admin to this group."),
+                        message: (Msg.localize('adminGroupAddConfirmation1')+  selected +Msg.localize('adminGroupAddConfirmation2')),
                         accept: function(){
                           makeAdmin(selectedUserId);
                           setModalInfo({})},
@@ -361,10 +363,10 @@ export const GroupAdmins: FC<any> = (props) => {
                     }
                     if(inviteAddress){
                       setModalInfo({
-                        title:"Confirmation",
+                        title:Msg.localize('Confirmation'),
                         accept_message: "YES",
                         cancel_message: "NO",
-                        message: ("Are you sure you want to send an invitation to this address ("+  selected +")."),
+                        message: (Msg.localize('adminGroupInviteConfirmation') +" ("+  selected +")."),
                         accept: function(){
                           sendInvitation(inviteAddress);
                           setModalInfo({})},

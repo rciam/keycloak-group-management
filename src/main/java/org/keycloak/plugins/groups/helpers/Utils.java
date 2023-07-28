@@ -33,6 +33,7 @@ import org.keycloak.services.resources.admin.GroupResource;
 public class Utils {
 
     public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    public static final String dateToStringFormat = "yyyy-MM-dd";
     public static final String expirationNotificationPeriod = "expiration-notification-period";
     public static final String invitationExpirationPeriod = "invitation-expiration-period";
     public static final String defaultGroupRole = "member";

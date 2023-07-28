@@ -4,6 +4,7 @@ import {useEffect, useState} from 'react';
 import { GroupsServiceClient, HttpResponse } from '../groups-mngnt-service/groups.service';
 import { Loading } from './LoadingModal';
 // import parse from '../../node_modules/react-html-parser';
+import { Msg } from '../widgets/Msg';
 
 
 interface ConfirmationModalProps {
@@ -56,9 +57,9 @@ export const DeleteSubgroupModal:React.FC<any> = (props) => {
     useEffect(()=>{
         if(props.active){
             setModalInfo({
-                message:"Are you sure you want to delete this group?",
-                accept_message: "YES",
-                cancel_message: "NO",
+                message:(Msg.localize('deleteGroupConfirmation')),
+                accept_message: (Msg.localize('YES')),
+                cancel_message: (Msg.localize('NO')),
                 accept: function(){
                     setModalInfo({});
                     deleteGroup();},
@@ -78,8 +79,8 @@ export const DeleteSubgroupModal:React.FC<any> = (props) => {
           props.close();
           if(response.status===200||response.status===204){
             setModalInfo({
-                message:"Group Deleted",
-                accept_message: "OK",
+                message:Msg.localize('deleteGroupSuccess'),
+                accept_message: Msg.localize('OK'),
                 accept: function(){
                     props.afterSuccess();
                     setModalInfo({})},
@@ -138,8 +139,8 @@ export const CreateSubgroupModal:React.FC<any> = (props) => {
           props.close()
           if(response.status===200||response.status===204){
             setModalInfo({
-                title:"Sub Group Created",
-                accept_message: "OK",
+                title:(Msg.localize('createSubgroupSuccess')),
+                accept_message: (Msg.localize('OK')),
                 accept: function(){
                   props.afterSuccess();
                   setModalInfo({})},
@@ -163,20 +164,20 @@ export const CreateSubgroupModal:React.FC<any> = (props) => {
             <ConfirmationModal modalInfo={modalInfo}/>
             <Modal
                 variant={ModalVariant.medium}
-                title={"Create Subgroup"}
+                title={Msg.localize('createSubgroup')}
                 isOpen={isModalOpen}
                 onClose={()=>{props.close()}}
                 actions={[
                     <Tooltip {...(!!validSubGroup ? { trigger:'manual', isVisible:false }:{trigger:'mouseenter'})}
                         content={
                             <div>
-                            Make sure you have provided all the required information
+                                <Msg msgKey='createSubgroupFormError' />
                             </div>
                         }
                     >
                     <div>
                         <Button key="confirm" variant="primary" isDisabled={!validSubGroup} onClick={()=>{createSubgroup();}}>
-                            Create
+                            <Msg msgKey='Create' />
                         </Button>
                     </div>
 
@@ -184,7 +185,7 @@ export const CreateSubgroupModal:React.FC<any> = (props) => {
                     ,
                     
                     <Button key="cancel" variant="link" onClick={()=>{props.close()}}>
-                        Cancel
+                        <Msg msgKey='Cancel' />
                     </Button>
                     
                 ]}

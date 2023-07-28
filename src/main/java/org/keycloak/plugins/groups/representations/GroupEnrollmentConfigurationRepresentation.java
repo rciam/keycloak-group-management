@@ -3,11 +3,14 @@ package org.keycloak.plugins.groups.representations;
 import java.time.LocalDate;
 import java.util.List;
 
+import javax.persistence.Column;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import org.keycloak.plugins.groups.helpers.Utils;
 
 public class GroupEnrollmentConfigurationRepresentation {
 
@@ -17,7 +20,7 @@ public class GroupEnrollmentConfigurationRepresentation {
     private Boolean active;
     private Boolean requireApprovalForExtension;
     private Boolean requireApproval;
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd")
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= Utils.dateToStringFormat)
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate validFrom;
@@ -30,6 +33,12 @@ public class GroupEnrollmentConfigurationRepresentation {
     private Boolean visibleToNotMembers;
     private Boolean multiselectRole;
     private List<String> groupRoles;
+
+    private Boolean commentsNeeded;
+
+    private String commentsLabel;
+
+    private String commentsDescription;
 
     public GroupEnrollmentConfigurationRepresentation(String id){
         this.id = id;
@@ -163,5 +172,29 @@ public class GroupEnrollmentConfigurationRepresentation {
 
     public void setGroupRoles(List<String> groupRoles) {
         this.groupRoles = groupRoles;
+    }
+
+    public Boolean getCommentsNeeded() {
+        return commentsNeeded;
+    }
+
+    public void setCommentsNeeded(Boolean commentsNeeded) {
+        this.commentsNeeded = commentsNeeded;
+    }
+
+    public String getCommentsLabel() {
+        return commentsLabel;
+    }
+
+    public void setCommentsLabel(String commentsLabel) {
+        this.commentsLabel = commentsLabel;
+    }
+
+    public String getCommentsDescription() {
+        return commentsDescription;
+    }
+
+    public void setCommentsDescription(String commentsDescription) {
+        this.commentsDescription = commentsDescription;
     }
 }

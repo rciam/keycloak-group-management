@@ -93,6 +93,7 @@ Path | Method | Description                                  | Classes |
 /admin/configuration-rules | POST |create group enrollment configuration rule | AdminEnrollmentConfigurationRules
 /admin/configuration-rules/{id}| GET | get group enrollment configuration rule by id       | AdminEnrollmentConfigurationRules
 /admin/configuration-rules/{id} | PUT |update group enrollment configuration rule | AdminEnrollmentConfigurationRules
+/admin/configuration-rules/{id} | DELETE |delete group enrollment configuration rule | AdminEnrollmentConfigurationRules
 /admin/memberUserAttribute/calculation | POST |update member user attribute value for all users | AdminService
 /admin/user/{id} | DELETE | delete user          | AdminService
 /admin/group/{groupId} | DELETE | delete group          | AdminGroups

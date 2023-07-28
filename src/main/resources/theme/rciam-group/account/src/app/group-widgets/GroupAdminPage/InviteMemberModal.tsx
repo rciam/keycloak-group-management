@@ -1,14 +1,12 @@
 import * as React from 'react';
-import {FC,useState,useEffect,useRef, createRef} from 'react';
+import {useState,useEffect,useRef} from 'react';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
-import { ConfirmationModal } from '../Modals';
-import { SearchInput } from './SearchInput';
-import {CheckIcon } from '@patternfly/react-icons';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
 import {ValidateEmail} from '../../js/utils.js'
-import { Alert, Button, Checkbox, DataList, DataListCell, DataListItem, DataListItemCells, DataListItemRow, FormAlert, Modal, ModalVariant, Select, SelectOption, SelectVariant, Spinner, TextInput, Wizard, WizardStep } from '@patternfly/react-core';
+import { Alert, Button, Checkbox, DataList, DataListCell, DataListItem, DataListItemCells, DataListItemRow, FormAlert, Modal, ModalVariant, Select, SelectOption, SelectVariant, Spinner, Wizard, WizardStep } from '@patternfly/react-core';
+import { Msg } from '../../widgets/Msg';
 
 
 
@@ -72,13 +70,13 @@ export const InviteMemberModal: React.FC<any> = (props) => {
     const steps = [
         { 
             id: 'incrementallyEnabled-1', 
-            name: 'Select Group Enrollment Configuration',
+            name: (Msg.localize('invitationStep1')),
             component: <EnrollmentStep groupId={props.groupId} invitationData={invitationData} setInvitationData={setInvitationData} isStep1Complete={isStep1Complete} setIsStep1Complete={setIsStep1Complete}/>, 
             enableNext: isStep1Complete
         },
         {
           id: 'incrementallyEnabled-2',
-          name: 'Recipient Details',
+          name: (Msg.localize('invitationStep2')),
           component: <EmailStep groupId={props.groupId} invitationData={invitationData} setInvitationData={setInvitationData} isStep2Complete={isStep2Complete} setIsStep2Complete={setIsStep2Complete}/>,
           enableNext: isStep2Complete,
           nextButtonText: 'Send Invitation',
@@ -86,7 +84,7 @@ export const InviteMemberModal: React.FC<any> = (props) => {
         }
       ];
   
-      const title = 'Invite Group Member';
+      const title = Msg.localize('invitationSend');
   
   
 
@@ -95,7 +93,7 @@ export const InviteMemberModal: React.FC<any> = (props) => {
       <React.Fragment>
          <Modal
             variant={ModalVariant.medium}
-            title={"Invite Group Member"}
+            title={Msg.localize('invitationTitle')}
             isOpen={isModalOpen}
             onClose={()=>{
               props.setActive(false);}}
@@ -213,7 +211,7 @@ export const InviteMemberModal: React.FC<any> = (props) => {
                 isOpen={isOpen}
                 aria-labelledby={"Test"}
                 >
-                  <SelectOption key="placeholder" value={"Select Enrollement Configuration"} onClick={()=>{
+                  <SelectOption key="placeholder" value={Msg.localize('invitationEnrollmentSelectPlaceholder')} onClick={()=>{
                     props.setIsStep1Complete(false);
                     setEnrollment({});
                     }} 
@@ -234,10 +232,10 @@ export const InviteMemberModal: React.FC<any> = (props) => {
                         <DataListItemCells
                           dataListCells={[
                             <DataListCell key="primary content">
-                              <span id="compact-item1"><strong>Membership Duration</strong></span>
+                              <span id="compact-item1"><strong><Msg msgKey='invitationMemberhipDuration' /></strong></span>
                             </DataListCell>,
                             <DataListCell width={3} key="secondary content ">
-                              <span>{enrollment?.membershipExpirationDays?enrollment?.membershipExpirationDays +" Days":"Permanent"} </span>  
+                              <span>{enrollment?.membershipExpirationDays?enrollment?.membershipExpirationDays +" "+Msg.localize('Days'):Msg.localize('Permanent')} </span>  
                             </DataListCell>
                           ]}
                         />
@@ -248,7 +246,7 @@ export const InviteMemberModal: React.FC<any> = (props) => {
                       <DataListItemCells
                         dataListCells={[
                             <DataListCell key="primary content">
-                                <span id="compact-item1"><strong>Select Roles</strong></span>
+                                <span id="compact-item1"><strong><Msg msgKey='invitationRoleSelection' /></strong></span>
                             </DataListCell>,
                             <DataListCell width={3} key="roles">
                               <table className="gm_roles-table">
@@ -404,7 +402,7 @@ const EmailStep: React.FC<any> = (props) => {
                 onSelect={()=>{}}
                 onClear={clearSelection}
                 selections={selected}
-                createText="Send invite to this email address"
+                createText={Msg.localize('invitationEmailInputTypeahead')}
                 onCreateOption={(value)=>{
                   setInviteAddress(value)
                   setEmailError(!ValidateEmail(value));
@@ -462,7 +460,7 @@ const EmailStep: React.FC<any> = (props) => {
               ))}
               </Select>
               {emailError&&showEmailError?<FormAlert>
-                <Alert variant="danger" title={!inviteAddress?"Email is required":"Invalid Email"} aria-live="polite" isInline />
+                <Alert variant="danger" title={!inviteAddress?Msg.localize('invitationEmailRequired'):Msg.localize('invitationEmailError')} aria-live="polite" isInline />
               </FormAlert>:null}
               </div>
             
@@ -481,7 +479,7 @@ const ResponseModal: React.FC<any> = (props) => {
   return(
     <Modal
       variant={ModalVariant.small}
-      title={"Invitation " + (props.invitationResult==='success'?"was successfully sent":" could not be sent, please try again")}
+      title={Msg.localize('Invitation')+" " + (props.invitationResult==='success'?Msg.localize('invitationSuccess'):Msg.localize('invitationFailed'))}
       isOpen={isModalOpen}
       onClose={()=>{props.close()}}
       actions={[         <Button key="confirm" variant="primary" onClick={()=>{props.close()}}>

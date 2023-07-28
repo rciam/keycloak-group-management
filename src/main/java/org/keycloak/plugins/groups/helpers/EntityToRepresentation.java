@@ -46,6 +46,11 @@ public class EntityToRepresentation {
             rep.setAup(toRepresentation(entity.getAupEntity()));
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
+        rep.setCommentsNeeded(entity.getCommentsNeeded());
+        if (rep.getCommentsNeeded()) {
+            rep.setCommentsLabel(entity.getCommentsLabel());
+            rep.setCommentsDescription(entity.getCommentsDescription());
+        }
         return rep;
     }
 
@@ -161,7 +166,7 @@ public class EntityToRepresentation {
         GroupEnrollmentConfigurationRulesRepresentation rep = new GroupEnrollmentConfigurationRulesRepresentation();
         rep.setId(entity.getId());
         rep.setType(entity.getType());
-        rep.setField(entity.getField().toString());
+        rep.setField(entity.getField());
         rep.setDefaultValue(entity.getDefaultValue());
         rep.setMax(entity.getMax());
         rep.setRequired(entity.getRequired());

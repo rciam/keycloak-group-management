@@ -151,7 +151,7 @@
 }
 
 .gm_plus-button-small {
-    padding: 0.3rem 0.3rem 0.3rem 0.4rem!important;
+    padding: 0.4rem 0.3rem 0.3rem 0.4rem !important;
 }
 
 .gm_x-button{
@@ -569,7 +569,39 @@
     margin-left: 1.5rem!important;
 }
 
-.gm_createsub-button{
+.gm_create-button-datalist-header{
     padding: 0.3rem 0.5rem !important;
-    font-size: 0.8rem;
+    font-size: 0.8rem!important;
 }
+
+.corner-ribbon {
+    width: 200px;
+    background: #e43;
+    position: absolute;
+    top: 25px;
+    left: -50px;
+    text-align: center;
+    line-height: 40px;
+    letter-spacing: 1px;
+    color: #f0f0f0;
+    transform: rotate(-45deg);
+    -webkit-transform: rotate(-45deg);
+    z-index: 1000;
+  }
+
+.gm_expiration-warning-label {
+    display: inline-block!important;
+    margin-left: 1rem!important;
+    height: 1.5rem;
+    vertical-align: middle!important;
+    line-height: 1.5rem;
+    color: #795600;
+  }
+
+  .gm_expiration-warning-label span {
+    margin-right:0.3rem;
+  }
+
+  .gm_number-input-container {
+    margin-top:1rem;
+  }
