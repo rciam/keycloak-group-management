@@ -22,7 +22,7 @@ export const GroupSubGroups: FC<any> = (props) => {
       <DataListItem key='emptyItem' aria-labelledby="empty-item">
         <DataListItemRow key='emptyRow'>
           <DataListItemCells dataListCells={[
-            <DataListCell key='empty'><strong>No subgroups</strong></DataListCell>
+            <DataListCell key='empty'><strong><Msg msgKey='adminGroupSubgroupNo' /></strong></DataListCell>
           ]} />
         </DataListItemRow>
       </DataListItem>
@@ -55,8 +55,10 @@ export const GroupSubGroups: FC<any> = (props) => {
                       aria-label="Actions"
                       isPlainButtonAction
                 >
-                  <Tooltip content={"Create Subgroup"}>
-                    <Button className={"gm_createsub-button"} onClick={()=>{setCreateSubgroup(true)}}><PlusIcon/></Button>
+                  <Tooltip content={<div><Msg msgKey='createSubgroup'/></div>}>
+                    <Button className={"gm_plus-button-small"} onClick={()=>{setCreateSubgroup(true)}}>
+                        <div className={"gm_plus-button"}></div>
+                    </Button>
                   </Tooltip>
                 </DataListAction>
                   

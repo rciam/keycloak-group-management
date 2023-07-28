@@ -14,7 +14,6 @@ import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import org.keycloak.models.jpa.entities.RealmEntity;
-import org.keycloak.plugins.groups.enums.FieldEnum;
 import org.keycloak.plugins.groups.enums.GroupTypeEnum;
 
 @Entity
@@ -35,8 +34,7 @@ public class GroupEnrollmentConfigurationRulesEntity {
     private RealmEntity realmEntity;
 
     @Column(name = "FIELD")
-    @Enumerated(EnumType.STRING)
-    private FieldEnum field;
+    private String field;
 
     @Column(name = "TYPE")
     @Enumerated(EnumType.STRING)
@@ -67,11 +65,11 @@ public class GroupEnrollmentConfigurationRulesEntity {
         this.realmEntity = realmEntity;
     }
 
-    public FieldEnum getField() {
+    public String getField() {
         return field;
     }
 
-    public void setField(FieldEnum field) {
+    public void setField(String field) {
         this.field = field;
     }
 

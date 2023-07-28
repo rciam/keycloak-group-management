@@ -99,7 +99,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
       <DataListItem key='emptyItem' aria-labelledby="empty-item">
         <DataListItemRow key='emptyRow'>
           <DataListItemCells dataListCells={[
-            <DataListCell key='empty'><strong>No groups found</strong></DataListCell>
+            <DataListCell key='empty'><strong><Msg msgKey='noGroups' /></strong></DataListCell>
           ]} />
         </DataListItemRow>
       </DataListItem>
@@ -112,14 +112,14 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
       <div className="gm_content">
         <Breadcrumb className="gm_breadcumb">
             <BreadcrumbItem to="#">
-              Account Console
+            <Msg msgKey='Account Console' />
             </BreadcrumbItem>
             <BreadcrumbItem isActive>
               {Msg.localize('adminGroupLabel')}
             </BreadcrumbItem>
         </Breadcrumb> 
         <ContentPage title={Msg.localize('adminGroupLabel')}>
-          <SearchInput searchText={"Search based on Group Name"} cancelText={"View All Groups"}  search={(searchString)=>{
+          <SearchInput searchText={Msg.localize('searchBoxPlaceholder')} cancelText={Msg.localize('searchBoxCancel')}  search={(searchString)=>{
             fetchAdminGroups(searchString);
             setPage(1);
           }} />
@@ -204,9 +204,9 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
     };
 
     const dropdownItems = [
-      <DropdownItem key="link" onClick={()=>{setCreateSubGroup(true);}}>Create Sub Group</DropdownItem>,
+      <DropdownItem key="link" onClick={()=>{setCreateSubGroup(true);}}><Msg msgKey='createSubGroup' /></DropdownItem>,
       ...(('/'+group.name!==group.path)&& !(group?.extraSubGroups.length>0)?[<DropdownItem key="action" onClick={()=>{setDeleteGroup(true);}} component="button">
-        Delete Group 
+        <Msg msgKey='deleteGroup' /> 
       </DropdownItem>]:[])
     ];
   

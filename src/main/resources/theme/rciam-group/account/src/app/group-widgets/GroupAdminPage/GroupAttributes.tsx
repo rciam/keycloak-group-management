@@ -5,6 +5,7 @@ import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, 
 // @ts-ignore
 import { ConfirmationModal } from '../Modals';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
+import { Msg } from '../../widgets/Msg';
 
 
 
@@ -27,8 +28,8 @@ export const GroupAttributes: FC<any> = (props) => {
                 <DataListItem aria-labelledby="compact-item1">
                     <DataListItemRow>
                         <DataListItemCells dataListCells={[
-                            <DataListCell width={2} key="key-hd"><strong>Key</strong></DataListCell>,
-                            <DataListCell width={3} key="value-hd"><strong>Value</strong></DataListCell>
+                            <DataListCell width={2} key="key-hd"><strong><Msg msgKey='Key' /></strong></DataListCell>,
+                            <DataListCell width={3} key="value-hd"><strong><Msg msgKey='Value' /></strong></DataListCell>
                         ]}>
                         </DataListItemCells>
                         <DataListAction 
@@ -62,7 +63,7 @@ export const GroupAttributes: FC<any> = (props) => {
                                 aria-label="Actions"
                                 isPlainButtonAction
                             >
-                                <Tooltip content={<div>Remove Attribute</div>}>
+                                <Tooltip content={<div><Msg msgKey='adminGroupRemoveAttribute' /></div>}>
                                     <Button variant="danger" className={"gm_x-button-small"} 
                                         onClick={()=>{
                                             delete attributes[attribute];
@@ -82,12 +83,12 @@ export const GroupAttributes: FC<any> = (props) => {
                             dataListCells={[
                             <DataListCell width={2} key="key-input">
                                 <span id="compact-item1">                              
-                                    <TextInput id="textInput-basic-1" value={attributeKeyInput} placeholder='Add Attribute Key' onKeyDown={(e)=>{e.key=== 'Enter'&&attributeRef?.current?.click();}} type="text" aria-label="text input field" onChange={(e)=>{setAttributeKeyInput(e);}} />
+                                    <TextInput id="textInput-basic-1" value={attributeKeyInput} placeholder={Msg.localize('adminGroupAttributeKeyPlaceholder')} onKeyDown={(e)=>{e.key=== 'Enter'&&attributeRef?.current?.click();}} type="text" aria-label="text input field" onChange={(e)=>{setAttributeKeyInput(e);}} />
                                 </span>
                             </DataListCell>,
                             <DataListCell width={3} key="value-input">
                                 <span id="item2">
-                                    <TextInput id="textInput-basic-2" value={attributeValueInput} placeholder='Add Attribute Value' onKeyDown={(e)=>{e.key=== 'Enter'&&attributeRef?.current?.click();}} type="text" aria-label="text input field" onChange={(e)=>{setAttributeValueInput(e);}} />                                
+                                    <TextInput id="textInput-basic-2" value={attributeValueInput} placeholder={Msg.localize('adminGroupAttributeValuePlaceholder')} onKeyDown={(e)=>{e.key=== 'Enter'&&attributeRef?.current?.click();}} type="text" aria-label="text input field" onChange={(e)=>{setAttributeValueInput(e);}} />                                
                                 </span>
                             </DataListCell>
                             ]}
@@ -100,7 +101,7 @@ export const GroupAttributes: FC<any> = (props) => {
                             aria-label="Actions"
                             isPlainButtonAction
                         >
-                            <Tooltip content={<div>Add Attribute</div>}>
+                            <Tooltip content={<div><Msg msgKey='adminGroupAttributeAdd' /></div>}>
                                 <Button className={"gm_plus-button-small"} ref={attributeRef} 
                                     onClick={()=>{
                                         if(attributeKeyInput){
@@ -121,10 +122,10 @@ export const GroupAttributes: FC<any> = (props) => {
                 <div className={"gm_attribute-controls"}>
                 <Button  className={""} onClick={()=>{
                      setModalInfo({
-                        title:"Confirmation",
-                        accept_message: "YES",
-                        cancel_message: "NO",
-                        message: ("Save changes made to the service attributes?"),
+                        title:(Msg.localize('Confirmation')),
+                        accept_message: (Msg.localize('YES')),
+                        cancel_message: (Msg.localize('NO')),
+                        message: (Msg.localize('adminGroupAttributeConfirmation')),
                         accept: function(){
                             props.groupConfiguration.attributes = attributes;
                             props.updateAttributes(props.groupConfiguration)

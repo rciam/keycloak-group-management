@@ -1,6 +1,5 @@
 package org.keycloak.plugins.groups.representations;
 
-import org.keycloak.plugins.groups.enums.FieldEnum;
 import org.keycloak.plugins.groups.enums.GroupTypeEnum;
 
 public class GroupEnrollmentConfigurationRulesRepresentation {

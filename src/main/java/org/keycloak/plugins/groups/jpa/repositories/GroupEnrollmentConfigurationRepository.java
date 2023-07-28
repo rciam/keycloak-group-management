@@ -61,6 +61,9 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
             r.setName(x.getName());
             return r;
         }).collect(Collectors.toList()));
+        entity.setCommentsNeeded(true);
+        entity.setCommentsLabel("Comments");
+        entity.setCommentsDescription("Why do you want to join the group?");
         create(entity);
     }
 
@@ -112,6 +115,15 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         } else {
             entity.setGroupRoles(null);
         }
+        entity.setCommentsNeeded(rep.getCommentsNeeded());
+        if (rep.getCommentsNeeded()){
+            entity.setCommentsLabel(rep.getCommentsLabel());
+            entity.setCommentsDescription(rep.getCommentsDescription());
+        } else {
+            entity.setCommentsLabel(null);
+            entity.setCommentsDescription(null);
+        }
+
     }
 
     private GroupAupEntity toEntity(GroupAupRepresentation rep) {

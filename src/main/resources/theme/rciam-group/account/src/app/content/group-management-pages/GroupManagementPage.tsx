@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import {HashRouter, Route, Link, Switch} from 'react-router-dom';
 
-
+import { Msg } from '../../widgets/Msg';
 import {
     Tabs, Tab, TabTitleText,
     Checkbox,
