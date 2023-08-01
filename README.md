@@ -24,7 +24,7 @@ Parameter explanation:
 - invitation-expiration-period = After how many hours the invitation will be expired.
 - expiration-notification-period = How many days before Group Membership expiration (or aup expiration) notification email will be sent to user. Can be overridden per Group.
 
-Moreover execute '{server_url}/realms/{realmName}/agm/admin/server-url?url={url}' in order to set server url in order to be used in usergroup expiration notification emails.
+You should define realm attribute 'keycloakUrl' (Keycloak main url)
 
 ## REST API
 
