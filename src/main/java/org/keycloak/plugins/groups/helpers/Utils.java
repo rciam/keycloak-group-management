@@ -51,6 +51,7 @@ public class Utils {
     public static final String EVENT_ROLES = "roles";
     public static final String EVENT_MEMBERSHIP_EXPIRATION = "membership expiration";
     public static final String VO_PERSON_ID ="voPersonID";
+    public static final String KEYCLOAK_URL = "keycloakUrl";
     public static final String GROUP_MEMBERSHIP_CREATE = "GROUP_MEMBERSHIP_CREATE";
     public static final String GROUP_MEMBERSHIP_UPDATE = "GROUP_MEMBERSHIP_UPDATE";
     public static final String GROUP_MEMBERSHIP_DELETE = "GROUP_MEMBERSHIP_DELETE";

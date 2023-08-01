@@ -86,9 +86,9 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         if (eventEntity == null || LocalDate.now().isAfter(eventEntity.getDate())) {
             logger.info("group management daily action is executing ...");
             Stream<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getExpiredMemberships").setParameter("date", LocalDate.now()).getResultStream();
-            String serverUrl = eventEntity != null ? eventEntity.getServerUrl() : null;
             results.forEach(entity -> {
                 RealmModel realmModel = session.realms().getRealm(entity.getUser().getRealmId());
+                String serverUrl = realm.getAttribute(Utils.KEYCLOAK_URL);
                 GroupAdminRepository groupAdminRepository = new GroupAdminRepository(session, realmModel);
                 UserModel user = session.users().getUserById(realmModel, entity.getUser().getId());
                 GroupModel group = realmModel.getGroupById(entity.getGroup().getId());
@@ -144,7 +144,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
             if (eventEntity == null) {
                 //first time, execute also weekly tasks
-                weeklyTaskExecution(customFreeMarkerEmailTemplateProvider, session, serverUrl);
+                weeklyTaskExecution(customFreeMarkerEmailTemplateProvider, session);
                 eventEntity = new GroupManagementEventEntity();
                 eventEntity.setId(Utils.eventId);
                 eventEntity.setDate(LocalDate.now());
@@ -156,7 +156,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
                 if (LocalDate.now().isAfter(eventEntity.getDateForWeekTasks().plusDays(6))) {
                     //weekly tasks execution
-                    weeklyTaskExecution(customFreeMarkerEmailTemplateProvider, session, serverUrl);
+                    weeklyTaskExecution(customFreeMarkerEmailTemplateProvider, session);
                     eventEntity.setDateForWeekTasks(LocalDate.now());
                     eventRepository.update(eventEntity);
                 }
@@ -172,9 +172,10 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         user.leaveGroup(group);
     }
 
-    private void weeklyTaskExecution(CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, KeycloakSession session, String serverUrl) {
+    private void weeklyTaskExecution(CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, KeycloakSession session) {
         session.realms().getRealmsStream().forEach(realmModel -> {
             customFreeMarkerEmailTemplateProvider.setRealm(realmModel);
+            String serverUrl = realm.getAttribute(Utils.KEYCLOAK_URL);
             session.groups().getGroupsStream(realmModel).forEach(group -> {
                 Integer dateBeforeNotification = group.getFirstAttribute(Utils.expirationNotificationPeriod) != null ? Integer.valueOf(group.getFirstAttribute(Utils.expirationNotificationPeriod)) : realmModel.getAttribute(Utils.expirationNotificationPeriod, 21);
                 //find group membership that expires in less days than dateBeforeNotification (at the end of this week)

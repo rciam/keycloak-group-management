@@ -85,17 +85,6 @@ public class AdminService {
         adminEvent.realm(realm);
     }
 
-    @GET
-    @Path("/server-url")
-    public Response configureServerUrl(@NotNull @QueryParam("url") String url) {
-        GroupManagementEventEntity eventEntity = groupManagementEventRepository.getEntity(Utils.eventId);
-        eventEntity.setServerUrl(url);
-        groupManagementEventRepository.update(eventEntity);
-        adminEvent.resource(ResourceType.REALM).operation(OperationType.UPDATE).representation(eventEntity).resourcePath(session.getContext().getUri()).success();
-        return Response.noContent().build();
-    }
-
-
     @PUT
     @Path("/configuration")
     @Consumes(MediaType.APPLICATION_JSON)

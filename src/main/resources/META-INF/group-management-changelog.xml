@@ -723,5 +723,9 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="serverurl">
+        <dropColumn tableName="GROUP_MANAGEMENT_EVENT" columnName="SERVER_URL"/>
+    </changeSet>
+
 
 </databaseChangeLog>
