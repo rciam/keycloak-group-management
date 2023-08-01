@@ -1,6 +1,7 @@
 package org.keycloak.plugins.groups.services;
 
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
@@ -12,6 +13,7 @@ import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.GeneralJpaService;
+import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
@@ -32,7 +34,6 @@ import org.keycloak.plugins.groups.representations.GroupInvitationRepresentation
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
 import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.ServicesLogger;
-import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.theme.FreeMarkerUtil;
 
 import javax.ws.rs.BadRequestException;
@@ -45,13 +46,20 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class UserGroups {
+
+    @Context
+    private ClientConnection clientConnection;
+
+    private static final String INVITATION_NOT_EXISTS ="This invitation does not exist or has been expired";
 
     protected final KeycloakSession session;
     private final RealmModel realm;
@@ -65,15 +73,11 @@ public class UserGroups {
     private final GeneralJpaService generalJpaService;
     private final UserModel user;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
-    private final AdminEventBuilder adminEvent;
 
-    private static final String INVITATION_ERROR ="This invitation does not exist or has been expired";
-
-    public UserGroups(KeycloakSession session, RealmModel realm, UserModel user, AdminEventBuilder adminEvent)  {
+    public UserGroups(KeycloakSession session, RealmModel realm, UserModel user)  {
         this.session = session;
         this.realm =  realm;
         this.user = user;
-        this.adminEvent = adminEvent;
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
         this.groupEnrollmentRequestRepository =  new GroupEnrollmentRequestRepository(session, realm, new GroupRolesRepository(session, realm));
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm, groupEnrollmentConfigurationRepository, new GroupRolesRepository(session, realm));
@@ -129,7 +133,7 @@ public class UserGroups {
         if (groupId == null) {
             throw new NotFoundException("This group does not exist");
         }
-        return groupEnrollmentConfigurationRepository.getAvailableByGroup(groupId).map(conf -> EntityToRepresentation.toRepresentation(conf)).collect(Collectors.toList());
+        return groupEnrollmentConfigurationRepository.getAvailableByGroup(groupId).map(EntityToRepresentation::toRepresentation).collect(Collectors.toList());
     }
 
     @Path("/group/{groupId}/member")
@@ -139,7 +143,7 @@ public class UserGroups {
             throw new NotFoundException("You are not member of this group");
         }
 
-        UserGroupMember service = new UserGroupMember(session, realm, user, entity, customFreeMarkerEmailTemplateProvider, userGroupMembershipExtensionRepository, groupEnrollmentConfigurationRepository, adminEvent);
+        UserGroupMember service = new UserGroupMember(session, realm, user, entity, userGroupMembershipExtensionRepository);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
@@ -158,7 +162,7 @@ public class UserGroups {
     @POST
     @Path("/enroll-request")
     @Consumes("application/json")
-    public Response createEnrollmentRequest(GroupEnrollmentRequestRepresentation rep) {
+    public Response createEnrollmentRequest(GroupEnrollmentRequestRepresentation rep) throws UnsupportedEncodingException {
         GroupEnrollmentConfigurationEntity configuration = groupEnrollmentConfigurationRepository.getEntity(rep.getGroupEnrollmentConfiguration().getId());
         if (configuration == null)
             throw new NotFoundException("Could not find this group enrollment configuration");
@@ -183,7 +187,7 @@ public class UserGroups {
             });
         } else {
             //user become immediately group member
-            userGroupMembershipExtensionRepository.createOrUpdate(rep, session, user, adminEvent);
+            userGroupMembershipExtensionRepository.createOrUpdate(rep, session, user, clientConnection);
         }
         return Response.noContent().build();
     }
@@ -208,7 +212,7 @@ public class UserGroups {
     public GroupInvitationRepresentation getInvitation(@PathParam("id") String id) {
         GroupInvitationEntity entity = groupInvitationRepository.getEntity(id);
         if (entity == null) {
-            throw new NotFoundException(INVITATION_ERROR);
+            throw new NotFoundException(INVITATION_NOT_EXISTS);
         }
         return EntityToRepresentation.toRepresentation(entity);
     }
@@ -220,7 +224,7 @@ public class UserGroups {
     public Response acceptInvitation(@PathParam("id") String id) {
         GroupInvitationEntity invitationEntity = groupInvitationRepository.getEntity(id);
         if (invitationEntity == null) {
-            throw new NotFoundException(INVITATION_ERROR);
+            throw new NotFoundException(INVITATION_NOT_EXISTS);
         }
         if (invitationEntity.getForMember() && userGroupMembershipExtensionRepository.getByUserAndGroup(invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId(), user.getId()) != null) {
             throw new BadRequestException("You are already member of this group");
@@ -231,7 +235,7 @@ public class UserGroups {
 
         if (invitationEntity.getForMember() ) {
             MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-            userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user, adminEvent, session.getContext().getUri(), memberUserAttribute);
+            userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user, session.getContext().getUri(), memberUserAttribute, clientConnection);
         } else {
             groupAdminRepository.addGroupAdmin(user.getId(), invitationEntity.getGroup().getId());
         }
@@ -254,7 +258,7 @@ public class UserGroups {
     public Response rejectInvitation(@PathParam("id") String id) {
         GroupInvitationEntity invitationEntity =  groupInvitationRepository.getEntity(id);
         if (invitationEntity == null) {
-            throw new NotFoundException(INVITATION_ERROR);
+            throw new NotFoundException(INVITATION_NOT_EXISTS);
         }
 
         List<String> groupRoles = invitationEntity.getGroupRoles() != null ? invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()): new ArrayList<>();
