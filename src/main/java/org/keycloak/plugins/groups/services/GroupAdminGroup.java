@@ -71,8 +71,6 @@ public class GroupAdminGroup {
     private final GroupInvitationRepository groupInvitationRepository;
     private final GeneralJpaService generalService;
     private final AdminEventBuilder adminEvent;
-    //TODO Add real url
-    private static final String ADD_ADMIN_URL = "http://localhost:8080/realms/master/agm/dummy";
 
     public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel groupAdmin, GroupModel group, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, AdminEventBuilder adminEvent) {
         this.session = session;
@@ -112,7 +110,7 @@ public class GroupAdminGroup {
     @Path("/configuration/all")
     @Produces("application/json")
     public List<GroupEnrollmentConfigurationRepresentation> getGroupEnrollmentConfigurationsByGroup() {
-        return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf)).collect(Collectors.toList());
+        return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(EntityToRepresentation::toRepresentation).collect(Collectors.toList());
     }
 
     @GET
@@ -254,7 +252,7 @@ public class GroupAdminGroup {
         if (member == null) {
             throw new NotFoundException("Could not find this group member");
         }
-        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository, adminEvent);
+        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
