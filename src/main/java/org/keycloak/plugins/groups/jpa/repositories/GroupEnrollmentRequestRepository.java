@@ -55,12 +55,15 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         return em.createNamedQuery("countOngoingByUserAndGroup", Long.class).setParameter("userId", userId).setParameter("groupId", groupId).setParameter("status", statusList).getSingleResult();
     }
 
-    public GroupEnrollmentRequestPager groupEnrollmentPager(String userId, String groupName, EnrollmentRequestStatusEnum status, Integer first, Integer max) {
+    public GroupEnrollmentRequestPager groupEnrollmentPager(String userId, String groupId, String groupName, EnrollmentRequestStatusEnum status, Integer first, Integer max) {
         StringBuilder sqlQueryMain = new StringBuilder("from GroupEnrollmentRequestEntity f");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("userId", userId);
-        if (groupName == null) {
+        if (groupId== null && groupName == null) {
             sqlQueryMain.append(" where f.user.id = :userId");
+        } else  if (groupId!= null){
+            sqlQueryMain.append(" join f.groupEnrollmentConfiguration c where f.user.id = :userId and c.group.id = :groupId");
+            parameters.put("groupId", groupId);
         } else {
             sqlQueryMain.append(" join f.groupEnrollmentConfiguration c join c.group g where f.user.id = :userId and g.name like :groupName");
             parameters.put("groupName", "%" + groupName + "%");

@@ -154,9 +154,10 @@ public class UserGroups {
     @Produces("application/json")
     public GroupEnrollmentRequestPager getMyEnrollments(@QueryParam("first") @DefaultValue("0") Integer first,
                                                         @QueryParam("max") @DefaultValue("10") Integer max,
+                                                        @QueryParam("groupId") String groupId,
                                                         @QueryParam("groupName") String groupName,
                                                         @QueryParam("status") EnrollmentRequestStatusEnum status) {
-        return groupEnrollmentRequestRepository.groupEnrollmentPager(user.getId(), groupName, status, first, max);
+        return groupEnrollmentRequestRepository.groupEnrollmentPager(user.getId(), groupId, groupName, status, first, max);
     }
 
     @POST
