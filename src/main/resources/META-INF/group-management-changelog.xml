@@ -728,9 +728,9 @@
         <renameColumn tableName="GROUP_ENROLLMENT_REQUEST" oldColumnName="REASON" newColumnName="COMMENTS" columnDataType="TEXT"/>
     </changeSet>
 
-    <changeSet author="cgeorgilakis@grnet.gr" id="serverurl">
-        <dropColumn tableName="GROUP_MANAGEMENT_EVENT" columnName="SERVER_URL"/>
-    </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="not_null_constraints">
+        <addNotNullConstraint tableName="GROUP_ENROLLMENT_CONFIGURATION" columnName="MULTISELECT_ROLE" columnDataType="boolean" />
+    </changeSet>
 
 </databaseChangeLog>
