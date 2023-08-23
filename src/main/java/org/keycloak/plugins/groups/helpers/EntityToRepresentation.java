@@ -100,6 +100,8 @@ public class EntityToRepresentation {
         rep.setReviewComments(entity.getReviewComments());
         rep.setStatus(entity.getStatus());
         rep.setComments(entity.getComments());
+        rep.setSubmittedDate(entity.getSubmittedDate());
+        rep.setApprovedDate(entity.getApprovedDate());
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
         return rep;

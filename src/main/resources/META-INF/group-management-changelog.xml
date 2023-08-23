@@ -733,4 +733,16 @@
         <addNotNullConstraint tableName="GROUP_ENROLLMENT_CONFIGURATION" columnName="MULTISELECT_ROLE" columnDataType="boolean" />
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="enrollment-request-dates">
+        <addColumn tableName="GROUP_ENROLLMENT_REQUEST">
+            <column name="SUBMITTED_DATE" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT_REQUEST">
+            <column name="APPROVED_DATE" type="timestamp"/>
+        </addColumn>
+        <dropDefaultValue tableName="GROUP_ENROLLMENT_REQUEST" columnName="SUBMITTED_DATE"/>
+    </changeSet>
+
 </databaseChangeLog>

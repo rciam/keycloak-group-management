@@ -1,7 +1,7 @@
 package org.keycloak.plugins.groups.enums;
 
 public enum EnrollmentRequestStatusEnum {
-    PENDING_APPROVAL("Pending approval"), WAITING_FOR_REPLY("Waiting for reply"), ACCEPTED("Accepted"), REJECTED("Rejected"), ARCHIVED("Archived");
+    PENDING_APPROVAL("Pending approval"), WAITING_FOR_REPLY("Waiting for reply"), ACCEPTED("Accepted"), REJECTED("Rejected"), ARCHIVED("Archived"), NO_APPROVAL("No approval"),;
 
     private String value;
 

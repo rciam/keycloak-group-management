@@ -19,6 +19,7 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -63,6 +64,11 @@ public class GroupEnrollmentRequestEntity {
     @Column(name = "REVIEW_COMMENTS")
     private String reviewComments;
 
+    @Column(name="SUBMITTED_DATE")
+    private LocalDateTime submittedDate;
+
+    @Column(name="APPROVED_DATE")
+    private LocalDateTime approvedDate;
     @ManyToMany
     @JoinTable(name = "GROUP_ENROLLMENT_ROLES", joinColumns = @JoinColumn(name = "GROUP_ENROLLMENT_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
     private List<GroupRolesEntity> groupRoles;
@@ -134,6 +140,22 @@ public class GroupEnrollmentRequestEntity {
     public void setComment(String reviewComment) {
         //add reviewComment to existing reviewComments after line separator
         this.reviewComments = this.reviewComments != null ? this.reviewComments + System.lineSeparator() + reviewComment : reviewComment;
+    }
+
+    public LocalDateTime getSubmittedDate() {
+        return submittedDate;
+    }
+
+    public void setSubmittedDate(LocalDateTime submittedDate) {
+        this.submittedDate = submittedDate;
+    }
+
+    public LocalDateTime getApprovedDate() {
+        return approvedDate;
+    }
+
+    public void setApprovedDate(LocalDateTime approvedDate) {
+        this.approvedDate = approvedDate;
     }
 
     public List<GroupRolesEntity> getGroupRoles() {

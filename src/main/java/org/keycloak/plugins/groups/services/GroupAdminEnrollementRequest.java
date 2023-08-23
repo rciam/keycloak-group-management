@@ -1,6 +1,7 @@
 package org.keycloak.plugins.groups.services;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDateTime;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BadRequestException;
@@ -86,6 +87,7 @@ public class GroupAdminEnrollementRequest {
 
         enrollmentEntity.setStatus(EnrollmentRequestStatusEnum.ACCEPTED);
         enrollmentEntity.setAdminJustification(adminJustification);
+        enrollmentEntity.setApprovedDate(LocalDateTime.now());
 
         groupEnrollmentRequestRepository.update(enrollmentEntity);
 
@@ -107,6 +109,7 @@ public class GroupAdminEnrollementRequest {
             throw new BadRequestException(statusErrorMessage);
         enrollmentEntity.setStatus(EnrollmentRequestStatusEnum.REJECTED);
         enrollmentEntity.setAdminJustification(adminJustification);
+        enrollmentEntity.setApprovedDate(LocalDateTime.now());
         groupEnrollmentRequestRepository.update(enrollmentEntity);
 
         try {
