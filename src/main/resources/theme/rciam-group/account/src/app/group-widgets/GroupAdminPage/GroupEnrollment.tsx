@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {FC,useState,useEffect,useRef} from 'react';
+
 import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, Pagination, InputGroup, TextInput, Dropdown, BadgeToggle, DropdownItem, Badge, Modal, Checkbox} from '@patternfly/react-core';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
@@ -12,6 +13,7 @@ import { Msg } from '../../widgets/Msg';
 import { EnrollmentModal } from '../GroupEnrollment/EnrollmentModal';
 import { Link } from 'react-router-dom';
 import {isIntegerOrNumericString} from '../../js/utils.js'
+import {CopyIcon } from '@patternfly/react-icons';
 
 
 interface FederatedIdentity {
@@ -45,7 +47,7 @@ export const GroupEnrollment: FC<any> = (props) => {
     const [groupEnrollments,setGroupEnrollments] = useState<any>([]);
     const [enrollmentModal,setEnrollmentModal] = useState({});
     const [enrollmentRules, setEnrollmentRules] = useState({});
-    const [defaultEnrollmentConfiguration,setDefaultEnrollmentConfiguration] = useState({
+    let defaultEnrollmentConfiguration = {
       group: {id:""},
       membershipExpirationDays : 3,
       name: "",
@@ -56,13 +58,14 @@ export const GroupEnrollment: FC<any> = (props) => {
           url: ""
       },
       requireApprovalForExtension:false,
+      multiselectRole: true,
       visibleToNotMembers: false,
       validFrom: null,
       commentsNeeded:true,
       commentsLabel: Msg.localize('enrollmentConfigurationCommentsDefaultLabel'),
       commentsDescription: Msg.localize('enrollmentConfigurationCommentsDefaultDescription'),
       groupRoles : []
-    })
+    }
 
     let groupsService = new GroupsServiceClient();
     
@@ -79,6 +82,11 @@ export const GroupEnrollment: FC<any> = (props) => {
         fetchGroupEnrollments();
       }
     },[props.groupId]);
+
+
+
+
+
 
     let fetchGroupEnrollments = ()=>{
       groupsService!.doGet<any>("/group-admin/group/"+props.groupId+"/configuration/all")
@@ -111,7 +119,6 @@ export const GroupEnrollment: FC<any> = (props) => {
                   }
               }
             })
-            setDefaultEnrollmentConfiguration({...defaultEnrollmentConfiguration});
             setEnrollmentRules(rules);
           }
           else{
@@ -140,7 +147,9 @@ export const GroupEnrollment: FC<any> = (props) => {
     return (
       <React.Fragment>
         <ConfirmationModal modalInfo={modalInfo}/>
-        <EnrollmentModal enrollment={enrollmentModal} validationRules={enrollmentRules}  groupRoles={props.groupConfiguration.groupRoles} close={()=>{setEnrollmentModal({}); fetchGroupEnrollments();}} groupId={props.groupId}/>
+        <EnrollmentModal enrollment={{...enrollmentModal}} validationRules={enrollmentRules}  groupRoles={props.groupConfiguration.groupRoles} close={()=>{
+          setEnrollmentModal({}); 
+          fetchGroupEnrollments();}} groupId={props.groupId}/>
         <DataList aria-label="Group Member Datalist" isCompact>
             <DataListItem aria-labelledby="compact-item1">
               <DataListItemRow>
@@ -164,7 +173,7 @@ export const GroupEnrollment: FC<any> = (props) => {
                       isPlainButtonAction
                 >
                   <Tooltip content={<div><Msg msgKey='createEnrollmentButton'/></div>}>
-                    <Button className={"gm_plus-button-small"} onClick={()=>{defaultEnrollmentConfiguration.group.id=props.groupId;  setEnrollmentModal(defaultEnrollmentConfiguration);}}>
+                    <Button className={"gm_plus-button-small"} onClick={()=>{defaultEnrollmentConfiguration.group.id=props.groupId;  setEnrollmentModal({...defaultEnrollmentConfiguration});}}>
                         <div className={"gm_plus-button"}></div>
                     </Button>
                   </Tooltip>
@@ -204,7 +213,11 @@ export const GroupEnrollment: FC<any> = (props) => {
                     id="check-action-action1"
                     aria-label="Actions"
                     isPlainButtonAction
-                  ><div className="gm_cell-placeholder"></div></DataListAction>
+                  ><Button isSmall variant="tertiary" onClick={()=>{
+                    
+                    let link = groupsService.getBaseUrl() + '/account/#/enroll?groupPath=' + encodeURI(props.groupConfiguration.path) + '&id=' + encodeURI(enrollment.id);
+                    console.log(link);
+                    navigator.clipboard.writeText(link)}} ><CopyIcon/> </Button></DataListAction>
                 </DataListItemRow>
               </DataListItem>
             }):noGroupEnrollments()}

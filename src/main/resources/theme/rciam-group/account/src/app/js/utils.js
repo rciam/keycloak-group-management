@@ -26,3 +26,54 @@ export function isIntegerOrNumericString(value) {
   }
   return false;
 }
+
+export const dateParse = (date) => {
+  const split = date.split('-');
+  if (split.length !== 3) {
+  return new Date();
+  }
+  const month = split[1];
+  const day = split[2];
+  const year = split[0];
+  return new Date(`${year.padStart(4, '0')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T00:00:00`);
+};
+
+export const getCurrentDate = ()=>{
+  const date = new Date();
+
+  let currentDay= String(date.getDate()).padStart(2, '0');
+
+  let currentMonth = String(date.getMonth()+1).padStart(2,"0");
+
+  let currentYear = date.getFullYear();
+
+  // we will display the date as YYYY-MM-DD 
+
+  return `${currentYear}-${currentMonth}-${currentDay}`;
+}
+
+export const isFutureDate = (date) => {
+  const currentDate = new Date();
+
+  if (date > currentDate) {
+    return true;
+  }
+  else{
+    return false;
+  }
+  
+};
+
+
+export function formatDateToString(date) {
+  // Ensure that the input is a valid Date object
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    throw new Error('Invalid date format. Please provide a valid Date object.');
+  }
+
+  const month = date.toLocaleString('default', { month: 'long' });
+  const day = date.getDate();
+  const year = date.getFullYear();
+
+  return `${month} ${day}, ${year}`;
+}

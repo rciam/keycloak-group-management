@@ -25,6 +25,7 @@ import { ForbiddenPage } from "./content/forbidden-page/ForbiddenPage.js";
 import { GroupPage } from "./content/group-management-pages/GroupPage.js";
 import { AdminGroupPage } from "./content/group-management-pages/AdminGroupPage.js";
 import { InvitationLandingPage } from "./content/group-management-pages/InvitationLandingPage.js";
+import { EnrollmentFlow } from "./group-widgets/GroupEnrollment/EnrollmentFlow.js";
 ;
 let customPages = [{
   path: "/groups/showgroups/:id",
@@ -36,6 +37,11 @@ let customPages = [{
   expandId: "groups",
   parentId: "admingroups",
   componentName: "AdminGroupPage"
+}, {
+  path: "/enroll",
+  expandId: "groups",
+  parentId: "showgroups",
+  componentName: "EnrollmentFlow"
 }];
 export function isModulePageDef(item) {
   return item.modulePath !== undefined;
@@ -157,7 +163,8 @@ export function makeRoutes() {
   if (typeof content === 'undefined') return /*#__PURE__*/React.createElement("span", null);
   const customComponents = {
     GroupPage: GroupPage,
-    AdminGroupPage: AdminGroupPage
+    AdminGroupPage: AdminGroupPage,
+    EnrollmentFlow: EnrollmentFlow
   };
   const pageDefs = flattenContent(content);
   const routes = pageDefs.map(page => {

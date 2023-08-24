@@ -1,11 +1,11 @@
 import * as React from 'react';
 import {FC,useState,useEffect} from 'react';
-import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, SelectVariant, Checkbox,Select,SelectOption, FormAlert, Alert, Form, FormGroup, TextInput, Modal, ModalVariant, Switch, FormFieldGroupHeader, FormFieldGroup, DatePicker, Popover, NumberInput, HelperTextItem} from '@patternfly/react-core';
+import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, SelectVariant, Checkbox,Select,SelectOption, FormAlert, Alert, Form, FormGroup, TextInput, Modal, ModalVariant, Switch, FormFieldGroupHeader, FormFieldGroup, DatePicker, Popover, NumberInput, HelperTextItem, TextArea} from '@patternfly/react-core';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
 import { ConfirmationModal } from '../Modals';
-import {isIntegerOrNumericString} from '../../js/utils.js'
+import {isIntegerOrNumericString,getCurrentDate} from '../../js/utils.js'
 import { Loading } from '../LoadingModal';
 import { Msg } from '../../widgets/Msg';
 import { HelpIcon } from '@patternfly/react-icons';
@@ -15,17 +15,7 @@ const reg_url = /^(https?|chrome):\/\/[^\s$.?#].[^\s]*$/
 
 export const EnrollmentModal: FC<any> = (props) => {
     
-    const date = new Date();
-
-    let currentDay= String(date.getDate()).padStart(2, '0');
-
-    let currentMonth = String(date.getMonth()+1).padStart(2,"0");
-
-    let currentYear = date.getFullYear();
-
-    // we will display the date as YYYY-MM-DD 
-
-    let currentDate = `${currentYear}-${currentMonth}-${currentDay}`;
+    let currentDate = getCurrentDate();
 
 
     const touchDefault = {
@@ -64,7 +54,8 @@ export const EnrollmentModal: FC<any> = (props) => {
     const [touched,setTouched] = useState<any>(touchDefault);
 
     useEffect(()=>{
-        if(Object.keys(props.enrollment).length !== 0) {
+      if(Object.keys(props.enrollment).length !== 0) {
+            
             setIsModalOpen(true);
             setEnrollment({...props.enrollment});
         }
@@ -98,7 +89,7 @@ export const EnrollmentModal: FC<any> = (props) => {
         if(enrollment?.validFrom){
           let parsedDate = dateParse(enrollment?.validFrom);
           if(parsedDate instanceof Date &&isFinite(parsedDate.getTime())){
-            !isFutureDate(parsedDate) && props.enrollment.validFrom!==enrollment.validFrom && (errors.validFrom=Msg.localize('validFromPastFormError'))
+            isPastDate(parsedDate) && props.enrollment.validFrom!==enrollment.validFrom && (errors.validFrom=Msg.localize('validFromPastFormError'))
           }
           else{
             !(parsedDate instanceof Date &&isFinite(parsedDate.getTime())) && (errors.validFrom=Msg.localize('validFromInvalidFormError'));
@@ -114,7 +105,6 @@ export const EnrollmentModal: FC<any> = (props) => {
         
         setErrors(errors);
         //!(enrollemtn?)
-        console.log(errors);
     }
 
     const touchFields = ()=> {
@@ -123,7 +113,11 @@ export const EnrollmentModal: FC<any> = (props) => {
         }            
         setTouched({...touched});
     }
-      
+     
+    const close = () =>{
+      setTouched(touchDefault);
+      props.close();
+    }
     
     const updateEnrollment = (attribute,value) =>{
         enrollment[attribute] = value;
@@ -153,12 +147,12 @@ export const EnrollmentModal: FC<any> = (props) => {
         .then((response: HttpResponse<any>) => {
           setLoading(false);
           if(response.status===200||response.status===204){
-            props.close();
+            close();
             // setGroupMembers(response.data.results);
           }
         }).catch((err)=>{
           setLoading(false);
-          props.close();
+          close();
           console.log(err)})
       }
 
@@ -181,7 +175,7 @@ export const EnrollmentModal: FC<any> = (props) => {
       };
   
 
-      const isFutureDate = (date: Date): string => {
+      const isPastDate = (date: Date): string => {
         const currentDate = new Date();
         if (date < currentDate&&(props.enrollment.validFrom!==dateFormat(date))) {
           return Msg.localize('validFromPastFormError');
@@ -192,7 +186,7 @@ export const EnrollmentModal: FC<any> = (props) => {
         
       };
 
-    const validators: ((date: Date) => string)[] = [isFutureDate];
+    const validators: ((date: Date) => string)[] = [isPastDate];
     return (
       <React.Fragment>
         <Loading active={loading}/>
@@ -201,7 +195,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                 variant={ModalVariant.large}
                 title={(enrollment?.id?Msg.localize('enrollmentConfigurationModalTitleEdit'):Msg.localize('enrollmentConfigurationModalTitleCreate'))}
                 isOpen={isModalOpen}
-                onClose={()=>{props.close()}}
+                onClose={()=>{close()}}
                 actions={[
                     <Tooltip {...(!!(Object.keys(errors).length !== 0) ? { trigger:'manual', isVisible:false }:{trigger:'mouseenter'})}
                         content={
@@ -235,7 +229,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                     </Tooltip>
                     ,
                     
-                    <Button key="cancel" variant="link" onClick={()=>{ props.close()}}>
+                    <Button key="cancel" variant="link" onClick={()=>{ close()}}>
                         <Msg msgKey='Cancel' />
                     </Button>
                     
@@ -388,8 +382,8 @@ export const EnrollmentModal: FC<any> = (props) => {
                             // helperText=""
                         >
                            <Switch
-                            id="simple-switch-requireApproval"
-                            aria-label="simple-switch-requireApproval"
+                            id="simple-switch-requireApproval1"
+                            aria-label="simple-switch-requireApproval1"
                             isChecked={enrollment?.requireApproval}
                             onChange={(value)=>{updateEnrollment('requireApproval',value)}}
                             />
@@ -645,31 +639,3 @@ export const EnrollmentModal: FC<any> = (props) => {
     )
 }
 
-
-function isFutureDate(date1, date2) {
-  // Split the date strings into day, month, and year components
-  const [day1, month1, year1] = date1.split('-').map(Number);
-  const [day2, month2, year2] = date2.split('-').map(Number);
-
-  // Compare the year
-  if (year1 > year2) {
-    return true;
-  } else if (year1 < year2) {
-    return false;
-  }
-
-  // Compare the month
-  if (month1 > month2) {
-    return true;
-  } else if (month1 < month2) {
-    return false;
-  }
-
-  // Compare the day
-  if (day1 >= day2) {
-    return true;
-  }
-
-  // If none of the conditions are met, date1 is before date2
-  return false;
-}

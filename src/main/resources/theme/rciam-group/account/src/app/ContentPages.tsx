@@ -26,6 +26,8 @@ import { ForbiddenPage } from './content/forbidden-page/ForbiddenPage';
 import {GroupPage} from './content/group-management-pages/GroupPage';
 import {AdminGroupPage} from './content/group-management-pages/AdminGroupPage';
 import { InvitationLandingPage } from './content/group-management-pages/InvitationLandingPage';
+import { EnrollmentFlow } from './group-widgets/GroupEnrollment/EnrollmentFlow';
+
 
 export interface ContentItem {
     id?: string;
@@ -48,6 +50,12 @@ let customPages =[
         expandId: "groups",
         parentId: "admingroups",
         componentName: "AdminGroupPage"
+    },
+    {
+        path: "/enroll",
+        expandId: "groups",
+        parentId: "showgroups",
+        componentName: "EnrollmentFlow"
     }
 ]
 
@@ -189,7 +197,8 @@ export function makeRoutes(): React.ReactNode {
     if (typeof content === 'undefined') return (<span/>);
     const customComponents = {
         GroupPage:GroupPage,
-        AdminGroupPage:AdminGroupPage
+        AdminGroupPage:AdminGroupPage,
+        EnrollmentFlow:EnrollmentFlow
     }
     const pageDefs: PageDef[] = flattenContent(content);
 

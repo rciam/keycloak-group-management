@@ -605,3 +605,29 @@
   .gm_number-input-container {
     margin-top:1rem;
   }
+
+  .gm_link_plain {
+    text-decoration: none;
+    color: black;
+  }
+
+  .gm_link_plain:hover {
+    text-decoration: none;
+    color: black;
+  }
+
+  .gm_description-text {
+    font-size:0.9rem;
+  }
+  .gm_enrollment_container {
+    padding: 1rem 3rem;
+  }
+
+  .gm_form-input {
+    max-width:30rem
+  }
+
+  .gm_content-width {
+    width: fit-content;
+    block-size: fit-content;
+  }

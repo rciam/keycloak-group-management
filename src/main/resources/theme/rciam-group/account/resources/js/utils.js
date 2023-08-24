@@ -14,17 +14,53 @@ export function deepEqual(x, y) {
   return x && y && tx === 'object' && tx === ty ? ok(x).length === ok(y).length && ok(x).every(key => deepEqual(x[key], y[key])) : x === y;
 }
 export function isIntegerOrNumericString(value) {
-  if (Number.isInteger(value)) {
-    // If the value is already an integer, return true
+  if (Number.isInteger(value) || typeof value === 'string' && /^\d+$/.test(value)) {
+    // If the value is already an integer or is a string containing only numbers, return true
     return true;
   }
 
-  if (typeof value === 'string' && /^\d+$/.test(value)) {
-    // If the value is a string containing only numbers, return true
-    return true;
-  } // Otherwise, return false
-
-
   return false;
+}
+export const dateParse = date => {
+  const split = date.split('-');
+
+  if (split.length !== 3) {
+    return new Date();
+  }
+
+  const month = split[1];
+  const day = split[2];
+  const year = split[0];
+  return new Date(`${year.padStart(4, '0')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T00:00:00`);
+};
+export const getCurrentDate = () => {
+  const date = new Date();
+  let currentDay = String(date.getDate()).padStart(2, '0');
+  let currentMonth = String(date.getMonth() + 1).padStart(2, "0");
+  let currentYear = date.getFullYear(); // we will display the date as YYYY-MM-DD 
+
+  return `${currentYear}-${currentMonth}-${currentDay}`;
+};
+export const isFutureDate = date => {
+  const currentDate = new Date();
+
+  if (date > currentDate) {
+    return true;
+  } else {
+    return false;
+  }
+};
+export function formatDateToString(date) {
+  // Ensure that the input is a valid Date object
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    throw new Error('Invalid date format. Please provide a valid Date object.');
+  }
+
+  const month = date.toLocaleString('default', {
+    month: 'long'
+  });
+  const day = date.getDate();
+  const year = date.getFullYear();
+  return `${month} ${day}, ${year}`;
 }
 //# sourceMappingURL=utils.js.map

@@ -40,6 +40,10 @@ export class GroupsServiceClient {
         this.baseUrl = this.kcSvc.authServerUrl() + 'admin/' + this.kcSvc.realm() + '/console'
     }
 
+    public getBaseUrl(){
+        return this.kcSvc.authServerUrl() + 'realms/' + this.kcSvc.realm();
+    }
+
     public async doGet<T>(endpoint: string,
                           config?: RequestInitWithParams): Promise<HttpResponse<T>> {
         return this.doRequest(endpoint, {...config, method: 'get'});

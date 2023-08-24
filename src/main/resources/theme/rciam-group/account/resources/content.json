@@ -77,6 +77,13 @@
         "label": "adminGroupLabel",
         "modulePath": "/content/group-page/AdminGroupsPage.js",
         "componentName": "AdminGroupsPage"
+      },
+      {
+        "id": "groupenrollments",
+        "path": "groups/groupenrollments",
+        "label": "groupEnrollmentsLabel",
+        "modulePath": "/content/group-page/AdminGroupsPage.js",
+        "componentName": "AdminGroupsPage"
       }
     ]
   }

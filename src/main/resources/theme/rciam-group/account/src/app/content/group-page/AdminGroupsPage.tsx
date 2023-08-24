@@ -152,7 +152,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
               emptyGroup():
               groups.map((group:AdminGroup,appIndex:number)=>{
                 return(
-                <GroupListItem group={group as AdminGroup} fetchAdminGroups={fetchAdminGroups} appIndex={appIndex} depth={0} />
+                <GroupListItem group={group as AdminGroup}  fetchAdminGroups={fetchAdminGroups} appIndex={appIndex} depth={0} />
                 )
               })
               }
@@ -205,9 +205,11 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
 
     const dropdownItems = [
       <DropdownItem key="link" onClick={()=>{setCreateSubGroup(true);}}><Msg msgKey='createSubGroup' /></DropdownItem>,
+      <Link to={"/enroll?groupPath="+encodeURI(group.path)} className="gm_link_plain"><DropdownItem key="link">Enroll to this group</DropdownItem></Link>,
       ...(('/'+group.name!==group.path)&& !(group?.extraSubGroups.length>0)?[<DropdownItem key="action" onClick={()=>{setDeleteGroup(true);}} component="button">
         <Msg msgKey='deleteGroup' /> 
-      </DropdownItem>]:[])
+      </DropdownItem>
+      ]:[])
     ];
   
 
