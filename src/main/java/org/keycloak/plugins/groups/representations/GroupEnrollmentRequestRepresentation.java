@@ -3,7 +3,10 @@ package org.keycloak.plugins.groups.representations;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.representations.idm.UserRepresentation;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
+import javax.persistence.Column;
 
 public class GroupEnrollmentRequestRepresentation {
 
@@ -16,6 +19,10 @@ public class GroupEnrollmentRequestRepresentation {
     private String adminJustification;
     private String reviewComments;
     private List<String> groupRoles;
+
+    private LocalDateTime submittedDate;
+
+    private LocalDateTime approvedDate;
 
     public GroupEnrollmentRequestRepresentation() {
     }
@@ -82,6 +89,22 @@ public class GroupEnrollmentRequestRepresentation {
 
     public void setReviewComments(String reviewComments) {
         this.reviewComments = reviewComments;
+    }
+
+    public LocalDateTime getSubmittedDate() {
+        return submittedDate;
+    }
+
+    public void setSubmittedDate(LocalDateTime submittedDate) {
+        this.submittedDate = submittedDate;
+    }
+
+    public LocalDateTime getApprovedDate() {
+        return approvedDate;
+    }
+
+    public void setApprovedDate(LocalDateTime approvedDate) {
+        this.approvedDate = approvedDate;
     }
 
     public List<String> getGroupRoles() {
