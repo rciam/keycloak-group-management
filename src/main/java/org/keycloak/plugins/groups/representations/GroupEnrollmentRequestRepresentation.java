@@ -1,12 +1,16 @@
 package org.keycloak.plugins.groups.representations;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
+import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
-import javax.persistence.Column;
 
 public class GroupEnrollmentRequestRepresentation {
 
@@ -20,8 +24,14 @@ public class GroupEnrollmentRequestRepresentation {
     private String reviewComments;
     private List<String> groupRoles;
 
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= Utils.dateTimeToStringFormat)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime submittedDate;
 
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= Utils.dateTimeToStringFormat)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime approvedDate;
 
     public GroupEnrollmentRequestRepresentation() {
