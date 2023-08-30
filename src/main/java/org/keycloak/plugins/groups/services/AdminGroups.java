@@ -89,7 +89,7 @@ public class AdminGroups {
         if (groupConfiguration == null) {
             throw new NotFoundException("Could not find this Group Configuration");
         } else {
-            return EntityToRepresentation.toRepresentation(groupConfiguration);
+            return EntityToRepresentation.toRepresentation(groupConfiguration, false, realm);
         }
     }
 

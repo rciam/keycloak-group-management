@@ -41,7 +41,7 @@ public class UserGroup {
     @Path("/configurations")
     @Produces("application/json")
     public List<GroupEnrollmentConfigurationRepresentation> getAvailableGroupEnrollmentConfigurationsByGroup() {
-        return groupEnrollmentConfigurationRepository.getAvailableByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf)).collect(Collectors.toList());
+        return groupEnrollmentConfigurationRepository.getAvailableByGroup(group.getId()).map(conf -> EntityToRepresentation.toRepresentation(conf, false, realm)).collect(Collectors.toList());
     }
 
 

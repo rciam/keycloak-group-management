@@ -123,10 +123,10 @@ public class GroupAdminService {
     @Produces("application/json")
     public GroupEnrollmentRequestPager getAdminEnrollments(@QueryParam("first") @DefaultValue("0") Integer first,
                                                            @QueryParam("max") @DefaultValue("10") Integer max,
-                                                           @QueryParam("groupId") String groupId,
+                                                           @QueryParam("groupName") String groupName,
                                                            @QueryParam("userSearch") String userSearch,
                                                            @QueryParam("status") EnrollmentRequestStatusEnum status) {
-        List<String> groupIds = groupId != null ? Stream.of(groupId).collect(Collectors.toList()):groupAdminRepository.getAllAdminGroupIds(groupAdmin.getId());
+        List<String> groupIds = groupAdminRepository.getAdminGroupIdsByName(groupAdmin.getId(), groupName);
         return groupEnrollmentRequestRepository.groupAdminEnrollmentPager(groupIds, userSearch, status, first, max);
     }
 

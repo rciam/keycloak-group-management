@@ -95,8 +95,8 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         if (userSearch == null) {
             sqlQueryMain.append(" where g.id in (:groupIds)");
         } else {
-            sqlQueryMain.append(" join f.user u where g.id in (:groupIds) and (u.firstName like :userSearch or u.lastName like :userSearch) ");
-            parameters.put("userSearch", "%" + userSearch + "%");
+            sqlQueryMain.append(" join f.user u where g.id in (:groupIds) and (lower(u.firstName) like :userSearch or lower(u.lastName) like :userSearch) ");
+            parameters.put("userSearch", "%" + userSearch.toLowerCase() + "%");
         }
         if (status != null) {
             sqlQueryMain.append(" and f.status = :status");

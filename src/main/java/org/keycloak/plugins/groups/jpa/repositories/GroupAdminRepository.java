@@ -96,6 +96,17 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
         return groupIds;
     }
 
+    public List<String> getAdminGroupIdsByName(String userId, String groupName) {
+        List<String> groupIds = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).getResultStream().map(id -> realm.getGroupById(id)).flatMap(this::getGroupWithSubgroups).distinct().filter(x->groupName == null || x.getName().toLowerCase().contains(groupName.toLowerCase())).map(GroupModel::getId).collect(Collectors.toList());
+        return groupIds;
+    }
+
+    private Stream<GroupModel> getGroupWithSubgroups(GroupModel group){
+        Set<GroupModel> groups = group.getSubGroups();
+        groups.add(group);
+        return groups.stream();
+    }
+
     public boolean hasAdminRights(String userId) {
         return em.createNamedQuery("countGroupsForAdmin", Long.class).setParameter("userId", userId).getSingleResult() > 0;
     }

@@ -1,6 +1,7 @@
 package org.keycloak.plugins.groups.helpers;
 
 import org.keycloak.common.util.MultivaluedHashMap;
+import org.keycloak.models.GroupModel;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupAttributeEntity;
@@ -28,9 +29,9 @@ public class EntityToRepresentation {
 
     private EntityToRepresentation(){}
 
-    public static GroupEnrollmentConfigurationRepresentation toRepresentation(GroupEnrollmentConfigurationEntity entity) {
+    public static GroupEnrollmentConfigurationRepresentation toRepresentation(GroupEnrollmentConfigurationEntity entity, boolean fullPath, RealmModel realm) {
         GroupEnrollmentConfigurationRepresentation rep = new GroupEnrollmentConfigurationRepresentation(entity.getId());
-        GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true);
+        GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true, fullPath, realm);
         rep.setGroup(group);
         rep.setName(entity.getName());
         rep.setActive(entity.isActive());
@@ -69,7 +70,7 @@ public class EntityToRepresentation {
     public static UserGroupMembershipExtensionRepresentation toRepresentation(UserGroupMembershipExtensionEntity entity, RealmModel realm) {
         UserGroupMembershipExtensionRepresentation rep = new UserGroupMembershipExtensionRepresentation();
         rep.setId(entity.getId());
-        GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true);
+        GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true, false, realm);
         rep.setGroup(group);
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
         rep.setJustification(entity.getJustification());
@@ -95,7 +96,7 @@ public class EntityToRepresentation {
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
         if (entity.getCheckAdmin() != null)
             rep.setCheckAdmin(toBriefRepresentation(entity.getCheckAdmin(), realm));
-        rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration()));
+        rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration(), true, realm));
         rep.setAdminJustification(entity.getAdminJustification());
         rep.setReviewComments(entity.getReviewComments());
         rep.setStatus(entity.getStatus());
@@ -107,12 +108,16 @@ public class EntityToRepresentation {
         return rep;
     }
 
-    public static GroupRepresentation toBriefRepresentation(GroupEntity entity, boolean attributes) {
+    public static GroupRepresentation toBriefRepresentation(GroupEntity entity, boolean attributes, boolean fullPath, RealmModel realm) {
         GroupRepresentation rep = new GroupRepresentation();
         rep.setId(entity.getId());
         rep.setName(entity.getName());
         if (attributes && entity.getAttributes() != null)
             rep.setAttributes(getGroupAttributes(entity.getAttributes()));
+        if (fullPath) {
+            GroupModel group = realm.getGroupById(entity.getId());
+            rep.setPath(ModelToRepresentation.buildGroupPath(group));
+        }
         return rep;
     }
 
@@ -143,17 +148,17 @@ public class EntityToRepresentation {
         return rep;
     }
 
-    public static GroupInvitationRepresentation toRepresentation(GroupInvitationEntity entity) {
+    public static GroupInvitationRepresentation toRepresentation(GroupInvitationEntity entity, RealmModel realm) {
         GroupInvitationRepresentation rep = new GroupInvitationRepresentation();
         rep.setId(entity.getId());
         rep.setCreationDate(entity.getCreationDate());
         rep.setForMember(entity.getForMember());
         if (entity.getGroupEnrollmentConfiguration() != null)
-            rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration()));
+            rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration(), false,  realm));
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
         if (entity.getGroup() != null) {
-            GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true);
+            GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true, false, realm);
             rep.setGroup(group);
         }
 

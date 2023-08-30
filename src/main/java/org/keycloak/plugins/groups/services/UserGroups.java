@@ -133,7 +133,7 @@ public class UserGroups {
         if (groupId == null) {
             throw new NotFoundException("This group does not exist");
         }
-        return groupEnrollmentConfigurationRepository.getAvailableByGroup(groupId).map(EntityToRepresentation::toRepresentation).collect(Collectors.toList());
+        return groupEnrollmentConfigurationRepository.getAvailableByGroup(groupId).map(x-> EntityToRepresentation.toRepresentation(x, false, realm)).collect(Collectors.toList());
     }
 
     @Path("/group/{groupId}/member")
@@ -216,7 +216,7 @@ public class UserGroups {
         if (entity == null) {
             throw new NotFoundException(INVITATION_NOT_EXISTS);
         }
-        return EntityToRepresentation.toRepresentation(entity);
+        return EntityToRepresentation.toRepresentation(entity, realm);
     }
 
     @POST
