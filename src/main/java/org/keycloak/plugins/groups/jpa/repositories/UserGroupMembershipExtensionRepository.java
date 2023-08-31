@@ -28,6 +28,7 @@ import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.helpers.DummyClientConnection;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.LoginEventHelper;
+import org.keycloak.plugins.groups.helpers.PagerParameters;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
@@ -194,7 +195,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         });
     }
 
-    public UserGroupMembershipExtensionRepresentationPager userpager(String userId, String search, Integer first, Integer max, String order, String orderType) {
+    public UserGroupMembershipExtensionRepresentationPager userpager(String userId, String search, PagerParameters pagerParameters) {
 
         String sqlQuery = "from UserGroupMembershipExtensionEntity f ";
         Map<String, Object> params = new HashMap<>();
@@ -206,7 +207,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             sqlQuery += "where f.user.id = :userId and f.status = 'ENABLED'";
         }
 
-        Query queryList = em.createQuery("select f " + sqlQuery + " order by " + order + " " + orderType).setFirstResult(first).setMaxResults(max);
+        Query queryList = em.createQuery("select f " + sqlQuery + " order by f."  + pagerParameters.getOrder() + " " + pagerParameters.getOrderType()).setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax());
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             queryList.setParameter(entry.getKey(), entry.getValue());
         }

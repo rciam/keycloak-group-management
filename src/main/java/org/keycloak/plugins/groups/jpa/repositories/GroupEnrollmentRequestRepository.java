@@ -16,6 +16,7 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.helpers.PagerParameters;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestPager;
@@ -59,7 +60,7 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         return em.createNamedQuery("countOngoingByUserAndGroup", Long.class).setParameter("userId", userId).setParameter("groupId", groupId).setParameter("status", statusList).getSingleResult();
     }
 
-    public GroupEnrollmentRequestPager groupEnrollmentPager(String userId, String groupId, String groupName, EnrollmentRequestStatusEnum status, Integer first, Integer max) {
+    public GroupEnrollmentRequestPager groupEnrollmentPager(String userId, String groupId, String groupName, EnrollmentRequestStatusEnum status, PagerParameters pagerParameters) {
         StringBuilder sqlQueryMain = new StringBuilder("from GroupEnrollmentRequestEntity f");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("userId", userId);
@@ -77,18 +78,18 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
             parameters.put("status", status);
         }
 
-        TypedQuery<GroupEnrollmentRequestEntity> query = em.createQuery("select f " + sqlQueryMain.toString(), GroupEnrollmentRequestEntity.class);
+        TypedQuery<GroupEnrollmentRequestEntity> query = em.createQuery("select f " + sqlQueryMain.toString()+ " order by f." + pagerParameters.getOrder() + " " + pagerParameters.getOrderType(), GroupEnrollmentRequestEntity.class);
         TypedQuery<Long> queryCount = em.createQuery("select count(f) " + sqlQueryMain.toString(), Long.class);
         for (Map.Entry<String, Object> e : parameters.entrySet()) {
             query.setParameter(e.getKey(), e.getValue());
             queryCount.setParameter(e.getKey(), e.getValue());
         }
-        List<GroupEnrollmentRequestRepresentation> enrollments = query.setFirstResult(first).setMaxResults(max).getResultStream().map(x -> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList());
+        List<GroupEnrollmentRequestRepresentation> enrollments = query.setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax()).getResultStream().map(x -> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList());
         return new GroupEnrollmentRequestPager(enrollments, queryCount.getSingleResult());
 
     }
 
-    public GroupEnrollmentRequestPager groupAdminEnrollmentPager(List<String> groupIds, String userSearch, EnrollmentRequestStatusEnum status, Integer first, Integer max) {
+    public GroupEnrollmentRequestPager groupAdminEnrollmentPager(List<String> groupIds, String userSearch, EnrollmentRequestStatusEnum status, PagerParameters pagerParameters) {
         StringBuilder sqlQueryMain = new StringBuilder("from GroupEnrollmentRequestEntity f join f.groupEnrollmentConfiguration c join c.group g");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("groupIds", groupIds);
@@ -103,13 +104,13 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
             parameters.put("status", status);
         }
 
-        TypedQuery<GroupEnrollmentRequestEntity> query = em.createQuery("select f " + sqlQueryMain.toString(), GroupEnrollmentRequestEntity.class);
+        TypedQuery<GroupEnrollmentRequestEntity> query = em.createQuery("select f " + sqlQueryMain.toString()+ " order by f." + pagerParameters.getOrder() + " " + pagerParameters.getOrderType(), GroupEnrollmentRequestEntity.class);
         TypedQuery<Long> queryCount = em.createQuery("select count(f) " + sqlQueryMain.toString(), Long.class);
         for (Map.Entry<String, Object> e : parameters.entrySet()) {
             query.setParameter(e.getKey(), e.getValue());
             queryCount.setParameter(e.getKey(), e.getValue());
         }
-        List<GroupEnrollmentRequestRepresentation> enrollments = query.setFirstResult(first).setMaxResults(max).getResultStream().map(x -> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList());
+        List<GroupEnrollmentRequestRepresentation> enrollments = query.setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax()).getResultStream().map(x -> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList());
         return new GroupEnrollmentRequestPager(enrollments, queryCount.getSingleResult());
 
     }

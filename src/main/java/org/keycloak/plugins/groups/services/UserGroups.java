@@ -12,6 +12,7 @@ import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.helpers.PagerParameters;
 import org.keycloak.plugins.groups.jpa.GeneralJpaService;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
@@ -99,7 +100,7 @@ public class UserGroups {
                                                                             @QueryParam("max") @DefaultValue("10") Integer max,
                                                                             @QueryParam("order") @DefaultValue("group.name") String order,
                                                                             @QueryParam("asc") @DefaultValue("true") boolean asc) {
-        return userGroupMembershipExtensionRepository.userpager(user.getId(), search, first, max, order, asc ? "asc" : "desc");
+        return userGroupMembershipExtensionRepository.userpager(user.getId(), search, new PagerParameters(first, max, order, asc ? "asc" : "desc"));
     }
 
     @Path("/group/{groupId}")
@@ -156,8 +157,10 @@ public class UserGroups {
                                                         @QueryParam("max") @DefaultValue("10") Integer max,
                                                         @QueryParam("groupId") String groupId,
                                                         @QueryParam("groupName") String groupName,
-                                                        @QueryParam("status") EnrollmentRequestStatusEnum status) {
-        return groupEnrollmentRequestRepository.groupEnrollmentPager(user.getId(), groupId, groupName, status, first, max);
+                                                        @QueryParam("status") EnrollmentRequestStatusEnum status,
+                                                        @QueryParam("order") @DefaultValue("submittedDate") String order,
+                                                        @QueryParam("asc") @DefaultValue("false") boolean asc) {
+        return groupEnrollmentRequestRepository.groupEnrollmentPager(user.getId(), groupId, groupName, status, new PagerParameters(first, max, order, asc ? "asc" : "desc"));
     }
 
     @POST

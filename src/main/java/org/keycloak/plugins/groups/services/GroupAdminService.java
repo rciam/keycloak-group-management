@@ -3,7 +3,6 @@ package org.keycloak.plugins.groups.services;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -22,6 +21,7 @@ import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.enums.GroupTypeEnum;
 import org.keycloak.plugins.groups.enums.MemberStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.helpers.PagerParameters;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRulesRepository;
@@ -125,9 +125,11 @@ public class GroupAdminService {
                                                            @QueryParam("max") @DefaultValue("10") Integer max,
                                                            @QueryParam("groupName") String groupName,
                                                            @QueryParam("userSearch") String userSearch,
-                                                           @QueryParam("status") EnrollmentRequestStatusEnum status) {
+                                                           @QueryParam("status") EnrollmentRequestStatusEnum status,
+                                                           @QueryParam("order") @DefaultValue("submittedDate") String order,
+                                                           @QueryParam("asc") @DefaultValue("false") boolean asc) {
         List<String> groupIds = groupAdminRepository.getAdminGroupIdsByName(groupAdmin.getId(), groupName);
-        return groupEnrollmentRequestRepository.groupAdminEnrollmentPager(groupIds, userSearch, status, first, max);
+        return groupEnrollmentRequestRepository.groupAdminEnrollmentPager(groupIds, userSearch, status, new PagerParameters(first, max, order, asc ? "asc" : "desc"));
     }
 
     @Path("/enroll-request/{enrollId}")
