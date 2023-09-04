@@ -100,7 +100,7 @@ public class GroupAdminEnrollementRequest {
     public Response rejectEnrollment(@QueryParam("adminJustification") String adminJustification) {
         if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
             throw new BadRequestException(statusErrorMessage);
-        updateEnrollmentRequest(enrollmentEntity, EnrollmentRequestStatusEnum.ACCEPTED, adminJustification);
+        updateEnrollmentRequest(enrollmentEntity, EnrollmentRequestStatusEnum.REJECTED, adminJustification);
 
         try {
             customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm,enrollmentEntity.getUser().getId()));
