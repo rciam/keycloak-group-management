@@ -17,18 +17,17 @@ import org.keycloak.email.EmailException;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 import org.keycloak.services.ServicesLogger;
-import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.theme.FreeMarkerUtil;
 
 public class GroupAdminEnrollementRequest {
@@ -84,13 +83,7 @@ public class GroupAdminEnrollementRequest {
 
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
         userGroupMembershipExtensionRepository.createOrUpdate(enrollmentEntity, session, groupAdmin,memberUserAttribute, clientConnection);
-
-        enrollmentEntity.setStatus(EnrollmentRequestStatusEnum.ACCEPTED);
-        enrollmentEntity.setAdminJustification(adminJustification);
-        enrollmentEntity.setApprovedDate(LocalDateTime.now());
-
-        groupEnrollmentRequestRepository.update(enrollmentEntity);
-
+        updateEnrollmentRequest(enrollmentEntity, EnrollmentRequestStatusEnum.ACCEPTED, adminJustification);
 
         try {
             customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm,enrollmentEntity.getUser().getId()));
@@ -107,10 +100,7 @@ public class GroupAdminEnrollementRequest {
     public Response rejectEnrollment(@QueryParam("adminJustification") String adminJustification) {
         if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
             throw new BadRequestException(statusErrorMessage);
-        enrollmentEntity.setStatus(EnrollmentRequestStatusEnum.REJECTED);
-        enrollmentEntity.setAdminJustification(adminJustification);
-        enrollmentEntity.setApprovedDate(LocalDateTime.now());
-        groupEnrollmentRequestRepository.update(enrollmentEntity);
+        updateEnrollmentRequest(enrollmentEntity, EnrollmentRequestStatusEnum.ACCEPTED, adminJustification);
 
         try {
             customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm,enrollmentEntity.getUser().getId()));
@@ -119,6 +109,16 @@ public class GroupAdminEnrollementRequest {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         }
         return Response.noContent().build();
+    }
+
+    private void updateEnrollmentRequest(GroupEnrollmentRequestEntity enrollmentEntity, EnrollmentRequestStatusEnum status, String adminJustification){
+        enrollmentEntity.setStatus(status);
+        enrollmentEntity.setAdminJustification(adminJustification);
+        enrollmentEntity.setApprovedDate(LocalDateTime.now());
+        UserEntity groupAdminEntity = new UserEntity();
+        groupAdminEntity.setId(groupAdmin.getId());
+        enrollmentEntity.setCheckAdmin(groupAdminEntity);
+        groupEnrollmentRequestRepository.update(enrollmentEntity);
     }
 
 
