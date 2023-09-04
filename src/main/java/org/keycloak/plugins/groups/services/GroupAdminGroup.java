@@ -157,7 +157,7 @@ public class GroupAdminGroup {
         GroupEnrollmentConfigurationEntity groupConfiguration = groupEnrollmentConfigurationRepository.getEntity(id);
         //if not exist, group have only created from main Keycloak
         if (groupConfiguration == null) {
-            throw new NotFoundException("Could not find this group configuration");
+            throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
         } else {
             return EntityToRepresentation.toRepresentation(groupConfiguration, false, realm);
         }
@@ -178,7 +178,7 @@ public class GroupAdminGroup {
                 });
                 groupEnrollmentConfigurationRepository.update(entity, rep);
             } else {
-                throw new NotFoundException("Could not find this group configuration");
+                throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
             }
         }
         //aup change action
@@ -190,14 +190,16 @@ public class GroupAdminGroup {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response deleteGroupEnrollmentConfiguration(@PathParam("id") String id) {
         GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(id);
-        if (entity != null) {
+        if (entity != null && group.getFirstAttribute(Utils.DEFAULT_CONFIGURATION_NAME) != null) {
             groupEnrollmentRequestRepository.getRequestsByConfigurationAndStatus(entity.getId(), Stream.of(EnrollmentRequestStatusEnum.WAITING_FOR_REPLY, EnrollmentRequestStatusEnum.PENDING_APPROVAL).collect(Collectors.toList())).forEach(request -> {
                 request.setStatus(EnrollmentRequestStatusEnum.ARCHIVED);
                 groupEnrollmentRequestRepository.update(request);
             });
             groupEnrollmentConfigurationRepository.deleteEntity(id);
-        } else {
-            throw new NotFoundException("Could not find this group configuration");
+        } else if (entity == null ) {
+            throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
+        } else  {
+            throw new BadRequestException("Could not delete default group configuration");
         }
         return Response.noContent().build();
     }
@@ -213,6 +215,15 @@ public class GroupAdminGroup {
     @Path("/roles")
     public Response saveGroupRole(@QueryParam("name") String name) {
         groupRolesRepository.create(name, group.getId());
+        return Response.noContent().build();
+    }
+
+    @POST
+    @Path("/default-configuration")
+    public Response changeDefaultConfiguration(@QueryParam("configurationId") String configurationId) {
+        if (groupEnrollmentConfigurationRepository.getEntity(configurationId) == null)
+            throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
+        group.setAttribute(Utils.DEFAULT_CONFIGURATION_NAME, Stream.of(configurationId).collect(Collectors.toList()));
         return Response.noContent().build();
     }
 

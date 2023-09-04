@@ -18,6 +18,9 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     private static final String enrollmentStartUrl = "realms/{realmName}/agm/account/user/group/{id}";
     private static final String finishGroupInvitation = "realms/{realmName}/account/#/invitation/{id}";
 
+    private static final String subgroupsStr = " - together with its subgroups ";
+    private static final String comma = ",";
+
     public CustomFreeMarkerEmailTemplateProvider(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
     }
@@ -32,12 +35,12 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send(title, "add-remove-group-admin.ftl", attributes);
     }
 
-    public void sendSuspensionEmail(String groupName, String justification) throws EmailException {
+    public void sendSuspensionEmail(String groupName, List<String> subgroupPaths, String justification) throws EmailException {
         attributes.put("justification", justification);
         attributes.put("groupname", groupName);
+        attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupPaths));
         send("suspendMemberSubject", "suspend-member.ftl", attributes);
     }
-
     public void sendActivationEmail(String groupName, String justification) throws EmailException {
         attributes.put("justification", justification);
         attributes.put("groupname", groupName);
@@ -87,18 +90,29 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("groupadminEnrollmentRequestCreationSubject", "groupadmin-enrollment-creation.ftl", attributes);
     }
 
-    public void sendExpiredGroupMemberEmailToAdmin(UserModel userRequest, String groupname) throws EmailException {
+    public void sendExpiredGroupMemberEmailToAdmin(UserModel userRequest, String groupname, List<String> subgroupsPaths) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("user", userRequest.getFirstName() + " " + userRequest.getLastName());
         attributes.put("groupname", groupname);
+        attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupsPaths));
         send("adminGroupUserRemovalSubject", "expired-group-membership-admin.ftl", attributes);
     }
 
-    public void sendExpiredGroupMemberEmailToUser(String groupname, String groupId, String serverUrl) throws EmailException {
+    public void sendExpiredGroupMemberEmailToUser(String groupname, String groupId, List<String> subgroupsPaths, String serverUrl) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("groupname", groupname);
+        attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupsPaths));
         attributes.put("url", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
         send("userRemovalSubject", "expired-group-membership-user.ftl", attributes);
+    }
+
+    private String subgroupsStrCalculation(List<String> subgroupsPaths){
+        if (subgroupsPaths.isEmpty())
+            return "";
+
+        StringBuilder sb = new StringBuilder(subgroupsStr);
+        subgroupsPaths.stream().forEach(x -> sb.append("x").append(comma));
+        return StringUtils.removeEnd(sb.toString(), comma) +"- ";
     }
 
     public void sendExpiredGroupMembershipNotification(String groupname, String date, String groupId, String serverUrl) throws EmailException {

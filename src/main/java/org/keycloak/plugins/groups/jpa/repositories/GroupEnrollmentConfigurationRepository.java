@@ -4,10 +4,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.GroupAupEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
@@ -41,20 +43,20 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         create(entity);
     }
 
-    public void createDefault(String groupId, String groupName) {
+    public void createDefault(GroupModel group, String groupName) {
         //default values, hide by default
         GroupEnrollmentConfigurationEntity entity = new GroupEnrollmentConfigurationEntity();
         entity.setId(KeycloakModelUtils.generateId());
-        GroupEntity group = new GroupEntity();
-        group.setId(groupId);
-        entity.setGroup(group);
+        GroupEntity groupEntity = new GroupEntity();
+        groupEntity.setId(group.getId());
+        entity.setGroup(groupEntity);
         entity.setName(groupName);
         entity.setRequireApproval(true);
         entity.setRequireApprovalForExtension(true);
         entity.setActive(true);
         entity.setVisibleToNotMembers(true);
         entity.setMultiselectRole(true);
-        entity.setGroupRoles(groupRolesRepository.getGroupRolesByGroup(groupId).map(x -> {
+        entity.setGroupRoles(groupRolesRepository.getGroupRolesByGroup(group.getId()).map(x -> {
             GroupRolesEntity r = new GroupRolesEntity();
             r.setId(x.getId());
             r.setGroup(x.getGroup());
@@ -65,6 +67,7 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         entity.setCommentsLabel("Comments");
         entity.setCommentsDescription("Why do you want to join the group?");
         create(entity);
+        group.setSingleAttribute(Utils.DEFAULT_CONFIGURATION_NAME, entity.getId());
     }
 
     public void update(GroupEnrollmentConfigurationEntity entity, GroupEnrollmentConfigurationRepresentation rep) {

@@ -66,8 +66,6 @@ public class AdminService {
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final GroupRolesRepository groupRolesRepository;
     private final GeneralJpaService generalJpaService;
-
-    private final GroupManagementEventRepository groupManagementEventRepository;
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
 
     public AdminService(KeycloakSession session, RealmModel realm, ClientConnection clientConnection, AdminPermissionEvaluator realmAuth) {
@@ -78,7 +76,6 @@ public class AdminService {
         this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
         this.groupEnrollmentConfigurationRepository.setGroupRolesRepository(new GroupRolesRepository(session, realm));
         this.generalJpaService =  new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
-        this.groupManagementEventRepository = new GroupManagementEventRepository (session, realm);
         this.groupRolesRepository = new GroupRolesRepository(session, realm);
         this.adminEvent =  new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
         this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
@@ -111,7 +108,6 @@ public class AdminService {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response configureMemberUserAttribute(MemberUserAttributeConfigurationRepresentation rep) {
         MemberUserAttributeConfigurationEntity memberUserAttributeEntity = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-        MemberUserAttributeConfigurationRepresentation oldRep = new MemberUserAttributeConfigurationRepresentation(memberUserAttributeEntity.getUserAttribute(), memberUserAttributeEntity.getUrnNamespace(),memberUserAttributeEntity.getAuthority());
         memberUserAttributeEntity.setUserAttribute(rep.getUserAttribute());
         memberUserAttributeEntity.setUrnNamespace(rep.getUrnNamespace());
         memberUserAttributeEntity.setAuthority(rep.getAuthority());
@@ -159,7 +155,7 @@ public class AdminService {
         } else if (groupEnrollmentConfigurationRepository.getByGroup(rep.getId()).collect(Collectors.toList()).isEmpty()) {
             //group creation - group configuration no exist
             logger.info("Create group with groupId === "+rep.getId());
-            groupEnrollmentConfigurationRepository.createDefault(rep.getId(), rep.getName());
+            groupEnrollmentConfigurationRepository.createDefault(realm.getGroupById(rep.getId()), rep.getName());
             groupRolesRepository.create(Utils.defaultGroupRole,rep.getId());
         }
         //if rep.getId() != null => mean that group has been moved( not created)
@@ -171,8 +167,6 @@ public class AdminService {
     @DELETE
     @Path("/user/{id}")
     public Response deleteUser(@PathParam("id") String id) {
-        AuthenticationHelper authHelper = new AuthenticationHelper(session);
-        AdminPermissionEvaluator realmAuth = authHelper.authenticateRealmAdminRequest();
         UserModel user = session.users().getUserById(realm, id);
         if (user == null) {
             throw new NotFoundException("Could not find user by id");

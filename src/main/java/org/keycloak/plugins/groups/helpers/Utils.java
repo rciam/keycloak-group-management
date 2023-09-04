@@ -54,10 +54,13 @@ public class Utils {
     public static final String EVENT_MEMBERSHIP_EXPIRATION = "membership expiration";
     public static final String VO_PERSON_ID ="voPersonID";
     public static final String KEYCLOAK_URL = "keycloakUrl";
+
+    public static final String DEFAULT_CONFIGURATION_NAME = "defaultConfiguration";
     public static final String GROUP_MEMBERSHIP_CREATE = "GROUP_MEMBERSHIP_CREATE";
     public static final String GROUP_MEMBERSHIP_UPDATE = "GROUP_MEMBERSHIP_UPDATE";
     public static final String GROUP_MEMBERSHIP_DELETE = "GROUP_MEMBERSHIP_DELETE";
     public static final String GROUP_MEMBERSHIP_SUSPEND = "GROUP_MEMBERSHIP_SUSPEND";
+    public static final String NO_FOUND_GROUP_CONFIGURATION = "Could not find this group configuration";
 
     public static UserAdapter getDummyUser(UserRepresentation userRep) {
         UserEntity userEntity = new UserEntity();
@@ -142,7 +145,7 @@ public class Utils {
         //custom agm implementation
         if (groupEnrollmentConfigurationRepository.getByGroup(rep.getId()).collect(Collectors.toList()).isEmpty()) {
             //group creation
-            groupEnrollmentConfigurationRepository.createDefault(child.getId(), rep.getName());
+            groupEnrollmentConfigurationRepository.createDefault(child, rep.getName());
             groupRolesRepository.create(Utils.defaultGroupRole, rep.getId());
         }
         return Response.noContent().build();
