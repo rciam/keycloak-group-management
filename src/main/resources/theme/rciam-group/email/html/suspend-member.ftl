@@ -1,5 +1,5 @@
 <html>
 <body>
-${kcSanitize(msg("suspendMemberBodyHtml",groupname,justification))?no_esc}
+${kcSanitize(msg("suspendMemberBodyHtml",groupname, subgroupsStr, justification))?no_esc}
 </body>
 </html>

@@ -87,7 +87,7 @@ public class AdminGroups {
         GroupEnrollmentConfigurationEntity groupConfiguration = groupEnrollmentConfigurationRepository.getEntity(id);
         //if not exist, group have only created from main Keycloak
         if (groupConfiguration == null) {
-            throw new NotFoundException("Could not find this Group Configuration");
+            throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
         } else {
             return EntityToRepresentation.toRepresentation(groupConfiguration, false, realm);
         }
@@ -105,7 +105,7 @@ public class AdminGroups {
             if (entity != null) {
                 groupEnrollmentConfigurationRepository.update(entity, rep);
             } else {
-                throw new NotFoundException("Could not find this group configuration");
+                throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
             }
         }
         //aup change action

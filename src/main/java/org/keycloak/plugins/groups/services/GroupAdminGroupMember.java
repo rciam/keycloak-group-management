@@ -96,10 +96,7 @@ public class GroupAdminGroupMember {
     @DELETE
     public Response deleteMember() {
         UserModel user = session.users().getUserById(realm, member.getUser().getId());
-        List<String> roleNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
-        userGroupMembershipExtensionRepository.deleteMember(member, group, user);
-        LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
-                , Utils.GROUP_MEMBERSHIP_DELETE, ModelToRepresentation.buildGroupPath(group), roleNames, null);
+        userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId()), memberUserAttributeConfigurationRepository);
         return Response.noContent().build();
     }
 
@@ -153,24 +150,17 @@ public class GroupAdminGroupMember {
             throw new NotFoundException("Could not find this User");
         }
         try {
-            userGroupMembershipExtensionRepository.suspendUser(user, member, justification, group);
-            MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-            List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
-            String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
-            memberUserAttributeValues.removeIf(x -> Utils.removeMemberUserAttributeCondition(x, memberUserAttribute.getUrnNamespace(), groupName));
-            user.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
+            List<String> subgroupPaths = userGroupMembershipExtensionRepository.suspendUser(user, member, justification, group, memberUserAttributeConfigurationRepository);
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
                     , Utils.GROUP_MEMBERSHIP_SUSPEND, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
 
+            customFreeMarkerEmailTemplateProvider.setUser(user);
+            customFreeMarkerEmailTemplateProvider.sendSuspensionEmail(ModelToRepresentation.buildGroupPath(group), subgroupPaths, justification);
+        } catch (EmailException e) {
+            ServicesLogger.LOGGER.failedToSendEmail(e);
         } catch (Exception e) {
             e.printStackTrace();
             throw new BadRequestException("problem suspended group member");
-        }
-        try {
-            customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendSuspensionEmail(group.getName(), justification);
-        } catch (EmailException e) {
-            ServicesLogger.LOGGER.failedToSendEmail(e);
         }
         return Response.noContent().build();
     }

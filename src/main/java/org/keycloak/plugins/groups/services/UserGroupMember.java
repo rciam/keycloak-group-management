@@ -21,6 +21,7 @@ import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
+import org.keycloak.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 
@@ -34,6 +35,8 @@ public class UserGroupMember {
     private final UserGroupMembershipExtensionEntity member;
 
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
+
+    private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
     private final UserModel user;
 
     public UserGroupMember(KeycloakSession session, RealmModel realm, UserModel user, UserGroupMembershipExtensionEntity member, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository) {
@@ -42,6 +45,7 @@ public class UserGroupMember {
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.user = user;
         this.member = member;
+        this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
     }
 
     @GET
@@ -53,10 +57,7 @@ public class UserGroupMember {
     @DELETE
     public Response leaveGroup() {
         GroupModel group = realm.getGroupById(member.getGroup().getId());
-        List<String> roleNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
-        userGroupMembershipExtensionRepository.deleteMember(member, group, user);
-        LoginEventHelper.createGroupEvent(realm, session, clientConnection, user,  user.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(user.getId())
-                , Utils.GROUP_MEMBERSHIP_DELETE, ModelToRepresentation.buildGroupPath(group), roleNames, null);
+        userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, user.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(user.getId()), memberUserAttributeConfigurationRepository);
         return Response.noContent().build();
     }
 

@@ -12,7 +12,7 @@ import org.keycloak.models.jpa.entities.UserEntity;
 
 public abstract class GeneralRepository<T> {
 
-    protected final RealmModel realm;
+    protected RealmModel realm;
     protected final EntityManager em;
     protected final KeycloakSession session;
 
@@ -48,5 +48,9 @@ public abstract class GeneralRepository<T> {
 
     public UserModel getUserModel(KeycloakSession session, UserEntity user){
         return new UserAdapter(session, realm, em, user);
+    }
+
+    protected void setRealm(RealmModel realm) {
+        this.realm = realm;
     }
 }
