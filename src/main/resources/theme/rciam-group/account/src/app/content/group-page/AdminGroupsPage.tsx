@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {FC,useState,useEffect} from 'react';
-import {DataListContent, DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell,Breadcrumb, BreadcrumbItem,Pagination, DataListAction, Dropdown, KebabToggle, DropdownItem} from '@patternfly/react-core';
+import {DataListContent, DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell,Breadcrumb, BreadcrumbItem,Pagination, DataListAction, Dropdown, KebabToggle, DropdownItem, Tooltip} from '@patternfly/react-core';
 import {Link} from 'react-router-dom';
 //import { fa-search } from '@patternfly/react-icons';
 //import { faSearch } from '@fortawesome/free-solid-svg-icons';
@@ -54,6 +54,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [totalItems,setTotalItems] = useState<number>(0);
+  const [initialRender,setInitialRender] = useState(true);
 
   const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
     setPage(newPage);
@@ -69,6 +70,10 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
   };
 
   useEffect(()=>{
+    if(initialRender){
+      setInitialRender(false);
+      return;
+    }
     fetchAdminGroups();
   },[perPage,page]);
   
@@ -82,7 +87,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
 
   let fetchAdminGroups= (searchString = undefined)=> {
 
-    groupsService!.doGet<Response>("/group-admin/groups?first="+ (perPage*(page-1))+ "&max=" + perPage + (searchString?"&search="+searchString:""),{params:{test:"test"}})
+    groupsService!.doGet<Response>("/group-admin/groups?first="+ (perPage*(page-1))+ "&max=" + perPage + (searchString?"&search="+searchString:""))
       .then((response: HttpResponse<Response>) => {
         let count = response?.data?.count||0;
         setTotalItems(count as number);
@@ -188,6 +193,17 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
     const [isOpen,setIsOpen] = useState(false);
     const [createSubGroup,setCreateSubGroup] = useState(false);
     const [deleteGroup,setDeleteGroup] = useState(false);
+    const [tooltip,setTooltip] = useState(false);
+
+    let groupsService = new GroupsServiceClient();
+
+    const disapearingTooltip = () => {
+      setTooltip(true);
+      setTimeout(() => {
+        setTooltip(false);
+      }, 2000);
+      
+    }
 
     const onToggle = (isOpen: boolean) => {
       setIsOpen(isOpen);
@@ -203,9 +219,17 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
       onFocus();
     };
 
+    const onCopyLink = ()=>{
+      disapearingTooltip();
+      let link = groupsService.getBaseUrl() + '/account/#/enroll?groupPath='+encodeURI(group.path);
+      navigator.clipboard.writeText(link)
+    }
+
     const dropdownItems = [
       <DropdownItem key="link" onClick={()=>{setCreateSubGroup(true);}}><Msg msgKey='createSubGroup' /></DropdownItem>,
-      <Link to={"/enroll?groupPath="+encodeURI(group.path)} className="gm_link_plain"><DropdownItem key="link">Enroll to this group</DropdownItem></Link>,
+      <DropdownItem key="link" onClick={() => onCopyLink()}>
+        <Msg msgKey='copyGroupEnrollmentLink' />
+      </DropdownItem>,
       ...(('/'+group.name!==group.path)&& !(group?.extraSubGroups.length>0)?[<DropdownItem key="action" onClick={()=>{setDeleteGroup(true);}} component="button">
         <Msg msgKey='deleteGroup' /> 
       </DropdownItem>
@@ -243,20 +267,26 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
                       aria-label="Actions"
                       isPlainButtonAction
             >
-              <Dropdown
-                alignments={{
-                  sm: 'right',
-                  md: 'right',
-                  lg: 'right',
-                  xl: 'right',
-                  '2xl': 'right'
-                }}
-                onSelect={onSelect}
-                toggle={<KebabToggle id="toggle-kebab" onToggle={onToggle} />}
-                isOpen={isOpen}
-                isPlain
-                dropdownItems={dropdownItems}
-              />
+              <Tooltip {...(!!(tooltip) ? { trigger:'manual', isVisible:true }:{ trigger:'manual', isVisible:false })}
+                      content={
+                          <div><Msg msgKey='copiedTooltip'/></div>
+                      }
+              >
+                <Dropdown
+                  alignments={{
+                    sm: 'right',
+                    md: 'right',
+                    lg: 'right',
+                    xl: 'right',
+                    '2xl': 'right'
+                  }}
+                  onSelect={onSelect}
+                  toggle={<KebabToggle id="toggle-kebab" onToggle={onToggle} />}
+                  isOpen={isOpen}
+                  isPlain
+                  dropdownItems={dropdownItems}
+                />
+              </Tooltip>
               
               </DataListAction>
           </DataListItemRow>

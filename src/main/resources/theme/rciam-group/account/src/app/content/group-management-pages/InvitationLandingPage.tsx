@@ -2,7 +2,7 @@ import * as React from 'react';
 import {FC,useState,useEffect} from 'react';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
-import { Button, Checkbox, DataList, DataListCell, DataListItem, DataListItemCells, DataListItemRow, HelperText, HelperTextItem, Hint, HintBody, Modal, ModalVariant, Tooltip } from '@patternfly/react-core';
+import { Button, Checkbox, HelperText, HelperTextItem, Hint, HintBody, Modal, ModalVariant, Tooltip } from '@patternfly/react-core';
 import { Loading } from '../../group-widgets/LoadingModal';
 //import { ContentPage } from '../ContentPage';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';

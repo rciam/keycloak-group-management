@@ -81,9 +81,9 @@
       {
         "id": "groupenrollments",
         "path": "groups/groupenrollments",
-        "label": "groupEnrollmentsLabel",
-        "modulePath": "/content/group-page/AdminGroupsPage.js",
-        "componentName": "AdminGroupsPage"
+        "label": "groupManageEnrollmentsLabel",
+        "modulePath": "/content/group-management-pages/ManageEnrollmentRequests.js",
+        "componentName": "ManageEnrollmentRequests"
       }
     ]
   }

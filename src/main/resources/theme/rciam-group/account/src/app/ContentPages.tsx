@@ -26,7 +26,8 @@ import { ForbiddenPage } from './content/forbidden-page/ForbiddenPage';
 import {GroupPage} from './content/group-management-pages/GroupPage';
 import {AdminGroupPage} from './content/group-management-pages/AdminGroupPage';
 import { InvitationLandingPage } from './content/group-management-pages/InvitationLandingPage';
-import { EnrollmentFlow } from './group-widgets/GroupEnrollment/EnrollmentFlow';
+import { CreateEnrollment } from './group-widgets/GroupEnrollment/CreateEnrollment';
+import { EnrollmentRequests } from './content/group-management-pages/ManageEnrollmentRequests';
 
 
 export interface ContentItem {
@@ -55,7 +56,7 @@ let customPages =[
         path: "/enroll",
         expandId: "groups",
         parentId: "showgroups",
-        componentName: "EnrollmentFlow"
+        componentName: "CreateEnrollment"
     }
 ]
 
@@ -104,6 +105,21 @@ function isChildOf(parent: Expansion, child: PageDef): boolean {
     return false;
 }
 
+function removeQueryParamsFromString(inputString) {
+    // Check if the input string contains a query parameter
+    if (inputString.includes('?')) {
+      // Split the string at the '?' character and take the part before it
+      const parts = inputString.split('?');
+      const newPath = parts[0];
+  
+      // Return the path without query parameters
+      return newPath;
+    }
+  
+    // If there are no query parameters, return the original string
+    return inputString;
+  }
+  
 function createNavItems(activePage: PageDef, contentParam: ContentItem[], groupNum: number): React.ReactNode {
     if (typeof content === 'undefined') return (<React.Fragment/>);
         let current_path = window.location.hash.substring(1);
@@ -114,7 +130,8 @@ function createNavItems(activePage: PageDef, contentParam: ContentItem[], groupN
             componentName:""
         }
         customPages.forEach(page=>{
-            matchPath(current_path, {
+
+            matchPath(removeQueryParamsFromString(current_path), {
                 path: page.path,
                 exact: true,
                 strict: false
@@ -164,7 +181,6 @@ function setIds(contentParam: ContentItem[], groupNum: number): number {
             expansionGroupNum = expansionGroupNum + 1;
             item.groupId = groupId(expansionGroupNum);
             expansionGroupNum = setIds(item.content, expansionGroupNum);
-            console.log('currentGroup=' + (expansionGroupNum));
         } else {
             item.groupId = groupId(groupNum);
             item.itemId = itemId(groupNum, i);
@@ -198,7 +214,7 @@ export function makeRoutes(): React.ReactNode {
     const customComponents = {
         GroupPage:GroupPage,
         AdminGroupPage:AdminGroupPage,
-        EnrollmentFlow:EnrollmentFlow
+        CreateEnrollment:CreateEnrollment
     }
     const pageDefs: PageDef[] = flattenContent(content);
 
@@ -213,6 +229,7 @@ export function makeRoutes(): React.ReactNode {
     });
 
     return (<Switch>
+                <Route path="/groups/groupenrollments" component={EnrollmentRequests}/>
                 {routes}
                 {customPages.map((item,index)=>{
                     return <Route path={item.path} component={customComponents[item.componentName]}/>

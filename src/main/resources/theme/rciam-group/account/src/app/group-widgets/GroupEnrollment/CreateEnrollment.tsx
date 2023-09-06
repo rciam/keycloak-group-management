@@ -1,6 +1,6 @@
 import * as React from 'react';
-import {FC,useState,useEffect, useRef} from 'react';
-import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, SelectVariant, Checkbox,Select,SelectOption, FormAlert, Alert, Form, FormGroup, TextInput, Modal, ModalVariant, Switch, FormFieldGroupHeader, FormFieldGroup, DatePicker, Popover, NumberInput, HelperTextItem, Breadcrumb, BreadcrumbItem, TextArea} from '@patternfly/react-core';
+import {FC,useState,useEffect} from 'react';
+import {  Button, Tooltip, SelectVariant, Checkbox,Select,SelectOption, Alert, Form, FormGroup, Breadcrumb, BreadcrumbItem, TextArea} from '@patternfly/react-core';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
@@ -8,7 +8,6 @@ import { ConfirmationModal } from '../Modals';
 import {dateParse,formatDateToString,isFutureDate} from '../../js/utils.js'
 import { Loading } from '../LoadingModal';
 import { Msg } from '../../widgets/Msg';
-import { HelpIcon } from '@patternfly/react-icons';
 // @ts-ignore
 import { ContentPage } from '../../content/ContentPage';
 import { GroupRolesTable } from '../GroupRolesTable';
@@ -16,7 +15,7 @@ import { GroupRolesTable } from '../GroupRolesTable';
 
 const reg_url = /^(https?|chrome):\/\/[^\s$.?#].[^\s]*$/
 
-export const EnrollmentFlow: FC<any> = (props) => {
+export const CreateEnrollment: FC<any> = (props) => {
     const touchDefault = {
       comments:false,
       groupRoles:false
@@ -24,7 +23,6 @@ export const EnrollmentFlow: FC<any> = (props) => {
     const [errors,setErrors] = useState<any>({});
     const [loading,setLoading] = useState(false)
     const [modalInfo,setModalInfo] = useState({});
-    const [validationRules,setValidationRules] = useState<any>({});
     const [touched,setTouched] = useState<any>(touchDefault);
     const [enrollments,setEnrollments] = useState<any>([]);
     const [selected,setSelected]= useState('');
@@ -33,6 +31,7 @@ export const EnrollmentFlow: FC<any> = (props) => {
     const [enrollment,setEnrollment] = useState<any>({});
     const [acceptAup,setAcceptAup] = useState(false);
     const [openRequest,setOpenRequest] = useState(false);
+    const [defaultId,setDefaultId] = useState("");
     const [enrollmentRequest,setEnrollmentRequest] = useState({
       groupEnrollmentConfiguration: {id:''},
       groupRoles:[],
@@ -51,7 +50,6 @@ export const EnrollmentFlow: FC<any> = (props) => {
         }
        
       }
-
     },[]);
 
 
@@ -59,9 +57,21 @@ export const EnrollmentFlow: FC<any> = (props) => {
       if(group.name){
         fetchGroupEnrollmentRequests();
       }
+      
     },[group])
 
-
+    useEffect(()=>{
+      if(enrollments.length>0&&defaultId){
+        enrollments.forEach(enrollment=>{
+          if(enrollment.id===defaultId){
+            setSelected(enrollment.name);
+            enrollmentRequest.groupEnrollmentConfiguration.id=enrollment.id
+            setEnrollmentRequest({...enrollmentRequest});
+            setEnrollment(enrollment);
+          }
+        })
+      }
+    },[enrollments,defaultId])
 
 
 
@@ -70,6 +80,9 @@ export const EnrollmentFlow: FC<any> = (props) => {
         .then((response: HttpResponse<any>) => {
           if(response.status===200&&response.data){
             if(response.data.length>0){
+              if(response.data[0].group?.attributes?.defaultConfiguration){
+                setDefaultId(response.data[0].group?.attributes?.defaultConfiguration[0]);  
+              }
               setGroup(response.data[0].group);
             }
             if(id){
@@ -82,7 +95,7 @@ export const EnrollmentFlow: FC<any> = (props) => {
             }
             else{
               setEnrollments(response.data);
-            }
+            }      
           }
         })
     }
@@ -124,6 +137,7 @@ export const EnrollmentFlow: FC<any> = (props) => {
       .then((response: HttpResponse<any>) => {
         setLoading(false);
         if(response.status===200||response.status===204){
+          props.history.push('/groups/showgroups');
           // setGroupMembers(response.data.results);
         }
       }).catch((err)=>{
@@ -141,7 +155,6 @@ export const EnrollmentFlow: FC<any> = (props) => {
 
         setErrors(errors);
         //!(enrollemtn?)
-        console.log(errors);
     }
 
     const touchFields = ()=> {
@@ -172,10 +185,6 @@ export const EnrollmentFlow: FC<any> = (props) => {
     };
 
 
-
-
-
-
     return (
       <React.Fragment>
         <div className="gm_content">
@@ -191,6 +200,7 @@ export const EnrollmentFlow: FC<any> = (props) => {
             </BreadcrumbItem>
           </Breadcrumb>
           <ConfirmationModal modalInfo={modalInfo}/>
+          <Loading active={loading}/>
           <ContentPage title={group?.name||""}>
             
 

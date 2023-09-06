@@ -293,7 +293,6 @@ const EmailStep: React.FC<any> = (props) => {
 
 
     useEffect(()=>{
-      //fetchGroupMembers();
       fetchGroupAdminIds();
     },[]);
 
@@ -414,7 +413,7 @@ const EmailStep: React.FC<any> = (props) => {
                   setInviteAddress("");
                   setEmailError(false);
                   setShowEmailError(false);
-                  let filterOptions :any = []
+                  let filterOptions :any = [];
                   fetchGroupMembers(searchString);
                   options.forEach((option, index) => (
                     filterOptions.push(

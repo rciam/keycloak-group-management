@@ -1,19 +1,17 @@
 import * as React from 'react';
 import {FC,useState,useEffect,useRef} from 'react';
 
-import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, Pagination, InputGroup, TextInput, Dropdown, BadgeToggle, DropdownItem, Badge, Modal, Checkbox} from '@patternfly/react-core';
+import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, Pagination, InputGroup, TextInput, Dropdown, BadgeToggle, DropdownItem, Badge, Modal, Checkbox, KebabToggle} from '@patternfly/react-core';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
 import { ConfirmationModal } from '../Modals';
-import { SearchInput } from './SearchInput';
-import {ExternalLinkAltIcon } from '@patternfly/react-icons';
+import { ExternalLinkAltIcon } from '@patternfly/react-icons';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
 import { Msg } from '../../widgets/Msg';
-import { EnrollmentModal } from '../GroupEnrollment/EnrollmentModal';
+import { EnrollmentModal } from '../GroupEnrollment/CreateEnrollmentModal';
 import { Link } from 'react-router-dom';
 import {isIntegerOrNumericString} from '../../js/utils.js'
-import {CopyIcon } from '@patternfly/react-icons';
 
 
 interface FederatedIdentity {
@@ -31,14 +29,6 @@ interface User {
     attributes: any;
 }
 
-interface Memberships {
-    id?: string;
-    user: User;
-    status: string;
-    membershipExpiresAt: string;
-    groupRoles: string[];
-  }
-
 
 
 export const GroupEnrollment: FC<any> = (props) => {
@@ -47,6 +37,7 @@ export const GroupEnrollment: FC<any> = (props) => {
     const [groupEnrollments,setGroupEnrollments] = useState<any>([]);
     const [enrollmentModal,setEnrollmentModal] = useState({});
     const [enrollmentRules, setEnrollmentRules] = useState({});
+
     let defaultEnrollmentConfiguration = {
       group: {id:""},
       membershipExpirationDays : 3,
@@ -68,8 +59,6 @@ export const GroupEnrollment: FC<any> = (props) => {
     }
 
     let groupsService = new GroupsServiceClient();
-    
-
 
     useEffect(()=>{
       if(Object.keys(props.groupConfiguration).length !== 0){
@@ -82,10 +71,6 @@ export const GroupEnrollment: FC<any> = (props) => {
         fetchGroupEnrollments();
       }
     },[props.groupId]);
-
-
-
-
 
 
     let fetchGroupEnrollments = ()=>{
@@ -140,7 +125,6 @@ export const GroupEnrollment: FC<any> = (props) => {
         )
       }
     
-  
 
   
   
@@ -163,6 +147,9 @@ export const GroupEnrollment: FC<any> = (props) => {
                   <DataListCell className="gm_vertical_center_cell" width={3} key="email-hd">
                     <strong><Msg msgKey='Aup' /></strong>
                   </DataListCell>,
+                  <DataListCell className="gm_vertical_center_cell" width={3} key="email-hd">
+                  <strong><Msg msgKey='Default' /></strong>
+                </DataListCell>
                 ]}>
                 </DataListItemCells>
                 <DataListAction
@@ -173,6 +160,7 @@ export const GroupEnrollment: FC<any> = (props) => {
                       isPlainButtonAction
                 >
                   <Tooltip content={<div><Msg msgKey='createEnrollmentButton'/></div>}>
+                    
                     <Button className={"gm_plus-button-small"} onClick={()=>{defaultEnrollmentConfiguration.group.id=props.groupId;  setEnrollmentModal({...defaultEnrollmentConfiguration});}}>
                         <div className={"gm_plus-button"}></div>
                     </Button>
@@ -181,7 +169,89 @@ export const GroupEnrollment: FC<any> = (props) => {
               </DataListItemRow>
             </DataListItem>
             {groupEnrollments.length>0?groupEnrollments.map((enrollment,index)=>{
-              return <DataListItem aria-labelledby={"enrollment-"+index}>
+              return <GroupEnrollmentItem {...{enrollment,index,defaultConfiguration:props.defaultConfiguration,groupConfiguration:props.groupConfiguration,updateAttributes:props.updateAttributes,setEnrollmentModal,groupId:props.groupId}}/>
+            }):noGroupEnrollments()}
+          </DataList>
+
+ 
+        </React.Fragment>         
+   
+    )
+  }
+
+
+  interface GroupEnrollmentItemProps {
+    enrollment: any; // Replace 'any' with the actual type of 'enrollment'
+    index: number;
+    updateAttributes: (any) => void;
+    defaultConfiguration: string;
+    groupConfiguration:any;
+    groupId:string;
+    setEnrollmentModal: (any)=> void;
+  }
+
+  const GroupEnrollmentItem: FC<GroupEnrollmentItemProps> = ({
+    enrollment,
+    index,
+    defaultConfiguration,
+    groupConfiguration,
+    updateAttributes,
+    setEnrollmentModal,
+    groupId,
+  }) => {
+    const [isOpen,setIsOpen] = useState(false);
+    const [tooltip,setTooltip] = useState(false);
+
+    const onToggle = (isOpen: boolean) => {
+      setIsOpen(isOpen);
+    };
+  
+    const onFocus = () => {
+      const element = document.getElementById('toggle-kebab');
+      element&&element.focus();
+    };
+  
+    const onSelect = () => {
+      setIsOpen(false);
+      onFocus();
+    };
+    const disapearingTooltip = () => {
+      setTooltip(true);
+      setTimeout(() => {
+        setTooltip(false);
+      }, 2000);
+      
+    }
+
+    let groupsService = new GroupsServiceClient();
+
+    const onMakeDefault= () =>  {
+      if(defaultConfiguration){
+        groupConfiguration.attributes.defaultConfiguration[0] = enrollment?.id; 
+      }
+      else {
+        groupConfiguration.attributes.defaultConfiguration = [enrollment?.id]
+      }
+      updateAttributes({...groupConfiguration.attributes});
+    }
+
+    const onCopyLink = ()=>{
+      disapearingTooltip();
+      let link = groupsService.getBaseUrl() + '/account/#/enroll?groupPath=' + encodeURI(groupConfiguration.path) + '&id=' + encodeURI(enrollment.id);
+      navigator.clipboard.writeText(link)
+    }
+
+    const dropdownItems = [
+      ...(enrollment?.id!==defaultConfiguration?[<DropdownItem key="link" onClick={() => onMakeDefault()}>
+        <Msg msgKey='makeDefault' />
+      </DropdownItem>]:[]),
+      <DropdownItem key="link" onClick={() => onCopyLink()}>
+        <Msg msgKey='copyEnrollmentLink' />
+      </DropdownItem>,
+    ];
+  
+    return (
+      <DataListItem aria-labelledby={"enrollment-"+index}>
                 <DataListItemRow>
                   <DataListItemCells
                     dataListCells={[
@@ -197,35 +267,56 @@ export const GroupEnrollment: FC<any> = (props) => {
                           }
                         }
                         setEnrollmentModal(enrollment)}}>
-                        <Link to={"/groups/admingroups/"+props.groupId}>{enrollment.name||Msg.localize('notAvailable')}</Link>
+                        <Link to={"/groups/admingroups/"+groupId}>{enrollment.name||Msg.localize('notAvailable')}</Link>
                       </DataListCell>,
                       <DataListCell width={3} className={enrollment.active?"gm_group-enrollment-active":"gm_group-enrollment-inactive"} key="secondary content ">
                         <strong>{enrollment.active?Msg.localize('Active'):Msg.localize('Inactive')}</strong>
                       </DataListCell>,
                       <DataListCell width={3} key="secondary content ">
                         {enrollment?.aup?.url?<a href={enrollment?.aup?.url} target="_blank" rel="noreferrer">link <ExternalLinkAltIcon/> </a>:Msg.localize('notAvailable')}
-                      </DataListCell>,                    
+                      </DataListCell>,
+                      <DataListCell width={3} key="secondary content ">
+                        <Tooltip content={<div><Msg msgKey='DefaultEnrollmentTooltip'/></div>}>
+                          <Checkbox id="disabled-check-1" className="gm_direct-checkbox" isChecked={enrollment?.id===defaultConfiguration} isDisabled />
+                        </Tooltip>
+                    </DataListCell>      
+                                    
                     ]}
                   />
                   <DataListAction
-                    className="gm_cell-center"
+                    className="gm_cell-center gm_kebab-menu-cell"
                     aria-labelledby="check-action-item1 check-action-action2"
                     id="check-action-action1"
                     aria-label="Actions"
                     isPlainButtonAction
-                  ><Button isSmall variant="tertiary" onClick={()=>{
-                    
-                    let link = groupsService.getBaseUrl() + '/account/#/enroll?groupPath=' + encodeURI(props.groupConfiguration.path) + '&id=' + encodeURI(enrollment.id);
-                    console.log(link);
-                    navigator.clipboard.writeText(link)}} ><CopyIcon/> </Button></DataListAction>
+                  >
+                  <Tooltip {...(!!(tooltip) ? { trigger:'manual', isVisible:true }:{ trigger:'manual', isVisible:false })}
+                        content={
+                            <div><Msg msgKey='copiedTooltip'/></div>
+                        }
+                    >
+                      <Dropdown
+                        alignments={{
+                          sm: 'right',
+                          md: 'right',
+                          lg: 'right',
+                          xl: 'right',
+                          '2xl': 'right'
+                        }}
+                        onSelect={onSelect}
+                        toggle={<KebabToggle id="toggle-kebab-1" onToggle={onToggle} />}
+                        isOpen={isOpen}
+                        isPlain
+                        dropdownItems={dropdownItems}
+                      />
+                    </Tooltip>                    
+                  </DataListAction>
                 </DataListItemRow>
               </DataListItem>
-            }):noGroupEnrollments()}
-          </DataList>
-               
-        </React.Fragment>         
-   
-    )
-  }
 
 
+
+
+    );
+  };
+  

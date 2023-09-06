@@ -8,7 +8,7 @@ import { ConfirmationModal } from '../Modals';
 import {isIntegerOrNumericString,getCurrentDate} from '../../js/utils.js'
 import { Loading } from '../LoadingModal';
 import { Msg } from '../../widgets/Msg';
-import { HelpIcon } from '@patternfly/react-icons';
+import { HelpIcon, TrashIcon } from '@patternfly/react-icons';
 
 
 const reg_url = /^(https?|chrome):\/\/[^\s$.?#].[^\s]*$/
@@ -156,6 +156,22 @@ export const EnrollmentModal: FC<any> = (props) => {
           console.log(err)})
       }
 
+
+      const deleteEnrollment = (id) => {
+        setLoading(true);
+        groupsService!.doDelete<any>("/group-admin/group/"+props.groupId+"/configuration/"+ id)
+        .then((response: HttpResponse<any>) => {
+          setLoading(false);
+          if(response.status===200||response.status===204){
+            close();
+            // setGroupMembers(response.data.results);
+          }
+        }).catch((err)=>{
+          setLoading(false);
+          close();
+          console.log(err)})
+      }
+
       const onMinus = () => {
         enrollment.membershipExpirationDays = (enrollment.membershipExpirationDays || 0) - 1;
         setEnrollment({...enrollment});
@@ -190,10 +206,39 @@ export const EnrollmentModal: FC<any> = (props) => {
     return (
       <React.Fragment>
         <Loading active={loading}/>
-        
+
         <Modal
                 variant={ModalVariant.large}
-                title={(enrollment?.id?Msg.localize('enrollmentConfigurationModalTitleEdit'):Msg.localize('enrollmentConfigurationModalTitleCreate'))}
+                header={
+                  <React.Fragment >
+                    <h1 className="pf-c-modal-box__title gm_modal-title gm_flex-center">
+                      {(enrollment?.id?Msg.localize('enrollmentConfigurationModalTitleEdit'):Msg.localize('enrollmentConfigurationModalTitleCreate'))}
+                      {enrollment?.id&&
+                        <Tooltip content={
+                                  <div>
+                                      <Msg msgKey="deleteEnrollmentTooltip"/>
+                                  </div>
+                              }
+                          >  
+                          <TrashIcon onClick={()=>{
+                            setModalInfo({
+                              message:Msg.localize('deleteEnrollmentConfirmation'),
+                              accept_message: Msg.localize("yes"),
+                              cancel_message: Msg.localize("no"),
+                              accept: function(){
+                                  deleteEnrollment(enrollment?.id);
+                                  setModalInfo({})},
+                              cancel: function(){
+                                  setModalInfo({})}
+                            });
+
+                          }}/>
+                        </Tooltip>              
+                      }
+                    </h1>
+                    
+                  </React.Fragment>
+                }
                 isOpen={isModalOpen}
                 onClose={()=>{close()}}
                 actions={[
@@ -317,11 +362,8 @@ export const EnrollmentModal: FC<any> = (props) => {
                               />
                               </div>
                             :null}
-                          </FormGroup>
-
-                              
-                  
-                        <FormGroup
+                          </FormGroup>   
+                          <FormGroup
                             label={Msg.localize('enrollmentConfigurationValidFromTitle')}
                             fieldId="simple-form-name-09"
                             helperTextInvalid={touched.validFrom&&!enrollment?.validFrom&&errors.validFrom}
@@ -344,9 +386,8 @@ export const EnrollmentModal: FC<any> = (props) => {
                                     <HelpIcon noVerticalAlign />
                                   </button>
                                 </Popover>
-                              }
-                            
-                        >
+                              }  
+                          >
                            <Switch
                             id="simple-switch-requireApproval"
                             aria-label="simple-switch-requireApproval"

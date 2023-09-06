@@ -25,7 +25,8 @@ import { ForbiddenPage } from "./content/forbidden-page/ForbiddenPage.js";
 import { GroupPage } from "./content/group-management-pages/GroupPage.js";
 import { AdminGroupPage } from "./content/group-management-pages/AdminGroupPage.js";
 import { InvitationLandingPage } from "./content/group-management-pages/InvitationLandingPage.js";
-import { EnrollmentFlow } from "./group-widgets/GroupEnrollment/EnrollmentFlow.js";
+import { CreateEnrollment } from "./group-widgets/GroupEnrollment/CreateEnrollment.js";
+import { EnrollmentRequests } from "./content/group-management-pages/ManageEnrollmentRequests.js";
 ;
 let customPages = [{
   path: "/groups/showgroups/:id",
@@ -41,7 +42,7 @@ let customPages = [{
   path: "/enroll",
   expandId: "groups",
   parentId: "showgroups",
-  componentName: "EnrollmentFlow"
+  componentName: "CreateEnrollment"
 }];
 export function isModulePageDef(item) {
   return item.modulePath !== undefined;
@@ -67,6 +68,20 @@ function isChildOf(parent, child) {
   return false;
 }
 
+function removeQueryParamsFromString(inputString) {
+  // Check if the input string contains a query parameter
+  if (inputString.includes('?')) {
+    // Split the string at the '?' character and take the part before it
+    const parts = inputString.split('?');
+    const newPath = parts[0]; // Return the path without query parameters
+
+    return newPath;
+  } // If there are no query parameters, return the original string
+
+
+  return inputString;
+}
+
 function createNavItems(activePage, contentParam, groupNum) {
   if (typeof content === 'undefined') return /*#__PURE__*/React.createElement(React.Fragment, null);
   let current_path = window.location.hash.substring(1);
@@ -77,7 +92,7 @@ function createNavItems(activePage, contentParam, groupNum) {
     componentName: ""
   };
   customPages.forEach(page => {
-    matchPath(current_path, {
+    matchPath(removeQueryParamsFromString(current_path), {
       path: page.path,
       exact: true,
       strict: false
@@ -131,7 +146,6 @@ function setIds(contentParam, groupNum) {
       expansionGroupNum = expansionGroupNum + 1;
       item.groupId = groupId(expansionGroupNum);
       expansionGroupNum = setIds(item.content, expansionGroupNum);
-      console.log('currentGroup=' + expansionGroupNum);
     } else {
       item.groupId = groupId(groupNum);
       item.itemId = itemId(groupNum, i);
@@ -164,7 +178,7 @@ export function makeRoutes() {
   const customComponents = {
     GroupPage: GroupPage,
     AdminGroupPage: AdminGroupPage,
-    EnrollmentFlow: EnrollmentFlow
+    CreateEnrollment: CreateEnrollment
   };
   const pageDefs = flattenContent(content);
   const routes = pageDefs.map(page => {
@@ -188,7 +202,10 @@ export function makeRoutes() {
       });
     }
   });
-  return /*#__PURE__*/React.createElement(Switch, null, routes, customPages.map((item, index) => {
+  return /*#__PURE__*/React.createElement(Switch, null, /*#__PURE__*/React.createElement(Route, {
+    path: "/groups/groupenrollments",
+    component: EnrollmentRequests
+  }), routes, customPages.map((item, index) => {
     return /*#__PURE__*/React.createElement(Route, {
       path: item.path,
       component: customComponents[item.componentName]

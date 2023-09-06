@@ -1,15 +1,15 @@
 import * as React from 'react';
 import {FC,useState,useEffect} from 'react';
-import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, Pagination, Dropdown, BadgeToggle, DropdownItem, Badge, Modal, Checkbox} from '@patternfly/react-core';
+import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, Pagination,Badge, Modal, Checkbox} from '@patternfly/react-core';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
 import { ConfirmationModal } from '../Modals';
 import { SearchInput } from './SearchInput';
-import {CheckIcon } from '@patternfly/react-icons';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
 import { InviteMemberModal } from './InviteMemberModal';
 import { Msg } from '../../widgets/Msg';
+import { DatalistFilterSelect } from '../DatalistFilterSelect';
 
 
 
@@ -48,7 +48,7 @@ export const GroupMembers: FC<any> = (props) => {
     const [roleSelection,setRoleSelection] = useState("")
     const [editMemberRoles,setEditMemberRoles] = useState({});
     const [inviteModalActive,setInviteModalActive] = useState(false);
-
+    const [initialRender,setInitialRender] = useState(true);
 
     let groupsService = new GroupsServiceClient();
     useEffect(()=>{
@@ -56,43 +56,16 @@ export const GroupMembers: FC<any> = (props) => {
     },[])
 
     useEffect(()=>{
+      if(initialRender){
+        setInitialRender(false);
+        return;
+      }
       setPage(1);
       fetchGroupMembers();
-    },[props.groupId])
-
-    useEffect(()=>{
-      setPage(1);
-      fetchGroupMembers();
-    },[statusSelection]);
-
-    useEffect(()=>{
-      setPage(1);
-      fetchGroupMembers();
-    },[roleSelection]);
+    },[statusSelection,roleSelection,page,perPage,props.groupId]);
 
 
-    useEffect(()=>{
-      fetchGroupMembers();
-    },[perPage,page]);
 
-
-    const [isOpen, setIsOpen] = React.useState({status:false,roles:false});
-
-    const onToggle = (open: boolean,type) => {
-      isOpen[type] = open;
-      setIsOpen({...isOpen});
-    };
-
-    const onFocus = (type) => {
-      const element = document.getElementById('toggle-badge-'+type);
-      element?.focus();
-    };
-
-    const onSelect = (type) => {
-      isOpen[type] = false;
-      setIsOpen({...isOpen});
-      onFocus(type);
-    };
 
 
 
@@ -113,7 +86,7 @@ export const GroupMembers: FC<any> = (props) => {
   
     
     let fetchGroupMembers = (searchString = undefined)=>{
-      groupsService!.doGet<any>("/group-admin/group/"+props.groupId+"/members?first="+ (perPage*(page-1))+ "&max=" + perPage + (searchString?"&search="+searchString:""),{params: { ...(statusSelection.length > 0 ? {status:statusSelection}:{}),...(roleSelection.length > 0 ? {role:roleSelection}:{})}
+      groupsService!.doGet<any>("/group-admin/group/"+props.groupId+"/members?first="+ (perPage*(page-1))+ "&max=" + perPage + (searchString?"&search="+searchString:""),{params: { ...(statusSelection ? {status:statusSelection}:{}),...(roleSelection ? {role:roleSelection}:{})}
     })
       .then((response: HttpResponse<any>) => {
         if(response.status===200&&response.data){
@@ -173,8 +146,7 @@ export const GroupMembers: FC<any> = (props) => {
         <EditRolesModal member={editMemberRoles} setMember={setEditMemberRoles} groupRoles={props.groupConfiguration?.groupRoles} groupId={props.groupId} fetchGroupMembers={fetchGroupMembers} />
         <SearchInput
           childComponent={<Button className="gm_invite-member-button" onClick={()=>{setInviteModalActive(true)}}><Msg msgKey='adminGroupInviteMemberButton' /></Button>}
-          searchText={Msg.localize('adminGroupSearchMember')} cancelText={Msg.localize('adminGroupSearchCancel')}search={(searchString)=>{
-            fetchGroupMembers(searchString);
+          searchText={Msg.localize('adminGroupSearchMember')} cancelText={Msg.localize('adminGroupSearchCancel')} search={(searchString)=>{            fetchGroupMembers(searchString);
             setPage(1);
           }} cancel={()=>{
             fetchGroupMembers();
@@ -195,58 +167,18 @@ export const GroupMembers: FC<any> = (props) => {
                   </DataListCell>,
                   <DataListCell className="gm_vertical_center_cell" width={3} key="email-hd">
                     <strong><Msg msgKey='Roles' /></strong>
-                    <Dropdown
-                        onSelect={()=>{onSelect('roles')}}
-                        toggle={
-                          <BadgeToggle id="toggle-badge-roles" onToggle={(e)=>{onToggle(e,'roles')}}>
-                            {roleSelection?roleSelection:"all"}
-                          </BadgeToggle>
-                        }
-                        className="gm_badge_dropdown"
-                        isOpen={isOpen.roles}
-                        dropdownItems={[
-                          <DropdownItem key="all" component="button" onClick={()=>{setRoleSelection('')}} icon={!roleSelection&&<CheckIcon />}>
-                                <Msg msgKey='all' />
-                          </DropdownItem>,
-                          ...(props.groupConfiguration && props.groupConfiguration.groupRoles ? props.groupConfiguration.groupRoles.map((role)=>{
-                            return (
-                              <DropdownItem key={role} component="button" onClick={()=>{setRoleSelection(role)}} icon={roleSelection===role&&<CheckIcon />}>
-                                {role}
-                              </DropdownItem>
-                            )
-                          }):[])
-                        ]}
-                      />
+                    {props.groupConfiguration?.groupRoles &&
+                      <DatalistFilterSelect default="" name="group-roles"  options={props.groupConfiguration?.groupRoles} optionsType="raw" action={(selection)=>{setRoleSelection(selection)}}/>
+                    }
+                    
+                   
                   </DataListCell>,
                   <DataListCell className="gm_vertical_center_cell" width={3} key="expiration-hd">
                     <strong><Msg msgKey='adminGroupMemberCellMembershipExp' /></strong>
                   </DataListCell>,
                   <DataListCell className="gm_vertical_center_cell" width={2} key="status-hd">
                     <strong><Msg msgKey='Status' />
-                      <Dropdown
-                        onSelect={()=>{onSelect('status')}}
-                        toggle={
-                          <BadgeToggle id="toggle-badge-status" onToggle={(e)=>{onToggle(e,'status')}}>
-                            {statusSelection==="ENABLED"?"active":statusSelection?statusSelection.toLowerCase():"all"}
-                          </BadgeToggle>
-                        }
-                        className="gm_badge_dropdown"
-                        isOpen={isOpen.status}
-                        dropdownItems={[                            
-                          <DropdownItem key="All" component="button" onClick={()=>{setStatusSelection("")}} icon={!statusSelection&&<CheckIcon />}>
-                            <Msg msgKey='All' />
-                          </DropdownItem>,
-                          <DropdownItem key="Enabled" component="button" onClick={()=>{setStatusSelection("ENABLED")}} icon={statusSelection==="ENABLED"&&<CheckIcon />}>
-                            <Msg msgKey='Active' />
-                          </DropdownItem>,
-                          <DropdownItem key="Suspended" component="button" onClick={()=>{setStatusSelection("SUSPENDED")}} icon={statusSelection==="SUSPENDED"&&<CheckIcon />}>
-                            <Msg msgKey='Suspended' />
-                          </DropdownItem>,
-                          <DropdownItem key="Pending" component="button" onClick={()=>{setStatusSelection("PENDING")}} icon={statusSelection==="PENDING"&&<CheckIcon />}>
-                            <Msg msgKey='Pending' />
-                          </DropdownItem>
-                        ]}
-                      />
+                      <DatalistFilterSelect default="" name="group-status"  options={['ENABLED','SUSPENDED','PENDING']} action={(selection)=>{setStatusSelection(selection)}}/>
                     </strong>
                   </DataListCell>
                 ]}>

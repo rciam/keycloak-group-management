@@ -63,6 +63,9 @@ export class Msg extends React.Component<MsgProps> {
 
     // if the message key has Freemarker syntax, remove it
     private static processKey(msgKey: string): string {
+        if (typeof msgKey === 'undefined') {
+            msgKey = ""
+        }
         if (!(msgKey.startsWith('${') && msgKey.endsWith('}'))) return msgKey;
 
         // remove Freemarker syntax
