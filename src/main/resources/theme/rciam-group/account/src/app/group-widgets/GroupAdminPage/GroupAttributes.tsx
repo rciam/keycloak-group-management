@@ -44,38 +44,40 @@ export const GroupAttributes: FC<any> = (props) => {
                     </DataListItemRow>
                 </DataListItem>
                 {attributes&&Object.keys(attributes).map(attribute=>{
-                    return <DataListItem aria-labelledby={attribute}>
-                        <DataListItemRow>
-                            <DataListItemCells
-                                dataListCells={[
-                                    <DataListCell width={2} key="primary content"><strong>{attribute}</strong></DataListCell>,
-                                    <DataListCell width={3} key="secondary content "><TextInput value={attributes[attribute]} onChange={(e)=>{
-                                        attributes[attribute] = [e];
-                                        setAttributes({...attributes})
-                                        }}/>    
-                                    </DataListCell>
-                                ]}
-                            />
-                            <DataListAction
-                                className="gm_cell-center"
-                                aria-labelledby="check-action-item1 check-action-action1"
-                                id="check-action-action1"
-                                aria-label="Actions"
-                                isPlainButtonAction
-                            >
-                                <Tooltip content={<div><Msg msgKey='adminGroupRemoveAttribute' /></div>}>
-                                    <Button variant="danger" className={"gm_x-button-small"} 
-                                        onClick={()=>{
-                                            delete attributes[attribute];
-                                            setAttributes({...attributes});
-                                        }}
-                                    >
-                                        <div className={"gm_x-button"}></div>
-                                    </Button>
-                                </Tooltip>
-                            </DataListAction>
-                        </DataListItemRow>
-                    </DataListItem>
+                    if(attribute!=='defaultConfiguration'){
+                        return <DataListItem aria-labelledby={attribute}>
+                            <DataListItemRow>
+                                <DataListItemCells
+                                    dataListCells={[
+                                        <DataListCell width={2} key="primary content"><strong>{attribute}</strong></DataListCell>,
+                                        <DataListCell width={3} key="secondary content "><TextInput value={attributes[attribute]} onChange={(e)=>{
+                                            attributes[attribute] = [e];
+                                            setAttributes({...attributes})
+                                            }}/>    
+                                        </DataListCell>
+                                    ]}
+                                />
+                                <DataListAction
+                                    className="gm_cell-center"
+                                    aria-labelledby="check-action-item1 check-action-action1"
+                                    id="check-action-action1"
+                                    aria-label="Actions"
+                                    isPlainButtonAction
+                                >
+                                    <Tooltip content={<div><Msg msgKey='adminGroupRemoveAttribute' /></div>}>
+                                        <Button variant="danger" className={"gm_x-button-small"} 
+                                            onClick={()=>{
+                                                delete attributes[attribute];
+                                                setAttributes({...attributes});
+                                            }}
+                                        >
+                                            <div className={"gm_x-button"}></div>
+                                        </Button>
+                                    </Tooltip>
+                                </DataListAction>
+                            </DataListItemRow>
+                        </DataListItem>
+                    }
                 })}
                 <DataListItem aria-labelledby='attribute-input'>
                     <DataListItemRow>
@@ -128,14 +130,15 @@ export const GroupAttributes: FC<any> = (props) => {
                         message: (Msg.localize('adminGroupAttributeConfirmation')),
                         accept: function(){
                             props.groupConfiguration.attributes = attributes;
-                            props.updateAttributes(props.groupConfiguration)
+                            props.updateAttributes({...props.groupConfiguration.attributes})
                             setModalInfo({})},
                         cancel: function(){
                             props.fetchGroupConfiguration()
                             setModalInfo({})}
                     });
                 }}>Save</Button>
-                <Button variant={"tertiary"} className={""} onClick={()=>{props.fetchGroupConfiguration()}}>Cancel</Button>
+                <Button variant={"tertiary"} className={""} onClick={()=>{
+                    props.fetchGroupConfiguration()}}>Cancel</Button>
                 </div>
         </React.Fragment>
 

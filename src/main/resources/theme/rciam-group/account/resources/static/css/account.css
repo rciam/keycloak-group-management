@@ -35,6 +35,10 @@
     max-width: 20rem!important;
 }
 
+.gm_search-input-double {
+    max-width: 35rem!important;
+}
+
 .gm_cancel-icon-container {
     background-image: url('../svg/xmark-solid.svg');
     background-size: cover;
@@ -555,12 +559,12 @@
     font-size:0.9rem;
 }
 
-.gm_group-title svg {
+.gm_group-title svg, .gm_modal-title .gm_group-title svg  {
     font-size: 1.1rem;
-    margin-left: 0.2rem;
+    margin-left: 0.5rem;
 }
 
-.gm_group-title svg:hover {
+.gm_group-title svg:hover, .gm_modal-title svg:hover {
     opacity: .5;
 }
 
@@ -605,3 +609,140 @@
   .gm_number-input-container {
     margin-top:1rem;
   }
+
+  .gm_link_plain {
+    text-decoration: none;
+    color: black;
+  }
+
+  .gm_link_plain:hover {
+    text-decoration: none;
+    color: black;
+  }
+
+  .gm_description-text {
+    font-size:0.9rem;
+  }
+  .gm_enrollment_container {
+    padding: 1rem 3rem;
+  }
+
+  .gm_form-input {
+    max-width:30rem
+  }
+
+  .gm_content-width {
+    width: fit-content;
+    block-size: fit-content;
+  }
+
+  .gm_enrollment-request-view-form .pf-c-form__group-control {
+    padding-top:0.35rem;
+  }
+
+  .gm_green-button {
+    background-color: #198754!important;
+    border-color: #198754!important;
+  }
+
+  .gm_green-button:hover {
+    background-color: #157347!important;
+    border-color: #157347!important;
+}
+
+.gm_grey-button {
+    background-color: #6c757d!important;
+    border-color: #6c757d!important;
+}
+
+.gm_grey-button:hover {
+    background-color: #5c636a!important;
+    border-color: #5c636a!important;
+}
+
+.gm_button-enrollment-link {
+    margin-left:-1rem!important;
+}
+
+.gm_button-spacer { 
+    margin-right:1rem!important;
+}
+
+.gm_margin-top-1rem {
+    margin-top:1rem!important;
+}
+
+.gm_normal-text {
+    font-weight:400!important;
+}
+
+.gm_title-button {
+    margin-left:1rem!important;
+}
+
+.gm_flex-center {
+    display: flex;
+    align-items: center;
+}
+
+.expandable-section {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
+  }
+  
+.expandable-section.expanded {
+    max-height: 200px; /* Adjust the desired expanded height */
+}
+
+.gm_badge-warning {
+    background-color: #FFC107!important;
+    color: #212529!important;
+}
+
+.gm_badge-danger {
+    background-color: #DC3545!important;
+    color:#FFFFFF!important;
+}
+
+.gm_badge-success {
+    background-color: #198754!important;
+    color:#FFFFFF!important;
+}
+
+.gm_toggle-filters-container {
+    height: 3rem;
+    padding-right: 1rem;
+}
+
+.gm_toggle-filters-container button {
+    float:right;
+}
+
+
+.gm_search-input-container-2 {
+    padding-top: 0.2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  
+  .gm_search-input-double {
+    display: flex;
+    margin-right:1rem;
+    gap: 10px; /* Adjust the gap between the text inputs as needed */
+  }
+  
+  .gm_search-input-double-controls {
+    height: 2.3rem;
+    margin-right: 1rem;
+    margin-bottom: 0.8rem;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px; /* Adjust the top margin as needed */
+  }
+
+.gm_search-input-double-controls .gm_cancel-icon-container{
+    margin-top: 0!important;   
+    height: 1.1rem!important;
+}

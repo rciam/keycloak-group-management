@@ -109,6 +109,8 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
   const [user,setUser] = useState<User>({} as User);
   const [modalInfo,setModalInfo] = useState({});
   const [deleteGroup,setDeleteGroup] = useState(false);
+  const [defaultConfiguration,setDefaultConfiguration] = useState("");
+  const [initialRender,setInitialRender] = useState(true);
 
   let groupsService = new GroupsServiceClient();
   useEffect(()=>{
@@ -122,6 +124,10 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
   },[props.match.params.id]);
   
   useEffect(()=>{
+    if(initialRender){
+      setInitialRender(false);
+      return;
+    }
     fetchGroupConfiguration();
     setActiveTabKey(0);
   },[groupId]);
@@ -143,17 +149,20 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
         if(response.data?.attributes?.description?.[0]!==descriptionInput){
           setDescriptionInput(response.data?.attributes?.description?.[0]);
         }
+        if(response.data?.attributes?.defaultConfiguration?.[0]!==defaultConfiguration){
+          setDefaultConfiguration(response.data?.attributes?.defaultConfiguration?.[0]);
+        }
         setGroupConfiguration(response.data);
       }
     })
   }
 
-  let updateAttributes = (groupConfiguration) =>{
-    
-    groupsService!.doPost<GroupConfiguration>("/group-admin/group/"+groupId+"/attributes",groupConfiguration?.attributes?{...groupConfiguration.attributes}:{})
+  let updateAttributes = (attributes) =>{
+    groupsService!.doPost<GroupConfiguration>("/group-admin/group/"+groupId+"/attributes",attributes?{...attributes}:{})
     .then((response: HttpResponse<GroupConfiguration>) => {
       if(response.status===200||response.status===204){
-        setGroupConfiguration({...groupConfiguration})
+        setGroupConfiguration({...groupConfiguration});
+        fetchGroupConfiguration();
       }
       else{
         fetchGroupConfiguration();
@@ -188,7 +197,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
             {groupConfiguration?.name}
           </BreadcrumbItem>
         </Breadcrumb>
-          <h1 className="pf-c-title pf-m-2xl pf-u-mb-xl gm_group-title">{groupConfiguration?.name} {("/"+groupConfiguration?.name)!==groupConfiguration?.path&&!(groupConfiguration?.extraSubGroups&&groupConfiguration?.extraSubGroups.length>0)&&<TrashIcon onClick={()=>{setDeleteGroup(true)}}/>}</h1>
+          <h1 className="pf-c-title pf-m-2xl pf-u-mb-xl gm_group-title gm_flex-center">{groupConfiguration?.name} {("/"+groupConfiguration?.name)!==groupConfiguration?.path&&!(groupConfiguration?.extraSubGroups&&groupConfiguration?.extraSubGroups.length>0)&&<TrashIcon onClick={()=>{setDeleteGroup(true)}}/>}</h1>
           {editDescription?
             <div className="gm_description-input-container">
               <TextArea value={descriptionInput} onChange={value => setDescriptionInput(value)} aria-label="text area example" />
@@ -201,7 +210,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
                       message: (Msg.localize('descriptionUpdateConfirmation')),
                       accept: function(){if(groupConfiguration.attributes){
                         groupConfiguration.attributes.description = [descriptionInput];
-                        updateAttributes(groupConfiguration);
+                        updateAttributes(groupConfiguration.attributes);
                         setEditDescription(false);
                         setModalInfo({})
                       }},
@@ -243,13 +252,13 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
               <GroupAdmins groupId={groupId} user={user} groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration}/>
             </Tab>
             <Tab eventKey={3} title={<TabTitleText><Msg msgKey='adminGroupEnrollmentTab' /></TabTitleText>} aria-label="Default content - attributes">   
-              <GroupEnrollment groupConfiguration={groupConfiguration}  groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
+              <GroupEnrollment groupConfiguration={groupConfiguration} defaultConfiguration={defaultConfiguration}  groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
             </Tab>   
             <Tab eventKey={4} title={<TabTitleText><Msg msgKey='adminGroupAttributesTab' /></TabTitleText>} aria-label="Default content - attributes">   
               <GroupAttributes groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
             </Tab>
             <Tab eventKey={5} title={<TabTitleText><Msg msgKey='adminGroupSubgroupsTab' /></TabTitleText>} aria-label="Default content - attributes">   
-              <GroupSubGroups groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
+              <GroupSubGroups groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} />
             </Tab>
             
           </Tabs>

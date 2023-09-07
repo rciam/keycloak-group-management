@@ -116,7 +116,7 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
                       })}
                 </DataListCell>,
                 <DataListCell id={`${appIndex}-group-membershipExpiration`} width={2} key={'directMembership-' + appIndex}>
-                {membership.membershipExpiresAt||"Never"}
+                {membership.membershipExpiresAt||<Msg msgKey='Never'/>}
               </DataListCell>
               ]}
             />
@@ -151,10 +151,6 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
                   </DataListCell>,
                   <DataListCell key='group-roles' width={2}>
                     <strong><Msg msgKey='rolesDatalistTitle' /></strong>
-                  </DataListCell>,
-
-                  <DataListCell key='group-aup-expiration-header' width={2} onClick={()=>{orderResults('aupExpiresAt')}}>
-                    <strong><Msg msgKey='aupDatalistTitle'/></strong> {orderBy!=='aupExpiresAt'?<AngleDownIcon/>:asc?<LongArrowAltDownIcon/>:<LongArrowAltUpIcon/>}
                   </DataListCell>,
                   <DataListCell key='group-membership-expiration-header' width={2} onClick={()=>{orderResults('membershipExpiresAt')}}>
                   <strong><Msg msgKey='membershipDatalistTitle'/></strong> {orderBy!=='membershipExpiresAt'?<AngleDownIcon/>:asc?<LongArrowAltDownIcon/>:<LongArrowAltUpIcon/>}

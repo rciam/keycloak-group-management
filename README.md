@@ -39,7 +39,8 @@ Path | Method | Description                                                     
 /account/user/invitation/{id}/accept | POST   | accept invitation and become group member or admin                                   | UserGroups
 /account/user/invitation/{id}/reject | POST   | reject invitation for becoming group member  or admin                                | UserGroups
 /account/user/groups/configurations | GET    | get all available group configurations (active and visibleToNotMembers) by groupPath | UserGroups
-/account/user/group/{groupId}/configurations | GET    | get all available group configurations (active and visibleToNotMembers)              | UserGroup 
+/account/user/groups/configuration/{id} | GET    | get group configuration by id                                                         | UserGroups
+/account/user/group/{groupId}/configurations | GET    | get all available group configurations (active and visibleToNotMembers)              | UserGroup
 /account/user/group/{groupId}/member | GET    | get user group membership                                                            | UserGroupMember
 /account/user/group/{groupId}/member | DELETE | leave user group membership                                                          | UserGroupMember
 /account/user/enroll-requests | GET    | get all user ongoing enrollment requests                                             | UserGroups

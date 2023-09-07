@@ -280,4 +280,14 @@ public class UserGroups {
         return Response.noContent().build();
     }
 
+    @GET
+    @Path("/configuration/{id}")
+    @Produces("application/json")
+    public GroupEnrollmentConfigurationRepresentation geGroupEnrollmentConfiguration(@PathParam("id") String id) {
+        GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(id);
+        if ( entity == null || !entity.isActive())
+            throw new NotFoundException("This configuration does not exists or is disabled");
+        return EntityToRepresentation.toRepresentation(entity, true, realm);
+    }
+
 }

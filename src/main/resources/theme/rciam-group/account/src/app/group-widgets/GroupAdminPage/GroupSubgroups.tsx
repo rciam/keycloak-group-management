@@ -1,9 +1,8 @@
 import * as React from 'react';
-import {FC,useState,useEffect,useRef} from 'react';
-import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, SelectVariant, Checkbox,Select,SelectOption, FormAlert, Alert, Modal, ModalVariant, Form, FormGroup, TextInput} from '@patternfly/react-core';
+import {FC,useState} from 'react';
+import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction} from '@patternfly/react-core';
 import { Msg } from '../../widgets/Msg';
 import { GroupListItem } from '../../content/group-page/AdminGroupsPage';
-import {PlusIcon } from '@patternfly/react-icons';
 import { CreateSubgroupModal } from '../Modals';
 
 interface AdminGroup{
@@ -32,7 +31,8 @@ export const GroupSubGroups: FC<any> = (props) => {
 
     return (
       <React.Fragment>
-        <CreateSubgroupModal groupId={props.groupId} active={createSubgroup} afterSuccess={()=>{props.fetchGroupConfiguration();}} close={()=>{setCreateSubgroup(false);}}/> 
+        <CreateSubgroupModal groupId={props.groupId} active={createSubgroup} afterSuccess={()=>{
+          props.fetchGroupConfiguration();}} close={()=>{setCreateSubgroup(false);}}/> 
          <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact>
             
             <DataListItem id="groups-list-header" aria-labelledby="Columns names">
@@ -67,7 +67,7 @@ export const GroupSubGroups: FC<any> = (props) => {
             {props.groupConfiguration?.extraSubGroups&&props.groupConfiguration?.extraSubGroups.length>0 ?
               props.groupConfiguration?.extraSubGroups.map((group:AdminGroup,appIndex:number)=>{
                 return(
-                <GroupListItem group={group as AdminGroup} fetchAdminGroups={props.fetchGroupConfiguration} appIndex={appIndex} depth={0} />
+                <GroupListItem  group={group as AdminGroup} fetchAdminGroups={props.fetchGroupConfiguration} appIndex={appIndex} depth={0} />
                 )
               }):
               emptyGroup()

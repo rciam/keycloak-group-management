@@ -26,26 +26,32 @@ export const GroupAdmins: FC<any> = (props) => {
     const [loading,setLoading] = useState(false);
     const [groupIds,setGroupIds] = useState([]);
     const [groupAdminIds,setGroupAdminIds] = useState<any>([]);
+    const [initialRender,setInitialRender] = useState(true);
 
     useEffect(()=>{
-      //fetchGroupMembers();
       fetchGroupAdminIds();
     },[]);
 
     useEffect(()=>{
+      if(initialRender){
+        setInitialRender(false);
+        return;
+      }
       fetchGroupAdminIds();
     },[props.groupId]);
 
-    useEffect(()=>{
-      
+    useEffect(()=>{      
       if(groupIds.length>0){
         fetchGroupMembers();
       }
     },[groupIds])
 
     useEffect(()=>{
+      if(initialRender){
+        setInitialRender(false);
+        return;
+      }
       let groupadminids = [] as any;
-      
       props.groupConfiguration?.admins?.length>0&&props.groupConfiguration?.admins.map((admin)=> {
         groupadminids.push(admin.user.id);
         // groupadminids.push(admin.user.id);
@@ -285,7 +291,7 @@ export const GroupAdmins: FC<any> = (props) => {
                   setInviteAddress("");
                   setSelectedUserId("");
                   setEmailError(false);
-                  let filterOptions :any = []
+                  let filterOptions :any = [];
                   fetchGroupMembers(searchString);
                   options.forEach((option, index) => (
                     filterOptions.push(
@@ -308,7 +314,7 @@ export const GroupAdmins: FC<any> = (props) => {
                     value={option.value+ (option.disabled?' ' +Msg.localize('adminGroupAlreadyAdmin'):"")}
                     {...(option.description && { description: option.description })}
                     />)
-                  ))
+                  ));
                   return filterOptions;
                 }}
                 isOpen={isOpen}
