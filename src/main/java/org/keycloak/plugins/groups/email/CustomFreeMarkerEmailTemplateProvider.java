@@ -14,8 +14,8 @@ import org.keycloak.theme.FreeMarkerUtil;
 public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTemplateProvider {
 
     //must be changed to a ui ( account console url)
-    private static final String enrollmentUrl = "realms/{realmName}/agm/account/group-admin/enroll-request/{id}";
-    private static final String enrollmentStartUrl = "realms/{realmName}/agm/account/user/group/{id}";
+    private static final String enrollmentUrl = "realms/{realmName}/account/#/groups/groupenrollments?id={id}";
+    private static final String enrollmentStartUrl = "realms/{realmName}/account/#/enroll?groupPath={path}";
     private static final String finishGroupInvitation = "realms/{realmName}/account/#/invitation/{id}";
 
     private static final String subgroupsStr = " - together with its subgroups ";
@@ -98,11 +98,11 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("adminGroupUserRemovalSubject", "expired-group-membership-admin.ftl", attributes);
     }
 
-    public void sendExpiredGroupMemberEmailToUser(String groupname, String groupId, List<String> subgroupsPaths, String serverUrl) throws EmailException {
+    public void sendExpiredGroupMemberEmailToUser(String groupPath, String groupId, List<String> subgroupsPaths, String serverUrl) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
-        attributes.put("groupname", groupname);
+        attributes.put("groupPath", groupPath);
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupsPaths));
-        attributes.put("url", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
+        attributes.put("url", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentStartUrl.replace("{realmName}", realm.getName()).replace("{path}", groupPath));
         send("userRemovalSubject", "expired-group-membership-user.ftl", attributes);
     }
 
@@ -115,16 +115,16 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         return StringUtils.removeEnd(sb.toString(), comma) +"- ";
     }
 
-    public void sendExpiredGroupMembershipNotification(String groupname, String date, String groupId, String serverUrl) throws EmailException {
+    public void sendExpiredGroupMembershipNotification(String groupPath, String date, String groupId, String serverUrl) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
-        attributes.put("groupname", groupname);
+        attributes.put("groupname", groupPath);
         attributes.put("date", date);
-        attributes.put("url", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
+        attributes.put("url", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentStartUrl.replace("{realmName}", realm.getName()).replace("{path}", groupPath));
         session.getContext().setRealm(this.realm);
         send("groupMembershipExpirationNotificationSubject", "group-membership-expiration-notification.ftl", attributes);
     }
 
-    public void sendGroupInvitationEmail(UserModel groupadmin, String groupname, boolean withoutAcceptance, List<String> groupRoles, String id) throws EmailException {
+    public void sendGroupInvitationEmail(UserModel groupadmin, String groupPath, boolean withoutAcceptance, List<String> groupRoles, String id) throws EmailException {
         StringBuilder sb = new StringBuilder();
         if (user.getFirstName() != null) {
             sb.append(user.getFirstName()).append(" ");
@@ -138,14 +138,14 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("fullname", sb.toString());
         attributes.put("groupadmin", groupadmin.getFirstName() + " " + groupadmin.getLastName());
         if (withoutAcceptance && groupRoles != null && !groupRoles.isEmpty()) {
-            StringBuilder sb2 = new StringBuilder(groupname).append(" with roles : ");
+            StringBuilder sb2 = new StringBuilder(groupPath).append(" with roles : ");
             groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
-            groupname = StringUtils.removeEnd(sb2.toString(), ", ");
+            groupPath = StringUtils.removeEnd(sb2.toString(), ", ");
         }
-        attributes.put("groupname", groupname);
+        attributes.put("groupname", groupPath);
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();
-        attributes.put("url", baseUri.toString() + (withoutAcceptance ? finishGroupInvitation : enrollmentStartUrl).replace("{realmName}", realm.getName()).replace("{id}", id));
+        attributes.put("url", baseUri.toString() + (withoutAcceptance ? finishGroupInvitation : enrollmentStartUrl).replace("{realmName}", realm.getName()).replace("{path}", groupPath));
         send("groupInvitationSubject", "user-group-invitation.ftl", attributes);
     }
 

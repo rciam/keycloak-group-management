@@ -249,7 +249,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                     UserModel user = session.users().getUserById(realmModel, entity.getUser().getId());
                     customFreeMarkerEmailTemplateProvider.setUser(user);
                     try {
-                        customFreeMarkerEmailTemplateProvider.sendExpiredGroupMembershipNotification(group.getName(), entity.getMembershipExpiresAt().format(Utils.formatter), group.getId(), serverUrl);
+                        customFreeMarkerEmailTemplateProvider.sendExpiredGroupMembershipNotification(ModelToRepresentation.buildGroupPath(group), entity.getMembershipExpiresAt().format(Utils.formatter), group.getId(), serverUrl);
                     } catch (EmailException e) {
                         e.printStackTrace();
                         logger.info("problem sending email to user  " + user.getFirstName() + " " + user.getLastName());
