@@ -175,20 +175,48 @@ public class UserGroups {
 
         if (configuration.getRequireApproval()) {
             GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.create(rep, user.getId(), configuration, true);
+            boolean topLevelMember = true;
+            if (configuration.getGroup().getParentId() != null) {
+                //check user is member of top level group and create flow for it
+                String configurationId = Utils.findDefaultConfigurationOfTopLevelGroup(configuration.getGroup().getId(), user, realm);
+                if (configurationId != null) {
+                    GroupEnrollmentConfigurationEntity configurationTopLevel = groupEnrollmentConfigurationRepository.getEntity(configurationId);
+                    if (configuration.getRequireApproval()) {
+                        topLevelMember = false;
+                        groupEnrollmentRequestRepository.createDefault(user.getId(), configurationTopLevel, true);
+                        groupAdminRepository.getAllAdminIdsGroupUsers(configuration.getGroup().getId()).forEach(adminId -> {
+                            try {
+                                UserModel admin = session.users().getUserById(realm, adminId);
+                                if (admin != null) {
+                                    customFreeMarkerEmailTemplateProvider.setUser(admin);
+                                    customFreeMarkerEmailTemplateProvider.sendGroupAdminEnrollmentCreationEmail(user, configurationTopLevel.getGroup().getName(),
+                                            configurationTopLevel.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()),
+                                            "User request to become member of "+configuration.getGroup().getName()+" group without being member of top level group", entity.getId(), true);
+                                }
+                            } catch (EmailException e) {
+                                ServicesLogger.LOGGER.failedToSendEmail(e);
+                            }
+
+                        });
+                    } else {
+                        userGroupMembershipExtensionRepository.createWithDefaultConf(configurationTopLevel, user, memberUserAttributeConfigurationRepository);
+                        groupEnrollmentRequestRepository.createDefault(user.getId(), configurationTopLevel, false);
+                    }
+                }
+            }
             //email to group admins if they must accept it
             //find thems based on group
-            groupAdminRepository.getAllAdminIdsGroupUsers(configuration.getGroup().getId()).forEach(adminId -> {
+            for (String adminId : groupAdminRepository.getAllAdminIdsGroupUsers(configuration.getGroup().getId()).collect(Collectors.toList())) {
                 try {
                     UserModel admin = session.users().getUserById(realm, adminId);
                     if (admin != null) {
                         customFreeMarkerEmailTemplateProvider.setUser(admin);
-                        customFreeMarkerEmailTemplateProvider.sendGroupAdminEnrollmentCreationEmail(user, configuration.getGroup().getName(), rep.getGroupRoles(), rep.getComments(), entity.getId());
+                        customFreeMarkerEmailTemplateProvider.sendGroupAdminEnrollmentCreationEmail(user, configuration.getGroup().getName(), rep.getGroupRoles(), rep.getComments(), entity.getId(), topLevelMember);
                     }
                 } catch (EmailException e) {
                     ServicesLogger.LOGGER.failedToSendEmail(e);
                 }
-
-            });
+            }
         } else {
             //user become immediately group member
             userGroupMembershipExtensionRepository.createOrUpdate(rep, session, user, clientConnection);
@@ -237,10 +265,13 @@ public class UserGroups {
         if (!invitationEntity.getForMember() && groupAdminRepository.getGroupAdminByUserAndGroup(user.getId(), invitationEntity.getGroup().getId()) != null) {
             throw new BadRequestException("You are already group admin for this group");
         }
+        if(invitationEntity.getForMember() && invitationEntity.getGroupEnrollmentConfiguration().getGroup().getParentId() != null) {
+            Utils.checkTopLevelGroupMember(invitationEntity.getGroupEnrollmentConfiguration().getGroup().getParentId(), user, realm);
+        }
 
         if (invitationEntity.getForMember() ) {
             MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-            userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user, session.getContext().getUri(), memberUserAttribute, clientConnection);
+            userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user,  memberUserAttribute);
         } else {
             groupAdminRepository.addGroupAdmin(user.getId(), invitationEntity.getGroup().getId());
         }

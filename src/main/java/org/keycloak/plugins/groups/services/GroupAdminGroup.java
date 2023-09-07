@@ -37,6 +37,7 @@ import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.GeneralJpaService;
 import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
+import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
@@ -173,8 +174,12 @@ public class GroupAdminGroup {
             GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(rep.getId());
             if (entity != null) {
                 groupEnrollmentRequestRepository.getRequestsByConfigurationAndStatus(entity.getId(), Stream.of(EnrollmentRequestStatusEnum.WAITING_FOR_REPLY, EnrollmentRequestStatusEnum.PENDING_APPROVAL).collect(Collectors.toList())).forEach(request -> {
-                    request.setStatus(EnrollmentRequestStatusEnum.ARCHIVED);
-                    groupEnrollmentRequestRepository.update(request);
+                    if (request.getRelatedEnrollmentRequest() != null) {
+                        groupEnrollmentRequestRepository.updateArchivedRequest(request.getRelatedEnrollmentRequest(), "Related Group Enrollment Request has been archived");
+                    }
+                    if (request.getRelatedInvitation() != null)
+                        groupInvitationRepository.deleteEntity(request.getRelatedInvitation());
+                    groupEnrollmentRequestRepository.updateArchivedRequest(request, "Group Enrollment Configuration has been changed");
                 });
                 groupEnrollmentConfigurationRepository.update(entity, rep);
             } else {
@@ -192,13 +197,17 @@ public class GroupAdminGroup {
         GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(id);
         if (entity != null && group.getFirstAttribute(Utils.DEFAULT_CONFIGURATION_NAME) != null) {
             groupEnrollmentRequestRepository.getRequestsByConfigurationAndStatus(entity.getId(), Stream.of(EnrollmentRequestStatusEnum.WAITING_FOR_REPLY, EnrollmentRequestStatusEnum.PENDING_APPROVAL).collect(Collectors.toList())).forEach(request -> {
-                request.setStatus(EnrollmentRequestStatusEnum.ARCHIVED);
-                groupEnrollmentRequestRepository.update(request);
+                if (request.getRelatedEnrollmentRequest() != null) {
+                    groupEnrollmentRequestRepository.updateArchivedRequest(request.getRelatedEnrollmentRequest(), "Related Group Enrollment Request has been archived");
+                }
+                if (request.getRelatedInvitation() != null)
+                    groupInvitationRepository.deleteEntity(request.getRelatedInvitation());
+                groupEnrollmentRequestRepository.updateArchivedRequest(request, "Group Enrollment Configuration has been deleted");
             });
             groupEnrollmentConfigurationRepository.deleteEntity(id);
-        } else if (entity == null ) {
+        } else if (entity == null) {
             throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
-        } else  {
+        } else {
             throw new BadRequestException("Could not delete default group configuration");
         }
         return Response.noContent().build();

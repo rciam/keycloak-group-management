@@ -496,7 +496,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
    }
 
     @Transactional
-    public void create(GroupInvitationRepository groupInvitationRepository, GroupInvitationEntity invitationEntity, UserModel userModel, KeycloakUriInfo uri, MemberUserAttributeConfigurationEntity memberUserAttribute, ClientConnection clientConnection) {
+    public void create(GroupInvitationRepository groupInvitationRepository, GroupInvitationEntity invitationEntity, UserModel userModel, MemberUserAttributeConfigurationEntity memberUserAttribute) {
         GroupEnrollmentConfigurationEntity configuration = invitationEntity.getGroupEnrollmentConfiguration();
         UserGroupMembershipExtensionEntity entity = new UserGroupMembershipExtensionEntity();
         entity.setId(KeycloakModelUtils.generateId());
@@ -546,6 +546,58 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         groupInvitationRepository.deleteEntity(invitationEntity.getId());
     }
+
+    @Transactional
+    public void createWithDefaultConf(GroupEnrollmentConfigurationEntity configuration, UserModel userModel,MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository) {
+        UserGroupMembershipExtensionEntity entity = new UserGroupMembershipExtensionEntity();
+        entity.setId(KeycloakModelUtils.generateId());
+        if (configuration.getValidFrom() == null || !configuration.getValidFrom().isAfter(LocalDate.now())) {
+            entity.setValidFrom(LocalDate.now());
+            entity.setStatus(MemberStatusEnum.ENABLED);
+        } else {
+            entity.setValidFrom(configuration.getValidFrom());
+            entity.setStatus(MemberStatusEnum.PENDING);
+        }
+        if (configuration.getMembershipExpirationDays() != null) {
+            entity.setMembershipExpiresAt(entity.getValidFrom().plusDays(configuration.getMembershipExpirationDays()));
+        } else {
+            entity.setMembershipExpiresAt(null);
+        }
+        entity.setGroup(configuration.getGroup());
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(userModel.getId());
+        entity.setUser(userEntity);
+        entity.setChangedBy(userEntity);
+        entity.setJustification(null);
+        entity.setGroupEnrollmentConfigurationId(configuration.getId());
+        if (configuration.getGroupRoles() != null) {
+            entity.setGroupRoles(configuration.getGroupRoles().stream().map(x -> {
+                GroupRolesEntity r = new GroupRolesEntity();
+                r.setId(x.getId());
+                r.setGroup(x.getGroup());
+                r.setName(x.getName());
+                return r;
+            }).collect(Collectors.toList()));
+        } else {
+            entity.setGroupRoles(null);
+        }
+        update(entity);
+
+        if (MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
+            GroupModel group = realm.getGroupById(configuration.getGroup().getId());
+            userModel.joinGroup(group);
+
+            try {
+                MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+                Utils.changeUserAttributeValue(userModel, entity, Utils.getGroupNameForMemberUserAttribute(configuration.getGroup(), realm), memberUserAttribute);
+            } catch (UnsupportedEncodingException e) {
+                logger.warn("problem calculating user attribute value for group : " + group.getId()+ " and user :  " + userModel.getId());
+            }
+            LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(localIp), userModel, userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
+                    , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), configuration.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), entity.getMembershipExpiresAt());
+        }
+    }
+
 
     public void deleteByGroup(String groupId) {
         em.createNamedQuery("deleteMembershipExtensionByGroup").setParameter("groupId", groupId).executeUpdate();

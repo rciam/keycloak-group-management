@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -17,6 +18,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import java.time.LocalDateTime;
@@ -69,6 +71,14 @@ public class GroupEnrollmentRequestEntity {
 
     @Column(name="APPROVED_DATE")
     private LocalDateTime approvedDate;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "RELATED_ENROLLMENT_REQUEST_ID")
+    private GroupEnrollmentRequestEntity relatedEnrollmentRequest;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "RELATED_INVITATION_ID")
+    private GroupInvitationEntity relatedInvitation;
+    @Column(name = "REASON")
+    private String reason;
     @ManyToMany
     @JoinTable(name = "GROUP_ENROLLMENT_ROLES", joinColumns = @JoinColumn(name = "GROUP_ENROLLMENT_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
     private List<GroupRolesEntity> groupRoles;
@@ -156,6 +166,30 @@ public class GroupEnrollmentRequestEntity {
 
     public void setApprovedDate(LocalDateTime approvedDate) {
         this.approvedDate = approvedDate;
+    }
+
+    public GroupEnrollmentRequestEntity getRelatedEnrollmentRequest() {
+        return relatedEnrollmentRequest;
+    }
+
+    public void setRelatedEnrollmentRequest(GroupEnrollmentRequestEntity relatedEnrollmentRequest) {
+        this.relatedEnrollmentRequest = relatedEnrollmentRequest;
+    }
+
+    public GroupInvitationEntity getRelatedInvitation() {
+        return relatedInvitation;
+    }
+
+    public void setRelatedInvitation(GroupInvitationEntity relatedInvitation) {
+        this.relatedInvitation = relatedInvitation;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     public List<GroupRolesEntity> getGroupRoles() {

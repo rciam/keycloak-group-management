@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
 
@@ -61,6 +62,7 @@ public class Utils {
     public static final String GROUP_MEMBERSHIP_DELETE = "GROUP_MEMBERSHIP_DELETE";
     public static final String GROUP_MEMBERSHIP_SUSPEND = "GROUP_MEMBERSHIP_SUSPEND";
     public static final String NO_FOUND_GROUP_CONFIGURATION = "Could not find this group configuration";
+    private static final String ERROR_FOR_NO_TOP_LEVEL_GROUP_MEMBER = "You must be member of top level group ";
 
     public static UserAdapter getDummyUser(UserRepresentation userRep) {
         UserEntity userEntity = new UserEntity();
@@ -170,6 +172,21 @@ public class Utils {
             }).collect(Collectors.toList()));
         }
         user.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
+    }
+
+    public static GroupModel getTopLevelGroup(GroupModel group){
+        return group.getParent() != null ? getTopLevelGroup(group.getParent()) : group;
+    }
+
+    public static void checkTopLevelGroupMember(String groupId, UserModel userRequested, RealmModel realm){
+        GroupModel parentGroup = Utils.getTopLevelGroup(realm.getGroupById(groupId)) ;
+        if (!userRequested.isMemberOf(parentGroup))
+            throw new BadRequestException(ERROR_FOR_NO_TOP_LEVEL_GROUP_MEMBER + parentGroup.getName());
+    }
+
+    public static String findDefaultConfigurationOfTopLevelGroup(String groupId, UserModel userRequested, RealmModel realm) {
+        GroupModel parentGroup = Utils.getTopLevelGroup(realm.getGroupById(groupId));
+        return userRequested.isMemberOf(parentGroup) ? null : parentGroup.getFirstAttribute(Utils.DEFAULT_CONFIGURATION_NAME);
     }
 
 }

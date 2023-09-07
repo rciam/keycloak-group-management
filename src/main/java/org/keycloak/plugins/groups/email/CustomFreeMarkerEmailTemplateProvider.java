@@ -18,8 +18,9 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     private static final String enrollmentStartUrl = "realms/{realmName}/agm/account/user/group/{id}";
     private static final String finishGroupInvitation = "realms/{realmName}/account/#/invitation/{id}";
 
-    private static final String subgroupsStr = " - together with its subgroups ";
-    private static final String comma = ",";
+    private static final String SUBGROUPS_STR = " - together with its subgroups ";
+    private static final String TOP_LEVEL_MEMBER = " He needs to become member of top level group before accepting this request. ";
+    private static final String COMMA = ",";
 
     public CustomFreeMarkerEmailTemplateProvider(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
@@ -74,7 +75,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send(isAccepted ? "acceptEnrollmentSubject" : "rejectEnrollmentSubject", "accept-reject-enrollment.ftl", attributes);
     }
 
-    public void sendGroupAdminEnrollmentCreationEmail(UserModel userRequest, String groupname, List<String> groupRoles, String reason, String enrollmentId) throws EmailException {
+    public void sendGroupAdminEnrollmentCreationEmail(UserModel userRequest, String groupname, List<String> groupRoles, String reason, String enrollmentId, boolean topLevelMember) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("user", userRequest.getFirstName() + " " + userRequest.getLastName());
         if (groupRoles != null && !groupRoles.isEmpty()) {
@@ -84,6 +85,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         }
         attributes.put("groupname", groupname);
         attributes.put("reason", reason != null ? reason : "");
+        attributes.put("extra", topLevelMember ? "" : TOP_LEVEL_MEMBER);
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();
         attributes.put("url", baseUri.toString() + enrollmentUrl.replace("{realmName}", realm.getName()).replace("{id}", enrollmentId));
@@ -110,9 +112,9 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         if (subgroupsPaths.isEmpty())
             return "";
 
-        StringBuilder sb = new StringBuilder(subgroupsStr);
-        subgroupsPaths.stream().forEach(x -> sb.append("x").append(comma));
-        return StringUtils.removeEnd(sb.toString(), comma) +"- ";
+        StringBuilder sb = new StringBuilder(SUBGROUPS_STR);
+        subgroupsPaths.stream().forEach(x -> sb.append("x").append(COMMA));
+        return StringUtils.removeEnd(sb.toString(), COMMA) +"- ";
     }
 
     public void sendExpiredGroupMembershipNotification(String groupname, String date, String groupId, String serverUrl) throws EmailException {

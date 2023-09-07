@@ -22,6 +22,7 @@ public class GroupEnrollmentRequestRepresentation {
     private String comments;
     private String adminJustification;
     private String reviewComments;
+    private String reason;
     private List<String> groupRoles;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= Utils.dateTimeToStringFormat)
@@ -115,6 +116,14 @@ public class GroupEnrollmentRequestRepresentation {
 
     public void setApprovedDate(LocalDateTime approvedDate) {
         this.approvedDate = approvedDate;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 
     public List<String> getGroupRoles() {

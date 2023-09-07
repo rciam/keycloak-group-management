@@ -745,4 +745,30 @@
         <dropDefaultValue tableName="GROUP_ENROLLMENT_REQUEST" columnName="SUBMITTED_DATE"/>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="enrollment-request-dates">
+        <addColumn tableName="GROUP_ENROLLMENT_REQUEST">
+            <column name="RELATED_ENROLLMENT_REQUEST_ID" type="VARCHAR(36)"/>
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT_REQUEST">
+            <column name="RELATED_INVITATION_ID" type="VARCHAR(36)"/>
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT_REQUEST">
+            <column name="REASON" type="VARCHAR(256)"/>
+        </addColumn>
+        <addForeignKeyConstraint
+                constraintName="enrollment_configuration_rules_realm_fk"
+                baseTableName="GROUP_ENROLLMENT_REQUEST"
+                baseColumnNames="RELATED_ENROLLMENT_REQUEST_ID"
+                referencedTableName="GROUP_ENROLLMENT_REQUEST"
+                referencedColumnNames="id"
+        />
+        <addForeignKeyConstraint
+                constraintName="enrollment_configuration_rules_realm_fk"
+                baseTableName="GROUP_ENROLLMENT_REQUEST"
+                baseColumnNames="RELATED_INVITATION_ID"
+                referencedTableName="GROUP_INVITATION"
+                referencedColumnNames="id"
+        />
+    </changeSet>
+
 </databaseChangeLog>

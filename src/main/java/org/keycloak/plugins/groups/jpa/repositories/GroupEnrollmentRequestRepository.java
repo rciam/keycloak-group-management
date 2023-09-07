@@ -55,6 +55,25 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         return entity;
     }
 
+    public GroupEnrollmentRequestEntity createDefault(String userId, GroupEnrollmentConfigurationEntity configuration, boolean isPending) {
+        GroupEnrollmentRequestEntity entity = new GroupEnrollmentRequestEntity();
+        entity.setId(KeycloakModelUtils.generateId());
+        UserEntity user = new UserEntity();
+        user.setId(userId);
+        entity.setUser(user);
+        entity.setGroupEnrollmentConfiguration(configuration);
+        entity.setComments("User request to become member of "+configuration.getGroup().getName()+" group without being member of top level group");
+        entity.setStatus(isPending ? EnrollmentRequestStatusEnum.PENDING_APPROVAL : EnrollmentRequestStatusEnum.NO_APPROVAL);
+        entity.setSubmittedDate(LocalDateTime.now());
+        if (!isPending)
+            entity.setApprovedDate(LocalDateTime.now());
+        if (configuration.getGroupRoles() != null) {
+            entity.setGroupRoles(configuration.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x.getName(), configuration.getGroup().getId())).filter(Objects::nonNull).limit(configuration.isMultiselectRole() ? Integer.MAX_VALUE : 1).collect(Collectors.toList()));
+        }
+        create(entity);
+        return entity;
+    }
+
     public Long countOngoingByUserAndGroup(String userId, String groupId) {
         List<EnrollmentRequestStatusEnum> statusList = Stream.of(EnrollmentRequestStatusEnum.PENDING_APPROVAL, EnrollmentRequestStatusEnum.WAITING_FOR_REPLY).collect(Collectors.toList());
         return em.createNamedQuery("countOngoingByUserAndGroup", Long.class).setParameter("userId", userId).setParameter("groupId", groupId).setParameter("status", statusList).getSingleResult();
@@ -126,5 +145,11 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
 
     public Stream<GroupEnrollmentRequestEntity> getRequestsByConfigurationAndStatus(String configurationId, List<EnrollmentRequestStatusEnum> status) {
         return em.createNamedQuery("getRequestsByConfigurationAndStatus").setParameter("configurationId", configurationId).setParameter("status", status).getResultStream();
+    }
+
+    public void updateArchivedRequest( GroupEnrollmentRequestEntity entity, String reason)  {
+        entity.setReason(reason);
+        entity.setStatus(EnrollmentRequestStatusEnum.ARCHIVED);
+        update(entity);
     }
 }

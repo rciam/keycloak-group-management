@@ -14,6 +14,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
+import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -21,8 +22,10 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
+import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
+import org.keycloak.plugins.groups.jpa.repositories.GroupInvitationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
 import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
@@ -43,6 +46,7 @@ public class GroupAdminEnrollementRequest {
     private final GroupEnrollmentRequestRepository groupEnrollmentRequestRepository;
     private final GroupEnrollmentRequestEntity enrollmentEntity;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
+    private final GroupInvitationRepository groupInvitationRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
 
@@ -54,6 +58,7 @@ public class GroupAdminEnrollementRequest {
         this.enrollmentEntity = enrollmentEntity;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
+        this.groupInvitationRepository = new GroupInvitationRepository(session, realm);
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
     }
@@ -81,6 +86,9 @@ public class GroupAdminEnrollementRequest {
         if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
             throw new BadRequestException(statusErrorMessage);
 
+        if(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getParentId() != null)
+            Utils.checkTopLevelGroupMember(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getParentId(), session.users().getUserById(realm, enrollmentEntity.getUser().getId()), realm);
+
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
         userGroupMembershipExtensionRepository.createOrUpdate(enrollmentEntity, session, groupAdmin,memberUserAttribute, clientConnection);
         updateEnrollmentRequest(enrollmentEntity, EnrollmentRequestStatusEnum.ACCEPTED, adminJustification);
@@ -101,6 +109,11 @@ public class GroupAdminEnrollementRequest {
         if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
             throw new BadRequestException(statusErrorMessage);
         updateEnrollmentRequest(enrollmentEntity, EnrollmentRequestStatusEnum.REJECTED, adminJustification);
+        if (enrollmentEntity.getRelatedEnrollmentRequest() != null) {
+            groupEnrollmentRequestRepository.updateArchivedRequest(enrollmentEntity.getRelatedEnrollmentRequest(), "Related Group Enrollment Request has been rejected");
+        }
+        if (enrollmentEntity.getRelatedInvitation() != null)
+            groupInvitationRepository.deleteEntity(enrollmentEntity.getRelatedInvitation());
 
         try {
             customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm,enrollmentEntity.getUser().getId()));

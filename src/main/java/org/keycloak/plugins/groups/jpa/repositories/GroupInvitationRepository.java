@@ -72,5 +72,10 @@ public class GroupInvitationRepository extends GeneralRepository<GroupInvitation
         em.createNamedQuery("deleteInvitationByGroup").setParameter("groupId", groupId).executeUpdate();
     }
 
+    public void deleteEntity(GroupInvitationEntity entity){
+        em.remove(entity);
+        em.flush();
+    }
+
 
 }

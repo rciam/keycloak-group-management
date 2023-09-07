@@ -62,8 +62,12 @@ public class GroupRolesRepository extends GeneralRepository<GroupRolesEntity> {
     public void delete(GroupRolesEntity entity){
         for (GroupEnrollmentRequestEntity request : entity.getEnrollments()) {
             request.getGroupRoles().removeIf(x -> entity.getId().equals(x.getId()));
-            request.setStatus(EnrollmentRequestStatusEnum.ARCHIVED);
-            groupEnrollmentRequestRepository.update(request);
+            if (request.getRelatedEnrollmentRequest() != null) {
+                groupEnrollmentRequestRepository.updateArchivedRequest(request.getRelatedEnrollmentRequest(), "Related Group Enrollment Request has been archived");
+            }
+            if (request.getRelatedInvitation() != null)
+                groupInvitationRepository.deleteEntity(request.getRelatedInvitation());
+            groupEnrollmentRequestRepository.updateArchivedRequest(request, "Role deletion");
         }
         //TODO TBD
         for (GroupInvitationEntity x : entity.getGroupInvitations()) {
