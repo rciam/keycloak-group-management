@@ -70,8 +70,8 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
             sqlQueryMain.append(" join f.groupEnrollmentConfiguration c where f.user.id = :userId and c.group.id = :groupId");
             parameters.put("groupId", groupId);
         } else {
-            sqlQueryMain.append(" join f.groupEnrollmentConfiguration c join c.group g where f.user.id = :userId and g.name like :groupName");
-            parameters.put("groupName", "%" + groupName + "%");
+            sqlQueryMain.append(" join f.groupEnrollmentConfiguration c join c.group g where f.user.id = :userId and lower(g.name) like :groupName");
+            parameters.put("groupName", "%" + groupName.toLowerCase() + "%");
         }
         if (status != null) {
             sqlQueryMain.append(" and f.status = :status");
