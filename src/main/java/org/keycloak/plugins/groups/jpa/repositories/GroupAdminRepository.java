@@ -15,6 +15,7 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.ModelToRepresentation;
+import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
 import org.keycloak.plugins.groups.representations.GroupAdminRepresentation;
 import org.keycloak.plugins.groups.representations.GroupsPager;
@@ -96,15 +97,8 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
     }
 
     public List<String> getAdminGroupIdsByName(String userId, String groupName) {
-        return em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).getResultStream().map(realm::getGroupById).flatMap(this::getGroupWithSubgroups).filter(x->groupName == null || x.getName().toLowerCase().contains(groupName.toLowerCase())).flatMap(this::getGroupIdsWithSubgroups).distinct().collect(Collectors.toList());
+        return em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).getResultStream().map(realm::getGroupById).flatMap(Utils::getGroupWithSubgroups).filter(x->groupName == null || x.getName().toLowerCase().contains(groupName.toLowerCase())).flatMap(this::getGroupIdsWithSubgroups).distinct().collect(Collectors.toList());
     }
-
-    private Stream<GroupModel> getGroupWithSubgroups(GroupModel group){
-        Set<GroupModel> groups = group.getSubGroups();
-        groups.add(group);
-        return groups.stream();
-    }
-
     private Stream<String> getGroupIdsWithSubgroups(GroupModel group){
         Set<String> groups = group.getSubGroups().stream().map(GroupModel::getId).collect(Collectors.toSet());
         groups.add(group.getId());

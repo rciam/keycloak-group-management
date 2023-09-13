@@ -1,15 +1,19 @@
 package org.keycloak.plugins.groups.jpa.repositories;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.persistence.TypedQuery;
 
+import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -17,6 +21,7 @@ import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.PagerParameters;
+import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentRequestPager;
@@ -61,17 +66,21 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
     }
 
     public GroupEnrollmentRequestPager groupEnrollmentPager(String userId, String groupId, String groupName, EnrollmentRequestStatusEnum status, PagerParameters pagerParameters) {
+        Set<String> groupIds = new HashSet<>();
+        if (groupId != null) {
+            groupIds =  Utils.getGroupIdsWithSubgroups(realm.getGroupById(groupId)).collect(Collectors.toSet());
+        } else  if (groupName != null) {
+            em.createQuery("select f.id from GroupEntity f where  lower(f.name) like :groupName", String.class).setParameter("groupName", "%" + groupName.toLowerCase() + "%").getResultStream().
+                    map(realm::getGroupById).flatMap(Utils::getGroupIdsWithSubgroups).collect(Collectors.toSet());
+        }
         StringBuilder sqlQueryMain = new StringBuilder("from GroupEnrollmentRequestEntity f");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("userId", userId);
-        if (groupId== null && groupName == null) {
+        if (groupIds.isEmpty()) {
             sqlQueryMain.append(" where f.user.id = :userId");
-        } else  if (groupId!= null){
-            sqlQueryMain.append(" join f.groupEnrollmentConfiguration c where f.user.id = :userId and c.group.id = :groupId");
-            parameters.put("groupId", groupId);
         } else {
-            sqlQueryMain.append(" join f.groupEnrollmentConfiguration c join c.group g where f.user.id = :userId and lower(g.name) like :groupName");
-            parameters.put("groupName", "%" + groupName.toLowerCase() + "%");
+            sqlQueryMain.append(" join f.groupEnrollmentConfiguration c where f.user.id = :userId and c.group.id in (:groupIds)");
+            parameters.put("groupIds", groupIds);
         }
         if (status != null) {
             sqlQueryMain.append(" and f.status = :status");

@@ -5,7 +5,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Response;
@@ -171,5 +173,18 @@ public class Utils {
         }
         user.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
     }
+
+    public static Stream<GroupModel> getGroupWithSubgroups(GroupModel group){
+        Set<GroupModel> groups = group.getSubGroups();
+        groups.add(group);
+        return groups.stream();
+    }
+
+    public static Stream<String> getGroupIdsWithSubgroups(GroupModel group){
+        Set<String> groups = group.getSubGroupsStream().map(GroupModel::getId).collect(Collectors.toSet());
+        groups.add(group.getId());
+        return groups.stream();
+    }
+
 
 }
