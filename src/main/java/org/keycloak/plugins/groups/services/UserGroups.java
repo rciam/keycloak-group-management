@@ -253,6 +253,7 @@ public class UserGroups {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
             }
         });
+        groupInvitationRepository.deleteEntity(id);
         return Response.noContent().build();
     }
 
