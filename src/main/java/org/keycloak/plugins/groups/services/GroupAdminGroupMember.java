@@ -96,7 +96,8 @@ public class GroupAdminGroupMember {
     @DELETE
     public Response deleteMember() {
         UserModel user = session.users().getUserById(realm, member.getUser().getId());
-        userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId()), memberUserAttributeConfigurationRepository);
+        MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+        userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId()), memberUserAttribute);
         return Response.noContent().build();
     }
 

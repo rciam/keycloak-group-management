@@ -745,4 +745,12 @@
         <dropDefaultValue tableName="GROUP_ENROLLMENT_REQUEST" columnName="SUBMITTED_DATE"/>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="support-team">
+        <addColumn tableName="MEMBER_USER_ATTRIBUTE_CONFIGURATION">
+            <column name="SIGNATURE_MESSAGE" type="VARCHAR(256)" defaultValue="Support team">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

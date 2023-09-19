@@ -21,8 +21,15 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     private static final String subgroupsStr = " - together with its subgroups ";
     private static final String comma = ",";
 
+    private String signatureMessage;
+
     public CustomFreeMarkerEmailTemplateProvider(KeycloakSession session, FreeMarkerUtil freeMarker) {
         super(session, freeMarker);
+    }
+
+    public CustomFreeMarkerEmailTemplateProvider setSignatureMessage(String signatureMessage) {
+        this.signatureMessage = signatureMessage;
+        return this;
     }
 
     public void sendGroupAdminEmail(String groupName, boolean isAdded) throws EmailException {
@@ -32,6 +39,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("text1", text1);
         attributes.put("text2", text2);
         attributes.put("groupname", groupName);
+        attributes.put("signatureMessage", signatureMessage);
         send(title, "add-remove-group-admin.ftl", attributes);
     }
 
@@ -39,11 +47,13 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("justification", justification);
         attributes.put("groupname", groupName);
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupPaths));
+        attributes.put("signatureMessage", signatureMessage);
         send("suspendMemberSubject", "suspend-member.ftl", attributes);
     }
     public void sendActivationEmail(String groupName, String justification) throws EmailException {
         attributes.put("justification", justification);
         attributes.put("groupname", groupName);
+        attributes.put("signatureMessage", signatureMessage);
         send("activateMemberSubject", "activate-member.ftl", attributes);
     }
 
@@ -63,6 +73,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();
         attributes.put("url", baseUri.toString() + finishGroupInvitation.replace("{realmName}", realm.getName()).replace("{id}", invitationId));
+        attributes.put("signatureMessage", signatureMessage);
         send("inviteGroupAdminSubject", "invite-group-admin.ftl", attributes);
     }
 
@@ -71,6 +82,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("groupname", groupname);
         attributes.put("action", isAccepted ? "accepted" : "rejected");
         attributes.put("justification", justification != null ? justification : "");
+        attributes.put("signatureMessage", signatureMessage);
         send(isAccepted ? "acceptEnrollmentSubject" : "rejectEnrollmentSubject", "accept-reject-enrollment.ftl", attributes);
     }
 
@@ -87,6 +99,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();
         attributes.put("url", baseUri.toString() + enrollmentUrl.replace("{realmName}", realm.getName()).replace("{id}", enrollmentId));
+        attributes.put("signatureMessage", signatureMessage);
         send("groupadminEnrollmentRequestCreationSubject", "groupadmin-enrollment-creation.ftl", attributes);
     }
 
@@ -95,6 +108,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("user", userRequest.getFirstName() + " " + userRequest.getLastName());
         attributes.put("groupname", groupname);
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupsPaths));
+        attributes.put("signatureMessage", signatureMessage);
         send("adminGroupUserRemovalSubject", "expired-group-membership-admin.ftl", attributes);
     }
 
@@ -103,6 +117,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("groupPath", groupPath);
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupsPaths));
         attributes.put("url", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentStartUrl.replace("{realmName}", realm.getName()).replace("{path}", groupPath));
+        attributes.put("signatureMessage", signatureMessage);
         send("userRemovalSubject", "expired-group-membership-user.ftl", attributes);
     }
 
@@ -120,6 +135,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("groupname", groupPath);
         attributes.put("date", date);
         attributes.put("url", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentStartUrl.replace("{realmName}", realm.getName()).replace("{path}", groupPath));
+        attributes.put("signatureMessage", signatureMessage);
         session.getContext().setRealm(this.realm);
         send("groupMembershipExpirationNotificationSubject", "group-membership-expiration-notification.ftl", attributes);
     }
@@ -145,7 +161,8 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("groupname", groupPath);
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();
-        attributes.put("url", baseUri.toString() + (withoutAcceptance ? finishGroupInvitation : enrollmentStartUrl).replace("{realmName}", realm.getName()).replace("{path}", groupPath));
+        attributes.put("url", baseUri.toString() + (withoutAcceptance ? finishGroupInvitation : enrollmentStartUrl).replace("{realmName}", realm.getName()).replace("{id}", id).replace("{path}", groupPath));
+        attributes.put("signatureMessage", signatureMessage);
         send("groupInvitationSubject", "user-group-invitation.ftl", attributes);
     }
 
@@ -160,6 +177,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
             groupname= StringUtils.removeEnd(sb2.toString(),", ");
         }
         attributes.put("groupname", groupname);
+        attributes.put("signatureMessage", signatureMessage);
         send("groupAcceptInvitationSubject", "accept-invitation.ftl", attributes);
     }
 
@@ -174,6 +192,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
             groupname= StringUtils.removeEnd(sb2.toString(),", ");
         }
         attributes.put("groupname", groupname);
+        attributes.put("signatureMessage", signatureMessage);
         send("groupRejectionInvitationSubject", "reject-invitation.ftl", attributes);
     }
 
@@ -188,6 +207,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         }
         attributes.put("groupname", groupname);
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
+        attributes.put("signatureMessage", signatureMessage);
         send(forMember ? "groupInvitationSubject" : "groupInvitationAdminInformSubject", "invitation-admin-inform.ftl", attributes);
     }
 
@@ -196,6 +216,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("groupname", groupname);
         attributes.put("adminAdded", adminAdded.getFirstName() + " "+ adminAdded.getLastName());
         attributes.put("adminAction", adminAction.getFirstName() + " "+ adminAction.getLastName());
+        attributes.put("signatureMessage", signatureMessage);
         send(added ? "addGroupAdminAdminInformationSubject" : "removeGroupAdminAdminInformationSubject", "add-remove-groupadmin-admin-inform.ftl", attributes);
     }
 
@@ -204,6 +225,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("groupname", groupname);
         attributes.put("userFullName", userChanged.getFirstName() + " "+ userChanged.getLastName());
         attributes.put("adminFullName", admin.getFirstName() + " "+ admin.getLastName());
+        attributes.put("signatureMessage", signatureMessage);
         send("memberUpdateAdminInformSubject", "member-update-admin-inform.ftl", attributes);
     }
 
@@ -211,6 +233,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("fullname", user.getFirstName() + " "+ user.getLastName());
         attributes.put("groupname", groupname);
         attributes.put("adminFullName", admin.getFirstName() + " "+ admin.getLastName());
+        attributes.put("signatureMessage", signatureMessage);
         send("memberUpdateUserInformSubject", "member-update-user-inform.ftl", attributes);
     }
 
@@ -218,6 +241,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("fullname", user.getFirstName() + " "+ user.getLastName());
         attributes.put("groupPath", groupPath);
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
+        attributes.put("signatureMessage", signatureMessage);
         send("deleteGroupAdminInformationSubject", "delete-group-admin-inform.ftl", attributes);
     }
 

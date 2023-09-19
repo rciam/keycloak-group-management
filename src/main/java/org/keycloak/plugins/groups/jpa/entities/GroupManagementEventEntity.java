@@ -47,5 +47,4 @@ public class GroupManagementEventEntity {
     public void setDateForWeekTasks(LocalDate dateForWeekTasks) {
         this.dateForWeekTasks = dateForWeekTasks;
     }
-
 }

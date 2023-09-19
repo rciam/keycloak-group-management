@@ -91,12 +91,14 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             Stream<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getExpiredMemberships").setParameter("date", LocalDate.now()).getResultStream();
             results.forEach(entity -> {
                 setRealm(session.realms().getRealm(entity.getUser().getRealmId()));
+                MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+                customFreeMarkerEmailTemplateProvider.setSignatureMessage(memberUserAttribute.getSignatureMessage());
                 String serverUrl = realm.getAttribute(Utils.KEYCLOAK_URL);
                 GroupAdminRepository groupAdminRepository = new GroupAdminRepository(session, realm);
                 UserModel user = session.users().getUserById(realm, entity.getUser().getId());
                 GroupModel group = realm.getGroupById(entity.getGroup().getId());
                 logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
-                List<String> subgroupsPaths = deleteMember(entity, group, user, new DummyClientConnection(localIp), null, memberUserAttributeConfigurationRepository).stream().map(ModelToRepresentation::buildGroupPath).collect(Collectors.toList());
+                List<String> subgroupsPaths = deleteMember(entity, group, user, new DummyClientConnection(localIp), null, memberUserAttribute).stream().map(ModelToRepresentation::buildGroupPath).collect(Collectors.toList());
 
                 customFreeMarkerEmailTemplateProvider.setRealm(realm);
                 try {
@@ -157,7 +159,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     }
 
     @Transactional
-    public Set<GroupModel> deleteMember(UserGroupMembershipExtensionEntity member, GroupModel group, UserModel user, ClientConnection clientConnection, String actionUserId, MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository) {
+    public Set<GroupModel> deleteMember(UserGroupMembershipExtensionEntity member, GroupModel group, UserModel user, ClientConnection clientConnection, String actionUserId, MemberUserAttributeConfigurationEntity memberUserAttribute) {
         logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
         List<String> roleNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
         String groupName = "";
@@ -168,7 +170,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         deleteEntity(member.getId());
         user.leaveGroup(group);
-        clearUserAttribute(groupName, user, memberUserAttributeConfigurationRepository);
+        clearUserAttribute(groupName, user, memberUserAttribute);
         LoginEventHelper.createGroupEvent(realm, session,  clientConnection, user, actionUserId
                 , Utils.GROUP_MEMBERSHIP_DELETE, ModelToRepresentation.buildGroupPath(group), roleNames, LocalDate.now());
 
@@ -184,7 +186,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                     em.remove(memberEntity);
                     GroupModel groupChild = subgroups.stream().filter(groupModel -> id.equals(groupModel.getId())).findAny().get();
                     user.leaveGroup(groupChild);
-                    clearUserAttribute(groupNameCh, user, memberUserAttributeConfigurationRepository);
+                    clearUserAttribute(groupNameCh, user, memberUserAttribute);
                     em.flush();
                     LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, actionUserId
                             , Utils.GROUP_MEMBERSHIP_DELETE, ModelToRepresentation.buildGroupPath(groupChild), roleSubgroupNames, LocalDate.now());
@@ -203,8 +205,9 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         member.setJustification(justification);
         update(member);
         user.leaveGroup(group);
+        MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
         try {
-            clearUserAttribute(Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm), user, memberUserAttributeConfigurationRepository);
+            clearUserAttribute(Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm), user, memberUserAttribute);
         } catch (UnsupportedEncodingException e) {
             logger.warn("problem calculating user attribute value for group : " + group.getId() + " and user :  " + user.getId());
         }
@@ -220,7 +223,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                     update(memberEntity);
                     GroupModel groupChild = subgroups.stream().filter(groupModel -> memberEntity.getGroup().getId().equals(groupModel.getId())).findAny().get();
                     user.leaveGroup(groupChild);
-                    clearUserAttribute(Utils.getGroupNameForMemberUserAttribute(memberEntity.getGroup(), realm), user, memberUserAttributeConfigurationRepository);
+                    clearUserAttribute(Utils.getGroupNameForMemberUserAttribute(memberEntity.getGroup(), realm), user, memberUserAttribute);
                 } catch (UnsupportedEncodingException e) {
                     logger.warn("problem calculating user attribute value for group : " + group.getId()+ " and user :  " + user.getId());
                 }
@@ -229,8 +232,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         return subgroups.stream().map(ModelToRepresentation::buildGroupPath).collect(Collectors.toList());
     }
 
-    private void clearUserAttribute(String groupName, UserModel user, MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository) {
-        MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+    private void clearUserAttribute(String groupName, UserModel user, MemberUserAttributeConfigurationEntity memberUserAttribute) {
         List<String> memberUserAttributeValues = user.getAttribute(memberUserAttribute.getUserAttribute());
         memberUserAttributeValues.removeIf(x -> Utils.removeMemberUserAttributeCondition(x, memberUserAttribute.getUrnNamespace(), groupName));
         user.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
@@ -239,6 +241,9 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
     private void weeklyTaskExecution(CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, KeycloakSession session) {
         session.realms().getRealmsStream().forEach(realmModel -> {
+            MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
+            MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+            customFreeMarkerEmailTemplateProvider.setSignatureMessage(memberUserAttribute.getSignatureMessage());
             customFreeMarkerEmailTemplateProvider.setRealm(realmModel);
             String serverUrl = realm.getAttribute(Utils.KEYCLOAK_URL);
             session.groups().getGroupsStream(realmModel).forEach(group -> {
