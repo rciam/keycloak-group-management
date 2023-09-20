@@ -46,6 +46,11 @@ public abstract class GeneralRepository<T> {
         em.flush();
     }
 
+    public void deleteEntity(T entity)  {
+        em.remove(entity);
+        em.flush();
+    }
+
     public UserModel getUserModel(KeycloakSession session, UserEntity user){
         return new UserAdapter(session, realm, em, user);
     }

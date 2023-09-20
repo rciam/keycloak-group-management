@@ -136,4 +136,9 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
     public Stream<GroupEnrollmentRequestEntity> getRequestsByConfigurationAndStatus(String configurationId, List<EnrollmentRequestStatusEnum> status) {
         return em.createNamedQuery("getRequestsByConfigurationAndStatus").setParameter("configurationId", configurationId).setParameter("status", status).getResultStream();
     }
+
+    public Stream<GroupEnrollmentRequestEntity> getRequestsByConfiguration(String configurationId) {
+        return em.createNamedQuery("getRequestsByConfiguration").setParameter("configurationId", configurationId).getResultStream();
+    }
+
 }
