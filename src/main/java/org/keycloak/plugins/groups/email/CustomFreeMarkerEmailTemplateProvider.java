@@ -50,6 +50,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("signatureMessage", signatureMessage);
         send("suspendMemberSubject", "suspend-member.ftl", attributes);
     }
+
     public void sendActivationEmail(String groupName, String justification) throws EmailException {
         attributes.put("justification", justification);
         attributes.put("groupname", groupName);
@@ -121,13 +122,13 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("userRemovalSubject", "expired-group-membership-user.ftl", attributes);
     }
 
-    private String subgroupsStrCalculation(List<String> subgroupsPaths){
+    private String subgroupsStrCalculation(List<String> subgroupsPaths) {
         if (subgroupsPaths.isEmpty())
             return "";
 
         StringBuilder sb = new StringBuilder(subgroupsStr);
         subgroupsPaths.stream().forEach(x -> sb.append("x").append(comma));
-        return StringUtils.removeEnd(sb.toString(), comma) +"- ";
+        return StringUtils.removeEnd(sb.toString(), comma) + "- ";
     }
 
     public void sendExpiredGroupMembershipNotification(String groupPath, String date, String groupId, String serverUrl) throws EmailException {
@@ -167,14 +168,14 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendAcceptInvitationEmail(UserModel userModel, String groupname, boolean forMember, List<String> groupRoles) throws EmailException {
-        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
-        attributes.put("userfullname", userModel.getFirstName()+" "+userModel.getLastName());
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("userfullname", userModel.getFirstName() + " " + userModel.getLastName());
         attributes.put("email", userModel.getEmail());
         attributes.put("type", forMember ? "member" : "admin");
         if (forMember && groupRoles != null && !groupRoles.isEmpty()) {
             StringBuilder sb2 = new StringBuilder(groupname).append(" with roles : ");
             groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
-            groupname= StringUtils.removeEnd(sb2.toString(),", ");
+            groupname = StringUtils.removeEnd(sb2.toString(), ", ");
         }
         attributes.put("groupname", groupname);
         attributes.put("signatureMessage", signatureMessage);
@@ -182,14 +183,14 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendRejectionInvitationEmail(UserModel userModel, String groupname, boolean forMember, List<String> groupRoles) throws EmailException {
-        attributes.put("fullname", user.getFirstName()+" "+user.getLastName());
-        attributes.put("userfullname", userModel.getFirstName()+" "+userModel.getLastName());
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("userfullname", userModel.getFirstName() + " " + userModel.getLastName());
         attributes.put("email", userModel.getEmail());
         attributes.put("type", forMember ? "member" : "admin");
         if (forMember && groupRoles != null && !groupRoles.isEmpty()) {
             StringBuilder sb2 = new StringBuilder(groupname).append(" with roles : ");
             groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
-            groupname= StringUtils.removeEnd(sb2.toString(),", ");
+            groupname = StringUtils.removeEnd(sb2.toString(), ", ");
         }
         attributes.put("groupname", groupname);
         attributes.put("signatureMessage", signatureMessage);
@@ -197,13 +198,13 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendInvitionAdminInformationEmail(String email, boolean forMember, String groupname, UserModel admin, List<String> groupRoles) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " "+ user.getLastName());
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("email", email);
         attributes.put("type", forMember ? "member" : "admin");
         if (forMember && groupRoles != null && !groupRoles.isEmpty()) {
             StringBuilder sb2 = new StringBuilder(groupname).append(" with roles : ");
             groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
-            groupname= StringUtils.removeEnd(sb2.toString(),", ");
+            groupname = StringUtils.removeEnd(sb2.toString(), ", ");
         }
         attributes.put("groupname", groupname);
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
@@ -211,34 +212,34 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send(forMember ? "groupInvitationSubject" : "groupInvitationAdminInformSubject", "invitation-admin-inform.ftl", attributes);
     }
 
-    public void sendAddRemoveAdminAdminInformationEmail(boolean added, String groupname, UserModel adminAdded,  UserModel adminAction) throws EmailException {
+    public void sendAddRemoveAdminAdminInformationEmail(boolean added, String groupname, UserModel adminAdded, UserModel adminAction) throws EmailException {
         attributes.put("text", added ? "added as" : "removed from");
         attributes.put("groupname", groupname);
-        attributes.put("adminAdded", adminAdded.getFirstName() + " "+ adminAdded.getLastName());
-        attributes.put("adminAction", adminAction.getFirstName() + " "+ adminAction.getLastName());
+        attributes.put("adminAdded", adminAdded.getFirstName() + " " + adminAdded.getLastName());
+        attributes.put("adminAction", adminAction.getFirstName() + " " + adminAction.getLastName());
         attributes.put("signatureMessage", signatureMessage);
         send(added ? "addGroupAdminAdminInformationSubject" : "removeGroupAdminAdminInformationSubject", "add-remove-groupadmin-admin-inform.ftl", attributes);
     }
 
     public void sendMemberUpdateAdminInformEmail(String groupname, UserModel userChanged, UserModel admin) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " "+ user.getLastName());
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("groupname", groupname);
-        attributes.put("userFullName", userChanged.getFirstName() + " "+ userChanged.getLastName());
-        attributes.put("adminFullName", admin.getFirstName() + " "+ admin.getLastName());
+        attributes.put("userFullName", userChanged.getFirstName() + " " + userChanged.getLastName());
+        attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
         attributes.put("signatureMessage", signatureMessage);
         send("memberUpdateAdminInformSubject", "member-update-admin-inform.ftl", attributes);
     }
 
     public void sendMemberUpdateUserInformEmail(String groupname, UserModel admin) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " "+ user.getLastName());
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("groupname", groupname);
-        attributes.put("adminFullName", admin.getFirstName() + " "+ admin.getLastName());
+        attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
         attributes.put("signatureMessage", signatureMessage);
         send("memberUpdateUserInformSubject", "member-update-user-inform.ftl", attributes);
     }
 
     public void sendDeleteGroupAdminInformationEmail(String groupPath, UserModel admin) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " "+ user.getLastName());
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("groupPath", groupPath);
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
         attributes.put("signatureMessage", signatureMessage);

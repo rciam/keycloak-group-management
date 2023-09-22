@@ -12,6 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
 import org.keycloak.models.KeycloakSession;
@@ -46,9 +47,9 @@ public class GroupAdminEnrollementRequest {
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
 
-    public GroupAdminEnrollementRequest(KeycloakSession session, RealmModel realm, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserModel groupAdmin, GroupEnrollmentRequestEntity enrollmentEntity,UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository) {
+    public GroupAdminEnrollementRequest(KeycloakSession session, RealmModel realm, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserModel groupAdmin, GroupEnrollmentRequestEntity enrollmentEntity, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository) {
         this.session = session;
-        this.realm =  realm;
+        this.realm = realm;
         this.groupEnrollmentRequestRepository = groupEnrollmentRequestRepository;
         this.groupAdmin = groupAdmin;
         this.enrollmentEntity = enrollmentEntity;
@@ -84,11 +85,11 @@ public class GroupAdminEnrollementRequest {
             throw new BadRequestException(statusErrorMessage);
 
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-        userGroupMembershipExtensionRepository.createOrUpdate(enrollmentEntity, session, groupAdmin,memberUserAttribute, clientConnection);
+        userGroupMembershipExtensionRepository.createOrUpdate(enrollmentEntity, session, groupAdmin, memberUserAttribute, clientConnection);
         updateEnrollmentRequest(enrollmentEntity, EnrollmentRequestStatusEnum.ACCEPTED, adminJustification);
 
         try {
-            customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm,enrollmentEntity.getUser().getId()));
+            customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm, enrollmentEntity.getUser().getId()));
             customFreeMarkerEmailTemplateProvider.sendAcceptRejectEnrollmentEmail(true, enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getName(), enrollmentEntity.getAdminJustification());
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
@@ -105,7 +106,7 @@ public class GroupAdminEnrollementRequest {
         updateEnrollmentRequest(enrollmentEntity, EnrollmentRequestStatusEnum.REJECTED, adminJustification);
 
         try {
-            customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm,enrollmentEntity.getUser().getId()));
+            customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm, enrollmentEntity.getUser().getId()));
             customFreeMarkerEmailTemplateProvider.sendAcceptRejectEnrollmentEmail(false, enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getName(), enrollmentEntity.getAdminJustification());
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
@@ -113,7 +114,7 @@ public class GroupAdminEnrollementRequest {
         return Response.noContent().build();
     }
 
-    private void updateEnrollmentRequest(GroupEnrollmentRequestEntity enrollmentEntity, EnrollmentRequestStatusEnum status, String adminJustification){
+    private void updateEnrollmentRequest(GroupEnrollmentRequestEntity enrollmentEntity, EnrollmentRequestStatusEnum status, String adminJustification) {
         enrollmentEntity.setStatus(status);
         enrollmentEntity.setAdminJustification(adminJustification);
         enrollmentEntity.setApprovedDate(LocalDateTime.now());

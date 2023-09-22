@@ -129,7 +129,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 try {
                     Utils.changeUserAttributeValue(userModel, member, Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm), memberUserAttribute);
                 } catch (UnsupportedEncodingException e) {
-                    logger.warn("problem calculating user attribute value for group : " + member.getGroup().getId()+ " and user :  " + member.getUser().getId());
+                    logger.warn("problem calculating user attribute value for group : " + member.getGroup().getId() + " and user :  " + member.getUser().getId());
                 }
                 LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(localIp), userModel, member.getChangedBy() != null ? member.getChangedBy().getId() : userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
                         , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
@@ -171,14 +171,14 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         deleteEntity(member.getId());
         user.leaveGroup(group);
         clearUserAttribute(groupName, user, memberUserAttribute);
-        LoginEventHelper.createGroupEvent(realm, session,  clientConnection, user, actionUserId
+        LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, actionUserId
                 , Utils.GROUP_MEMBERSHIP_DELETE, ModelToRepresentation.buildGroupPath(group), roleNames, LocalDate.now());
 
         //delete also subgroup members if exists
         Set<GroupModel> subgroups = group.getSubGroups();
         List<String> subgroupsIds = subgroups.stream().map(GroupModel::getId).collect(Collectors.toList());
-        if(!subgroupsIds.isEmpty()){
-            em.createNamedQuery("getByUserAndGroups", UserGroupMembershipExtensionEntity.class).setParameter("userId", user.getId()).setParameter("groupIds", subgroupsIds).getResultStream().forEach( memberEntity ->{
+        if (!subgroupsIds.isEmpty()) {
+            em.createNamedQuery("getByUserAndGroups", UserGroupMembershipExtensionEntity.class).setParameter("userId", user.getId()).setParameter("groupIds", subgroupsIds).getResultStream().forEach(memberEntity -> {
                 try {
                     List<String> roleSubgroupNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
                     String id = memberEntity.getGroup().getId();
@@ -191,7 +191,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                     LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, actionUserId
                             , Utils.GROUP_MEMBERSHIP_DELETE, ModelToRepresentation.buildGroupPath(groupChild), roleSubgroupNames, LocalDate.now());
                 } catch (UnsupportedEncodingException e) {
-                    logger.warn("problem calculating user attribute value for group : " + group.getId()+ " and user :  " + user.getId());
+                    logger.warn("problem calculating user attribute value for group : " + group.getId() + " and user :  " + user.getId());
                 }
 
             });
@@ -215,8 +215,8 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         //suspend also subgroup members if exists
         Set<GroupModel> subgroups = group.getSubGroups();
         List<String> subgroupsIds = subgroups.stream().map(GroupModel::getId).collect(Collectors.toList());
-        if(!subgroupsIds.isEmpty()){
-            em.createNamedQuery("getByUserAndGroups", UserGroupMembershipExtensionEntity.class).setParameter("userId", user.getId()).setParameter("groupIds", subgroupsIds).getResultStream().forEach( memberEntity ->{
+        if (!subgroupsIds.isEmpty()) {
+            em.createNamedQuery("getByUserAndGroups", UserGroupMembershipExtensionEntity.class).setParameter("userId", user.getId()).setParameter("groupIds", subgroupsIds).getResultStream().forEach(memberEntity -> {
                 try {
                     memberEntity.setStatus(MemberStatusEnum.SUSPENDED);
                     memberEntity.setJustification(justification);
@@ -225,7 +225,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                     user.leaveGroup(groupChild);
                     clearUserAttribute(Utils.getGroupNameForMemberUserAttribute(memberEntity.getGroup(), realm), user, memberUserAttribute);
                 } catch (UnsupportedEncodingException e) {
-                    logger.warn("problem calculating user attribute value for group : " + group.getId()+ " and user :  " + user.getId());
+                    logger.warn("problem calculating user attribute value for group : " + group.getId() + " and user :  " + user.getId());
                 }
             });
         }
@@ -276,7 +276,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             sqlQuery += "where f.user.id = :userId and f.status = 'ENABLED'";
         }
 
-        Query queryList = em.createQuery("select f " + sqlQuery + " order by f."  + pagerParameters.getOrder() + " " + pagerParameters.getOrderType()).setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax());
+        Query queryList = em.createQuery("select f " + sqlQuery + " order by f." + pagerParameters.getOrder() + " " + pagerParameters.getOrderType()).setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax());
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             queryList.setParameter(entry.getKey(), entry.getValue());
         }
@@ -498,7 +498,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
                     , eventState, ModelToRepresentation.buildGroupPath(group), rep.getGroupRoles(), entity.getMembershipExpiresAt());
         }
-   }
+    }
 
     @Transactional
     public void create(GroupInvitationRepository groupInvitationRepository, GroupInvitationEntity invitationEntity, UserModel userModel, KeycloakUriInfo uri, MemberUserAttributeConfigurationEntity memberUserAttribute, ClientConnection clientConnection) {
@@ -544,7 +544,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             try {
                 Utils.changeUserAttributeValue(userModel, entity, Utils.getGroupNameForMemberUserAttribute(configuration.getGroup(), realm), memberUserAttribute);
             } catch (UnsupportedEncodingException e) {
-                logger.warn("problem calculating user attribute value for group : " + group.getId()+ " and user :  " + userModel.getId());
+                logger.warn("problem calculating user attribute value for group : " + group.getId() + " and user :  " + userModel.getId());
             }
             LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(localIp), userModel, userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
                     , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), entity.getMembershipExpiresAt());

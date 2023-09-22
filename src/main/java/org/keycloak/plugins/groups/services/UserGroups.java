@@ -14,7 +14,6 @@ import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.PagerParameters;
 import org.keycloak.plugins.groups.jpa.GeneralJpaService;
-import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
@@ -60,7 +59,7 @@ public class UserGroups {
     @Context
     private ClientConnection clientConnection;
 
-    private static final String INVITATION_NOT_EXISTS ="This invitation does not exist or has been expired";
+    private static final String INVITATION_NOT_EXISTS = "This invitation does not exist or has been expired";
 
     protected final KeycloakSession session;
     private final RealmModel realm;
@@ -75,23 +74,22 @@ public class UserGroups {
     private final UserModel user;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
 
-    public UserGroups(KeycloakSession session, RealmModel realm, UserModel user)  {
+    public UserGroups(KeycloakSession session, RealmModel realm, UserModel user) {
         this.session = session;
-        this.realm =  realm;
+        this.realm = realm;
         this.user = user;
-        this.groupEnrollmentConfigurationRepository =  new GroupEnrollmentConfigurationRepository(session, realm);
-        this.groupEnrollmentRequestRepository =  new GroupEnrollmentRequestRepository(session, realm, new GroupRolesRepository(session, realm));
+        this.groupEnrollmentConfigurationRepository = new GroupEnrollmentConfigurationRepository(session, realm);
+        this.groupEnrollmentRequestRepository = new GroupEnrollmentRequestRepository(session, realm, new GroupRolesRepository(session, realm));
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm, groupEnrollmentConfigurationRepository, new GroupRolesRepository(session, realm));
-        this.groupAdminRepository =  new GroupAdminRepository(session, realm);
-        this.groupInvitationRepository =  new GroupInvitationRepository(session, realm);
-        this.memberUserAttributeConfigurationRepository =  new MemberUserAttributeConfigurationRepository(session);
+        this.groupAdminRepository = new GroupAdminRepository(session, realm);
+        this.groupInvitationRepository = new GroupInvitationRepository(session, realm);
+        this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
         this.customFreeMarkerEmailTemplateProvider.setSignatureMessage(memberUserAttribute.getSignatureMessage());
         this.generalJpaService = new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
     }
-
 
 
     @GET
@@ -122,12 +120,12 @@ public class UserGroups {
     @Produces("application/json")
     public List<GroupEnrollmentConfigurationRepresentation> getAvailableGroupEnrollmentConfigurationsByGroup(@QueryParam("groupPath") String groupPath) {
         String[] groupNames = groupPath.split("/");
-        List<GroupEntity> groups = generalJpaService.getGroupByName(groupNames[groupNames.length-1]);
+        List<GroupEntity> groups = generalJpaService.getGroupByName(groupNames[groupNames.length - 1]);
         String groupId = null;
-        for (GroupEntity x : groups){
+        for (GroupEntity x : groups) {
             GroupModel group = realm.getGroupById(x.getId());
             String xPath = ModelToRepresentation.buildGroupPath(group);
-            if ( groupPath.equals(xPath)){
+            if (groupPath.equals(xPath)) {
                 groupId = x.getId();
                 break;
             }
@@ -136,7 +134,7 @@ public class UserGroups {
         if (groupId == null) {
             throw new NotFoundException("This group does not exist");
         }
-        return groupEnrollmentConfigurationRepository.getAvailableByGroup(groupId).map(x-> EntityToRepresentation.toRepresentation(x, false, realm)).collect(Collectors.toList());
+        return groupEnrollmentConfigurationRepository.getAvailableByGroup(groupId).map(x -> EntityToRepresentation.toRepresentation(x, false, realm)).collect(Collectors.toList());
     }
 
     @Path("/group/{groupId}/member")
@@ -240,13 +238,13 @@ public class UserGroups {
             throw new BadRequestException("You are already group admin for this group");
         }
 
-        if (invitationEntity.getForMember() ) {
+        if (invitationEntity.getForMember()) {
             MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
             userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user, session.getContext().getUri(), memberUserAttribute, clientConnection);
         } else {
             groupAdminRepository.addGroupAdmin(user.getId(), invitationEntity.getGroup().getId());
         }
-        List<String> groupRoles = invitationEntity.getGroupRoles() != null ? invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()): new ArrayList<>();
+        List<String> groupRoles = invitationEntity.getGroupRoles() != null ? invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()) : new ArrayList<>();
         groupAdminRepository.getAllAdminIdsGroupUsers(invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId() : invitationEntity.getGroup().getId()).map(userId -> session.users().getUserById(realm, userId)).forEach(admin -> {
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(admin);
@@ -264,14 +262,14 @@ public class UserGroups {
     @Produces("application/json")
     @Consumes("application/json")
     public Response rejectInvitation(@PathParam("id") String id) {
-        GroupInvitationEntity invitationEntity =  groupInvitationRepository.getEntity(id);
+        GroupInvitationEntity invitationEntity = groupInvitationRepository.getEntity(id);
         if (invitationEntity == null) {
             throw new NotFoundException(INVITATION_NOT_EXISTS);
         }
 
-        List<String> groupRoles = invitationEntity.getGroupRoles() != null ? invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()): new ArrayList<>();
+        List<String> groupRoles = invitationEntity.getGroupRoles() != null ? invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()) : new ArrayList<>();
         groupInvitationRepository.deleteEntity(id);
-            // rejection email
+        // rejection email
         groupAdminRepository.getAllAdminIdsGroupUsers(invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId() : invitationEntity.getGroup().getId()).map(userId -> session.users().getUserById(realm, userId)).forEach(admin -> {
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(admin);
@@ -288,7 +286,7 @@ public class UserGroups {
     @Produces("application/json")
     public GroupEnrollmentConfigurationRepresentation geGroupEnrollmentConfiguration(@PathParam("id") String id) {
         GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(id);
-        if ( entity == null || !entity.isActive())
+        if (entity == null || !entity.isActive())
             throw new NotFoundException("This configuration does not exists or is disabled");
         return EntityToRepresentation.toRepresentation(entity, true, realm);
     }

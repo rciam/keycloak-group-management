@@ -103,7 +103,7 @@ public class GroupAdminGroupMember {
 
     @POST
     @Path("/role")
-    public Response addGroupRole(@QueryParam("name") String name) throws UnsupportedEncodingException{
+    public Response addGroupRole(@QueryParam("name") String name) throws UnsupportedEncodingException {
         GroupRolesEntity role = groupRolesRepository.getGroupRolesByNameAndGroup(name, group.getId());
         if (role == null) throw new NotFoundException(" This role does not exist in this group");
         if (member.getGroupRoles() == null) {
@@ -125,7 +125,7 @@ public class GroupAdminGroupMember {
 
     @DELETE
     @Path("/role/{name}")
-    public Response deleteGroupRole(@PathParam("name") String name) throws UnsupportedEncodingException{
+    public Response deleteGroupRole(@PathParam("name") String name) throws UnsupportedEncodingException {
         if (member.getGroupRoles() == null || member.getGroupRoles().stream().noneMatch(x -> name.equals(x.getName())))
             throw new NotFoundException("Could not find this user group member role");
 
