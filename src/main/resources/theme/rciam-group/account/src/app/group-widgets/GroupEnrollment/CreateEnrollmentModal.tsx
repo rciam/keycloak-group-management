@@ -220,9 +220,11 @@ export const EnrollmentModal: FC<any> = (props) => {
                                   </div>
                               }
                           >  
-                          <TrashIcon onClick={()=>{
+                          <TrashIcon className={"gm_trash-icon"} onClick={()=>{
                             setModalInfo({
-                              message:Msg.localize('deleteEnrollmentConfirmation'),
+                              variant:'medium',
+                              title:Msg.localize('deleteEnrollmentConfirmationTitle'),
+                              message:Msg.localize('deleteEnrollmentConfirmationMessage'),
                               accept_message: Msg.localize("yes"),
                               cancel_message: Msg.localize("no"),
                               accept: function(){
@@ -267,7 +269,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                             }
                             
                             }}>
-                            <Msg msgKey={enrollment?.id?Msg.localize('Edit'):Msg.localize('Create')} />
+                            <Msg msgKey={enrollment?.id?Msg.localize('Submit'):Msg.localize('Create')} />
                         </Button>
                     </div>
 

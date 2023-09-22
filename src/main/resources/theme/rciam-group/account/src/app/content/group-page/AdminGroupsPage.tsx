@@ -129,7 +129,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
             setPage(1);
           }} />
   
-          <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact>
+          <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact wrapModifier={"breakWord"}>
             
             <DataListItem id="groups-list-header" aria-labelledby="Columns names">
             

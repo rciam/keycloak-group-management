@@ -174,20 +174,17 @@ export const GroupAdmins: FC<any> = (props) => {
       <React.Fragment>
         <Loading active={loading}/>
         <ConfirmationModal modalInfo={modalInfo}/>
-        <DataList aria-label="Group Member Datalist" isCompact>
+        <DataList aria-label="Group Member Datalist" isCompact wrapModifier={"breakWord"}>
             <DataListItem aria-labelledby="compact-item1">
               <DataListItemRow>
                 <DataListItemCells dataListCells={[
-                  <DataListCell width={1} key="id-hd">
-                    <strong><Msg msgKey='Id' /></strong>
-                  </DataListCell>,
                   <DataListCell width={1} key="username-hd">
-                    <strong><Msg msgKey='Username' /></strong>
+                    <strong><Msg msgKey='UniqueIdentifier' /></strong>
                   </DataListCell>,
-                  <DataListCell width={1} key="email-hd">
-                  <strong><Msg msgKey='Email' /></strong>
+                  <DataListCell width={1} key="name-email-hd">
+                  <strong><Msg msgKey='adminGroupMemberCellNameEmail' /></strong>
                   </DataListCell>,
-                  <DataListCell width={1} key="email-hd">
+                  <DataListCell width={1} key="direct-admin-hd">
                   <strong><Msg msgKey='directAdmin' /></strong>
                   </DataListCell> 
                 ]}>
@@ -206,14 +203,12 @@ export const GroupAdmins: FC<any> = (props) => {
                 <DataListItemRow>
                   <DataListItemCells
                     dataListCells={[
-                      <DataListCell width={1} key="primary content">
-                        {admin.user.id}
+                      <DataListCell width={1} key="secondary content ">
+                        {admin.user?.attributes?.voPersonID||admin.user.username}
                       </DataListCell>,
                       <DataListCell width={1} key="secondary content ">
-                        {admin.user.username}
-                      </DataListCell>,
-                      <DataListCell width={1} key="secondary content ">
-                        {admin.user.email}
+                        <span className="gm_fullname_datalist pf-c-select__menu-item-main">{admin?.user?.firstName && admin?.user?.lastName?admin?.user?.firstName + " " + admin?.user?.lastName:Msg.localize('notAvailable')}</span>
+                        <span className="gm_email_datalist pf-c-select__menu-item-description">{admin?.user?.email}</span>
                       </DataListCell>,
                       <DataListCell width={1} key="secondary content ">
                         <Tooltip content={<div>{admin.direct?Msg.localize('adminGroupIsDirect'):Msg.localize('adminGroupIsNotDirect')}</div>}>

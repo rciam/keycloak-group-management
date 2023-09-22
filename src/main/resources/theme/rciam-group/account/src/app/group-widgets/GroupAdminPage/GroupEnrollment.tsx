@@ -6,7 +6,7 @@ import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, 
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
 import { ConfirmationModal } from '../Modals';
-import { ExternalLinkAltIcon } from '@patternfly/react-icons';
+import { ExternalLinkAltIcon, EyeIcon } from '@patternfly/react-icons';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
 import { Msg } from '../../widgets/Msg';
 import { EnrollmentModal } from '../GroupEnrollment/CreateEnrollmentModal';
@@ -134,7 +134,7 @@ export const GroupEnrollment: FC<any> = (props) => {
         <EnrollmentModal enrollment={{...enrollmentModal}} validationRules={enrollmentRules}  groupRoles={props.groupConfiguration.groupRoles} close={()=>{
           setEnrollmentModal({}); 
           fetchGroupEnrollments();}} groupId={props.groupId}/>
-        <DataList aria-label="Group Member Datalist" isCompact>
+        <DataList aria-label="Group Member Datalist" isCompact wrapModifier={"breakWord"}>
             <DataListItem aria-labelledby="compact-item1">
               <DataListItemRow>
                 <DataListItemCells dataListCells={[
@@ -149,7 +149,10 @@ export const GroupEnrollment: FC<any> = (props) => {
                   </DataListCell>,
                   <DataListCell className="gm_vertical_center_cell" width={3} key="email-hd">
                   <strong><Msg msgKey='Default' /></strong>
-                </DataListCell>
+                </DataListCell>,
+                <DataListCell className="gm_vertical_center_cell" width={3} key="email-hd">
+                <strong><Msg msgKey='Visible' /></strong>
+              </DataListCell>
                 ]}>
                 </DataListItemCells>
                 <DataListAction
@@ -237,7 +240,7 @@ export const GroupEnrollment: FC<any> = (props) => {
 
     const onCopyLink = ()=>{
       disapearingTooltip();
-      let link = groupsService.getBaseUrl() + '/account/#/enroll?groupPath=' + encodeURI(groupConfiguration.path) + '&id=' + encodeURI(enrollment.id);
+      let link = groupsService.getBaseUrl() + '/account/#/enroll?id=' + encodeURI(enrollment.id);
       navigator.clipboard.writeText(link)
     }
 
@@ -279,8 +282,14 @@ export const GroupEnrollment: FC<any> = (props) => {
                         <Tooltip content={<div><Msg msgKey='DefaultEnrollmentTooltip'/></div>}>
                           <Checkbox id="disabled-check-1" className="gm_direct-checkbox" isChecked={enrollment?.id===defaultConfiguration} isDisabled />
                         </Tooltip>
-                    </DataListCell>      
-                                    
+                    </DataListCell>,     	 
+                      <DataListCell width={3} key="secondary content ">
+                        {enrollment?.visibleToNotMembers &&
+                          <Tooltip content={<div><Msg msgKey={'visibleEnrollmentTooltip'}/></div>}>
+                            <EyeIcon className="gm_primary-color"/>
+                          </Tooltip>
+                        }
+                      </DataListCell>                
                     ]}
                   />
                   <DataListAction

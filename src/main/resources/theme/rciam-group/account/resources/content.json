@@ -58,19 +58,12 @@
     "hidden": "!features.isMyResourcesEnabled"
   },
   {
-    "id": "groups",
+    "id": "managegroups",
     "icon": "pf-icon-applications",
-    "label": "groupsSidebarTitle",
-    "descriptionLabel": "groupsIntroMessage",
+    "label": "adminGroupLabel",
+    "descriptionLabel": "adminGroupsIntroMessage",
     "hidden": "!features.isViewGroupsEnabled",
     "content": [
-      {
-        "id": "showgroups",
-        "path": "groups/showgroups",
-        "label": "groupLabel",
-        "modulePath": "/content/group-page/GroupsPage.js",
-        "componentName": "GroupsPage"
-      },
       {
         "id": "admingroups",
         "path": "groups/admingroups",
@@ -82,9 +75,33 @@
         "id": "groupenrollments",
         "path": "groups/groupenrollments",
         "label": "groupManageEnrollmentsLabel",
-        "modulePath": "/content/group-management-pages/ManageEnrollmentRequests.js",
-        "componentName": "ManageEnrollmentRequests"
+        "modulePath": "/content/group-management-pages/EnrollmentRequests.js",
+        "componentName": "EnrollmentRequests"
       }
+    ]
+  },
+  {
+    "id": "groups",
+    "icon": "pf-icon-applications",
+    "label": "groupLabel",
+    "descriptionLabel": "groupsIntroMessage",
+    "hidden": "!features.isViewGroupsEnabled",
+    "content": [
+      {
+        "id": "showgroups",
+        "path": "groups/showgroups",
+        "label": "viewMyGroupsLabel",
+        "modulePath": "/content/group-page/GroupsPage.js",
+        "componentName": "GroupsPage"
+      },
+      {
+        "id": "mygroupenrollments",
+        "path": "groups/mygroupenrollments",
+        "label": "groupMyEnrollmentsLabel",
+        "modulePath": "/content/group-management-pages/EnrollmentRequests.js",
+        "componentName": "EnrollmentRequests"
+      }
+
     ]
   }
 ]

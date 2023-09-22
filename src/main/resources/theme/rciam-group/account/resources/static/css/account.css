@@ -478,7 +478,10 @@
     margin-bottom: -0.1rem;
     margin-left:0.1rem;
 }
-
+.gm_trash-icon {
+    font-size: 1.1rem;
+    margin-left: 0.5rem;
+}
 .gm_view-groups-header .pf-c-data-list__cell {
      cursor:pointer;
 }
@@ -745,4 +748,8 @@
 .gm_search-input-double-controls .gm_cancel-icon-container{
     margin-top: 0!important;   
     height: 1.1rem!important;
+}
+
+.gm_primary-color {
+    color: #0d6efd!important;;
 }

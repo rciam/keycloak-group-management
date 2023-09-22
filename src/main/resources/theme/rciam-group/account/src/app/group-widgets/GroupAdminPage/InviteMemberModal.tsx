@@ -226,7 +226,7 @@ export const InviteMemberModal: React.FC<any> = (props) => {
             </Select>
             {enrollment?.id&&
               <React.Fragment>
-                <DataList aria-label="Compact data list example" isCompact>
+                <DataList aria-label="Compact data list example" isCompact wrapModifier={"breakWord"}>
                   <DataListItem aria-labelledby="compact-item1">
                       <DataListItemRow>
                         <DataListItemCells

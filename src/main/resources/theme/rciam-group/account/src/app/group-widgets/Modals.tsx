@@ -19,7 +19,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = (props) =>{
     },[props.modalInfo])
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-
+    const [type,setType] = useState('small');
     const handleModalToggle = () => {
         props?.modalInfo?.cancel();
     };
@@ -27,7 +27,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = (props) =>{
     return (
         <React.Fragment>
             <Modal
-            variant={ModalVariant.small}
+            variant={props.modalInfo?.variant==='medium'?ModalVariant.medium:ModalVariant.small}
             title={props?.modalInfo?.title}
             isOpen={isModalOpen}
             onClose={handleModalToggle}
