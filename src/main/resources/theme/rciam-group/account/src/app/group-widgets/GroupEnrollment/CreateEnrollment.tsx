@@ -45,8 +45,11 @@ export const CreateEnrollment: FC<any> = (props) => {
         let groupPath = decodeURI(query.get('groupPath')||"");
         let id = decodeURI(query.get('id')||"");
 
-        if(groupPath){
-          fetchGroupEnrollments(groupPath,id);
+        if(id){
+          fetchGroupEnrollment(id);
+        }
+        else if(groupPath){
+          fetchGroupEnrollments(groupPath);
         }
        
       }
@@ -56,8 +59,7 @@ export const CreateEnrollment: FC<any> = (props) => {
     useEffect(()=>{
       if(group.name){
         fetchGroupEnrollmentRequests();
-      }
-      
+      }      
     },[group])
 
     useEffect(()=>{
@@ -74,8 +76,18 @@ export const CreateEnrollment: FC<any> = (props) => {
     },[enrollments,defaultId])
 
 
+    let fetchGroupEnrollment = (id)=>{
+      groupsService!.doGet<any>("/user/configuration/"+id)
+      .then((response: HttpResponse<any>) => {
+        if(response.status===200&&response.data){
+            setGroup(response.data.group);
+            setEnrollments([response.data]);
+        }
+      })
+  }
 
-    let fetchGroupEnrollments = (groupPath,id)=>{
+
+    let fetchGroupEnrollments = (groupPath)=>{
         groupsService!.doGet<any>("/user/groups/configurations",{params:{groupPath:groupPath}})
         .then((response: HttpResponse<any>) => {
           if(response.status===200&&response.data){
@@ -84,18 +96,8 @@ export const CreateEnrollment: FC<any> = (props) => {
                 setDefaultId(response.data[0].group?.attributes?.defaultConfiguration[0]);  
               }
               setGroup(response.data[0].group);
-            }
-            if(id){
-              response.data.forEach(enrollment=>{
-                if(enrollment.id=id){
-                  setEnrollments([enrollment]);
-                }
-
-              })
-            }
-            else{
-              setEnrollments(response.data);
-            }      
+            }          
+            setEnrollments(response.data);
           }
         })
     }

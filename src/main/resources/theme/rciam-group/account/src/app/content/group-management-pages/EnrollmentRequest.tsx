@@ -1,21 +1,14 @@
 import * as React from 'react';
 import {FC,useState,useEffect} from 'react';
-import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, SelectVariant, Checkbox,Select,SelectOption, FormAlert, Alert, Form, FormGroup, TextInput, Modal, ModalVariant, Switch, FormFieldGroupHeader, FormFieldGroup, DatePicker, Popover, NumberInput, HelperTextItem, TextArea, Badge} from '@patternfly/react-core';
+import {Button, Tooltip, Alert, Form, FormGroup, Modal, ModalVariant, FormFieldGroupHeader, FormFieldGroup, TextArea, Badge} from '@patternfly/react-core';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
-// @ts-ignore
-import { ConfirmationModal } from '../Modals';
-import {isIntegerOrNumericString,getCurrentDate} from '../../js/utils.js'
 import { Loading } from '../../group-widgets/LoadingModal';
 import { Msg } from '../../widgets/Msg';
-import { CopyIcon, ExternalLinkSquareAltIcon, HelpIcon, ShareSquareIcon } from '@patternfly/react-icons';
-
-
-const reg_url = /^(https?|chrome):\/\/[^\s$.?#].[^\s]*$/
+import { CopyIcon, ExternalLinkSquareAltIcon } from '@patternfly/react-icons';
 
 export const EnrollmentRequest: FC<any> = (props) => {
     
-    const [modalInfo,setModalInfo] = useState({});
     const [loading,setLoading] = useState(false); 
     const [enrollmentRequest,setEnrollmentRequest] = useState<any>({});
     const [copyTooltip,setCopyTooltip] = useState(false);
@@ -25,7 +18,6 @@ export const EnrollmentRequest: FC<any> = (props) => {
 
     useEffect(()=>{
       if(Object.keys(props.enrollmentRequest).length !== 0) {
-            
             setIsModalOpen(true);
             setEnrollmentRequest({...props.enrollmentRequest});
         }
@@ -39,11 +31,8 @@ export const EnrollmentRequest: FC<any> = (props) => {
       setCopyTooltip(true);
       setTimeout(() => {
         setCopyTooltip(false);
-      }, 2000);
-      
+      }, 2000);      
     }
-
-
 
     let reviewEnrollmentRequest = (action)=>{
       setLoading(true);
@@ -54,19 +43,17 @@ export const EnrollmentRequest: FC<any> = (props) => {
           props.close();
         }
       }).catch((err)=>{console.log(err)})
-     
     }
    
     return (
       <React.Fragment>
-        
         <Modal
                 variant={ModalVariant.large}
                 header={
                   <React.Fragment >
                     <h1 className="pf-c-modal-box__title gm_flex-center">
                       {enrollmentRequest?.status==='PENDING_APPROVAL'?<Msg msgKey='reviewRequestTitle'/>:<Msg msgKey='viewRequestTitle'/>}
-                      <Tooltip {...(!!(copyTooltip) ? { trigger:'manual', isVisible:true }:{trigger:'mouseenter'})}
+                      {props.managePage&&<Tooltip {...(!!(copyTooltip) ? { trigger:'manual', isVisible:true }:{trigger:'mouseenter'})}
                             content={
                                 <div>
                                     {copyTooltip?<Msg msgKey='copiedTooltip'/>:<Msg msgKey='copyTooltip'/>}
@@ -77,7 +64,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                         disapearingTooltip();
                         let link = groupsService.getBaseUrl() + '/account/#/groups/groupenrollments?id=' + encodeURI(enrollmentRequest?.id);
                         navigator.clipboard.writeText(link)}} ><CopyIcon/> </Button>
-                      </Tooltip>              
+                      </Tooltip>}              
                     </h1>
                     
                   </React.Fragment>
@@ -85,7 +72,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                 isOpen={isModalOpen}
                 onClose={()=>{props.close()}}
                 actions={[
-                  ...(enrollmentRequest?.status==='PENDING_APPROVAL'?
+                  ...(enrollmentRequest?.status==='PENDING_APPROVAL'&&props.managePage?
                     [<Tooltip 
                         content={
                             <div>
@@ -124,7 +111,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
 
                   <Alert variant={enrollmentRequest?.status==='ACCEPTED'?"success":enrollmentRequest?.status==='REJECTED'?"danger":"info"} title={
                     <React.Fragment>
-                      <p><Msg msgKey='reviewAlertSubmitted'/><span className="gm_normal-text">{enrollmentRequest?.submittedDate}</span></p>
+                      <p><Msg msgKey='reviewAlertSubmitted'/><span className="gm_normal-text"> {enrollmentRequest?.submittedDate}</span></p>
                       {enrollmentRequest?.approvedDate&&
                         <p className="gm_margin-top-1rem"><Msg msgKey={enrollmentRequest?.status}/>: <span className="gm_normal-text">{enrollmentRequest?.approvedDate}</span></p>
                       }
@@ -234,7 +221,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                             </FormGroup>
                           }
                         </FormFieldGroup>
-                        {enrollmentRequest?.status==='PENDING_APPROVAL'&&
+                        {enrollmentRequest?.status==='PENDING_APPROVAL'&&props.managePage&&
                           <FormFieldGroup
                             header={
                             <FormFieldGroupHeader

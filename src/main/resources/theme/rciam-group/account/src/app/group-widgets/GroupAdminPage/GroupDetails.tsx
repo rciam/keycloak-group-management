@@ -50,7 +50,7 @@ export const GroupDetails: FC<any> = (props) => {
         <React.Fragment>
 
         <ConfirmationModal modalInfo={modalInfo}/>
-            <DataList aria-label="Compact data list example" isCompact>
+            <DataList aria-label="Compact data list example" isCompact wrapModifier={"breakWord"}>
                 <DataListItem aria-labelledby="compact-item1">
                     <DataListItemRow>
                         <DataListItemCells

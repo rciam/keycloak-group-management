@@ -27,7 +27,7 @@ import {GroupPage} from './content/group-management-pages/GroupPage';
 import {AdminGroupPage} from './content/group-management-pages/AdminGroupPage';
 import { InvitationLandingPage } from './content/group-management-pages/InvitationLandingPage';
 import { CreateEnrollment } from './group-widgets/GroupEnrollment/CreateEnrollment';
-import { EnrollmentRequests } from './content/group-management-pages/ManageEnrollmentRequests';
+import { EnrollmentRequests } from './content/group-management-pages/EnrollmentRequests';
 
 
 export interface ContentItem {
@@ -214,7 +214,8 @@ export function makeRoutes(): React.ReactNode {
     const customComponents = {
         GroupPage:GroupPage,
         AdminGroupPage:AdminGroupPage,
-        CreateEnrollment:CreateEnrollment
+        CreateEnrollment:CreateEnrollment,
+        EnrollmentRequests:EnrollmentRequests
     }
     const pageDefs: PageDef[] = flattenContent(content);
 
@@ -229,7 +230,8 @@ export function makeRoutes(): React.ReactNode {
     });
 
     return (<Switch>
-                <Route path="/groups/groupenrollments" component={EnrollmentRequests}/>
+                <Route path="/groups/groupenrollments" render={(props) => <EnrollmentRequests {...props} manage={true} />} />
+                <Route path="/groups/mygroupenrollments" component={EnrollmentRequests} />
                 {routes}
                 {customPages.map((item,index)=>{
                     return <Route path={item.path} component={customComponents[item.componentName]}/>

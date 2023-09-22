@@ -141,7 +141,7 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
   
     return (
       <ContentPage title={Msg.localize('groupLabel')}>
-        <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact>
+        <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact wrapModifier={"breakWord"}>
           <DataListItem id="groups-list-header" aria-labelledby="Columns names">
             <DataListItemRow className="gm_view-groups-header">
               <DataListItemCells

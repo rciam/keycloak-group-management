@@ -102,7 +102,7 @@ export const GroupPage: FC<GroupsPageProps> = (props)=> {
             role="region"
             >
               <Tab eventKey={0} title={<TabTitleText><Msg msgKey='groupMembershipTab' /></TabTitleText>} aria-label="Default content - users">
-                <DataList className="gm_datalist" aria-label="Compact data list example" isCompact>
+                <DataList className="gm_datalist" aria-label="Compact data list example" isCompact wrapModifier={"breakWord"}>
                 <DataListItem aria-labelledby="compact-item2">
                     <DataListItemRow>
                       <DataListItemCells

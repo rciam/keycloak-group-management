@@ -33,7 +33,7 @@ export const GroupSubGroups: FC<any> = (props) => {
       <React.Fragment>
         <CreateSubgroupModal groupId={props.groupId} active={createSubgroup} afterSuccess={()=>{
           props.fetchGroupConfiguration();}} close={()=>{setCreateSubgroup(false);}}/> 
-         <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact>
+         <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact wrapModifier={"breakWord"}>
             
             <DataListItem id="groups-list-header" aria-labelledby="Columns names">
             

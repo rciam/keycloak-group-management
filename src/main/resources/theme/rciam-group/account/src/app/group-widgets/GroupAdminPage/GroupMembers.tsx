@@ -152,15 +152,12 @@ export const GroupMembers: FC<any> = (props) => {
             fetchGroupMembers();
             setPage(1);
           }} />
-        <DataList aria-label="Group Member Datalist" isCompact>
+        <DataList aria-label="Group Member Datalist" isCompact wrapModifier={"breakWord"}>
             <DataListItem aria-labelledby="compact-item1">
               <DataListItemRow>
                 <DataListItemCells dataListCells={[
                   <DataListCell className="gm_vertical_center_cell" width={3} key="id-hd">
-                    <strong><Msg msgKey='adminGroupMemberCellId' /></strong>
-                  </DataListCell>,
-                  <DataListCell className="gm_vertical_center_cell" width={3} key="username-hd">
-                    <strong><Msg msgKey='Username' /></strong>
+                    <strong><Msg msgKey='UniqueIdentifier' /></strong>
                   </DataListCell>,
                   <DataListCell className="gm_vertical_center_cell" width={3} key="email-hd">
                     <strong><Msg msgKey='adminGroupMemberCellNameEmail' /></strong>
@@ -198,10 +195,7 @@ export const GroupMembers: FC<any> = (props) => {
                   <DataListItemCells
                     dataListCells={[
                       <DataListCell width={3} key="primary content">
-                        {member.user?.attributes?.voPersonID||Msg.localize('notAvailable')}
-                      </DataListCell>,
-                      <DataListCell width={3} key="secondary content ">
-                        {member.user.username}
+                        {member.user?.attributes?.voPersonID||member.user.username}
                       </DataListCell>,
                       <DataListCell width={3} key="secondary content ">
                         <span className="gm_fullname_datalist pf-c-select__menu-item-main">{member.user.firstName && member.user.lastName?member.user.firstName + " " + member.user.lastName:Msg.localize('notAvailable')}</span>

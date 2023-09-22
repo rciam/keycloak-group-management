@@ -1,14 +1,15 @@
 import * as React from 'react';
-import {FC,useState,useEffect} from 'react';
+import {FC,useState,useEffect, useReducer} from 'react';
 import {DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction,Breadcrumb, BreadcrumbItem, Pagination, TextInput, Badge} from '@patternfly/react-core';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
-import {EnrollmentRequest} from './ManageEnrollmentRequest';
+import {EnrollmentRequest} from './EnrollmentRequest';
 // @ts-ignore
 import { ContentPage } from '../ContentPage';
 import { Msg } from '../../widgets/Msg';
 import { DatalistFilterSelect } from '../../group-widgets/DatalistFilterSelect';
 import { AngleDownIcon, CaretDownIcon, CaretUpIcon, FilterIcon, LongArrowAltDownIcon, LongArrowAltUpIcon } from '@patternfly/react-icons';
+import { SearchInput } from '../../group-widgets/GroupAdminPage/SearchInput';
 
 export const EnrollmentRequests: FC<any> = (props) => {
 
@@ -21,15 +22,14 @@ export const EnrollmentRequests: FC<any> = (props) => {
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
     const [totalItems,setTotalItems] = useState<number>(0);
-    const [statusSelection,setStatusSelection] = useState("PENDING_APPROVAL");
+    const [statusSelection,setStatusSelection] = useState("");
     const [initialRender, setInitialRender] = useState(true);
     const [orderBy,setOrderBy] = useState<string>('submittedDate');
     const [asc,setAsc] = useState<boolean>(false);
     const [searchStringGroup,setSearchStringGroup] = useState("");
     const [searchStringUser,setSearchStringUser] = useState("");
     const [isExpanded, setIsExpanded] = useState(false);
-
-    
+    const [requestId,setRequestId] = useState(0);    
 
     const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
       setPage(newPage);
@@ -45,6 +45,16 @@ export const EnrollmentRequests: FC<any> = (props) => {
     };
 
     useEffect(()=>{
+      let id;
+      setStatusSelection("PENDING_APPROVAL")
+      if(props.location.search){
+        const query = new URLSearchParams(props.location.search);
+        id = decodeURI(query.get('id')||"");
+        id && setRequestId(id);
+      }
+    },[props.manage]);
+
+    useEffect(()=>{
       if(initialRender){
         setInitialRender(false);
         return;
@@ -52,22 +62,11 @@ export const EnrollmentRequests: FC<any> = (props) => {
       fetchEnrollmentRequests();
     },[perPage,page,orderBy,asc]);
     
-
     useEffect(()=>{
-      let id;
-
-      if(props.location.search){
-        const query = new URLSearchParams(props.location.search);
-        id = decodeURI(query.get('id')||"");
+      if(requestId){
+        fetchEnrollmentRequest(requestId);
       }
-      
-      if(id){
-        fetchEnrollmentRequest(id);
-      }
-      
-      fetchEnrollmentRequests();
-      
-    },[])
+    },[requestId])
 
     useEffect(()=>{
       if(initialRender){
@@ -79,10 +78,10 @@ export const EnrollmentRequests: FC<any> = (props) => {
     },[statusSelection]);
 
     
-    let fetchEnrollmentRequests = (searchStringUser = "",searchStringGroup= "") => {
-        groupsService!.doGet<any>("/group-admin/enroll-requests",{params:{first:(perPage*(page-1)),max:perPage,
+    let fetchEnrollmentRequests = (searchStringUser = "",searchStringGroupOverwrite= "") => {
+      groupsService!.doGet<any>(props.manage?"/group-admin/enroll-requests":"/user/enroll-requests",{params:{first:(perPage*(page-1)),max:perPage,
           ...(statusSelection?{status:statusSelection}:{}),
-          ...(searchStringGroup?{groupName:searchStringGroup}:{}),
+          ...((searchStringGroup||searchStringGroupOverwrite)?{groupName:(searchStringGroup||searchStringGroupOverwrite)}:{}),
           ...(searchStringUser?{userSearch:searchStringUser}:{}),
           ...(orderBy?{order:orderBy}:{}),
           asc:asc?"true":"false"
@@ -103,7 +102,9 @@ export const EnrollmentRequests: FC<any> = (props) => {
 
         
     let fetchEnrollmentRequest = (id) => {
-      groupsService!.doGet<any>("/group-admin/enroll-request/"+id)
+      console.log(props.manage);
+      console.log('I fetch');
+      groupsService!.doGet<any>((props.manage?"/group-admin/enroll-request/":"/user/enroll-request/")+id)
       .then((response: HttpResponse<any>) => {
         if(response.status===200&&response.data){
           let count = 1;
@@ -155,7 +156,7 @@ export const EnrollmentRequests: FC<any> = (props) => {
   
   
     return (
-      <React.Fragment>
+      <React.Fragment key={props.manage}>
 
         <div className="gm_content">
           <Breadcrumb className="gm_breadcumb">
@@ -166,62 +167,72 @@ export const EnrollmentRequests: FC<any> = (props) => {
               <Msg msgKey='groupManageEnrollmentsLabel' />
             </BreadcrumbItem>
           </Breadcrumb>
-          <ContentPage title={Msg.localize('groupManageEnrollmentsLabel')}>
-            <div className="gm_toggle-filters-container">
-              <Button className="gm_toggle-filters" variant='control' onClick={toggleExpansion}><FilterIcon/> {isExpanded?<	CaretUpIcon/>:<	CaretDownIcon/>}</Button>
-            </div>
+          <ContentPage title={props.manage?Msg.localize('groupManageEnrollmentsLabel'):Msg.localize('groupMyEnrollmentsLabel')}>
+            {props.manage?
+              <React.Fragment>
+                <div className="gm_toggle-filters-container">
+                <Button className="gm_toggle-filters" variant='control' onClick={toggleExpansion}><FilterIcon/> {isExpanded?<	CaretUpIcon/>:<	CaretDownIcon/>}</Button>
+                </div>
+                <div className={`expandable-section ${isExpanded ? 'expanded' : ''}`}>
+                  <div className="gm_search-input-container-2">
+                    <div className="gm_search-input-double">
+                      <TextInput
+                        name="searchInputUser"
+                        id="searchInputUser"
+                        type="text"
+                        value={searchStringUser}
+                        onChange={(e) => setSearchStringUser(e)}
+                        placeholder={Msg.localize('UserSearchPlaceholder')}
+                        aria-label="searchInputUser"
+                        onKeyDown={(e) => e.key === 'Enter' && search()}
+                      />
+                      <TextInput
+                        name="searchInputGroup"
+                        id="searchInputGroup"
+                        type="text"
+                        value={searchStringGroup}
+                        onChange={(e) => setSearchStringGroup(e)}
+                        placeholder={Msg.localize('GroupSearchPlaceholder')}
+                        aria-label="searchInputGroup"
+                        onKeyDown={(e) => e.key === 'Enter' && search()}
+                      />
+                    </div>
+                    <div className="gm_search-input-double-controls">
+                      <Tooltip content={<div><Msg msgKey='EnrollmentRequestFilterTooltip'/></div>}>
+                        <Button variant="control" aria-label="popover for input" onClick={() => search()}>
+                          <div className="gm_search-icon-container"></div>
+                        </Button>
+                      </Tooltip>
+                      <Tooltip content={<div><Msg msgKey='EnrollmentRequestFilterCancel'/></div>}>
+                        <Button
+                          variant="control"
+                          aria-label="popover for input"
+                          onClick={() => {
+                            setSearchStringUser('');
+                            setSearchStringGroup('');
+                            setPage(1);
+                            fetchEnrollmentRequests();
+                          }}
+                        >
+                          <div className="gm_cancel-icon-container"></div>
+                        </Button>
+                      </Tooltip>
+                    </div>
+                  </div>  
+                </div>
+              </React.Fragment>
+              :
+            <SearchInput searchText={Msg.localize('searchBoxPlaceholder')} cancelText={Msg.localize('searchBoxCancel')}  search={(searchString)=>{
+              setPage(1);
+              fetchEnrollmentRequests("",searchString);
+            }} />  
+          }
             
-              <div className={`expandable-section ${isExpanded ? 'expanded' : ''}`}>
-              <div className="gm_search-input-container-2">
-                <div className="gm_search-input-double">
-                  <TextInput
-                    name="searchInputUser"
-                    id="searchInputUser"
-                    type="text"
-                    value={searchStringUser}
-                    onChange={(e) => setSearchStringUser(e)}
-                    placeholder={Msg.localize('UserSearchPlaceholder')}
-                    aria-label="searchInputUser"
-                    onKeyDown={(e) => e.key === 'Enter' && search()}
-                  />
-                  <TextInput
-                    name="searchInputGroup"
-                    id="searchInputGroup"
-                    type="text"
-                    value={searchStringGroup}
-                    onChange={(e) => setSearchStringGroup(e)}
-                    placeholder={Msg.localize('GroupSearchPlaceholder')}
-                    aria-label="searchInputGroup"
-                    onKeyDown={(e) => e.key === 'Enter' && search()}
-                  />
-                </div>
-                <div className="gm_search-input-double-controls">
-                  <Tooltip content={<div><Msg msgKey='EnrollmentRequestFilterTooltip'/></div>}>
-                    <Button variant="control" aria-label="popover for input" onClick={() => search()}>
-                      <div className="gm_search-icon-container"></div>
-                    </Button>
-                  </Tooltip>
-                  <Tooltip content={<div><Msg msgKey='EnrollmentRequestFilterCancel'/></div>}>
-                    <Button
-                      variant="control"
-                      aria-label="popover for input"
-                      onClick={() => {
-                        setSearchStringUser('');
-                        setSearchStringGroup('');
-                        setPage(1);
-                        fetchEnrollmentRequests();
-                      }}
-                    >
-                      <div className="gm_cancel-icon-container"></div>
-                    </Button>
-                  </Tooltip>
-                </div>
-              </div>  
-          </div>
+            
           
           
-            <EnrollmentRequest enrollmentRequest={selectedRequest} close={()=>{setSelectedRequest({}); fetchEnrollmentRequests();}}/>
-            <DataList aria-label="Enrollment Request Datalist" isCompact>
+            <EnrollmentRequest enrollmentRequest={selectedRequest} managePage={props.manage} close={()=>{setSelectedRequest({}); fetchEnrollmentRequests();}}/>
+            <DataList aria-label="Enrollment Request Datalist" isCompact wrapModifier={"breakWord"}>
                 <DataListItem aria-labelledby="compact-item1">
                   <DataListItemRow>
                     <DataListItemCells dataListCells={[
@@ -234,15 +245,15 @@ export const EnrollmentRequests: FC<any> = (props) => {
                       <DataListCell className="gm_vertical_center_cell" width={1} key="enrollment-hd">
                       <strong><Msg msgKey='Enrollment Name' /></strong>
                       </DataListCell> ,
-                      <DataListCell className="gm_vertical_center_cell" width={1} key="state-hd">
+                      ...(props.manage?[<DataListCell className="gm_vertical_center_cell" width={1} key="state-hd">
                         <strong>
                           <Msg msgKey='adminGroupMemberCellNameEmail' />
                         </strong>
-                      </DataListCell>,
+                      </DataListCell>]:[]),
                       <DataListCell className="gm_vertical_center_cell" width={1} key="state-hd">
                         <strong>
                           <Msg msgKey='State' />
-                          <DatalistFilterSelect default="PENDING_APPROVAL" name="status"  options={statusOptions} action={(selection)=>{setStatusSelection(selection)}}/>
+                          <DatalistFilterSelect default={"PENDING_APPROVAL"} name="status"  options={statusOptions} action={(selection)=>{setStatusSelection(selection)}}/>
                         </strong>
                       </DataListCell>,
                       
@@ -272,10 +283,10 @@ export const EnrollmentRequests: FC<any> = (props) => {
                           <DataListCell width={1} key="secondary content ">
                             {enrollment.groupEnrollmentConfiguration.name}                        
                           </DataListCell>,
-                          <DataListCell width={1} key="primary content">
+                          ...(props.manage?[<DataListCell width={1} key="primary content">
                              <span className="gm_fullname_datalist pf-c-select__menu-item-main">{enrollment?.user?.firstName && enrollment?.user?.lastName?enrollment?.user?.firstName + " " + enrollment?.user?.lastName:Msg.localize('notAvailable')}</span>
                             <span className="gm_email_datalist pf-c-select__menu-item-description">{enrollment?.user?.email}</span>
-                          </DataListCell>,
+                          </DataListCell>]:[]),
                           <DataListCell width={1} key="secondary content ">
                             <Badge className={enrollment.status==='ACCEPTED'?"gm_badge-success":enrollment.status==='REJECTED'?"gm_badge-danger":enrollment.status==='PENDING_APPROVAL'?"gm_badge-warning":""}>
                               {formatStatus(enrollment.status)}
@@ -295,14 +306,14 @@ export const EnrollmentRequests: FC<any> = (props) => {
                             <Tooltip
                             content={
                                 <div>
-                                    {enrollment.status==='PENDING_APPROVAL'?<Msg msgKey='ReviewEnrollmentTooltip'/>:<Msg msgKey='ViewEnrollmentTooltip'/>}
+                                    {(enrollment.status==='PENDING_APPROVAL'&&props.manage)?<Msg msgKey='ReviewEnrollmentTooltip'/>:<Msg msgKey='ViewEnrollmentTooltip'/>}
                                 </div>
                             }
                             >
                                 <Button variant="primary" onClick={()=>{
                                   setSelectedRequest(enrollment);
                                 }}>
-                                    {enrollment.status==='PENDING_APPROVAL'?'Review':"View"}
+                                    {(enrollment.status==='PENDING_APPROVAL'&&props.manage)?'Review':"View"}
                                 </Button>
                             </Tooltip>
                         </DataListAction>
