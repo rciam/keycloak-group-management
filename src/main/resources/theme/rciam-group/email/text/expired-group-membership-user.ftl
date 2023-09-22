@@ -1,2 +1,2 @@
 <#ftl output_format="plainText">
-${msg("userRemovalBody",fullname, groupname, subgroupsStr, url)}
+${msg("userRemovalBody",fullname, groupname, subgroupsStr, url, signatureMessage)}

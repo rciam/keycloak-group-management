@@ -19,6 +19,7 @@ import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.LoginEventHelper;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
+import org.keycloak.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.keycloak.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
@@ -57,7 +58,8 @@ public class UserGroupMember {
     @DELETE
     public Response leaveGroup() {
         GroupModel group = realm.getGroupById(member.getGroup().getId());
-        userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, user.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(user.getId()), memberUserAttributeConfigurationRepository);
+        MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+        userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, user.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(user.getId()), memberUserAttribute);
         return Response.noContent().build();
     }
 

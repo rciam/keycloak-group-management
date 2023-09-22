@@ -15,13 +15,14 @@ public class GroupManagementEventEntity {
 
     @Id
     @Column(name = "ID")
-    @Access(AccessType.PROPERTY) // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
+    @Access(AccessType.PROPERTY)
+    // we do this because relationships often fetch id, but not entity.  This avoids an extra SQL
     private String id;
 
-    @Column(name="DATE")
+    @Column(name = "DATE")
     private LocalDate date;
 
-    @Column(name="DATE_FOR_WEEK_TASKS")
+    @Column(name = "DATE_FOR_WEEK_TASKS")
     private LocalDate dateForWeekTasks;
 
     public String getId() {
@@ -47,5 +48,4 @@ public class GroupManagementEventEntity {
     public void setDateForWeekTasks(LocalDate dateForWeekTasks) {
         this.dateForWeekTasks = dateForWeekTasks;
     }
-
 }

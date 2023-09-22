@@ -34,6 +34,9 @@ public class MemberUserAttributeConfigurationEntity {
     @Column(name = "AUTHORITY")
     private String authority ;
 
+    @Column(name="SIGNATURE_MESSAGE")
+    private String signatureMessage;
+
     @OneToOne()
     @JoinColumn(name = "REALM_ID")
     private RealmEntity realmEntity;
@@ -68,6 +71,14 @@ public class MemberUserAttributeConfigurationEntity {
 
     public void setAuthority(String authority) {
         this.authority = authority;
+    }
+
+    public String getSignatureMessage() {
+        return signatureMessage;
+    }
+
+    public void setSignatureMessage(String signatureMessage) {
+        this.signatureMessage = signatureMessage;
     }
 
     public RealmEntity getRealmEntity() {

@@ -96,13 +96,14 @@ public class GroupAdminGroupMember {
     @DELETE
     public Response deleteMember() {
         UserModel user = session.users().getUserById(realm, member.getUser().getId());
-        userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId()), memberUserAttributeConfigurationRepository);
+        MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+        userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId()), memberUserAttribute);
         return Response.noContent().build();
     }
 
     @POST
     @Path("/role")
-    public Response addGroupRole(@QueryParam("name") String name) throws UnsupportedEncodingException{
+    public Response addGroupRole(@QueryParam("name") String name) throws UnsupportedEncodingException {
         GroupRolesEntity role = groupRolesRepository.getGroupRolesByNameAndGroup(name, group.getId());
         if (role == null) throw new NotFoundException(" This role does not exist in this group");
         if (member.getGroupRoles() == null) {
@@ -124,7 +125,7 @@ public class GroupAdminGroupMember {
 
     @DELETE
     @Path("/role/{name}")
-    public Response deleteGroupRole(@PathParam("name") String name) throws UnsupportedEncodingException{
+    public Response deleteGroupRole(@PathParam("name") String name) throws UnsupportedEncodingException {
         if (member.getGroupRoles() == null || member.getGroupRoles().stream().noneMatch(x -> name.equals(x.getName())))
             throw new NotFoundException("Could not find this user group member role");
 

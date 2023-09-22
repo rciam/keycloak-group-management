@@ -35,16 +35,8 @@ import org.keycloak.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.keycloak.plugins.groups.helpers.EntityToRepresentation;
 import org.keycloak.plugins.groups.helpers.Utils;
 import org.keycloak.plugins.groups.jpa.GeneralJpaService;
-import org.keycloak.plugins.groups.jpa.entities.GroupAdminEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
-import org.keycloak.plugins.groups.jpa.entities.GroupRolesEntity;
-import org.keycloak.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
-import org.keycloak.plugins.groups.jpa.repositories.GroupAdminRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupInvitationRepository;
-import org.keycloak.plugins.groups.jpa.repositories.GroupRolesRepository;
-import org.keycloak.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
+import org.keycloak.plugins.groups.jpa.entities.*;
+import org.keycloak.plugins.groups.jpa.repositories.*;
 import org.keycloak.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
 import org.keycloak.plugins.groups.scheduled.AgmTimerProvider;
 import org.keycloak.plugins.groups.scheduled.DeleteExpiredInvitationTask;
@@ -86,6 +78,8 @@ public class GroupAdminGroup {
         this.groupInvitationRepository = new GroupInvitationRepository(session, realm);
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session, new FreeMarkerUtil());
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
+        MemberUserAttributeConfigurationEntity memberUserAttribute = (new MemberUserAttributeConfigurationRepository(session)).getByRealm(realm.getId());
+        this.customFreeMarkerEmailTemplateProvider.setSignatureMessage(memberUserAttribute.getSignatureMessage());
         this.generalService = new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
         this.adminEvent = adminEvent;
     }
