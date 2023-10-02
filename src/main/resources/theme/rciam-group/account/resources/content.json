@@ -59,7 +59,7 @@
   },
   {
     "id": "managegroups",
-    "icon": "pf-icon-applications",
+    "icon": "pf-icon-server-group",
     "label": "adminGroupLabel",
     "descriptionLabel": "adminGroupsIntroMessage",
     "hidden": "!features.isViewGroupsEnabled",
@@ -82,7 +82,7 @@
   },
   {
     "id": "groups",
-    "icon": "pf-icon-applications",
+    "icon": "pf-icon-users",
     "label": "groupLabel",
     "descriptionLabel": "groupsIntroMessage",
     "hidden": "!features.isViewGroupsEnabled",
