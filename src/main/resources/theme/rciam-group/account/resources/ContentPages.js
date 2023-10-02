@@ -26,7 +26,7 @@ import { GroupPage } from "./content/group-management-pages/GroupPage.js";
 import { AdminGroupPage } from "./content/group-management-pages/AdminGroupPage.js";
 import { InvitationLandingPage } from "./content/group-management-pages/InvitationLandingPage.js";
 import { CreateEnrollment } from "./group-widgets/GroupEnrollment/CreateEnrollment.js";
-import { EnrollmentRequests } from "./content/group-management-pages/ManageEnrollmentRequests.js";
+import { EnrollmentRequests } from "./content/group-management-pages/EnrollmentRequests.js";
 ;
 let customPages = [{
   path: "/groups/showgroups/:id",
@@ -178,7 +178,8 @@ export function makeRoutes() {
   const customComponents = {
     GroupPage: GroupPage,
     AdminGroupPage: AdminGroupPage,
-    CreateEnrollment: CreateEnrollment
+    CreateEnrollment: CreateEnrollment,
+    EnrollmentRequests: EnrollmentRequests
   };
   const pageDefs = flattenContent(content);
   const routes = pageDefs.map(page => {
