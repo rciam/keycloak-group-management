@@ -1,10 +1,17 @@
 # keycloak-group-management
-A keycloak plugin to perform advanced group management 
+A keycloak plugin to support advanced group management features:
 
-<br>
-<br>
+* User-driven group enrollment flows:
+  * Users can request membership in groups:
+    * Accept group Terms & Conditions
+    * Provide comment/justification
+  * Membership requests are reviewed by group managers
 
-<h1>THIS PLUGIN IS CURRENTLY UNDER CONSTRUCTION</h1>
+* Time-based group membership: 
+  * Automatic expiration of group membership beyond a configurable time period after joining the group
+  * Membership renewal process
+
+* Roles within groups
 
 ## General configuration options 
 
