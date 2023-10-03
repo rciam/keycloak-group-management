@@ -231,7 +231,7 @@ export function makeRoutes(): React.ReactNode {
 
     return (<Switch>
                 <Route path="/groups/groupenrollments" render={(props) => <EnrollmentRequests {...props} manage={true} />} />
-                <Route path="/groups/mygroupenrollments" component={EnrollmentRequests} />
+                <Route path="/groups/mygroupenrollments" render={(props) => <EnrollmentRequests {...props}/>} />
                 {routes}
                 {customPages.map((item,index)=>{
                     return <Route path={item.path} component={customComponents[item.componentName]}/>
