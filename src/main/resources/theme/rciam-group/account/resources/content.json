@@ -58,29 +58,6 @@
     "hidden": "!features.isMyResourcesEnabled"
   },
   {
-    "id": "managegroups",
-    "icon": "pf-icon-server-group",
-    "label": "adminGroupLabel",
-    "descriptionLabel": "adminGroupsIntroMessage",
-    "hidden": "!features.isViewGroupsEnabled",
-    "content": [
-      {
-        "id": "admingroups",
-        "path": "groups/admingroups",
-        "label": "adminGroupLabel",
-        "modulePath": "/content/group-page/AdminGroupsPage.js",
-        "componentName": "AdminGroupsPage"
-      },
-      {
-        "id": "groupenrollments",
-        "path": "groups/groupenrollments",
-        "label": "groupManageEnrollmentsLabel",
-        "modulePath": "/content/group-management-pages/EnrollmentRequests.js",
-        "componentName": "EnrollmentRequests"
-      }
-    ]
-  },
-  {
     "id": "groups",
     "icon": "pf-icon-users",
     "label": "groupLabel",
@@ -103,5 +80,31 @@
       }
 
     ]
+  },
+  {
+    "id": "managegroups",
+    "icon": "pf-icon-server-group",
+    "label": "adminGroupLabel",
+    "descriptionLabel": "adminGroupsIntroMessage",
+    "hidden": "!features.isViewGroupsEnabled",
+    "content": [
+      {
+        "id": "admingroups",
+        "path": "groups/admingroups",
+        "label": "adminGroupLabel",
+        "modulePath": "/content/group-page/AdminGroupsPage.js",
+        "componentName": "AdminGroupsPage"
+      },
+      {
+        "id": "groupenrollments",
+        "path": "groups/groupenrollments",
+        "label": "groupManageEnrollmentsLabel",
+        "modulePath": "/content/group-management-pages/EnrollmentRequests.js",
+        "componentName": "EnrollmentRequests"
+      }
+    ]
   }
+
+  
+
 ]

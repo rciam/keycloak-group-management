@@ -46,7 +46,13 @@ export const EnrollmentRequests: FC<any> = (props) => {
 
     useEffect(()=>{
       let id;
-      setStatusSelection("PENDING_APPROVAL")
+      if(statusSelection==='PENDING_APPROVAL'){
+        setPage(1);
+        fetchEnrollmentRequests();
+      }
+      else{
+        setStatusSelection("PENDING_APPROVAL")
+      }
       if(props.location.search){
         const query = new URLSearchParams(props.location.search);
         id = decodeURI(query.get('id')||"");
@@ -102,8 +108,6 @@ export const EnrollmentRequests: FC<any> = (props) => {
 
         
     let fetchEnrollmentRequest = (id) => {
-      console.log(props.manage);
-      console.log('I fetch');
       groupsService!.doGet<any>((props.manage?"/group-admin/enroll-request/":"/user/enroll-request/")+id)
       .then((response: HttpResponse<any>) => {
         if(response.status===200&&response.data){
@@ -157,7 +161,6 @@ export const EnrollmentRequests: FC<any> = (props) => {
   
     return (
       <React.Fragment key={props.manage}>
-
         <div className="gm_content">
           <Breadcrumb className="gm_breadcumb">
             <BreadcrumbItem to="#">

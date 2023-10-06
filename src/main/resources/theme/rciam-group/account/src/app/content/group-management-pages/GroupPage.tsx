@@ -134,20 +134,6 @@ export const GroupPage: FC<GroupsPageProps> = (props)=> {
                       <DataListItemCells
                         dataListCells={[
                           <DataListCell key="primary content">
-                            <span id="compact-item2"><strong><Msg msgKey='groupDatalistCellAupExp' /></strong></span>
-                          </DataListCell>,
-                          <DataListCell key="secondary content ">
-                            <span>{groupMembership?.aupExpiresAt||<Msg msgKey='Never' />}</span>
-                          </DataListCell>
-                        ]}
-                      />
-                    </DataListItemRow>
-                  </DataListItem>
-                  <DataListItem aria-labelledby="compact-item2">
-                    <DataListItemRow>
-                      <DataListItemCells
-                        dataListCells={[
-                          <DataListCell key="primary content">
                             <span id="compact-item2"><strong><Msg msgKey='groupDatalistCellRoles' /></strong></span>
                           </DataListCell>,
                           <DataListCell key="secondary content ">
