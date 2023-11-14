@@ -1,1 +1,1 @@
-org.keycloak.plugins.groups.jpa.GroupManagementEntityProviderFactory
+org.rciam.plugins.groups.jpa.GroupManagementEntityProviderFactory

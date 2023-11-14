@@ -1,2 +1,2 @@
 <#ftl output_format="plainText">
-${msg("inviteGroupAdminBody",fullname,groupadmin,groupname,url, signatureMessage)}
+${msg("inviteGroupAdminBody",fullname,groupadmin,groupname,urlLink, signatureMessage)}

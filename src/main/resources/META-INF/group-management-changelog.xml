@@ -753,4 +753,11 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="version22">
+        <dropColumn tableName="GROUP_AUP" columnName="content" />
+        <addColumn tableName="GROUP_AUP">
+            <column name="content" type="longblob" />
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
