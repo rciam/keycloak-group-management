@@ -127,7 +127,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
             return "";
 
         StringBuilder sb = new StringBuilder(subgroupsStr);
-        subgroupsPaths.stream().forEach(x -> sb.append("x").append(comma));
+        subgroupsPaths.stream().forEach(x -> sb.append(x).append(comma));
         return StringUtils.removeEnd(sb.toString(), comma) + "- ";
     }
 
