@@ -1,5 +1,6 @@
 package org.rciam.plugins.groups.services;
 
+import jakarta.ws.rs.*;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
@@ -35,16 +36,6 @@ import org.rciam.plugins.groups.representations.UserGroupMembershipExtensionRepr
 import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.ServicesLogger;
 
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DefaultValue;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 
@@ -239,7 +230,7 @@ public class UserGroups {
 
         if (invitationEntity.getForMember()) {
             MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-            userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user, session.getContext().getUri(), memberUserAttribute, clientConnection);
+            userGroupMembershipExtensionRepository.create(invitationEntity, user, session.getContext().getUri(), memberUserAttribute, clientConnection);
         } else {
             groupAdminRepository.addGroupAdmin(user.getId(), invitationEntity.getGroup().getId());
         }
