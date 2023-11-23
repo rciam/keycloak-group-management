@@ -1,6 +1,5 @@
 package org.keycloak.plugins.groups.services;
 
-import jakarta.ws.rs.*;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
