@@ -1,5 +1,6 @@
 package org.keycloak.plugins.groups.services;
 
+import jakarta.ws.rs.*;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
@@ -240,7 +241,7 @@ public class UserGroups {
 
         if (invitationEntity.getForMember()) {
             MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-            userGroupMembershipExtensionRepository.create(groupInvitationRepository, invitationEntity, user, session.getContext().getUri(), memberUserAttribute, clientConnection);
+            userGroupMembershipExtensionRepository.create(invitationEntity, user, session.getContext().getUri(), memberUserAttribute, clientConnection);
         } else {
             groupAdminRepository.addGroupAdmin(user.getId(), invitationEntity.getGroup().getId());
         }
