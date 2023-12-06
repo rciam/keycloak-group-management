@@ -33,6 +33,7 @@ public class StartUpTasks implements ScheduledTask {
                 configurationEntity.setId(KeycloakModelUtils.generateId());
                 configurationEntity.setUserAttribute("eduPersonEntitlement");
                 configurationEntity.setUrnNamespace("urn%3Ageant%3Aeosc-portal.eu");
+                configurationEntity.setSignatureMessage("Support team");
                 RealmEntity realmEntity = new RealmEntity();
                 realmEntity.setId(realm.getId());
                 configurationEntity.setRealmEntity(realmEntity);

@@ -134,7 +134,7 @@ public class GroupAdminGroupMember {
         UserModel user = session.users().getUserById(realm, member.getUser().getId());
         List<String> memberUserAttributeValues = user.getAttributeStream(memberUserAttribute.getUserAttribute()).collect(Collectors.toList());
         String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
-        memberUserAttributeValues.removeIf(x -> x.startsWith(memberUserAttribute.getUrnNamespace() + Utils.groupStr + groupName + Utils.roleStr + name));
+        memberUserAttributeValues.removeIf(x -> x.startsWith(memberUserAttribute.getUrnNamespace() + Utils.groupStr + groupName + Utils.colon + Utils.roleStr + name));
         user.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
         LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
                 , Utils.GROUP_MEMBERSHIP_UPDATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
@@ -175,7 +175,7 @@ public class GroupAdminGroupMember {
         try {
             userGroupMembershipExtensionRepository.activateUser(user, member, justification, group);
             MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-            Utils.changeUserAttributeValue(user, member, Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm), memberUserAttribute);
+            Utils.changeUserAttributeValue(user, member, Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm), memberUserAttribute, session);
 
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
                     , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());

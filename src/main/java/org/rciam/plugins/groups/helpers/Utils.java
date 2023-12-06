@@ -5,6 +5,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,6 +23,8 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.userprofile.UserProfile;
+import org.keycloak.userprofile.UserProfileProvider;
 import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.rciam.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
@@ -31,6 +34,8 @@ import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ErrorResponseException;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.GroupResource;
+
+import static org.keycloak.userprofile.UserProfileContext.USER_API;
 
 public class Utils {
 
@@ -45,7 +50,7 @@ public class Utils {
     public static final String eventId = "1";
 
     private static final String chronJobUserId = "chron-job";
-    private static final String colon = ":";
+    public static final String colon = ":";
     private static final String space = " ";
     private static final String sharp = "#";
     public static final String groupStr = ":group:";
@@ -154,10 +159,10 @@ public class Utils {
     }
 
     public static boolean removeMemberUserAttributeCondition(String x, String urnNamespace, String groupName) {
-        return x.equals(urnNamespace + groupStr + groupName) || x.startsWith(urnNamespace + groupStr + groupName + roleStr) || x.startsWith(urnNamespace + groupStr + groupName + sharp);
+        return x.equals(urnNamespace + groupStr + groupName) || x.startsWith(urnNamespace + groupStr + groupName + colon + roleStr) || x.startsWith(urnNamespace + groupStr + groupName + sharp);
     }
 
-    public static void changeUserAttributeValue(UserModel user, UserGroupMembershipExtensionEntity member, String groupName, MemberUserAttributeConfigurationEntity memberUserAttribute) throws UnsupportedEncodingException {
+    public static void changeUserAttributeValue(UserModel user, UserGroupMembershipExtensionEntity member, String groupName, MemberUserAttributeConfigurationEntity memberUserAttribute, KeycloakSession session) throws UnsupportedEncodingException {
         List<String> memberUserAttributeValues = user.getAttributeStream(memberUserAttribute.getUserAttribute()).collect(Collectors.toList());
         memberUserAttributeValues.removeIf(x -> Utils.removeMemberUserAttributeCondition(x, memberUserAttribute.getUrnNamespace(), groupName));
         if (member.getGroupRoles() == null || member.getGroupRoles().isEmpty()) {
@@ -171,7 +176,10 @@ public class Utils {
                 }
             }).collect(Collectors.toList()));
         }
-        user.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
+        Map<String, List<String>> attributes = user.getAttributes();
+        attributes.put(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
+        UserProfile profile = session.getProvider(UserProfileProvider.class).create(USER_API, attributes, user);
+        profile.update(true);
     }
 
     public static Stream<GroupModel> getGroupWithSubgroups(GroupModel group){
