@@ -40,9 +40,9 @@ Parameter explanation:
    --header 'Authorization: Bearer {admin_access_token}' \
    --header 'Content-Type: application/json' \
    --data '{
-   "userAttribute" : "eduPersonEntitlement",
-   "urnNamespace" : "urn%3Agrnett%3Aeosc-portal.eu",
-   "authority" : "aai.eosc-portal.eu"
+   "userAttribute" : "entitlements",
+   "urnNamespace" : "urn%3Amace%3Aexample.org",
+   "authority" : "rciam.example.org" // Optional. It will be omitted from the group entitlements if not specified
    }'`
 
 Only authority is optional.
