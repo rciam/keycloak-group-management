@@ -14,8 +14,10 @@ A keycloak plugin to support advanced group management features:
 * Roles within groups
 
 ## General configuration options 
+All web services to be executed needs realm management rights role.
 
-For general group management configuarion options execute following web service (necessary during first time deployed):
+1. You should define realm attribute 'keycloakUrl' (Keycloak main url)
+2. (optional) For general group management configuration options execute following web service (necessary during first time deployed):
 
 `curl --request PUT \
 --url {server_url}/realms/{realmName}/agm/admin/configuration \
@@ -28,10 +30,47 @@ For general group management configuarion options execute following web service 
 }'`
 
 Parameter explanation:
-- invitation-expiration-period = After how many hours the invitation will be expired.
-- expiration-notification-period = How many days before Group Membership expiration (or aup expiration) notification email will be sent to user. Can be overridden per Group.
+- invitation-expiration-period = After how many hours the invitation will be expired. (default value is 72)
+- expiration-notification-period = How many days before Group Membership expiration (or aup expiration) notification email will be sent to user. Can be overridden per Group. (default value is 21)
 
-You should define realm attribute 'keycloakUrl' (Keycloak main url)
+3. For configuring entitlements user attribute you must execute the following web service :
+   `curl --request POST \
+   --url {server_url}/realms/{realmName}/agm/admin/member-user-attribute/configuration \
+   --header 'Accept: application/json' \
+   --header 'Authorization: Bearer {admin_access_token}' \
+   --header 'Content-Type: application/json' \
+   --data '{
+   "userAttribute" : "entitlements",
+   "urnNamespace" : "urn%3Amace%3Aexample.org",
+   "authority" : "rciam.example.org" // Optional. It will be omitted from the group entitlements if not specified
+   }'`
+
+Only authority is optional.
+
+4.  Configuration rules exists for group configuration options. Web service example:
+   `curl --request POST \
+   --url {server_url}/realms/{realmName}/agm/admin/configuration-rules \
+   --header 'Accept: application/json' \
+   --header 'Authorization: Bearer {admin_access_token}' \
+   --header 'Content-Type: application/json' \
+   --data '{
+   "field" : "membershipExpirationDays" ,
+   "type" : "TOP_LEVEL" ,
+   "required" : true,
+   "defaultValue" : "30",
+   "max" : "45"
+   }'`
+
+Fields explanation :
+- *field* : field of group management (required)
+- *type* : "TOP_LEVEL" or "SUBGROUP" (required)
+- *required* : required field (required)
+- *defaultValue* : default value
+- *max* : max value
+
+With PUT *{server_url}/realms/{realmName}/agm/admin/configuration-rules/{id}* you could update a configuration rule.
+With GET *{server_url}/realms/{realmName}/agm/admin/configuration-rules* you could get all configuration rules.
+
 
 ## REST API
 

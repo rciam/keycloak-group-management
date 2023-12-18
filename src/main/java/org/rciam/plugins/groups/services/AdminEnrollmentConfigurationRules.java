@@ -19,6 +19,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentConfigurationRulesEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRulesRepository;
@@ -30,22 +31,26 @@ public class AdminEnrollmentConfigurationRules {
     private final RealmModel realm;
     private final GroupEnrollmentConfigurationRulesRepository groupEnrollmentConfigurationRulesRepository;
     private final AdminEventBuilder adminEvent;
+    private  final AdminPermissionEvaluator realmAuth;
 
-    public AdminEnrollmentConfigurationRules(RealmModel realm, KeycloakSession session, AdminEventBuilder adminEvent) {
+    public AdminEnrollmentConfigurationRules(RealmModel realm, KeycloakSession session, AdminEventBuilder adminEvent, AdminPermissionEvaluator realmAuth) {
         this.realm = realm;
         this.groupEnrollmentConfigurationRulesRepository = new GroupEnrollmentConfigurationRulesRepository(session);
         this.adminEvent = adminEvent;
+        this.realmAuth = realmAuth;
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<GroupEnrollmentConfigurationRulesRepresentation> getEnrollmentConfigurationRules() {
+        realmAuth.realm().requireViewRealm();
         return groupEnrollmentConfigurationRulesRepository.getByRealm(realm.getId()).map(EntityToRepresentation::toRepresentation).collect(Collectors.toList());
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response configureRule(GroupEnrollmentConfigurationRulesRepresentation rep) {
+        realmAuth.realm().requireManageRealm();
         GroupEnrollmentConfigurationRulesEntity entity = new GroupEnrollmentConfigurationRulesEntity();
         entity.setId(KeycloakModelUtils.generateId());
         RealmEntity realmEntity = new RealmEntity();
@@ -64,6 +69,7 @@ public class AdminEnrollmentConfigurationRules {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateConfigureRule(GroupEnrollmentConfigurationRulesRepresentation rep, @PathParam("id") String id) {
+        realmAuth.realm().requireManageRealm();
         GroupEnrollmentConfigurationRulesEntity entity = groupEnrollmentConfigurationRulesRepository.getEntity(id);
         if (entity == null) {
             throw new NotFoundException("Could not find GroupEnrollmentConfigurationRules by id");
@@ -81,6 +87,7 @@ public class AdminEnrollmentConfigurationRules {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public GroupEnrollmentConfigurationRulesRepresentation getConfigureRule(@PathParam("id") String id) {
+        realmAuth.realm().requireViewRealm();
         GroupEnrollmentConfigurationRulesEntity entity = groupEnrollmentConfigurationRulesRepository.getEntity(id);
         if (entity == null) {
             throw new NotFoundException("Could not find GroupEnrollmentConfigurationRules by id");
@@ -92,6 +99,7 @@ public class AdminEnrollmentConfigurationRules {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteConfigureRule(@PathParam("id") String id) {
+        realmAuth.realm().requireManageRealm();
         groupEnrollmentConfigurationRulesRepository.deleteEntity(id);
         return Response.noContent().build();
     }

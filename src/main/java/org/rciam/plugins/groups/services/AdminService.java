@@ -93,6 +93,7 @@ public class AdminService {
     @Path("/member-user-attribute/configuration")
     @Produces(MediaType.APPLICATION_JSON)
     public MemberUserAttributeConfigurationRepresentation memberUserAttributeConfiguration() {
+        realmAuth.realm().requireManageRealm();
         MemberUserAttributeConfigurationEntity memberUserAttributeEntity = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
         return memberUserAttributeEntity != null ? EntityToRepresentation.toRepresentation(memberUserAttributeEntity) : new MemberUserAttributeConfigurationRepresentation();
     }
@@ -101,6 +102,7 @@ public class AdminService {
     @Path("/member-user-attribute/configuration")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response configureMemberUserAttribute(MemberUserAttributeConfigurationRepresentation rep) {
+        realmAuth.realm().requireManageRealm();
         MemberUserAttributeConfigurationEntity memberUserAttributeEntity = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
         memberUserAttributeEntity.setUserAttribute(rep.getUserAttribute());
         memberUserAttributeEntity.setUrnNamespace(rep.getUrnNamespace());
@@ -120,7 +122,7 @@ public class AdminService {
 
     @Path("/configuration-rules")
     public AdminEnrollmentConfigurationRules adminEnrollmentConfigurationRules() {
-        AdminEnrollmentConfigurationRules service = new AdminEnrollmentConfigurationRules(realm, session, adminEvent);
+        AdminEnrollmentConfigurationRules service = new AdminEnrollmentConfigurationRules(realm, session, adminEvent, realmAuth);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
