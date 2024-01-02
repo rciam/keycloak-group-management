@@ -107,6 +107,7 @@ public class AdminService {
         memberUserAttributeEntity.setUserAttribute(rep.getUserAttribute());
         memberUserAttributeEntity.setUrnNamespace(rep.getUrnNamespace());
         memberUserAttributeEntity.setAuthority(rep.getAuthority());
+        memberUserAttributeEntity.setSignatureMessage(rep.getSignatureMessage());
         memberUserAttributeConfigurationRepository.update(memberUserAttributeEntity);
         return Response.noContent().build();
     }

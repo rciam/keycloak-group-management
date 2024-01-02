@@ -167,7 +167,7 @@ public class EntityToRepresentation {
     }
 
     public static MemberUserAttributeConfigurationRepresentation toRepresentation(MemberUserAttributeConfigurationEntity entity) {
-        MemberUserAttributeConfigurationRepresentation rep = new MemberUserAttributeConfigurationRepresentation(entity.getUserAttribute(), entity.getUrnNamespace(), entity.getAuthority());
+        MemberUserAttributeConfigurationRepresentation rep = new MemberUserAttributeConfigurationRepresentation(entity.getUserAttribute(), entity.getUrnNamespace(), entity.getAuthority(), entity.getSignatureMessage());
         rep.setId(entity.getId());
         return rep;
     }

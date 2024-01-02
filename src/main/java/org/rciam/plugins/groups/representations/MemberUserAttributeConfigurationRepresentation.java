@@ -6,15 +6,16 @@ public class MemberUserAttributeConfigurationRepresentation {
     private String userAttribute;
     private String urnNamespace;
     private String authority;
+    private String signatureMessage;
 
     public MemberUserAttributeConfigurationRepresentation() {
 
     }
 
-    public MemberUserAttributeConfigurationRepresentation(String userAttribute, String urnNamespace, String authority) {
+    public MemberUserAttributeConfigurationRepresentation(String userAttribute, String urnNamespace, String authority, String signatureMessage) {
         this.userAttribute = userAttribute;
         this.urnNamespace = urnNamespace;
-        this.authority = authority;
+        this.signatureMessage = signatureMessage;
     }
 
     public String getId() {
@@ -47,5 +48,13 @@ public class MemberUserAttributeConfigurationRepresentation {
 
     public void setAuthority(String authority) {
         this.authority = authority;
+    }
+
+    public String getSignatureMessage() {
+        return signatureMessage;
+    }
+
+    public void setSignatureMessage(String signatureMessage) {
+        this.signatureMessage = signatureMessage;
     }
 }
