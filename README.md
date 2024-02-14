@@ -130,6 +130,14 @@ Path | Method | Description                                                     
 /account/group-admin/enroll-request/{enrollId}/accept | POST | accept group enrollment request                                               | GroupAdminEnrollementRequest
 /account/group-admin/enroll-request/{enrollId}/reject | POST | reject group enrollment request                                               | GroupAdminEnrollementRequest
 
+**manage-groups account role**
+
+Role name can be changed in database( column GROUP_ROLE_NAME of table GROUP_MANAGEMENT_EVENT)
+
+Path | Method | Description                                  | Classes |
+------------ |--|----------------------------------------------|---------| 
+/account/group-admin/group | POST | create top level group                       | GroupAdminService
+
 **Admin web services**
 
 Path | Method | Description                                  | Classes |

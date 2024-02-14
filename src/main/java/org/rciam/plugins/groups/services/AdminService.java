@@ -143,22 +143,8 @@ public class AdminService {
     @Path("/group")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addTopLevelGroup(GroupRepresentation rep) {
-        GroupsResource groupsResource = new GroupsResource(realm, session, realmAuth,adminEvent);
-        Response response = groupsResource.addTopLevelGroup(rep);
-        logger.info("group have been created with status"+response.getStatus());
-        if (response.getStatus() >= 400) {
-            //error response from client creation
-            return response;
-        } else if (groupEnrollmentConfigurationRepository.getByGroup(rep.getId()).collect(Collectors.toList()).isEmpty()) {
-            //group creation - group configuration no exist
-            logger.info("Create group with groupId === "+rep.getId());
-            groupEnrollmentConfigurationRepository.createDefault(realm.getGroupById(rep.getId()), rep.getName());
-            groupRolesRepository.create(Utils.defaultGroupRole,rep.getId());
-        }
-        //if rep.getId() != null => mean that group has been moved( not created)
-        logger.info("group configuration exists ==== "+rep.getId());
-
-        return Response.noContent().build();
+        realmAuth.groups().requireManage();
+        return generalJpaService.addTopLevelGroup(rep, adminEvent);
     }
 
     @DELETE

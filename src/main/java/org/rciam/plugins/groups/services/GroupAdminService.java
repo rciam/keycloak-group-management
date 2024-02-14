@@ -7,25 +7,33 @@ import java.util.stream.Collectors;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 
+import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.representations.idm.GroupRepresentation;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.enums.GroupTypeEnum;
 import org.rciam.plugins.groups.enums.MemberStatusEnum;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.PagerParameters;
+import org.rciam.plugins.groups.helpers.Utils;
+import org.rciam.plugins.groups.jpa.GeneralJpaService;
 import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
+import org.rciam.plugins.groups.jpa.entities.GroupManagementEventEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupAdminRepository;
+import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRulesRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
+import org.rciam.plugins.groups.jpa.repositories.GroupManagementEventRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.rciam.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.rciam.plugins.groups.representations.GroupEnrollmentConfigurationRulesRepresentation;
@@ -46,6 +54,8 @@ public class GroupAdminService {
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
 
     private final GroupEnrollmentConfigurationRulesRepository groupEnrollmentConfigurationRulesRepository;
+    private final GroupManagementEventRepository eventRepository;
+    private final GeneralJpaService generalJpaService;
 
     public GroupAdminService(KeycloakSession session, RealmModel realm, UserModel user, AdminEventBuilder adminEvent) {
         this.session = session;
@@ -56,6 +66,8 @@ public class GroupAdminService {
         this.groupEnrollmentRequestRepository =  new GroupEnrollmentRequestRepository(session, realm, new GroupRolesRepository(session, realm));
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
         this.groupEnrollmentConfigurationRulesRepository = new GroupEnrollmentConfigurationRulesRepository(session);
+        this.eventRepository = new GroupManagementEventRepository(session, realm);
+        this.generalJpaService = new GeneralJpaService(session, realm, new GroupEnrollmentConfigurationRepository(session, realm));
     }
 
 
@@ -66,6 +78,16 @@ public class GroupAdminService {
                                            @QueryParam("max") @DefaultValue("10") Integer max){
         return groupAdminRepository.getAdminGroups(groupAdmin.getId(), search, first, max);
     }
+
+    @POST
+    @Path("/group")
+    public Response createTopLevelGroup(GroupRepresentation rep) {
+        if (!Utils.hasManageGroupsAccountRole(realm, groupAdmin)){
+            throw new ForbiddenException("You could not create a top-level group");
+        }
+        return generalJpaService.addTopLevelGroup(rep, adminEvent);
+    }
+
 
     @Path("/group/{groupId}")
     public GroupAdminGroup group(@PathParam("groupId") String groupId) {

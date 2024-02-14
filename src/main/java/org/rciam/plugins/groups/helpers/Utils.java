@@ -16,6 +16,8 @@ import jakarta.ws.rs.core.Response;
 import org.keycloak.common.util.ObjectUtil;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
+import org.keycloak.models.ClientModel;
+import org.keycloak.models.Constants;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -61,13 +63,13 @@ public class Utils {
     public static final String EVENT_MEMBERSHIP_EXPIRATION = "membership expiration";
     public static final String VO_PERSON_ID ="voPersonID";
     public static final String KEYCLOAK_URL = "keycloakUrl";
-
     public static final String DEFAULT_CONFIGURATION_NAME = "defaultConfiguration";
     public static final String GROUP_MEMBERSHIP_CREATE = "GROUP_MEMBERSHIP_CREATE";
     public static final String GROUP_MEMBERSHIP_UPDATE = "GROUP_MEMBERSHIP_UPDATE";
     public static final String GROUP_MEMBERSHIP_DELETE = "GROUP_MEMBERSHIP_DELETE";
     public static final String GROUP_MEMBERSHIP_SUSPEND = "GROUP_MEMBERSHIP_SUSPEND";
     public static final String NO_FOUND_GROUP_CONFIGURATION = "Could not find this group configuration";
+    public static final String DEFAULT_GROUP_ROLE_NAME = "manage-groups";
 
     public static UserAdapter getDummyUser(UserRepresentation userRep) {
         UserEntity userEntity = new UserEntity();
@@ -151,9 +153,9 @@ public class Utils {
         //GroupRepresentation childRep = ModelToRepresentation.toGroupHierarchy(child, true);
         //custom agm implementation
         if (groupEnrollmentConfigurationRepository.getByGroup(rep.getId()).collect(Collectors.toList()).isEmpty()) {
-            //group creation
-            groupEnrollmentConfigurationRepository.createDefault(child, rep.getName());
+            //group configuration creation
             groupRolesRepository.create(Utils.defaultGroupRole, rep.getId());
+            groupEnrollmentConfigurationRepository.createDefault(child, rep.getName());
         }
         return Response.noContent().build();
     }
@@ -194,5 +196,9 @@ public class Utils {
         return groups.stream();
     }
 
+    public static boolean hasManageGroupsAccountRole(RealmModel realm, UserModel user) {
+        ClientModel client = realm.getClientByClientId(Constants.ACCOUNT_MANAGEMENT_CLIENT_ID);
+        return client!= null && user.hasRole(client.getRole(DEFAULT_GROUP_ROLE_NAME));
+    }
 
 }

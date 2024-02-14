@@ -1,19 +1,29 @@
 package org.rciam.plugins.groups.jpa;
 
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
+import org.keycloak.common.util.ObjectUtil;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.ModelDuplicateException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
+import org.keycloak.services.ErrorResponse;
+import org.keycloak.services.resources.admin.AdminEventBuilder;
+import org.keycloak.services.resources.admin.GroupResource;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.ModelToRepresentation;
+import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
@@ -37,11 +47,12 @@ public class GeneralJpaService {
     public GeneralJpaService(KeycloakSession session, RealmModel realm, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository) {
         this.realm = realm;
         this.session = session;
+        this.groupRolesRepository = new GroupRolesRepository(session, realm);
         this.groupEnrollmentConfigurationRepository = groupEnrollmentConfigurationRepository;
+        groupEnrollmentConfigurationRepository.setGroupRolesRepository(groupRolesRepository);
         this.groupAdminRepository = new GroupAdminRepository(session, realm);
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
         this.groupEnrollmentRequestRepository = new GroupEnrollmentRequestRepository(session, realm, null);
-        this.groupRolesRepository = new GroupRolesRepository(session, realm);
         this.groupInvitationRepository = new GroupInvitationRepository(session, realm);
 
     }
@@ -107,5 +118,43 @@ public class GeneralJpaService {
     public List<GroupEntity> getGroupByName(String name){
         EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
         return em.createQuery("from GroupEntity f where f.name = :name",GroupEntity.class).setParameter("name",name).getResultList();
+    }
+
+    public Response addTopLevelGroup(org.keycloak.representations.idm.GroupRepresentation rep, AdminEventBuilder adminEvent) {
+
+        //method based on GroupsResource.addTopLevelGroup (any upgrade changes need to be passed)
+        //with extra create default role and default configuration
+
+        GroupModel child;
+        Response.ResponseBuilder builder = Response.status(204);
+        String groupName = rep.getName();
+
+        if (ObjectUtil.isBlank(groupName)) {
+            throw ErrorResponse.error("Group name is missing", Response.Status.BAD_REQUEST);
+        }
+
+        try {
+            child = realm.createGroup(groupName);
+            GroupResource.updateGroup(rep, child, realm, session);
+            URI uri = session.getContext().getUri().getAbsolutePathBuilder()
+                    .path(child.getId()).build();
+            builder.status(201).location(uri);
+
+            rep.setId(child.getId());
+
+            //create defaults group
+            if (groupEnrollmentConfigurationRepository.getByGroup(rep.getId()).collect(Collectors.toList()).isEmpty()) {
+                //group creation - group configuration no exist
+                groupRolesRepository.create(Utils.defaultGroupRole,rep.getId());
+                groupEnrollmentConfigurationRepository.createDefault(realm.getGroupById(rep.getId()), rep.getName());
+            }
+
+            adminEvent.operation(OperationType.CREATE).resourcePath(session.getContext().getUri(), child.getId());
+        } catch (ModelDuplicateException mde) {
+            throw ErrorResponse.exists("Top level group named '" + groupName + "' already exists.");
+        }
+
+        adminEvent.representation(rep).success();
+        return builder.build();
     }
 }
