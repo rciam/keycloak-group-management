@@ -92,7 +92,7 @@ public class GroupAdminService {
     @Path("/group/{groupId}")
     public GroupAdminGroup group(@PathParam("groupId") String groupId) {
         GroupModel group = realm.getGroupById(groupId);
-        if (!groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group)){
+        if (!Utils.hasManageGroupsAccountRole(realm, groupAdmin) || !groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group)){
             throw new ForbiddenException();
         }
         if (group == null) {
@@ -115,7 +115,7 @@ public class GroupAdminService {
     @Path("/configuration-rules")
     @Produces("application/json")
     public  List<GroupEnrollmentConfigurationRulesRepresentation> getEnrollmentConfigurationRules(@QueryParam("type") @DefaultValue("TOP_LEVEL") GroupTypeEnum type) {
-        if (!groupAdminRepository.hasAdminRights(groupAdmin.getId())){
+        if (!Utils.hasManageGroupsAccountRole(realm, groupAdmin) || !groupAdminRepository.hasAdminRights(groupAdmin.getId())){
             throw new ForbiddenException();
         }
         return groupEnrollmentConfigurationRulesRepository.getByRealmAndType(realm.getId(), type).map(EntityToRepresentation::toRepresentation).collect(Collectors.toList());
