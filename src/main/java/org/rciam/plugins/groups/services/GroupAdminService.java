@@ -2,6 +2,7 @@ package org.rciam.plugins.groups.services;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import jakarta.ws.rs.DefaultValue;
@@ -19,6 +20,7 @@ import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.enums.GroupTypeEnum;
@@ -28,12 +30,10 @@ import org.rciam.plugins.groups.helpers.PagerParameters;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.GeneralJpaService;
 import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
-import org.rciam.plugins.groups.jpa.entities.GroupManagementEventEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRulesRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
-import org.rciam.plugins.groups.jpa.repositories.GroupManagementEventRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.rciam.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.rciam.plugins.groups.representations.GroupEnrollmentConfigurationRulesRepresentation;
@@ -54,7 +54,6 @@ public class GroupAdminService {
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
 
     private final GroupEnrollmentConfigurationRulesRepository groupEnrollmentConfigurationRulesRepository;
-    private final GroupManagementEventRepository eventRepository;
     private final GeneralJpaService generalJpaService;
 
     public GroupAdminService(KeycloakSession session, RealmModel realm, UserModel user, AdminEventBuilder adminEvent) {
@@ -66,7 +65,6 @@ public class GroupAdminService {
         this.groupEnrollmentRequestRepository =  new GroupEnrollmentRequestRepository(session, realm, new GroupRolesRepository(session, realm));
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
         this.groupEnrollmentConfigurationRulesRepository = new GroupEnrollmentConfigurationRulesRepository(session);
-        this.eventRepository = new GroupManagementEventRepository(session, realm);
         this.generalJpaService = new GeneralJpaService(session, realm, new GroupEnrollmentConfigurationRepository(session, realm));
     }
 
@@ -76,7 +74,23 @@ public class GroupAdminService {
     public GroupsPager getGroupAdminGroups(@QueryParam("search") String search,
                                            @QueryParam("first") @DefaultValue("0") Integer first,
                                            @QueryParam("max") @DefaultValue("10") Integer max){
-        return groupAdminRepository.getAdminGroups(groupAdmin.getId(), search, first, max);
+        if (Utils.hasManageGroupsAccountRole(realm, groupAdmin)){
+            return getAllGroups( search, first, max);
+        } else {
+            return groupAdminRepository.getAdminGroups(groupAdmin.getId(), search, first, max);
+        }
+    }
+
+    private GroupsPager getAllGroups( String search,Integer first,Integer max){
+        if (Objects.nonNull(search)) {
+            List<GroupRepresentation> results = ModelToRepresentation.searchForGroupModelByName(session, realm, false, search.trim(), false, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+            Long count =realm.getGroupsCountByNameContaining(search);
+            return new GroupsPager(results, count);
+        } else {
+            List<GroupRepresentation> results = ModelToRepresentation.toGroupModelHierarchy(realm, false, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+            Long count = realm.getGroupsCount(true);
+            return new GroupsPager(results, count);
+        }
     }
 
     @POST
@@ -92,7 +106,7 @@ public class GroupAdminService {
     @Path("/group/{groupId}")
     public GroupAdminGroup group(@PathParam("groupId") String groupId) {
         GroupModel group = realm.getGroupById(groupId);
-        if (!Utils.hasManageGroupsAccountRole(realm, groupAdmin) || !groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group)){
+        if (!Utils.hasManageGroupsAccountRole(realm, groupAdmin) && !groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group)){
             throw new ForbiddenException();
         }
         if (group == null) {
@@ -115,7 +129,7 @@ public class GroupAdminService {
     @Path("/configuration-rules")
     @Produces("application/json")
     public  List<GroupEnrollmentConfigurationRulesRepresentation> getEnrollmentConfigurationRules(@QueryParam("type") @DefaultValue("TOP_LEVEL") GroupTypeEnum type) {
-        if (!Utils.hasManageGroupsAccountRole(realm, groupAdmin) || !groupAdminRepository.hasAdminRights(groupAdmin.getId())){
+        if (!Utils.hasManageGroupsAccountRole(realm, groupAdmin) && !groupAdminRepository.hasAdminRights(groupAdmin.getId())){
             throw new ForbiddenException();
         }
         return groupEnrollmentConfigurationRulesRepository.getByRealmAndType(realm.getId(), type).map(EntityToRepresentation::toRepresentation).collect(Collectors.toList());
