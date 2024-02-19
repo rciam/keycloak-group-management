@@ -106,7 +106,8 @@ public class GroupAdminService {
     @Path("/group/{groupId}")
     public GroupAdminGroup group(@PathParam("groupId") String groupId) {
         GroupModel group = realm.getGroupById(groupId);
-        if (!Utils.hasManageGroupsAccountRole(realm, groupAdmin) && !groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group)){
+        boolean isGroupAdmin = groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group);
+        if (!isGroupAdmin && !Utils.hasManageGroupsAccountRole(realm, groupAdmin)){
             throw new ForbiddenException();
         }
         if (group == null) {
@@ -114,7 +115,7 @@ public class GroupAdminService {
         }
 
 
-        GroupAdminGroup service = new GroupAdminGroup(session, realm, groupAdmin, group, userGroupMembershipExtensionRepository, groupAdminRepository, groupEnrollmentRequestRepository, adminEvent);
+        GroupAdminGroup service = new GroupAdminGroup(session, realm, groupAdmin, group, userGroupMembershipExtensionRepository, groupAdminRepository, groupEnrollmentRequestRepository, adminEvent, isGroupAdmin);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

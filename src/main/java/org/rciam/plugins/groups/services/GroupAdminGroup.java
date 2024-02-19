@@ -30,6 +30,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.services.ForbiddenException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
@@ -61,8 +62,10 @@ public class GroupAdminGroup {
     private final GroupInvitationRepository groupInvitationRepository;
     private final GeneralJpaService generalService;
     private final AdminEventBuilder adminEvent;
+    //based on this boolean, do not allow manage-groups users to do specific actions
+    private final boolean isGroupAdmin;
 
-    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel groupAdmin, GroupModel group, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, AdminEventBuilder adminEvent) {
+    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel groupAdmin, GroupModel group, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, AdminEventBuilder adminEvent, boolean isGroupAdmin) {
         this.session = session;
         this.realm = realm;
         this.groupAdmin = groupAdmin;
@@ -80,10 +83,14 @@ public class GroupAdminGroup {
         this.customFreeMarkerEmailTemplateProvider.setSignatureMessage(memberUserAttribute.getSignatureMessage());
         this.generalService = new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
         this.adminEvent = adminEvent;
+        this.isGroupAdmin = isGroupAdmin;
     }
 
     @DELETE
     public void deleteGroup() {
+        if (!isGroupAdmin){
+            throw new ForbiddenException();
+        }
         List<String> groupAdminsIds = groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).collect(Collectors.toList());
         generalService.removeGroup(group);
         groupAdminsIds.stream().map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
@@ -221,6 +228,10 @@ public class GroupAdminGroup {
     @DELETE
     @Path("/role/{name}")
     public Response deleteGroupRole(@PathParam("name") String name) {
+        if (!isGroupAdmin){
+            throw new ForbiddenException();
+        }
+
         GroupRolesEntity entity = groupRolesRepository.getGroupRolesByNameAndGroup(name, group.getId());
         if (entity.getGroupExtensions() != null && entity.getGroupExtensions().size() > 0)
             throw new BadRequestException("You can not delete this role because it is assigned in a group membership");
@@ -262,6 +273,10 @@ public class GroupAdminGroup {
     @POST
     @Path("/admin/invite")
     public Response inviteGroupAdmin(UserRepresentation userRep) throws EmailException {
+        if (!isGroupAdmin){
+            throw new ForbiddenException();
+        }
+        
         if (userRep.getEmail() == null)
             throw new ErrorResponseException("Wrong data", "Wrong data", Response.Status.BAD_REQUEST);
 
