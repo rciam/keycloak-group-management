@@ -138,14 +138,7 @@ public class EntityToRepresentation {
             rep.setAttributes(attributes);
         }
         if (entity.getFederatedIdentities() != null)
-            rep.setFederatedIdentities(entity.getFederatedIdentities().stream().map(fed -> getFederatedIdentityRep(realm, fed.getIdentityProvider())).collect(Collectors.toList()));
-        return rep;
-    }
-
-    private static FederatedIdentityRepresentation getFederatedIdentityRep(RealmModel realm, String idPAlias) {
-        FederatedIdentityRepresentation rep = new FederatedIdentityRepresentation();
-        IdentityProviderModel idp = realm.getIdentityProviderByAlias(idPAlias);
-        rep.setIdentityProvider(idp.getDisplayName() != null ? idp.getDisplayName() : idPAlias);
+            rep.setFederatedIdentities(entity.getFederatedIdentities().stream().map(fed -> Utils.getFederatedIdentityRep(realm, fed.getIdentityProvider())).collect(Collectors.toList()));
         return rep;
     }
 

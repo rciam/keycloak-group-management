@@ -1,7 +1,9 @@
 package org.rciam.plugins.groups.services;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -21,6 +23,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.enums.GroupTypeEnum;
@@ -150,9 +153,21 @@ public class GroupAdminService {
     public UserRepresentationPager memberhipPager(@QueryParam("first") @DefaultValue("0") Integer first,
                                                   @QueryParam("max") @DefaultValue("10") Integer max,
                                                   @QueryParam("search") String search,
+                                                  @QueryParam("serviceAccountClientLink") @DefaultValue("true") boolean serviceAccountClientLink,
                                                   @QueryParam("status") MemberStatusEnum status,
                                                   @QueryParam("groups") String groupids){
-        return userGroupMembershipExtensionRepository.searchByAdminGroups(Arrays.asList(groupids.split(",")), search, status, first, max);
+        if (Utils.hasManageGroupsAccountRole(realm, groupAdmin)){
+            Map<String, String> attributes = new HashMap<>();
+            if (search != null && !search.isEmpty())
+                attributes.put(UserModel.SEARCH, search.trim());
+            if (!serviceAccountClientLink)
+                attributes.put(UserModel.INCLUDE_SERVICE_ACCOUNT, "false");
+            List<UserRepresentation> users = session.users().searchForUserStream(realm, attributes, first, max).map(user->org.rciam.plugins.groups.helpers.ModelToRepresentation.toBriefRepresentation(user, session, realm)).collect(Collectors.toList());
+            int count = session.users().getUsersCount(realm, attributes);
+            return new UserRepresentationPager(users, (long) count);
+        } else {
+            return userGroupMembershipExtensionRepository.searchByAdminGroups(Arrays.asList(groupids.split(",")), search, serviceAccountClientLink, status, first, max);
+        }
     }
 
     @GET

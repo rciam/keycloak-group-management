@@ -19,12 +19,14 @@ import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.Constants;
 import org.keycloak.models.GroupModel;
+import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.representations.idm.FederatedIdentityRepresentation;
 import org.keycloak.userprofile.UserProfile;
 import org.keycloak.userprofile.UserProfileProvider;
 import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
@@ -199,6 +201,13 @@ public class Utils {
     public static boolean hasManageGroupsAccountRole(RealmModel realm, UserModel user) {
         ClientModel client = realm.getClientByClientId(Constants.ACCOUNT_MANAGEMENT_CLIENT_ID);
         return client!= null && user.hasRole(client.getRole(DEFAULT_GROUP_ROLE_NAME));
+    }
+
+    public static FederatedIdentityRepresentation getFederatedIdentityRep(RealmModel realm, String idPAlias) {
+        FederatedIdentityRepresentation rep = new FederatedIdentityRepresentation();
+        IdentityProviderModel idp = realm.getIdentityProviderByAlias(idPAlias);
+        rep.setIdentityProvider(idp.getDisplayName() != null ? idp.getDisplayName() : idPAlias);
+        return rep;
     }
 
 }

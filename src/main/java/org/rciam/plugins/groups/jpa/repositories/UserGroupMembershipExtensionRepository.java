@@ -331,7 +331,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         return new UserGroupMembershipExtensionRepresentationPager(results.map(x -> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList()), count);
     }
 
-    public UserRepresentationPager searchByAdminGroups(List<String> groupids, String search, MemberStatusEnum status, Integer first, Integer max) {
+    public UserRepresentationPager searchByAdminGroups(List<String> groupids, String search, boolean serviceAccountClientLink, MemberStatusEnum status, Integer first, Integer max) {
 
         String sqlQuery = "from UserGroupMembershipExtensionEntity f join UserEntity u on f.user.id = u.id where f.group.id in (:groupids) ";
         Map<String, Object> params = new HashMap<>();
@@ -343,6 +343,9 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         if (status != null) {
             sqlQuery += " and f.status = :status";
             params.put("status", status);
+        }
+        if (!serviceAccountClientLink ){
+            sqlQuery += " and u.serviceAccountClientLink is null";
         }
 
         Query queryList = em.createQuery("select distinct(u) " + sqlQuery).setFirstResult(first).setMaxResults(max);
