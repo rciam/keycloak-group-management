@@ -15,6 +15,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
+import org.keycloak.services.ForbiddenException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.enums.MemberStatusEnum;
 import org.rciam.plugins.groups.helpers.ModelToRepresentation;
@@ -44,8 +45,9 @@ public class GroupAdminGroupMembers {
     private final GroupInvitationRepository groupInvitationRepository;
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final GroupAdminRepository groupAdminRepository;
+    private final boolean isGroupAdmin;
 
-    public GroupAdminGroupMembers(KeycloakSession session, RealmModel realm, UserModel groupAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider) {
+    public GroupAdminGroupMembers(KeycloakSession session, RealmModel realm, UserModel groupAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider,boolean isGroupAdmin) {
         this.session = session;
         this.realm =  realm;
         this.groupAdmin = groupAdmin;
@@ -55,6 +57,7 @@ public class GroupAdminGroupMembers {
         this.groupInvitationRepository = new GroupInvitationRepository(session, realm, new GroupRolesRepository(session, realm));
         this.groupEnrollmentConfigurationRepository = new GroupEnrollmentConfigurationRepository(session, realm);
         this.groupAdminRepository= new GroupAdminRepository(session, realm);
+        this.isGroupAdmin = isGroupAdmin;
     }
 
     // group invitation and process for accept it
@@ -63,6 +66,10 @@ public class GroupAdminGroupMembers {
     @Produces("application/json")
     @Consumes("application/json")
     public Response inviteUser(GroupInvitationInitialRepresentation groupInvitationInitialRep) {
+
+        if (!isGroupAdmin){
+            throw new ForbiddenException();
+        }
 
         if (groupInvitationInitialRep.getEmail() == null || (groupInvitationInitialRep.isWithoutAcceptance() && groupInvitationInitialRep.getGroupEnrollmentConfiguration() == null))
             throw new ErrorResponseException("Wrong data","Wrong data", Response.Status.BAD_REQUEST);

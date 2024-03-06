@@ -53,8 +53,9 @@ public class GroupAdminGroupMember {
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
     private final GroupAdminRepository groupAdminRepository;
     private final UserGroupMembershipExtensionEntity member;
+    private final boolean isGroupAdmin;
 
-    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel groupAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, GroupAdminRepository groupAdminRepository) {
+    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel groupAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, GroupAdminRepository groupAdminRepository,boolean isGroupAdmin) {
         this.session = session;
         this.realm = realm;
         this.groupAdmin = groupAdmin;
@@ -65,6 +66,7 @@ public class GroupAdminGroupMember {
         this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
         this.member = member;
+        this.isGroupAdmin = isGroupAdmin;
     }
 
     @PUT

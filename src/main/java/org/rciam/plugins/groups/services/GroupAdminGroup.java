@@ -254,7 +254,7 @@ public class GroupAdminGroup {
 
     @Path("/members")
     public GroupAdminGroupMembers groupMember() {
-        GroupAdminGroupMembers service = new GroupAdminGroupMembers(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider);
+        GroupAdminGroupMembers service = new GroupAdminGroupMembers(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, isGroupAdmin);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
@@ -265,7 +265,7 @@ public class GroupAdminGroup {
         if (member == null) {
             throw new NotFoundException("Could not find this group member");
         }
-        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository);
+        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository, isGroupAdmin);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
