@@ -158,8 +158,9 @@ public class GroupAdminService {
                                                   @QueryParam("groups") String groupids){
         if (Utils.hasManageGroupsAccountRole(realm, groupAdmin)){
             Map<String, String> attributes = new HashMap<>();
+            //for search add * in start and in end in order to be a like everywhere in string
             if (search != null && !search.isEmpty())
-                attributes.put(UserModel.SEARCH, search.trim());
+                attributes.put(UserModel.SEARCH, "*"+search.trim()+"*");
             if (!serviceAccountClientLink)
                 attributes.put(UserModel.INCLUDE_SERVICE_ACCOUNT, "false");
             List<UserRepresentation> users = session.users().searchForUserStream(realm, attributes, first, max).map(user->org.rciam.plugins.groups.helpers.ModelToRepresentation.toBriefRepresentation(user, session, realm)).collect(Collectors.toList());
