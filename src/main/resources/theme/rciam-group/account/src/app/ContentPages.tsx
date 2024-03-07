@@ -38,7 +38,6 @@ export interface ContentItem {
     groupId: string; // computed value
     itemId: string; // computed value
 };
-
 let customPages =[ 
     {
         path: "/groups/showgroups/:id",
@@ -57,6 +56,12 @@ let customPages =[
         expandId: "groups",
         parentId: "showgroups",
         componentName: "CreateEnrollment"
+    },
+    {
+        path: "/invitation/:invitation_id",
+        expandId: "groups",
+        parentId: "showgroups",
+        componentName: "InvitationLandingPage"
     }
 ]
 
@@ -215,7 +220,8 @@ export function makeRoutes(): React.ReactNode {
         GroupPage:GroupPage,
         AdminGroupPage:AdminGroupPage,
         CreateEnrollment:CreateEnrollment,
-        EnrollmentRequests:EnrollmentRequests
+        EnrollmentRequests:EnrollmentRequests,
+        InvitationLandingPage:InvitationLandingPage
     }
     const pageDefs: PageDef[] = flattenContent(content);
 
@@ -236,7 +242,6 @@ export function makeRoutes(): React.ReactNode {
                 {customPages.map((item,index)=>{
                     return <Route path={item.path} component={customComponents[item.componentName]}/>
                 })}
-                <Route path="/invitation/:invitation_id" component={InvitationLandingPage}/>
                 <Route path="/forbidden" component={ForbiddenPage}/>
                 <Route component={PageNotFound}/>
             </Switch>);

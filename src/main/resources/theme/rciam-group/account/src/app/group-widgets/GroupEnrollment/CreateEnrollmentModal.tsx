@@ -247,7 +247,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                     <Tooltip {...(!!(Object.keys(errors).length !== 0) ? { trigger:'manual', isVisible:false }:{trigger:'mouseenter'})}
                         content={
                             <div>
-                                <Msg msgKey='createSubgroupFormError' />
+                                <Msg msgKey='createGroupFormError' />
                             </div>
                         }
                     >

@@ -258,10 +258,10 @@ export const CreateEnrollment: FC<any> = (props) => {
         {Object.keys(enrollment).length !== 0?
           <React.Fragment>
             <Alert variant="warning" className='gm_content-width' title={
-              (((enrollment.validFrom &&isFutureDate(dateParse(enrollment.validFrom)))||parseInt(enrollment.membershipExpirationDays)>0)&& "The membership ")+ 
+              ("The membership ")+ 
               (enrollment.validFrom &&isFutureDate(dateParse(enrollment.validFrom))? "will take effect at " +formatDateToString(dateParse(enrollment.validFrom)):"")+
               (enrollment.validFrom &&isFutureDate(dateParse(enrollment.validFrom))&&parseInt(enrollment.membershipExpirationDays)>0 ?" and it ": "")+
-              (parseInt(enrollment.membershipExpirationDays)>0&& "will expire in " + enrollment.membershipExpirationDays+ " days after activation")} 
+              (parseInt(enrollment.membershipExpirationDays)>0? "will expire in " + enrollment.membershipExpirationDays+ " days after activation":" does not have an expiration date.")} 
             />  
 
             

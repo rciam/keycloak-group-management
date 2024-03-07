@@ -1,15 +1,29 @@
 import * as React from 'react';
-import {FC,useState} from 'react';
+import {FC,useState,useEffect} from 'react';
 import {Button, TextInput, InputGroup, Tooltip} from '@patternfly/react-core';
+import { CreateGroupModal } from '../Modals';
 // @ts-ignore
 
 
-export const SearchInput: FC<any> = (props) => {
+export const TableActionBar: FC<any> = (props) => {
 
+    useEffect(()=>{
+        console.log(props.createButton);
+    },[props.createButton])
     const [searchString,setSearchString] = useState<string>("");
+    const [createGroupModalOpen,setCreateGroupModalOpen] = useState<boolean>(false);
+
 
     return(
         <div className="gm_search-input-container">
+            {props.createButton&&
+            <div className="gm_search-input-action">
+                <CreateGroupModal active={createGroupModalOpen} afterSuccess={()=>{
+                    props.afterCreate();}} close={()=>{setCreateGroupModalOpen(false);}}/>
+                <Button onClick={()=>{setCreateGroupModalOpen(true);}}>
+                    Create Group
+                </Button>
+            </div>}
             
             <InputGroup className="gm_search-input">
                 <TextInput

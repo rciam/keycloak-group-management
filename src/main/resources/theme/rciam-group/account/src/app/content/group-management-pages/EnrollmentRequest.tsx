@@ -209,7 +209,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                             label={Msg.localize('enrollmentExpirationLabel')}
                             fieldId="simple-form-name-09"
                           >
-                            <div>{enrollmentRequest?.groupEnrollmentConfiguration?.membershipExpirationDays}</div>
+                            <div>{enrollmentRequest?.groupEnrollmentConfiguration?.membershipExpirationDays?enrollmentRequest?.groupEnrollmentConfiguration?.membershipExpirationDays:Msg.localize('reviewEnrollmentMembershipNoExpiration')}</div>
                           </FormGroup>
                           {
                             enrollmentRequest?.groupEnrollmentConfiguration?.commentsNeeded &&
@@ -230,7 +230,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                             }                          
                           >
                             <FormGroup
-                              label={Msg.localize('enrollmentUserCommentLabel')}
+                              label={Msg.localize('enrollmentReviewerCommentLabel')}
                               fieldId="simple-form-name-11"
                             >
                               <TextArea

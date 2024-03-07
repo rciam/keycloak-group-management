@@ -5,7 +5,7 @@ import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, 
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
 import { ConfirmationModal } from '../Modals';
-import { SearchInput } from './SearchInput';
+import { TableActionBar } from './TableActionBar';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
 import { InviteMemberModal } from './InviteMemberModal';
 import { Msg } from '../../widgets/Msg';
@@ -144,8 +144,8 @@ export const GroupMembers: FC<any> = (props) => {
       <React.Fragment>
         <ConfirmationModal modalInfo={modalInfo}/>
         <EditRolesModal member={editMemberRoles} setMember={setEditMemberRoles} groupRoles={props.groupConfiguration?.groupRoles} groupId={props.groupId} fetchGroupMembers={fetchGroupMembers} />
-        <SearchInput
-          childComponent={<Button className="gm_invite-member-button" onClick={()=>{setInviteModalActive(true)}}><Msg msgKey='adminGroupInviteMemberButton' /></Button>}
+        <TableActionBar
+          childComponent={props.isGroupAdmin&&<Button className="gm_invite-member-button" onClick={()=>{setInviteModalActive(true)}}><Msg msgKey='adminGroupInviteMemberButton' /></Button>}
           searchText={Msg.localize('adminGroupSearchMember')} cancelText={Msg.localize('adminGroupSearchCancel')} search={(searchString)=>{            fetchGroupMembers(searchString);
             setPage(1);
           }} cancel={()=>{
@@ -205,15 +205,17 @@ export const GroupMembers: FC<any> = (props) => {
                       {member.groupRoles.map((role,index)=>{
                         return <Badge key={index} className="gm_role_badge" isRead>{role}</Badge>
                       })}
-                      <Tooltip
-                        content={
-                          <div>
-                            <Msg msgKey='adminGroupMemberCellRolesTooltip' />
-                          </div>
-                        }
-                      >
-                        <div className="gm_edit-member-roles" onClick={()=>{setEditMemberRoles(member);}}><div></div></div>
-                      </Tooltip>
+                      {props.isGroupAdmin&&
+                        <Tooltip
+                          content={
+                            <div>
+                              <Msg msgKey='adminGroupMemberCellRolesTooltip' />
+                            </div>
+                          }
+                        >
+                          <div className="gm_edit-member-roles" onClick={()=>{setEditMemberRoles(member);}}><div></div></div>
+                        </Tooltip> 
+                      }
                       </DataListCell>,
                       <DataListCell width={3} key="secondary content ">
                       {member.membershipExpiresAt||<Msg msgKey='Never' />}
@@ -222,12 +224,12 @@ export const GroupMembers: FC<any> = (props) => {
                         <Tooltip
                           content={
                             <div>
-                              {member.status==='ENABLED'?Msg.localize('adminGroupMemberUserActiveTooltip'):member.status==="SUSPENDED"?Msg.localize('adminGroupMemberUserSuspendedTooltip'):""}
+                              {member.status==='ENABLED'?Msg.localize('adminGroupMemberUserActiveTooltip'):member.status==="SUSPENDED"?Msg.localize('adminGroupMemberUserSuspendedTooltip'):member.status==="SUSPENDED"?Msg.localize('adminGroupMemberUserPendingTooltip'):""}
                             </div>
                           }
                         >
                         <div className="gm_user-status-container">
-                          <div className={member.status==='ENABLED'?"gm_icon gm_icon-active-user":member.status==="SUSPENDED"?"gm_icon gm_icon-suspended-user":""}></div>
+                          <div className={member.status==='ENABLED'?"gm_icon gm_icon-active-user":member.status==="SUSPENDED"?"gm_icon gm_icon-suspended-user":member.status==="SUSPENDED"?"gm_icon gm_icon-pending-user":""}></div>
                         </div>
                         </Tooltip>
                       </DataListCell>
@@ -241,34 +243,36 @@ export const GroupMembers: FC<any> = (props) => {
                         aria-label="Actions"
                         isPlainButtonAction
                       >
+                        {props.isGroupAdmin&&
+                          <Tooltip
+                            content={
+                              <div>
+                                {member.user.id===props.user.userId?Msg.localize('adminGroupMemberLeave'):Msg.localize('adminGroupMemberRemove')}
+                              </div>
+                            }
+                          >
+                            <Button className={"gm_x-button-small"} onClick={()=>{
+                                setModalInfo({
+                                  title:(Msg.localize('Confirmation')),
+                                  accept_message: (Msg.localize('YES')),
+                                  cancel_message: (Msg.localize('NO')),
+                                  message: (Msg.localize('adminGroupMemberRemoveConfirmation')),
+                                  accept: function(){
+                                      deleteGroupMember(member.id);
+                                      setModalInfo({})},
+                                  cancel: function(){
+                                      setModalInfo({})}
+                                });
+                              
+                              }}>
+                                <div className={"gm_x-button"}></div>
+                            </Button>
+                          </Tooltip>
+                        }
                         <Tooltip
                           content={
                             <div>
-                              {member.user.id===props.user.userId?Msg.localize('adminGroupMemberLeave'):Msg.localize('adminGroupMemberRemove')}
-                            </div>
-                          }
-                        >
-                          <Button className={"gm_x-button-small"} onClick={()=>{
-                              setModalInfo({
-                                title:(Msg.localize('Confirmation')),
-                                accept_message: (Msg.localize('YES')),
-                                cancel_message: (Msg.localize('NO')),
-                                message: (Msg.localize('adminGroupMemberRemoveConfirmation')),
-                                accept: function(){
-                                    deleteGroupMember(member.id);
-                                    setModalInfo({})},
-                                cancel: function(){
-                                    setModalInfo({})}
-                              });
-                             
-                            }}>
-                              <div className={"gm_x-button"}></div>
-                          </Button>
-                        </Tooltip>
-                        <Tooltip
-                          content={
-                            <div>
-                              {member.status==='ENABLED'?Msg.localize('adminGroupMemberSuspendTooltip'):member.status==="SUSPENDED"?Msg.localize('adminGroupMemberActivateTooltip'):""}
+                              {member.status==='ENABLED'?Msg.localize('adminGroupMemberSuspendTooltip'):member.status==="SUSPENDED"||member.status==="PENDING"?Msg.localize('adminGroupMemberActivateTooltip'):""}
                             </div>
                           }
                         >
@@ -307,8 +311,7 @@ export const GroupMembers: FC<any> = (props) => {
             widgetId="top-example"
             onPerPageSelect={onPerPageSelect}
           /> 
-          <InviteMemberModal active={inviteModalActive} setActive={setInviteModalActive} groupId={props.groupId}/>
-         
+          {props.isGroupAdmin&&<InviteMemberModal active={inviteModalActive} setActive={setInviteModalActive} groupId={props.groupId}/>}        
         </React.Fragment>         
    
     )

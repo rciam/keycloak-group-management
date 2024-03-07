@@ -9,7 +9,7 @@ import { ContentPage } from '../ContentPage';
 import { Msg } from '../../widgets/Msg';
 import { DatalistFilterSelect } from '../../group-widgets/DatalistFilterSelect';
 import { AngleDownIcon, CaretDownIcon, CaretUpIcon, FilterIcon, LongArrowAltDownIcon, LongArrowAltUpIcon } from '@patternfly/react-icons';
-import { SearchInput } from '../../group-widgets/GroupAdminPage/SearchInput';
+import { TableActionBar } from '../../group-widgets/GroupAdminPage/TableActionBar';
 
 export const EnrollmentRequests: FC<any> = (props) => {
 
@@ -225,7 +225,7 @@ export const EnrollmentRequests: FC<any> = (props) => {
                 </div>
               </React.Fragment>
               :
-            <SearchInput searchText={Msg.localize('searchBoxPlaceholder')} cancelText={Msg.localize('searchBoxCancel')}  search={(searchString)=>{
+            <TableActionBar searchText={Msg.localize('searchBoxPlaceholder')} cancelText={Msg.localize('searchBoxCancel')}  search={(searchString)=>{
               setPage(1);
               fetchEnrollmentRequests("",searchString);
             }} />  

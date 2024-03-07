@@ -6,6 +6,7 @@ import { ConfirmationModal } from '../Modals';
 import { GroupsServiceClient, HttpResponse } from '../../groups-mngnt-service/groups.service';
 import {MinusIcon,PlusIcon } from '@patternfly/react-icons';
 import { Msg } from '../../widgets/Msg';
+import { Alerts } from '../../widgets/Alerts';
 
 
 export const GroupDetails: FC<any> = (props) => {
@@ -13,7 +14,7 @@ export const GroupDetails: FC<any> = (props) => {
     const roleRef= useRef<any>(null);
     const [roleInput, setRoleInput] = useState<string>("");
     const [modalInfo,setModalInfo] = useState({});
-
+    const [alert,setAlert] = useState({});
 
     const addGroupRole = (role) =>{  
         groupsService!.doPost<any>("/group-admin/group/"+props.groupId+"/roles",{},{params:{name:role}})
@@ -36,10 +37,10 @@ export const GroupDetails: FC<any> = (props) => {
                 props.groupConfiguration.groupRoles.splice(index, 1); // 2nd parameter means remove one item only
             }
             props.setGroupConfiguration({...props.groupConfiguration});
-            
           }
           setModalInfo({});
         }).catch(err=>{
+            setAlert({message:Msg.localize('deleteRoleErrorTitle'),variant:"danger",description:Msg.localize('deleteRoleErrorMessage')});
             setModalInfo({});
         })    
         
@@ -48,7 +49,7 @@ export const GroupDetails: FC<any> = (props) => {
 
     return(
         <React.Fragment>
-
+        <Alerts alert={alert} close={()=>{setAlert({})}}/>
         <ConfirmationModal modalInfo={modalInfo}/>
             <DataList aria-label="Compact data list example" isCompact wrapModifier={"breakWord"}>
                 <DataListItem aria-labelledby="compact-item1">

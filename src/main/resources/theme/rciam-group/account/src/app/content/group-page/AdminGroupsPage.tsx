@@ -10,8 +10,8 @@ import { ContentPage } from '../ContentPage';
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
 import { Msg } from '../../widgets/Msg';
-import { SearchInput } from '../../group-widgets/GroupAdminPage/SearchInput';
-import { CreateSubgroupModal, DeleteSubgroupModal } from '../../group-widgets/Modals';
+import { TableActionBar } from '../../group-widgets/GroupAdminPage/TableActionBar';
+import { CreateGroupModal, DeleteSubgroupModal } from '../../group-widgets/Modals';
 
 export interface AdminGroupsPageProps {
   match :any;
@@ -55,6 +55,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
   const [perPage, setPerPage] = useState(10);
   const [totalItems,setTotalItems] = useState<number>(0);
   const [initialRender,setInitialRender] = useState(true);
+  const [userRoles,setUserRoles] = useState<String[]>([]);
 
   const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
     setPage(newPage);
@@ -80,6 +81,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
 
 
   useEffect(()=>{
+    setUserRoles(groupsService.getUserRoles());
     fetchAdminGroups();
   },[]);
 
@@ -124,7 +126,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
             </BreadcrumbItem>
         </Breadcrumb> 
         <ContentPage title={Msg.localize('adminGroupLabel')}>
-          <SearchInput searchText={Msg.localize('searchBoxPlaceholder')} cancelText={Msg.localize('searchBoxCancel')}  search={(searchString)=>{
+          <TableActionBar searchText={Msg.localize('searchBoxPlaceholder')} afterCreate={()=>{fetchAdminGroups();}} createButton={userRoles.includes('manage-groups')} cancelText={Msg.localize('searchBoxCancel')}  search={(searchString)=>{
             fetchAdminGroups(searchString);
             setPage(1);
           }} />
@@ -157,7 +159,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
               emptyGroup():
               groups.map((group:AdminGroup,appIndex:number)=>{
                 return(
-                <GroupListItem group={group as AdminGroup}  fetchAdminGroups={fetchAdminGroups} appIndex={appIndex} depth={0} />
+                <GroupListItem group={group as AdminGroup} userRoles={userRoles}  fetchAdminGroups={fetchAdminGroups} appIndex={appIndex} depth={0} />
                 )
               })
               }
@@ -181,11 +183,12 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
     group: AdminGroup,
     appIndex: number;
     depth:number;
+    userRoles: String[];
     fetchAdminGroups: Function;
   }
   
  
-  export const GroupListItem: FC<GroupListItemProps> = ({group,appIndex,depth,fetchAdminGroups}) =>{
+  export const GroupListItem: FC<GroupListItemProps> = ({group,appIndex,depth,fetchAdminGroups,userRoles}) =>{
     useEffect(()=>{
       setExpanded(false);
     },[group]);
@@ -230,7 +233,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
       <DropdownItem key="link" onClick={() => onCopyLink()}>
         <Msg msgKey='copyGroupEnrollmentLink' />
       </DropdownItem>,
-      ...(('/'+group.name!==group.path)&& !(group?.extraSubGroups.length>0)?[<DropdownItem key="action" onClick={()=>{setDeleteGroup(true);}} component="button">
+      ...('/'+group.name!==group.path&& !(group?.extraSubGroups.length>0)?[<DropdownItem key="action" onClick={()=>{setDeleteGroup(true);}} component="button">
         <Msg msgKey='deleteGroup' /> 
       </DropdownItem>
       ]:[])
@@ -239,7 +242,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
 
     return(  
       <React.Fragment>
-        <CreateSubgroupModal groupId={group.id} active={createSubGroup} afterSuccess={()=>{fetchAdminGroups();}} close={()=>{setCreateSubGroup(false);}}/> 
+        <CreateGroupModal groupId={group.id} active={createSubGroup} afterSuccess={()=>{fetchAdminGroups();}} close={()=>{setCreateSubGroup(false);}}/> 
         <DeleteSubgroupModal groupId={group.id} active={deleteGroup} afterSuccess={()=>{fetchAdminGroups();}} close={()=>{setDeleteGroup(false);}}/>  
         <DataListItem id={`${appIndex}-group`} key={'group-' + appIndex} className={"gm_expandable-list" + (group?.extraSubGroups.length>0?" gm_expandable-list-item":"")} aria-labelledby="groups-list" isExpanded={expanded}>
           <DataListItemRow style={{"paddingLeft": ((depth===0?2:(3+depth-1))+ (group?.extraSubGroups.length>0?0:0.4))+"rem"}}>
@@ -297,7 +300,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
           >
             {group?.extraSubGroups.length>0?group?.extraSubGroups.map((subGroup:AdminGroup,appSubIndex:number)=>{
                 return(
-                  <GroupListItem group={subGroup as AdminGroup} appIndex={appSubIndex} depth={depth + 1} fetchAdminGroups={fetchAdminGroups} />
+                  <GroupListItem group={subGroup as AdminGroup} userRoles={userRoles} appIndex={appSubIndex} depth={depth + 1} fetchAdminGroups={fetchAdminGroups} />
                 )
               }):null}
           </DataListContent>
