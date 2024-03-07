@@ -24,6 +24,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.services.ForbiddenException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.helpers.LoginEventHelper;
 import org.rciam.plugins.groups.helpers.Utils;
@@ -105,6 +106,10 @@ public class GroupAdminGroupMember {
     @POST
     @Path("/role")
     public Response addGroupRole(@QueryParam("name") String name) throws UnsupportedEncodingException {
+        if (!isGroupAdmin){
+            throw new ForbiddenException();
+        }
+
         GroupRolesEntity role = groupRolesRepository.getGroupRolesByNameAndGroup(name, group.getId());
         if (role == null) throw new NotFoundException(" This role does not exist in this group");
         if (member.getGroupRoles() == null) {
@@ -127,6 +132,10 @@ public class GroupAdminGroupMember {
     @DELETE
     @Path("/role/{name}")
     public Response deleteGroupRole(@PathParam("name") String name) throws UnsupportedEncodingException {
+        if (!isGroupAdmin){
+            throw new ForbiddenException();
+        }
+
         if (member.getGroupRoles() == null || member.getGroupRoles().stream().noneMatch(x -> name.equals(x.getName())))
             throw new NotFoundException("Could not find this user group member role");
 

@@ -273,10 +273,7 @@ public class GroupAdminGroup {
     @POST
     @Path("/admin/invite")
     public Response inviteGroupAdmin(UserRepresentation userRep) throws EmailException {
-        if (!isGroupAdmin){
-            throw new ForbiddenException();
-        }
-        
+             
         if (userRep.getEmail() == null)
             throw new ErrorResponseException("Wrong data", "Wrong data", Response.Status.BAD_REQUEST);
 
