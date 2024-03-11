@@ -10,7 +10,7 @@ public class MemberUserAttributeConfigurationRepository extends GeneralRepositor
     }
 
     public MemberUserAttributeConfigurationEntity getByRealm(String realmId){
-        return em.createNamedQuery("getConfigurationByRealm", MemberUserAttributeConfigurationEntity.class).setParameter("realmId",realmId).getResultStream().findAny().orElse(null);
+        return em.createNamedQuery("getConfigurationByRealm", MemberUserAttributeConfigurationEntity.class).setParameter("realmId",realmId).getResultStream().findAny().orElse(new MemberUserAttributeConfigurationEntity());
     }
 
     @Override

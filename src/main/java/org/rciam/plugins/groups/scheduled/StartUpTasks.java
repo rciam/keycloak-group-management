@@ -28,7 +28,7 @@ public class StartUpTasks implements ScheduledTask {
             MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
             repository.dailyExecutedActions(session);
             //create default eduPersonEntitlement configuration entity if not exist
-            if (memberUserAttributeConfigurationRepository.getByRealm(realm.getId()) == null) {
+            if (memberUserAttributeConfigurationRepository.getByRealm(realm.getId()).getId() == null) {
                 MemberUserAttributeConfigurationEntity configurationEntity = new MemberUserAttributeConfigurationEntity();
                 configurationEntity.setId(KeycloakModelUtils.generateId());
                 configurationEntity.setUserAttribute("eduPersonEntitlement");
