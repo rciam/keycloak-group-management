@@ -84,7 +84,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     }
 
     @Transactional
-    public void dailyExecutedActions(KeycloakSession session) {
+    public void dailyExecutedActions() {
         GroupManagementEventEntity eventEntity = eventRepository.getEntity(Utils.eventId);
         MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
         CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session);
@@ -124,6 +124,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             pendingMembers.forEach(member -> {
                 member.setStatus(MemberStatusEnum.ENABLED);
                 update(member);
+                setRealm(session.realms().getRealm(member.getUser().getRealmId()));
                 GroupModel group = realm.getGroupById(member.getGroup().getId());
                 UserModel userModel = session.users().getUserById(realm, member.getUser().getId());
                 userModel.joinGroup(group);
@@ -245,10 +246,10 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     private void weeklyTaskExecution(CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, KeycloakSession session) {
         session.realms().getRealmsStream().forEach(realmModel -> {
             MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
-            MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+            MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realmModel.getId());
             customFreeMarkerEmailTemplateProvider.setSignatureMessage(memberUserAttribute.getSignatureMessage());
             customFreeMarkerEmailTemplateProvider.setRealm(realmModel);
-            String serverUrl = realm.getAttribute(Utils.KEYCLOAK_URL);
+            String serverUrl = realmModel.getAttribute(Utils.KEYCLOAK_URL);
             session.groups().getGroupsStream(realmModel).forEach(group -> {
                 Integer dateBeforeNotification = group.getFirstAttribute(Utils.expirationNotificationPeriod) != null ? Integer.valueOf(group.getFirstAttribute(Utils.expirationNotificationPeriod)) : realmModel.getAttribute(Utils.expirationNotificationPeriod, 21);
                 //find group membership that expires in less days than dateBeforeNotification (at the end of this week)

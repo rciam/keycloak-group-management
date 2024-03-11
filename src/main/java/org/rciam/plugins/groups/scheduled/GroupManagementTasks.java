@@ -9,6 +9,6 @@ public class GroupManagementTasks implements ScheduledTask {
     @Override
     public void run(KeycloakSession session) {
         UserGroupMembershipExtensionRepository repository = new UserGroupMembershipExtensionRepository(session, null);
-        repository.dailyExecutedActions(session);
+        repository.dailyExecutedActions();
     }
 }
