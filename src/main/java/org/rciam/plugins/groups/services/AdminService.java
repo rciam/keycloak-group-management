@@ -27,6 +27,7 @@ import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.Utils;
@@ -104,10 +105,15 @@ public class AdminService {
     public Response configureMemberUserAttribute(MemberUserAttributeConfigurationRepresentation rep) {
         realmAuth.realm().requireManageRealm();
         MemberUserAttributeConfigurationEntity memberUserAttributeEntity = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+        if (memberUserAttributeEntity.getId() == null)
+            memberUserAttributeEntity.setId(KeycloakModelUtils.generateId());
         memberUserAttributeEntity.setUserAttribute(rep.getUserAttribute());
         memberUserAttributeEntity.setUrnNamespace(rep.getUrnNamespace());
         memberUserAttributeEntity.setAuthority(rep.getAuthority());
         memberUserAttributeEntity.setSignatureMessage(rep.getSignatureMessage());
+        RealmEntity realmEntity = new RealmEntity();
+        realmEntity.setId(realm.getId());
+        memberUserAttributeEntity.setRealmEntity(realmEntity);
         memberUserAttributeConfigurationRepository.update(memberUserAttributeEntity);
         return Response.noContent().build();
     }
