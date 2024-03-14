@@ -157,7 +157,7 @@ public class Utils {
         if (groupEnrollmentConfigurationRepository.getByGroup(rep.getId()).collect(Collectors.toList()).isEmpty()) {
             //group configuration creation
             groupRolesRepository.create(Utils.defaultGroupRole, rep.getId());
-            groupEnrollmentConfigurationRepository.createDefault(child, rep.getName());
+            groupEnrollmentConfigurationRepository.createDefault(child, rep.getName(), realm.getId());
         }
         return Response.noContent().build();
     }

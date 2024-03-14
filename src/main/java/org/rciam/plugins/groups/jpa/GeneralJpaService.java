@@ -146,7 +146,7 @@ public class GeneralJpaService {
             if (groupEnrollmentConfigurationRepository.getByGroup(rep.getId()).collect(Collectors.toList()).isEmpty()) {
                 //group creation - group configuration no exist
                 groupRolesRepository.create(Utils.defaultGroupRole,rep.getId());
-                groupEnrollmentConfigurationRepository.createDefault(realm.getGroupById(rep.getId()), rep.getName());
+                groupEnrollmentConfigurationRepository.createDefault(realm.getGroupById(rep.getId()), rep.getName(), realm.getId());
             }
 
             adminEvent.operation(OperationType.CREATE).resourcePath(session.getContext().getUri(), child.getId());

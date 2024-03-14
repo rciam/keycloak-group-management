@@ -1,5 +1,6 @@
 package org.rciam.plugins.groups.jpa.repositories;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -9,9 +10,12 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.rciam.plugins.groups.enums.GroupAupTypeEnum;
+import org.rciam.plugins.groups.enums.GroupTypeEnum;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.entities.GroupAupEntity;
 import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
+import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentConfigurationRulesEntity;
 import org.rciam.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.rciam.plugins.groups.representations.GroupAupRepresentation;
 import org.rciam.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
@@ -19,9 +23,11 @@ import org.rciam.plugins.groups.representations.GroupEnrollmentConfigurationRepr
 public class GroupEnrollmentConfigurationRepository extends GeneralRepository<GroupEnrollmentConfigurationEntity> {
 
     private GroupRolesRepository groupRolesRepository;
+    private final GroupEnrollmentConfigurationRulesRepository groupEnrollmentConfigurationRulesRepository;
 
     public GroupEnrollmentConfigurationRepository(KeycloakSession session, RealmModel realm) {
         super(session, realm);
+        this.groupEnrollmentConfigurationRulesRepository = new GroupEnrollmentConfigurationRulesRepository(session);
     }
 
     public void setGroupRolesRepository(GroupRolesRepository groupRolesRepository) {
@@ -43,19 +49,20 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         create(entity);
     }
 
-    public void createDefault(GroupModel group, String groupName) {
+    public void createDefault(GroupModel group, String groupName, String realmId) {
         //default values, hide by default
+        List<GroupEnrollmentConfigurationRulesEntity> configurationRulesList = groupEnrollmentConfigurationRulesRepository.getByRealmAndType(realmId, group.getParentId() == null ? GroupTypeEnum.TOP_LEVEL : GroupTypeEnum.SUBGROUP).collect(Collectors.toList());
         GroupEnrollmentConfigurationEntity entity = new GroupEnrollmentConfigurationEntity();
         entity.setId(KeycloakModelUtils.generateId());
         GroupEntity groupEntity = new GroupEntity();
         groupEntity.setId(group.getId());
         entity.setGroup(groupEntity);
         entity.setName(groupName);
-        entity.setRequireApproval(true);
-        entity.setRequireApprovalForExtension(true);
-        entity.setActive(true);
-        entity.setVisibleToNotMembers(true);
-        entity.setMultiselectRole(true);
+        entity.setRequireApproval(configurationRulesList.stream().noneMatch(x -> "requireApproval".equals(x.getField()) && "false".equals(x.getDefaultValue())) );
+        entity.setRequireApprovalForExtension(configurationRulesList.stream().noneMatch(x -> "requireApprovalForExtension".equals(x.getField()) &&  "false".equals(x.getDefaultValue())) );
+        entity.setActive(configurationRulesList.stream().noneMatch(x -> "active".equals(x.getField()) &&  "false".equals(x.getDefaultValue())));
+        entity.setVisibleToNotMembers(configurationRulesList.stream().noneMatch(x -> "visibleToNotMembers".equals(x.getField()) &&  "false".equals(x.getDefaultValue())) );
+        entity.setMultiselectRole(configurationRulesList.stream().noneMatch(x -> "multiselectRole".equals(x.getField()) &&  "false".equals(x.getDefaultValue())));
         entity.setGroupRoles(groupRolesRepository.getGroupRolesByGroup(group.getId()).map(x -> {
             GroupRolesEntity r = new GroupRolesEntity();
             r.setId(x.getId());
@@ -63,9 +70,24 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
             r.setName(x.getName());
             return r;
         }).collect(Collectors.toList()));
-        entity.setCommentsNeeded(true);
-        entity.setCommentsLabel("Comments");
-        entity.setCommentsDescription("Why do you want to join the group?");
+        entity.setCommentsNeeded(configurationRulesList.stream().noneMatch(x -> "multiselectRole".equals(x.getField()) &&  "false".equals(x.getDefaultValue())) );
+        if (entity.getCommentsNeeded()) {
+            String label = configurationRulesList.stream().filter(x -> "commentsLabel".equals(x.getField())).findAny().orElse(new GroupEnrollmentConfigurationRulesEntity()).getDefaultValue();
+            entity.setCommentsLabel(label != null ? label : "Comments");
+            String description = configurationRulesList.stream().filter(x -> "commentsDescription".equals(x.getField())).findAny().orElse(new GroupEnrollmentConfigurationRulesEntity()).getDefaultValue();
+            entity.setCommentsDescription(description != null ? description : "Why do you want to join the group?");
+        }
+        String membershipExpirationDaysDefault = configurationRulesList.stream().filter(x -> "membershipExpirationDays".equals(x.getField())).findAny().orElse(new GroupEnrollmentConfigurationRulesEntity()).getDefaultValue();
+        if (membershipExpirationDaysDefault != null)
+            entity.setMembershipExpirationDays(Long.valueOf(membershipExpirationDaysDefault));
+        String aupDefault = configurationRulesList.stream().filter(x -> "aupEntity".equals(x.getField())).findAny().orElse(new GroupEnrollmentConfigurationRulesEntity()).getDefaultValue();
+        if (aupDefault != null) {
+            GroupAupEntity aup = new GroupAupEntity();
+            aup.setId(KeycloakModelUtils.generateId());
+            aup.setType(GroupAupTypeEnum.URL);
+            aup.setUrl(aupDefault);
+            entity.setAupEntity(aup);
+        }
         create(entity);
         group.setSingleAttribute(Utils.DEFAULT_CONFIGURATION_NAME, entity.getId());
     }
