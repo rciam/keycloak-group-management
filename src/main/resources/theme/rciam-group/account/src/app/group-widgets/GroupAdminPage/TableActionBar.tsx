@@ -7,9 +7,6 @@ import { CreateGroupModal } from '../Modals';
 
 export const TableActionBar: FC<any> = (props) => {
 
-    useEffect(()=>{
-        console.log(props.createButton);
-    },[props.createButton])
     const [searchString,setSearchString] = useState<string>("");
     const [createGroupModalOpen,setCreateGroupModalOpen] = useState<boolean>(false);
 

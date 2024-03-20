@@ -55,7 +55,6 @@ export const EnrollmentModal: FC<any> = (props) => {
 
     useEffect(()=>{
       if(Object.keys(props.enrollment).length !== 0) {
-            
             setIsModalOpen(true);
             setEnrollment({...props.enrollment});
         }
@@ -79,8 +78,8 @@ export const EnrollmentModal: FC<any> = (props) => {
     const validateEnrollment = () => {
         let errors: Record<string, string> = {};
         !(enrollment?.name?.length>0) && (errors.name = Msg.localize('requredFormError'));
-        !(enrollment?.aup?.url?.length>0 && reg_url.test(enrollment.aup.url)) &&  (errors.aup_url = Msg.localize('invalidUrlFormError'));
-        !(enrollment?.aup?.url?.length>0) && (errors.aup_url = Msg.localize('requredFormError'));
+        enrollment?.aup?.url?.length>0 && !reg_url.test(enrollment.aup.url) &&  (errors.aup_url = Msg.localize('invalidUrlFormError'));
+        !(enrollment?.aup?.url?.length>0) && validationRules["aupEntity"].required===true && (errors.aup_url = Msg.localize('requredFormError'));
         !(enrollment?.groupRoles?.length>0) && (errors.groupRoles=Msg.localize('groupRolesFormError'));
         (enrollment?.membershipExpirationDays&&!(enrollment?.membershipExpirationDays>0)) && (errors.membershipExpirationDays=Msg.localize('expirationDaysPositiveFormError'));        
         (typeof(enrollment?.membershipExpirationDays)!=='number') && (errors.membershipExpirationDays=Msg.localize('expirationDaysNumberFormError'));
@@ -318,12 +317,12 @@ export const EnrollmentModal: FC<any> = (props) => {
                               }}
                               // helperText=""
                           >
-                          <Tooltip  {...((validationRules?.membershipExpirationDays?.max&&parseInt(validationRules.membershipExpirationDays.max)>0&&!(isIntegerOrNumericString(enrollment?.membershipExpirationDays)&&enrollment.membershipExpirationDays!==0)) ? { trigger:'manual', isVisible:false }:{trigger:'mouseenter'})} content={<div><Msg msgKey='enrollmentConfigurationExpirationSwitchDisabledTooltip' /></div>}>
+                          <Tooltip  {...(!(validationRules?.membershipExpirationDays?.max) ? { trigger:'manual', isVisible:false }:{trigger:'mouseenter'})} content={<div><Msg msgKey='enrollmentConfigurationExpirationSwitchDisabledTooltip' /></div>}>
                                                           
                               <Switch
                                 id="simple-switch-membershipExpirationDays"
                                 aria-label="simple-switch-membershipExpirationDays"
-                                isDisabled={!(validationRules?.membershipExpirationDays?.max&&parseInt(validationRules.membershipExpirationDays.max)>0&&enrollment.membershipExpirationDays===0)}
+                                isDisabled={validationRules?.membershipExpirationDays?.max&& (isIntegerOrNumericString(enrollment?.membershipExpirationDays)&&enrollment.membershipExpirationDays!==0)}
                                 isChecked={isIntegerOrNumericString(enrollment?.membershipExpirationDays)&&enrollment.membershipExpirationDays!==0}
                                 onChange={(value)=>{
                                     
@@ -545,14 +544,14 @@ export const EnrollmentModal: FC<any> = (props) => {
                         >
                             <FormGroup
                                 label={Msg.localize('URL')}
-                                isRequired
+                                isRequired={validationRules["aupEntity"].required===true}
                                 fieldId="simple-form-name-01"
                                 helperTextInvalid={touched.aup_url&&errors.aup_url}
                                 validated={errors.aup_url&&touched.aup_url?'error':'default'}
                                 // helperText=""
                             >
                                 <TextInput
-                                isRequired
+                                isRequired={validationRules["aupEntity"].required===true}
                                 type="url"
                                 id="simple-form-name-01"
                                 name="simple-form-name-01"

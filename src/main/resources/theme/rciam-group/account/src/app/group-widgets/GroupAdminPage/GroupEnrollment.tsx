@@ -38,7 +38,7 @@ export const GroupEnrollment: FC<any> = (props) => {
     const [enrollmentModal,setEnrollmentModal] = useState({});
     const [enrollmentRules, setEnrollmentRules] = useState({});
 
-    let defaultEnrollmentConfiguration = {
+    const [defaultEnrollmentConfiguration,setDefaultEnrollmentConfiguration] = useState({
       group: {id:""},
       membershipExpirationDays : 3,
       name: "",
@@ -56,7 +56,7 @@ export const GroupEnrollment: FC<any> = (props) => {
       commentsLabel: Msg.localize('enrollmentConfigurationCommentsDefaultLabel'),
       commentsDescription: Msg.localize('enrollmentConfigurationCommentsDefaultDescription'),
       groupRoles : []
-    }
+    });
 
     let groupsService = new GroupsServiceClient();
 
@@ -100,10 +100,10 @@ export const GroupEnrollment: FC<any> = (props) => {
                   }
                   else{
                     defaultEnrollmentConfiguration[field_rules.field] = field_rules.defaultValue; 
-
                   }
               }
             })
+            setDefaultEnrollmentConfiguration({...defaultEnrollmentConfiguration})
             setEnrollmentRules(rules);
           }
           else{
