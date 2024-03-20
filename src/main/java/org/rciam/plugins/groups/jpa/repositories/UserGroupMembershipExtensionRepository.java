@@ -93,6 +93,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             Stream<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getExpiredMemberships").setParameter("date", LocalDate.now()).getResultStream();
             results.forEach(entity -> {
                 setRealm(session.realms().getRealm(entity.getUser().getRealmId()));
+                session.getContext().setRealm(this.realm);
                 MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
                 customFreeMarkerEmailTemplateProvider.setSignatureMessage(memberUserAttribute.getSignatureMessage());
                 String serverUrl = realm.getAttribute(Utils.KEYCLOAK_URL);
@@ -125,6 +126,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 member.setStatus(MemberStatusEnum.ENABLED);
                 update(member);
                 setRealm(session.realms().getRealm(member.getUser().getRealmId()));
+                session.getContext().setRealm(this.realm);
                 GroupModel group = realm.getGroupById(member.getGroup().getId());
                 UserModel userModel = session.users().getUserById(realm, member.getUser().getId());
                 userModel.joinGroup(group);
