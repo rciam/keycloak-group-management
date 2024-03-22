@@ -1,11 +1,12 @@
 package org.rciam.plugins.groups.representations;
 
 import java.util.List;
+import java.util.Map;
 
 public class GroupRepresentation extends org.keycloak.representations.idm.GroupRepresentation {
 
     private List<GroupRepresentation> subGroups;
-    private List<String> groupRoles;
+    private Map<String,String> groupRoles;
     private List<GroupEnrollmentConfigurationRepresentation> enrollmentConfigurationList;
     private List<GroupAdminRepresentation> admins;
 
@@ -18,11 +19,11 @@ public class GroupRepresentation extends org.keycloak.representations.idm.GroupR
         this.subGroups = subGroups;
     }
 
-    public List<String> getGroupRoles() {
+    public Map<String,String> getGroupRoles() {
         return groupRoles;
     }
 
-    public void setGroupRoles(List<String> groupRoles) {
+    public void setGroupRoles(Map<String,String> groupRoles) {
         this.groupRoles = groupRoles;
     }
 

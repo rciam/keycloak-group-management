@@ -1,5 +1,6 @@
 package org.rciam.plugins.groups.services;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -115,7 +116,7 @@ public class GroupAdminGroup {
     @GET
     @Path("/all")
     @Produces("application/json")
-    public GroupRepresentation getAllGroupInfo() {
+    public GroupRepresentation getAllGroupInfo() throws UnsupportedEncodingException {
         return generalService.getAllGroupInfo(group);
     }
 

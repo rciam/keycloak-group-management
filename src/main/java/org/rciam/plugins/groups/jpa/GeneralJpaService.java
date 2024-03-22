@@ -1,5 +1,6 @@
 package org.rciam.plugins.groups.jpa;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,11 +26,13 @@ import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.ModelToRepresentation;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.entities.GroupRolesEntity;
+import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupInvitationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupRolesRepository;
+import org.rciam.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.rciam.plugins.groups.representations.GroupRepresentation;
 
@@ -43,6 +46,7 @@ public class GeneralJpaService {
     private final GroupEnrollmentRequestRepository groupEnrollmentRequestRepository;
     private final GroupRolesRepository groupRolesRepository;
     private final GroupInvitationRepository groupInvitationRepository;
+    private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
 
     public GeneralJpaService(KeycloakSession session, RealmModel realm, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository) {
         this.realm = realm;
@@ -54,6 +58,7 @@ public class GeneralJpaService {
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
         this.groupEnrollmentRequestRepository = new GroupEnrollmentRequestRepository(session, realm, null);
         this.groupInvitationRepository = new GroupInvitationRepository(session, realm);
+        this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
 
     }
 
@@ -107,9 +112,17 @@ public class GeneralJpaService {
         }
     }
 
-    public GroupRepresentation getAllGroupInfo( GroupModel group){
+    public GroupRepresentation getAllGroupInfo( GroupModel group) throws UnsupportedEncodingException {
+        MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+        String groupNameUserAttribute = Utils.getGroupNameForMemberUserAttribute(group);
         GroupRepresentation rep = ModelToRepresentation.toRepresentationWithAttributes(group);
-        rep.setGroupRoles(groupRolesRepository.getGroupRolesByGroup(group.getId()).map(GroupRolesEntity::getName).collect(Collectors.toList()));
+        rep.setGroupRoles(groupRolesRepository.getGroupRolesByGroup(group.getId()).collect(Collectors.toMap(GroupRolesEntity::getName, role -> {
+            try {
+                return Utils.createMemberUserAttribute(groupNameUserAttribute, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+        })));
         rep.setEnrollmentConfigurationList(groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(x -> EntityToRepresentation.toRepresentation(x, false, realm)).collect(Collectors.toList()));
         rep.setAdmins(groupAdminRepository.getAdminsForGroup(group));
         return rep;

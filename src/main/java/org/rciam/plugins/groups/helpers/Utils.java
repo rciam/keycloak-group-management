@@ -33,7 +33,6 @@ import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEnt
 import org.rciam.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupRolesRepository;
-import org.keycloak.representations.account.UserRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ErrorResponseException;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
@@ -74,29 +73,18 @@ public class Utils {
     public static final String DEFAULT_GROUP_ROLE_NAME = "manage-groups";
     public static final String DESCRIPTION = "description";
 
-    public static UserAdapter getDummyUser(UserRepresentation userRep) {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setEmail(userRep.getEmail(), true);
-        userEntity.setFirstName(userRep.getFirstName());
-        userEntity.setLastName(userRep.getLastName());
-        UserAdapter user = new UserAdapter(null, null, null, userEntity);
-        return user;
-    }
-
     public static UserAdapter getDummyUser(String email, String firstName, String lastName) {
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(email, true);
         userEntity.setFirstName(firstName);
         userEntity.setLastName(lastName);
-        UserAdapter user = new UserAdapter(null, null, null, userEntity);
-        return user;
+        return new UserAdapter(null, null, null, userEntity);
     }
 
     public static UserAdapter getChronJobUser() {
         UserEntity userEntity = new UserEntity();
         userEntity.setId(chronJobUserId);
-        UserAdapter user = new UserAdapter(null, null, null, userEntity);
-        return user;
+        return new UserAdapter(null, null, null, userEntity);
     }
 
     public static String createMemberUserAttribute(String groupName, String role, String namespace, String authority) throws UnsupportedEncodingException {
@@ -113,8 +101,14 @@ public class Utils {
     }
 
     public static String getGroupNameForMemberUserAttribute(GroupEntity group, RealmModel realm) throws UnsupportedEncodingException {
-        String groupName = encode(group.getName());
-        GroupModel parent = realm.getGroupById(group.getParentId());
+        return addParentGroupName(encode(group.getName()), realm.getGroupById(group.getParentId()));
+    }
+
+    public static String getGroupNameForMemberUserAttribute(GroupModel group) throws UnsupportedEncodingException {
+        return addParentGroupName(encode(group.getName()), group.getParent());
+    }
+
+    private static String addParentGroupName(String groupName, GroupModel parent) throws UnsupportedEncodingException {
         while (parent != null) {
             groupName = encode(parent.getName()) + colon + groupName;
             parent = parent.getParent();
