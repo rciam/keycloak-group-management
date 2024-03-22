@@ -72,6 +72,7 @@ public class Utils {
     public static final String GROUP_MEMBERSHIP_SUSPEND = "GROUP_MEMBERSHIP_SUSPEND";
     public static final String NO_FOUND_GROUP_CONFIGURATION = "Could not find this group configuration";
     public static final String DEFAULT_GROUP_ROLE_NAME = "manage-groups";
+    public static final String DESCRIPTION = "description";
 
     public static UserAdapter getDummyUser(UserRepresentation userRep) {
         UserEntity userEntity = new UserEntity();

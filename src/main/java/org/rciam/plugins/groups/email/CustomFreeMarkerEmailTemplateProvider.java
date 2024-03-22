@@ -57,19 +57,11 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("activateMemberSubject", "activate-member.ftl", attributes);
     }
 
-    public void sendInviteGroupAdminEmail(String invitationId, UserModel groupadmin, String groupname) throws EmailException {
-        StringBuilder sb = new StringBuilder();
-        if (user.getFirstName() != null) {
-            sb.append(user.getFirstName()).append(" ");
-        }
-        if (user.getLastName() != null) {
-            sb.append(user.getLastName());
-        } else if (user.getFirstName() == null) {
-            sb.append("Sir/Madam");
-        }
-        attributes.put("fullname", sb.toString());
+    public void sendInviteGroupAdminEmail(String invitationId, UserModel groupadmin, String groupName, String groupPath, String description) throws EmailException {
         attributes.put("groupadmin", groupadmin.getFirstName() + " " + groupadmin.getLastName());
-        attributes.put("groupname", groupname);
+        attributes.put("groupName", groupName);
+        attributes.put("groupPath", groupPath);
+        attributes.put("description", description !=  null ? description : "");
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();
         attributes.put("urlLink", baseUri.toString() + finishGroupInvitation.replace("{realmName}", realm.getName()).replace("{id}", invitationId));
@@ -140,25 +132,25 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("groupMembershipExpirationNotificationSubject", "group-membership-expiration-notification.ftl", attributes);
     }
 
-    public void sendGroupInvitationEmail(UserModel groupadmin, String groupPath, boolean withoutAcceptance, List<String> groupRoles, String id) throws EmailException {
-        StringBuilder sb = new StringBuilder();
-        if (user.getFirstName() != null) {
-            sb.append(user.getFirstName()).append(" ");
-        }
-        if (user.getLastName() != null) {
-            sb.append(user.getLastName());
-        } else if (user.getFirstName() == null) {
-            sb.append("Sir/Madam");
-        }
-
-        attributes.put("fullname", sb.toString());
+    public void sendGroupInvitationEmail(UserModel groupadmin, String groupName, String groupPath, String description, boolean withoutAcceptance, List<String> groupRoles, String id) throws EmailException {
         attributes.put("groupadmin", groupadmin.getFirstName() + " " + groupadmin.getLastName());
-        if (withoutAcceptance && groupRoles != null && !groupRoles.isEmpty()) {
-            StringBuilder sb2 = new StringBuilder(groupPath).append(" with roles : ");
-            groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
-            groupPath = StringUtils.removeEnd(sb2.toString(), ", ");
+        attributes.put("groupName", groupName);
+        attributes.put("groupPath", groupPath);
+        attributes.put("description", description !=  null ? description : "");
+        if (groupRoles != null && !groupRoles.isEmpty()) {
+            StringBuilder sb = new StringBuilder("<h4>Your roles in the group:<br>");
+            StringBuilder sbText = new StringBuilder("\nYour roles in the group:\n");
+            groupRoles.stream().forEach(role -> {
+                sb.append("•").append(role).append("<br>");
+                sbText.append("•").append(role).append("\n");
+            });
+            sb.append("</h4>");
+            attributes.put("groupRoles", sb.toString());
+            attributes.put("groupRolesText", sbText.toString());
+        } else  {
+            attributes.put("groupRoles", "");
+            attributes.put("groupRolesText", "");
         }
-        attributes.put("groupname", groupPath);
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();
         attributes.put("urlLink", baseUri.toString() + (withoutAcceptance ? finishGroupInvitation : enrollmentStartUrl).replace("{realmName}", realm.getName()).replace("{id}", id).replace("{path}", groupPath));

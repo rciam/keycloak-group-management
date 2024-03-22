@@ -90,7 +90,7 @@ public class GroupAdminGroupMembers {
         try {
             UserAdapter user = Utils.getDummyUser(groupInvitationInitialRep.getEmail(), groupInvitationInitialRep.getFirstName(), groupInvitationInitialRep.getLastName());
             customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendGroupInvitationEmail(groupAdmin, ModelToRepresentation.buildGroupPath(group), groupInvitationInitialRep.isWithoutAcceptance(), groupInvitationInitialRep.getGroupRoles(), emailId);
+            customFreeMarkerEmailTemplateProvider.sendGroupInvitationEmail(groupAdmin, group.getName(), ModelToRepresentation.buildGroupPath(group), group.getFirstAttribute(Utils.DESCRIPTION), groupInvitationInitialRep.isWithoutAcceptance(), groupInvitationInitialRep.getGroupRoles(), emailId);
 
             if (groupInvitationInitialRep.isWithoutAcceptance()) {
                 groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
