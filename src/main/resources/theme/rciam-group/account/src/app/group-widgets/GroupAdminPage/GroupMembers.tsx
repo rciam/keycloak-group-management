@@ -165,7 +165,7 @@ export const GroupMembers: FC<any> = (props) => {
                   <DataListCell className="gm_vertical_center_cell" width={3} key="email-hd">
                     <strong><Msg msgKey='Roles' /></strong>
                     {props.groupConfiguration?.groupRoles &&
-                      <DatalistFilterSelect default="" name="group-roles"  options={props.groupConfiguration?.groupRoles} optionsType="raw" action={(selection)=>{setRoleSelection(selection)}}/>
+                      <DatalistFilterSelect default="" name="group-roles"  options={Object.keys(props.groupConfiguration.groupRoles)} optionsType="raw" action={(selection)=>{setRoleSelection(selection)}}/>
                     }
                     
                    
@@ -384,7 +384,7 @@ const EditRolesModal: React.FC<EditRolesModalProps> = (props) =>{
             >
                  <table className="gm_roles-table gm_table-center">
                     <tbody>
-                      {props.groupRoles?.map((role,index)=>{
+                      {props?.groupRoles&&Object.keys(props.groupRoles).map((role,index)=>{
                           return <tr>
                               <td>
                                   {role}

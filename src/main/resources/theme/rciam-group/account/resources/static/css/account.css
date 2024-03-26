@@ -260,6 +260,23 @@
     justify-content: center!important;
 } 
 
+.gm_role_add_container div {
+    width: 16rem;
+    display: inline-block;
+    padding-top: 0.3rem;
+    padding-bottom: 0.8rem;
+    margin-right: 1rem;
+    width: 16rem!important;
+}
+
+.gm_role_add_container button {
+    display:inline-block;
+} 
+
+.gm_roles-table-popover div {
+    background-color:white!important;
+}
+
 .gm_cell-placeholder {
     width:5rem;
 }
@@ -380,6 +397,7 @@
     text-align: left;
     border-bottom: 1px solid #ddd;
     vertical-align: middle;
+    font-weight: bold;
 }
 
 .gm_roles-table tbody tr:nth-child(even) {
@@ -402,7 +420,7 @@
 }
 
 
-.gm_roles-table button {
+.gm_roles-table .gm_roles-delete-button {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -410,7 +428,6 @@
     height: 1.5rem;
     padding: 0;
     border: none;
-    background-color: #ccc;
   }
   
 .gm_roles-table svg {

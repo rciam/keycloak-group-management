@@ -581,7 +581,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                             >
                             <table className="gm_roles-table">
                                     <tbody>
-                                    {props.groupRoles&&props.groupRoles?.map((role,index)=>{
+                                    {props.groupRoles&&Object.keys(props.groupRoles).map((role,index)=>{
                                         return <tr onClick={()=>{roleHandler(role);}}>
                                             <td>
                                                 {role}

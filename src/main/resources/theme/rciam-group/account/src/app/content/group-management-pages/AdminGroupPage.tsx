@@ -91,7 +91,7 @@ interface GroupConfiguration {
     name: string;
     path: string;
     attributes: any;
-    groupRoles: string[];
+    groupRoles: any;
     enrollmentConfigurationList: EnrollmentConfiration[];
     status: string;
     membershipExpiresAt: string;
