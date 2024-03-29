@@ -57,11 +57,11 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         GroupEntity groupEntity = new GroupEntity();
         groupEntity.setId(group.getId());
         entity.setGroup(groupEntity);
-        entity.setName(groupName);
+        entity.setName("Join "+groupName);
         entity.setRequireApproval(configurationRulesList.stream().noneMatch(x -> "requireApproval".equals(x.getField()) && "false".equals(x.getDefaultValue())) );
         entity.setRequireApprovalForExtension(configurationRulesList.stream().noneMatch(x -> "requireApprovalForExtension".equals(x.getField()) &&  "false".equals(x.getDefaultValue())) );
         entity.setActive(configurationRulesList.stream().noneMatch(x -> "active".equals(x.getField()) &&  "false".equals(x.getDefaultValue())));
-        entity.setVisibleToNotMembers(configurationRulesList.stream().noneMatch(x -> "visibleToNotMembers".equals(x.getField()) &&  "false".equals(x.getDefaultValue())) );
+        entity.setVisibleToNotMembers(configurationRulesList.stream().anyMatch(x -> "visibleToNotMembers".equals(x.getField()) &&  "true".equals(x.getDefaultValue())) );
         entity.setMultiselectRole(configurationRulesList.stream().noneMatch(x -> "multiselectRole".equals(x.getField()) &&  "false".equals(x.getDefaultValue())));
         entity.setGroupRoles(groupRolesRepository.getGroupRolesByGroup(group.getId()).map(x -> {
             GroupRolesEntity r = new GroupRolesEntity();
