@@ -47,7 +47,7 @@ Parameter explanation:
 
 Only authority is optional.
 
-4.  Configuration rules exists for group configuration options. Web service example:
+4.  Configuration rules exists for group configuration options. ConfiuWeb service example:
    `curl --request POST \
    --url {server_url}/realms/{realmName}/agm/admin/configuration-rules \
    --header 'Accept: application/json' \
@@ -70,6 +70,19 @@ Fields explanation :
 
 With PUT *{server_url}/realms/{realmName}/agm/admin/configuration-rules/{id}* you could update a configuration rule.
 With GET *{server_url}/realms/{realmName}/agm/admin/configuration-rules* you could get all configuration rules.
+
+When a group is created, a default configuration is created. Group admin can change it/ create a new one.
+Configuration rules determines the default group configuration and applies rules in group configuration creation/ update.
+
+Default group configuration values without any configuration rules:
+- name →  Join + <group name>
+- Requires approval → True
+- Comments → True
+- Visible → False
+- Active → True
+- No expiration date
+- No aup
+- Default group role (member)
 
 
 ## REST API
