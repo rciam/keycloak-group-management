@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {FC,useState,useEffect} from 'react';
-import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction, Pagination,Badge, Modal, Checkbox} from '@patternfly/react-core';
+import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, ModalVariant,DataListAction, Pagination,Badge, Modal, Checkbox, Form, FormGroup, Popover, TextArea} from '@patternfly/react-core';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
@@ -10,6 +10,8 @@ import { TableActionBar } from './TableActionBar';
 import { InviteMemberModal } from './InviteMemberModal';
 import { Msg } from '../../widgets/Msg';
 import { DatalistFilterSelect } from '../DatalistFilterSelect';
+import { HelpIcon } from '@patternfly/react-icons';
+import { Loading } from '../LoadingModal';
 
 
 
@@ -36,7 +38,109 @@ interface Memberships {
     groupRoles: string[];
   }
 
+const UserActionModal:FC<any> = (props) => {
+  const [justification,setJustification] = useState("");
+  let groupsService = new GroupsServiceClient();
+  const [user,setUser] = useState<any>({});
+  const [isOpen,setIsOpen] = useState(false);
+  const [loading,setLoading] = useState(false);
+  useEffect(()=>{
+    setUser(props.user);
+    setIsOpen(Object.keys(props.user).length > 0);
+  },[props.user])
 
+  let suspendGroupMember = () => {
+    setLoading(true);
+    groupsService!.doPost<any>("/group-admin/group/"+props.groupId+"/member/"+ user.id+"/suspend" + (justification?"?justification="+justification:""),{})
+    .then((response: HttpResponse<any>) => {
+      if(response.status===200||response.status===204){
+        props.fetchGroupMembers();
+      }
+      setLoading(false);
+      close();
+    })
+  }
+
+  let activateGroupMember = () => {
+    setLoading(true);
+    groupsService!.doPost<any>("/group-admin/group/"+props.groupId+"/member/"+ user.id+"/activate" + (justification?"?justification="+justification:""),{})
+    .then((response: HttpResponse<any>) => {
+      if(response.status===200||response.status===204){
+        props.fetchGroupMembers();
+      }
+      setLoading(false);
+      close();
+    })
+  }
+
+  const close = ()=> {
+    props.setUser({}); 
+    setJustification("");
+  }
+  
+  return (
+    <Modal
+            variant={ModalVariant.medium}
+            title={Msg.localize('Confirmation')}
+            isOpen={isOpen}
+            onClose={()=>{close()}}
+            actions={[
+              <Button key="confirm" variant="primary" onClick={()=>{
+                if(user.status==="ENABLED"){
+                  suspendGroupMember();
+                }
+                else{
+                  activateGroupMember();
+                }
+              }}>
+                  {Msg.localize('YES')}
+              </Button>,
+              <Button key="cancel" variant="link" onClick={()=>{close();}}>
+                  {Msg.localize('NO')}
+              </Button>
+              
+            ]}
+          >
+            <div>
+                <Loading active={loading}/>
+                <p>{user.status==="ENABLED"?Msg.localize('adminGroupMemberSuspendConfirmation'):Msg.localize('adminGroupMemberRevokeSuspendConfirmation')}</p>
+                <Form>
+                  <FormGroup
+                    labelIcon={
+                      <Popover
+                        bodyContent={
+                          <div>
+                            {user.status==="ENABLED"?Msg.localize('adminGroupMemberSuspendJustification'):Msg.localize('adminGroupMemberRevokeSuspendJustification')}
+                          </div>
+                        }
+                      >
+                        <button
+                          type="button"
+                          aria-label="More info for name field"
+                          onClick={e => e.preventDefault()}
+                          aria-describedby="simple-form-name-01"
+                          className="pf-c-form__group-label-help"
+                        >
+                          <HelpIcon noVerticalAlign />
+                        </button>
+                      </Popover>
+                    }
+                    className="gm_suspend-justification-formgroup"
+                    label={Msg.localize('justificationLabel')} fieldId={''}                                    >
+                      <TextArea
+                        type="text"
+                        id="simple-form-name-01"
+                        name="simple-form-name-01"
+                        aria-describedby="simple-form-name-01-helper"
+                        value={justification}
+                        onChange={(value)=>{setJustification(value)}}
+                      />
+                  </FormGroup>
+                </Form>
+              </div>          
+              </Modal>
+  )
+}
 
 export const GroupMembers: FC<any> = (props) => {
     const [groupMembers,setGroupMembers] = useState<Memberships[]>([]);
@@ -49,6 +153,7 @@ export const GroupMembers: FC<any> = (props) => {
     const [editMemberRoles,setEditMemberRoles] = useState({});
     const [inviteModalActive,setInviteModalActive] = useState(false);
     const [initialRender,setInitialRender] = useState(true);
+    const [selectedUser,setSelectedUser] = useState<any>({});
 
     let groupsService = new GroupsServiceClient();
     useEffect(()=>{
@@ -104,23 +209,7 @@ export const GroupMembers: FC<any> = (props) => {
         }
       })
     }
-    let suspendGroupMember = (memberId) => {
-      groupsService!.doPost<any>("/group-admin/group/"+props.groupId+"/member/"+ memberId+"/suspend",{})
-      .then((response: HttpResponse<any>) => {
-        if(response.status===200||response.status===204){
-          fetchGroupMembers();
-        }
-      })
-    }
 
-    let activateGroupMember = (memberId) => {
-      groupsService!.doPost<any>("/group-admin/group/"+props.groupId+"/member/"+ memberId+"/activate",{})
-      .then((response: HttpResponse<any>) => {
-        if(response.status===200||response.status===204){
-          fetchGroupMembers();
-        }
-      })
-    }
 
 
 
@@ -143,6 +232,7 @@ export const GroupMembers: FC<any> = (props) => {
     return (
       <React.Fragment>
         <ConfirmationModal modalInfo={modalInfo}/>
+        <UserActionModal user={selectedUser} setUser={setSelectedUser} groupId={props.groupId}  fetchGroupMembers={fetchGroupMembers}/>
         <EditRolesModal member={editMemberRoles} setMember={setEditMemberRoles} groupRoles={props.groupConfiguration?.groupRoles} groupId={props.groupId} fetchGroupMembers={fetchGroupMembers} />
         <TableActionBar
           childComponent={props.isGroupAdmin&&<Button className="gm_invite-member-button" onClick={()=>{setInviteModalActive(true)}}><Msg msgKey='adminGroupInviteMemberButton' /></Button>}
@@ -224,12 +314,12 @@ export const GroupMembers: FC<any> = (props) => {
                         <Tooltip
                           content={
                             <div>
-                              {member.status==='ENABLED'?Msg.localize('adminGroupMemberUserActiveTooltip'):member.status==="SUSPENDED"?Msg.localize('adminGroupMemberUserSuspendedTooltip'):member.status==="SUSPENDED"?Msg.localize('adminGroupMemberUserPendingTooltip'):""}
+                              {member.status==='ENABLED'?Msg.localize('adminGroupMemberUserActiveTooltip'):member.status==="SUSPENDED"?Msg.localize('adminGroupMemberUserSuspendedTooltip'):member.status==="PENDING"?Msg.localize('adminGroupMemberUserPendingTooltip'):""}
                             </div>
                           }
                         >
                         <div className="gm_user-status-container">
-                          <div className={member.status==='ENABLED'?"gm_icon gm_icon-active-user":member.status==="SUSPENDED"?"gm_icon gm_icon-suspended-user":member.status==="SUSPENDED"?"gm_icon gm_icon-pending-user":""}></div>
+                          <div className={member.status==='ENABLED'?"gm_icon gm_icon-active-user":member.status==="SUSPENDED"?"gm_icon gm_icon-suspended-user":member.status==="PENDING"?"gm_icon gm_icon-pending-user":""}></div>
                         </div>
                         </Tooltip>
                       </DataListCell>
@@ -276,25 +366,7 @@ export const GroupMembers: FC<any> = (props) => {
                             </div>
                           }
                         >
-                          <Button variant="danger" className={member.status==='ENABLED'?"gm_ban-button-small":"gm_activate-button-small"} onClick={()=>{
-                              setModalInfo({
-                                title:"Confirmation",
-                                accept_message: "YES",
-                                cancel_message: "NO",
-                                message: (member.status==="ENABLED"?Msg.localize('adminGroupMemberSuspendConfirmation'):Msg.localize('adminGroupMemberRevokeSuspendConfirmation')),
-                                accept: function(){
-                                    if(member.status==="ENABLED"){
-                                      suspendGroupMember(member.id);
-                                    }
-                                    else{
-                                      activateGroupMember(member.id);
-                                    }
-                                    setModalInfo({})},
-                                cancel: function(){
-                                    setModalInfo({})}
-                              });
-                             
-                            }}>
+                          <Button variant="danger" className={member.status==='ENABLED'?"gm_ban-button-small":"gm_activate-button-small"} onClick={()=>{setSelectedUser(member);}}>
                               <div className={member.status==="ENABLED"?"gm_lock-button":"gm_activate-button"}></div>
                           </Button>
                         </Tooltip>

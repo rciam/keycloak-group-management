@@ -392,7 +392,7 @@ const EmailStep: React.FC<any> = (props) => {
 
     return(
         <React.Fragment>
-            <strong>Enter Recipient Address:</strong>
+            <strong>Select user or enter new email</strong>
             <div className="gm_invitation-email-input">
               <Select
                 variant={SelectVariant.typeahead}
@@ -438,7 +438,7 @@ const EmailStep: React.FC<any> = (props) => {
                 isOpen={isOpen}
                 aria-labelledby={"titleId"}
                 isInputValuePersisted={true}
-                placeholderText="Select a user"
+                placeholderText="Start typing a user's name or email address"
                 isCreatable={true}
               >
               {options.map((option, index) => (

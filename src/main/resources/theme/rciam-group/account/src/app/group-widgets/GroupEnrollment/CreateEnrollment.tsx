@@ -139,7 +139,7 @@ export const CreateEnrollment: FC<any> = (props) => {
       .then((response: HttpResponse<any>) => {
         setLoading(false);
         if(response.status===200||response.status===204){
-          props.history.push('/groups/showgroups');
+          props.history.push('/groups/mygroupenrollments');
           // setGroupMembers(response.data.results);
         }
       }).catch((err)=>{
