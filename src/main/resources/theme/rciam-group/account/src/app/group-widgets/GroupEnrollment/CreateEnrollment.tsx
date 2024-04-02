@@ -139,7 +139,7 @@ export const CreateEnrollment: FC<any> = (props) => {
       .then((response: HttpResponse<any>) => {
         setLoading(false);
         if(response.status===200||response.status===204){
-          props.history.push('/groups/showgroups');
+          props.history.push('/groups/mygroupenrollments');
           // setGroupMembers(response.data.results);
         }
       }).catch((err)=>{
@@ -258,10 +258,10 @@ export const CreateEnrollment: FC<any> = (props) => {
         {Object.keys(enrollment).length !== 0?
           <React.Fragment>
             <Alert variant="warning" className='gm_content-width' title={
-              (((enrollment.validFrom &&isFutureDate(dateParse(enrollment.validFrom)))||parseInt(enrollment.membershipExpirationDays)>0)&& "The membership ")+ 
+              ("The membership ")+ 
               (enrollment.validFrom &&isFutureDate(dateParse(enrollment.validFrom))? "will take effect at " +formatDateToString(dateParse(enrollment.validFrom)):"")+
               (enrollment.validFrom &&isFutureDate(dateParse(enrollment.validFrom))&&parseInt(enrollment.membershipExpirationDays)>0 ?" and it ": "")+
-              (parseInt(enrollment.membershipExpirationDays)>0&& "will expire in " + enrollment.membershipExpirationDays+ " days after activation")} 
+              (parseInt(enrollment.membershipExpirationDays)>0? "will expire in " + enrollment.membershipExpirationDays+ " days after activation":" does not have an expiration date.")} 
             />  
 
             

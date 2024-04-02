@@ -54,8 +54,7 @@ export const GroupAdmins: FC<any> = (props) => {
       let groupadminids = [] as any;
       props.groupConfiguration?.admins?.length>0&&props.groupConfiguration?.admins.map((admin)=> {
         groupadminids.push(admin.user.id);
-        // groupadminids.push(admin.user.id);
-        })
+      })
       setGroupAdminIds(groupadminids);      
     },[props.groupConfiguration]);
 
@@ -212,7 +211,7 @@ export const GroupAdmins: FC<any> = (props) => {
                       </DataListCell>,
                       <DataListCell width={1} key="secondary content ">
                         <Tooltip content={<div>{admin.direct?Msg.localize('adminGroupIsDirect'):Msg.localize('adminGroupIsNotDirect')}</div>}>
-                            <Checkbox id="disabled-check-1" className="gm_direct-checkbox" defaultChecked={admin.direct?true:false} isDisabled />
+                            <Checkbox id="disabled-check-1" className="gm_direct-checkbox" checked={admin.direct?true:false} isDisabled />
                         </Tooltip>
                       </DataListCell>
                     ]}

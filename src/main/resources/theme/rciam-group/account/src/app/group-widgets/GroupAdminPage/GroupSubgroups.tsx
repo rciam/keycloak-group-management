@@ -1,9 +1,10 @@
 import * as React from 'react';
-import {FC,useState} from 'react';
+import {FC,useState,useEffect} from 'react';
 import {  DataList,DataListItem,DataListItemCells,DataListItemRow,DataListCell, Button, Tooltip, DataListAction} from '@patternfly/react-core';
 import { Msg } from '../../widgets/Msg';
 import { GroupListItem } from '../../content/group-page/AdminGroupsPage';
-import { CreateSubgroupModal } from '../Modals';
+import { CreateGroupModal } from '../Modals';
+import { GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 
 interface AdminGroup{
   id? : string;
@@ -15,6 +16,12 @@ interface AdminGroup{
 export const GroupSubGroups: FC<any> = (props) => {
   
   const [createSubgroup,setCreateSubgroup] = useState(false);
+  const [userRoles,setUserRoles] = useState<String[]>([]);
+  let groupsService = new GroupsServiceClient();
+
+  useEffect(()=>{
+    setUserRoles(groupsService.getUserRoles());
+  },[])
 
   const emptyGroup= ()=>{
     return (
@@ -31,7 +38,7 @@ export const GroupSubGroups: FC<any> = (props) => {
 
     return (
       <React.Fragment>
-        <CreateSubgroupModal groupId={props.groupId} active={createSubgroup} afterSuccess={()=>{
+        <CreateGroupModal groupId={props.groupId} active={createSubgroup} afterSuccess={()=>{
           props.fetchGroupConfiguration();}} close={()=>{setCreateSubgroup(false);}}/> 
          <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact wrapModifier={"breakWord"}>
             
@@ -67,7 +74,7 @@ export const GroupSubGroups: FC<any> = (props) => {
             {props.groupConfiguration?.extraSubGroups&&props.groupConfiguration?.extraSubGroups.length>0 ?
               props.groupConfiguration?.extraSubGroups.map((group:AdminGroup,appIndex:number)=>{
                 return(
-                <GroupListItem  group={group as AdminGroup} fetchAdminGroups={props.fetchGroupConfiguration} appIndex={appIndex} depth={0} />
+                <GroupListItem  group={group as AdminGroup} userRoles={userRoles} fetchAdminGroups={props.fetchGroupConfiguration} appIndex={appIndex} depth={0} />
                 )
               }):
               emptyGroup()

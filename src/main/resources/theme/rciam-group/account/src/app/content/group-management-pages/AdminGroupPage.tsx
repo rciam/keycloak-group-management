@@ -64,15 +64,23 @@ interface FederatedIdentity {
 }
 
 interface User {
-    id?: string;
+    userId?: string;
     username: string;
     emailVerified: boolean;
     email: string;
     federatedIdentities: FederatedIdentity[];
 }
 
+interface UserGroupConfig {
+  id?: string;
+  username: string;
+  emailVerified: boolean;
+  email: string;
+  federatedIdentities: FederatedIdentity[];
+}
+
 interface Admin {
-    user: User;
+    user: UserGroupConfig;
     direct: boolean;
 }
 
@@ -83,7 +91,7 @@ interface GroupConfiguration {
     name: string;
     path: string;
     attributes: any;
-    groupRoles: string[];
+    groupRoles: any;
     enrollmentConfigurationList: EnrollmentConfiration[];
     status: string;
     membershipExpiresAt: string;
@@ -111,11 +119,14 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
   const [deleteGroup,setDeleteGroup] = useState(false);
   const [defaultConfiguration,setDefaultConfiguration] = useState("");
   const [initialRender,setInitialRender] = useState(true);
+  const [userRoles,setUserRoles] = useState<String[]>([]);
+  const [isGroupAdmin,setIsGroupAdmin] = useState<boolean>(false);
 
   let groupsService = new GroupsServiceClient();
   useEffect(()=>{
     fetchUser();
     fetchGroupConfiguration();
+    setUserRoles(groupsService.getUserRoles());
   },[]);
 
 
@@ -132,7 +143,18 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
     setActiveTabKey(0);
   },[groupId]);
 
-  
+  useEffect(()=>{    
+    let isAdmin = false;    
+    if(groupConfiguration?.admins?.length>0){
+      groupConfiguration.admins.forEach((admin)=>{
+        if(admin.user.id===user.userId){
+          isAdmin = true;
+        }
+      });
+    }
+    setIsGroupAdmin(isAdmin);
+
+  },[groupConfiguration])
 
   const handleTabClick = (
     event: React.MouseEvent<any> | React.KeyboardEvent | MouseEvent,
@@ -197,7 +219,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
             {groupConfiguration?.name}
           </BreadcrumbItem>
         </Breadcrumb>
-          <h1 className="pf-c-title pf-m-2xl pf-u-mb-xl gm_group-title gm_flex-center">{groupConfiguration?.name} {("/"+groupConfiguration?.name)!==groupConfiguration?.path&&!(groupConfiguration?.extraSubGroups&&groupConfiguration?.extraSubGroups.length>0)&&<TrashIcon onClick={()=>{setDeleteGroup(true)}}/>}</h1>
+          <h1 className="pf-c-title pf-m-2xl pf-u-mb-xl gm_group-title gm_flex-center">{groupConfiguration?.name} {(isGroupAdmin||("/"+groupConfiguration?.name)!==groupConfiguration?.path) &&!(groupConfiguration?.extraSubGroups&&groupConfiguration?.extraSubGroups.length>0)&&<TrashIcon onClick={()=>{setDeleteGroup(true)}}/>}</h1>
           {editDescription?
             <div className="gm_description-input-container">
               <TextArea value={descriptionInput} onChange={value => setDescriptionInput(value)} aria-label="text area example" />
@@ -242,23 +264,23 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
           role="region"
           >
             <Tab eventKey={0} title={<TabTitleText><Msg msgKey='adminGroupDetailsTab' /></TabTitleText>} aria-label="Default content - users">
-              <GroupDetails groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration}/>
+              <GroupDetails groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration}/>
             </Tab>    
             
             <Tab eventKey={1} title={<TabTitleText><Msg msgKey='adminGroupMembersTab' /></TabTitleText>} aria-label="Default content - members">
-              <GroupMembers groupConfiguration={groupConfiguration} groupId={groupId} user={user}/>
+              <GroupMembers isGroupAdmin={isGroupAdmin} groupConfiguration={groupConfiguration} groupId={groupId} user={user}/>
             </Tab>
             <Tab eventKey={2} title={<TabTitleText><Msg msgKey='adminGroupAdminsTab' /></TabTitleText>} aria-label="Default content - admins">
-              <GroupAdmins groupId={groupId} user={user} groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration}/>
+              <GroupAdmins isGroupAdmin={isGroupAdmin} groupId={groupId} user={user} groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration}/>
             </Tab>
             <Tab eventKey={3} title={<TabTitleText><Msg msgKey='adminGroupEnrollmentTab' /></TabTitleText>} aria-label="Default content - attributes">   
-              <GroupEnrollment groupConfiguration={groupConfiguration} defaultConfiguration={defaultConfiguration}  groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
+              <GroupEnrollment isGroupAdmin={isGroupAdmin} groupConfiguration={groupConfiguration} defaultConfiguration={defaultConfiguration}  groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
             </Tab>   
             <Tab eventKey={4} title={<TabTitleText><Msg msgKey='adminGroupAttributesTab' /></TabTitleText>} aria-label="Default content - attributes">   
-              <GroupAttributes groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
+              <GroupAttributes isGroupAdmin={isGroupAdmin} groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
             </Tab>
             <Tab eventKey={5} title={<TabTitleText><Msg msgKey='adminGroupSubgroupsTab' /></TabTitleText>} aria-label="Default content - attributes">   
-              <GroupSubGroups groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} />
+              <GroupSubGroups isGroupAdmin={isGroupAdmin} groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} />
             </Tab>
             
           </Tabs>

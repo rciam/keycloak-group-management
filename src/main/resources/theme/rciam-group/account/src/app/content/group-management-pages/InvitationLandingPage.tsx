@@ -64,7 +64,12 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props)=> {
       .then((response: HttpResponse<any>) => {
         setLoading(false);
         if(response.status===200||response.status===204){
-          props.history.push('/groups/showgroups');
+          if(invitationData?.forMember){
+            props.history.push('/groups/showgroups');
+          }
+          else{
+            props.history.push('/groups/admingroups')
+          }
         }
         else{
           setActionBlocked(true);          
@@ -81,8 +86,12 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props)=> {
       .then((response: HttpResponse<any>) => {
         setLoading(false);
         if(response.status===200||response.status===204){
-          props.history.push('/groups/showgroups');
-
+          if(invitationData?.forMember){
+            props.history.push('/groups/showgroups');
+          }
+          else{
+            props.history.push('/groups/admingroups')
+          }
         }
         else{ 
           setActionBlocked(true);
@@ -103,7 +112,12 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props)=> {
         <Loading active={loading}/>
         <ResponseModal type={invitationData?.forMember} close={()=>{
           setActionBlocked(false);
-          props.history.push('/groups/showgroups');
+          if(invitationData?.forMember){
+            props.history.push('/groups/showgroups');
+          }
+          else{
+            props.history.push('/groups/admingroups')
+          }
         }} active={actionBlocked}/>
         {Object.keys(invitationData).length  >0 ?
           <>
@@ -111,19 +125,20 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props)=> {
             <div className="gm_invitation-content-container">
               <Hint>
                 <HintBody>
-                <Msg msgKey='invitationMessage' />{invitationData?.forMember?invitationData?.groupRoles.map((role,index)=>{return <strong> {role}{index !== invitationData.groupRoles.length - 1&&','}</strong>}):'n admin'}.
+                <Msg msgKey='invitationMessage' />{invitationData?.forMember?invitationData?.groupRoles.map((role,index)=>{return <strong> {role}{index !== invitationData.groupRoles.length - 1&&','}</strong>}):' admin'}.
                 </HintBody>
               </Hint>
               {(invitationData?.groupEnrollmentConfiguration?.group?.attributes?.description||invitationData?.group?.attributes?.description)&&<div className="gm_invitation-purpuse">
                 <h1><Msg msgKey='Description' /></h1>
                 {invitationData?.groupEnrollmentConfiguration?.group?.attributes?.description[0]||invitationData?.group?.attributes?.description[0]}
               </div>}
-              {invitationData?.forMember&&invitationData?.groupEnrollmentConfiguration?.membershipExpirationDays&&
-                    <HelperText>
-                    <HelperTextItem variant="warning" hasIcon>
-                      <p><Msg msgKey='invitationExpirationMessage1' /> <strong>{invitationData?.groupEnrollmentConfiguration?.membershipExpirationDays} <Msg msgKey='days' /></strong> <Msg msgKey='invitationExpirationMessage2' /></p></HelperTextItem>
-                    </HelperText>
+              {invitationData?.forMember &&
+                <HelperText>
+                  <HelperTextItem variant="warning" hasIcon>
+                    <p>{invitationData?.groupEnrollmentConfiguration?.membershipExpirationDays?<React.Fragment><Msg msgKey='invitationExpirationMessage1' /> <strong>{invitationData?.groupEnrollmentConfiguration?.membershipExpirationDays} <Msg msgKey='days' /></strong> <Msg msgKey='invitationExpirationMessage2' /></React.Fragment>:<Msg msgKey='invitationExpirationMessageInfinite'/>}</p></HelperTextItem>
+                </HelperText>
               }
+        
               {invitationData?.groupEnrollmentConfiguration?.aup?.url?
                 <>
                   <p>

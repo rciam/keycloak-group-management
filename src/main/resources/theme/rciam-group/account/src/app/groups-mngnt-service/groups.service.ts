@@ -37,7 +37,18 @@ export class GroupsServiceClient {
     public constructor() {
         this.kcSvc = keycloakService;
         this.groupsUrl = this.kcSvc.authServerUrl() + 'realms/' + this.kcSvc.realm() + '/agm/account';
-        this.baseUrl = this.kcSvc.authServerUrl() + 'admin/' + this.kcSvc.realm() + '/console'
+        this.baseUrl = this.kcSvc.authServerUrl() + 'admin/' + this.kcSvc.realm() + '/console';
+    }
+
+    public getUserRoles = ()=> {
+        let userRoles = [];
+        try{
+            userRoles = this.kcSvc.keycloakAuth.resourceAccess.account.roles;
+        }
+        catch(err){
+            console.log(err);
+        }
+        return userRoles;
     }
 
     public getBaseUrl(){

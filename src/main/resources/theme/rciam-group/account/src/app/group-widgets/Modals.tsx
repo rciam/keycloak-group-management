@@ -19,7 +19,6 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = (props) =>{
     },[props.modalInfo])
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [type,setType] = useState('small');
     const handleModalToggle = () => {
         props?.modalInfo?.cancel();
     };
@@ -107,15 +106,15 @@ export const DeleteSubgroupModal:React.FC<any> = (props) => {
 
 
 
-export const CreateSubgroupModal:React.FC<any> = (props) => {
+export const CreateGroupModal:React.FC<any> = (props) => {
 
     useEffect(()=>{
         setIsModalOpen(props.active);
-        setSubGroup(subgroupDefault);
+        setGroupConfig(groupConfigDefault);
     },[props.active])
 
     const [isModalOpen, setIsModalOpen] = React.useState(false);
-    let subgroupDefault = {
+    let groupConfigDefault = {
         name: "",
         attributes: {
             description: [""]
@@ -124,22 +123,22 @@ export const CreateSubgroupModal:React.FC<any> = (props) => {
     let groupsService = new GroupsServiceClient();
     const [modalInfo,setModalInfo] = useState({});
     const [loading,setLoading] = useState(false);
-    const [subGroup,setSubGroup] = useState(subgroupDefault);
-    const [validSubGroup,setValidSubGroup]= useState(false);
+    const [groupConfig,setGroupConfig] = useState(groupConfigDefault);
+    const [isValid,setIsValid]= useState(false);
     
     useEffect(()=>{
-        setValidSubGroup(subGroup.name.length>0&&subGroup.attributes.description[0].length>0);
-      },[subGroup]);
+        setIsValid(groupConfig.name.length>0&&groupConfig.attributes.description[0].length>0);
+      },[groupConfig]);
 
-    const createSubgroup = () =>{
+    const createGroup = () =>{
         setLoading(true);
-        groupsService!.doPost<any>("/group-admin/group/"+props.groupId+"/children",{...subGroup})
+        groupsService!.doPost<any>("/group-admin/group"+(props.groupId?("/"+props.groupId+"/children"):""),{...groupConfig})
         .then((response: HttpResponse<any>) => {
           setLoading(false);
           props.close()
-          if(response.status===200||response.status===204){
+          if(response.status===200||response.status===204||response.status===201){
             setModalInfo({
-                title:(Msg.localize('createSubgroupSuccess')),
+                title:(props.groupId?Msg.localize('createSubgroupSuccess'):Msg.localize('createGroupSuccess')),
                 accept_message: (Msg.localize('OK')),
                 accept: function(){
                   props.afterSuccess();
@@ -164,19 +163,19 @@ export const CreateSubgroupModal:React.FC<any> = (props) => {
             <ConfirmationModal modalInfo={modalInfo}/>
             <Modal
                 variant={ModalVariant.medium}
-                title={Msg.localize('createSubgroup')}
+                title={props.groupId?Msg.localize('createSubgroup'):Msg.localize('createGroup')}
                 isOpen={isModalOpen}
                 onClose={()=>{props.close()}}
                 actions={[
-                    <Tooltip {...(!!validSubGroup ? { trigger:'manual', isVisible:false }:{trigger:'mouseenter'})}
+                    <Tooltip {...(!!isValid ? { trigger:'manual', isVisible:false }:{trigger:'mouseenter'})}
                         content={
                             <div>
-                                <Msg msgKey='createSubgroupFormError' />
+                                <Msg msgKey='createGroupFormError' />
                             </div>
                         }
                     >
                     <div>
-                        <Button key="confirm" variant="primary" isDisabled={!validSubGroup} onClick={()=>{createSubgroup();}}>
+                        <Button key="confirm" variant="primary" isDisabled={!isValid} onClick={()=>{createGroup();}}>
                             <Msg msgKey='Create' />
                         </Button>
                     </div>
@@ -203,8 +202,8 @@ export const CreateSubgroupModal:React.FC<any> = (props) => {
                             id="simple-form-name-01"
                             name="simple-form-name-01"
                             aria-describedby="simple-form-name-01-helper"
-                            value={subGroup.name}
-                            onChange={(value)=>{subGroup.name=value; setSubGroup({...subGroup})}}
+                            value={groupConfig.name}
+                            onChange={(value)=>{groupConfig.name=value; setGroupConfig({...groupConfig})}}
                             />
                         </FormGroup>
                         <FormGroup label="Description" isRequired fieldId="simple-form-desription-01">
@@ -213,8 +212,8 @@ export const CreateSubgroupModal:React.FC<any> = (props) => {
                             type="text"
                             id="simple-form-email-01"
                             name="simple-form-email-01"
-                            value={subGroup.attributes.description[0]}
-                            onChange={(value)=>{ subGroup.attributes.description[0]=value; setSubGroup({...subGroup})}}
+                            value={groupConfig.attributes.description[0]}
+                            onChange={(value)=>{ groupConfig.attributes.description[0]=value; setGroupConfig({...groupConfig})}}
                             />
                         </FormGroup>
                     </Form>
