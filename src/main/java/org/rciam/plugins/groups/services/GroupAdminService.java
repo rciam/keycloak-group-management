@@ -154,7 +154,6 @@ public class GroupAdminService {
                                                   @QueryParam("max") @DefaultValue("10") Integer max,
                                                   @QueryParam("search") String search,
                                                   @QueryParam("serviceAccountClientLink") @DefaultValue("true") boolean serviceAccountClientLink,
-                                                  @QueryParam("status") MemberStatusEnum status,
                                                   @QueryParam("groups") String groupids){
         if (Utils.hasManageGroupsAccountRole(realm, groupAdmin)){
             Map<String, String> attributes = new HashMap<>();
@@ -167,7 +166,7 @@ public class GroupAdminService {
             int count = session.users().getUsersCount(realm, attributes);
             return new UserRepresentationPager(users, (long) count);
         } else {
-            return userGroupMembershipExtensionRepository.searchByAdminGroups(Arrays.asList(groupids.split(",")), search, serviceAccountClientLink, status, first, max);
+            return userGroupMembershipExtensionRepository.searchByAdminGroups(Arrays.asList(groupids.split(",")), search, serviceAccountClientLink, first, max);
         }
     }
 
