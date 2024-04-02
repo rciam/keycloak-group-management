@@ -13,6 +13,11 @@ A keycloak plugin to support advanced group management features:
 
 * Roles within groups
 
+## Compatible Keycloak versions
+
+Until group management version 0.9.x, group management is compatible with Keycloak version 18.0.1-2.17.
+From group management version 0.10.0, group management is compatible with Keycloak version 22.0.5-1.x.
+
 ## General configuration options 
 All web services to be executed needs realm management rights role.
 
