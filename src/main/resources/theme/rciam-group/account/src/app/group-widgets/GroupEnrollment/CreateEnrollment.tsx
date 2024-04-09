@@ -133,14 +133,18 @@ export const CreateEnrollment: FC<any> = (props) => {
       validateEnrollmentRequest();
     },[enrollmentRequest])
 
-    const createEnrollmentRequest = () => {
+    const createEnrollmentRequest = (requiresApproval) => {
       setLoading(true);
       groupsService!.doPost<any>("/user/enroll-request",{...enrollmentRequest})
       .then((response: HttpResponse<any>) => {
         setLoading(false);
         if(response.status===200||response.status===204){
-          props.history.push('/groups/mygroupenrollments');
-          // setGroupMembers(response.data.results);
+          if(requiresApproval){
+            props.history.push('/groups/mygroupenrollments');
+          }
+          else{
+            props.history.push('/groups/showgroups');
+          }
         }
       }).catch((err)=>{
         setLoading(false);
@@ -153,8 +157,6 @@ export const CreateEnrollment: FC<any> = (props) => {
         (!enrollmentRequest?.comments&&enrollment.commentsNeeded) && (errors.comments = Msg.localize('requredFormError'));
         !(enrollmentRequest?.groupRoles?.length>0) && (errors.groupRoles=Msg.localize('groupRolesFormError'));
         (!enrollment.multiselectRoles&&enrollmentRequest.groupRoles.length>1) && (errors.groupRoles=Msg.localize('groupRolesFormErrorMulitple'));
-
-
         setErrors(errors);
         //!(enrollemtn?)
     }
@@ -204,50 +206,45 @@ export const CreateEnrollment: FC<any> = (props) => {
           <ConfirmationModal modalInfo={modalInfo}/>
           <Loading active={loading}/>
           <ContentPage title={group?.name||""}>
-            
-
             <p className="gm_group_desc">
               {(group?.attributes?.description&&group?.attributes?.description[0])||Msg.localize('noDescription')}
             </p>
             <div className="gm_enrollment_container">
             <Form> 
               {!openRequest?
-              
-              <React.Fragment>
-
-              
-            {enrollments&&enrollments.length>0?
-            <React.Fragment>
-               <FormGroup
-              label= {Msg.localize('Group Enrollment')}
-              isRequired
-              fieldId="simple-form-name-01"
-              >
-                <Select
-                  variant={SelectVariant.single}
-                  aria-label="Select Input"
-                  className="gm_form-input"
-                  onToggle={onToggle}
-                  onSelect={onSelect}
-                  isDisabled={enrollments.length===1}
-                  selections={selected}
-                  isOpen={isOpen}
-                  aria-labelledby={"Test"}
-                >
-                  <SelectOption {...(enrollments.length!==1&& {...{key:"placeholder",isPlaceholder:true}})} value={Msg.localize('invitationEnrollmentSelectPlaceholder')} onClick={()=>{
-                    setEnrollment({});
-                    }} 
-                    
-                  />
-                    {enrollments.map((enrollment,index)=>{
-                      return <SelectOption {...(enrollments.length===1&& {...{key:"placeholder",isPlaceholder:true}})} key={index} value={enrollment?.name} isDisabled={!enrollment.active} onClick={()=>{
-                        enrollmentRequest.groupEnrollmentConfiguration.id=enrollment.id
-                        setEnrollmentRequest({...enrollmentRequest});
-                        setEnrollment(enrollment);
-                        }} />
-                    })}
-              </Select>
-              </FormGroup>
+                <React.Fragment>              
+                  {enrollments&&enrollments.length>0?
+                    <React.Fragment>
+                      <FormGroup
+                      label= {Msg.localize('Group Enrollment')}
+                      isRequired
+                      fieldId="simple-form-name-01"
+                      >
+                        <Select
+                          variant={SelectVariant.single}
+                          aria-label="Select Input"
+                          className="gm_form-input"
+                          onToggle={onToggle}
+                          onSelect={onSelect}
+                          isDisabled={enrollments.length===1}
+                          selections={selected}
+                          isOpen={isOpen}
+                          aria-labelledby={"Test"}
+                        >
+                          <SelectOption {...(enrollments.length!==1&& {...{key:"placeholder",isPlaceholder:true}})} value={Msg.localize('invitationEnrollmentSelectPlaceholder')} onClick={()=>{
+                            setEnrollment({});
+                            }} 
+                            
+                          />
+                            {enrollments.map((enrollment,index)=>{
+                              return <SelectOption {...(enrollments.length===1&& {...{key:"placeholder",isPlaceholder:true}})} key={index} value={enrollment?.name} isDisabled={!enrollment.active} onClick={()=>{
+                                enrollmentRequest.groupEnrollmentConfiguration.id=enrollment.id
+                                setEnrollmentRequest({...enrollmentRequest});
+                                setEnrollment(enrollment);
+                                }} />
+                            })}
+                      </Select>
+                    </FormGroup>
                 </React.Fragment>
             :
             <Alert  className='gm_content-width' variant="warning" title="This group has no available enrollments" />  
@@ -321,9 +318,8 @@ export const CreateEnrollment: FC<any> = (props) => {
                 </div>
               </> 
             :""}
-
+            <Alert variant="info" className='gm_content-width' title={enrollment?.requireApproval?Msg.localize('enrollmentRequiresApprovalAlert'):Msg.localize('enrollmentNoApprovalAlert')} />
             <div>
-
             <Tooltip  {...(!(enrollment?.aup?.url&&!acceptAup) ? { trigger:'manual', isVisible:false }:{trigger:'mouseenter'})} content={<div><Msg msgKey='invitationAUPErrorMessage' /></div>}>
                   <div className="gm_invitation-response-button-container">
                   <Button isDisabled={enrollment?.aup?.url&&!acceptAup} onClick={()=>{
@@ -339,7 +335,7 @@ export const CreateEnrollment: FC<any> = (props) => {
                           });
                     }
                     else{
-                        createEnrollmentRequest();
+                        createEnrollmentRequest(enrollment?.requireApproval);
                     }
                   }}>Submit</Button>
                   </div>

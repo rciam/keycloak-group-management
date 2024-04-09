@@ -567,6 +567,7 @@
 
 
 .gm_checkbox-container {
+    margin-top:-1rem;
     padding: 1rem;
     background-color: #d1d1d1;
 }
