@@ -81,7 +81,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
 
     public void sendGroupAdminEnrollmentCreationEmail(UserModel userRequest, String groupname, List<String> groupRoles, String reason, String enrollmentId) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
-        attributes.put("user", userRequest.getFirstName() + " " + userRequest.getLastName());
+        attributes.put("userName", userRequest.getFirstName() + " " + userRequest.getLastName());
         if (groupRoles != null && !groupRoles.isEmpty()) {
             StringBuilder sb = new StringBuilder(groupname).append(" with roles : ");
             groupRoles.stream().forEach(role -> sb.append(role).append(", "));
@@ -98,7 +98,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
 
     public void sendExpiredGroupMemberEmailToAdmin(UserModel userRequest, String groupname, List<String> subgroupsPaths) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
-        attributes.put("user", userRequest.getFirstName() + " " + userRequest.getLastName());
+        attributes.put("userName", userRequest.getFirstName() + " " + userRequest.getLastName());
         attributes.put("groupname", groupname);
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupsPaths));
         attributes.put("signatureMessage", signatureMessage);
