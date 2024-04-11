@@ -83,6 +83,12 @@ public class EntityToRepresentation {
         return rep;
     }
 
+    public static UserGroupMembershipExtensionRepresentation toRepresentation(UserGroupMembershipExtensionEntity entity, RealmModel realm, String groupId) {
+        UserGroupMembershipExtensionRepresentation rep = toRepresentation(entity, realm);
+        rep.setDirect(groupId.equals(rep.getGroup().getId()));
+        return rep;
+    }
+
     private static Map<String, List<String>> getGroupAttributes(Collection<GroupAttributeEntity> attributesList) {
         MultivaluedHashMap<String, String> result = new MultivaluedHashMap<>();
         for (GroupAttributeEntity attr : attributesList) {

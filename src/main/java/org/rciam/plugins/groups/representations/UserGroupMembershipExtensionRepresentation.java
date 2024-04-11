@@ -32,6 +32,8 @@ public class UserGroupMembershipExtensionRepresentation {
     private GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
     private List<String> groupRoles;
 
+    private boolean direct;
+
     public UserGroupMembershipExtensionRepresentation() {
     }
 
@@ -113,5 +115,13 @@ public class UserGroupMembershipExtensionRepresentation {
 
     public void setGroupRoles(List<String> groupRoles) {
         this.groupRoles = groupRoles;
+    }
+
+    public boolean isDirect() {
+        return direct;
+    }
+
+    public void setDirect(boolean direct) {
+        this.direct = direct;
     }
 }
