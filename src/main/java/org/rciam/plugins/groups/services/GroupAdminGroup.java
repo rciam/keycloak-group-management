@@ -288,7 +288,7 @@ public class GroupAdminGroup {
         try {
             UserAdapter user = Utils.getDummyUser(userRep.getEmail(), userRep.getFirstName(), userRep.getLastName());
             customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendInviteGroupAdminEmail(invitationId, groupAdmin, group.getName(), org.rciam.plugins.groups.helpers.ModelToRepresentation.buildGroupPath(group), group.getFirstAttribute(Utils.DESCRIPTION));
+            customFreeMarkerEmailTemplateProvider.sendInviteGroupAdminEmail(invitationId, groupAdmin, group.getName(), org.rciam.plugins.groups.helpers.ModelToRepresentation.buildGroupPath(group), group.getFirstAttribute(Utils.DESCRIPTION), invitationExpirationHour);
 
             groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                 try {

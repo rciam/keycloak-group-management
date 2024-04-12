@@ -80,6 +80,7 @@ public class GroupAdminGroupMembers {
             throw new ErrorResponseException("Wrong data","Wrong data", Response.Status.BAD_REQUEST);
 
         String emailId = group.getId();
+        Long invitationExpirationHour = null;
         if (groupInvitationInitialRep.isWithoutAcceptance()) {
             GroupEnrollmentConfigurationEntity conf = groupEnrollmentConfigurationRepository.getEntity(groupInvitationInitialRep.getGroupEnrollmentConfiguration().getId());
             if (conf == null)
@@ -87,7 +88,7 @@ public class GroupAdminGroupMembers {
             emailId = groupInvitationRepository.createForMember(groupInvitationInitialRep, groupAdmin.getId(),conf);
             //execute once delete invitation after "url-expiration-period" ( default 72 hours)
             AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
-            long invitationExpirationHour = realm.getAttribute(Utils.invitationExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.invitationExpirationPeriod)) : 72;
+            invitationExpirationHour = realm.getAttribute(Utils.invitationExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.invitationExpirationPeriod)) : 72;
             long interval = invitationExpirationHour * 3600 * 1000;
             timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new DeleteExpiredInvitationTask(emailId, realm.getId()), interval), interval, "DeleteExpiredInvitation_"+emailId);
         }
@@ -95,7 +96,7 @@ public class GroupAdminGroupMembers {
         try {
             UserAdapter user = Utils.getDummyUser(groupInvitationInitialRep.getEmail(), groupInvitationInitialRep.getFirstName(), groupInvitationInitialRep.getLastName());
             customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendGroupInvitationEmail(groupAdmin, group.getName(), ModelToRepresentation.buildGroupPath(group), group.getFirstAttribute(Utils.DESCRIPTION), groupInvitationInitialRep.isWithoutAcceptance(), groupInvitationInitialRep.getGroupRoles(), emailId);
+            customFreeMarkerEmailTemplateProvider.sendGroupInvitationEmail(groupAdmin, group.getName(), ModelToRepresentation.buildGroupPath(group), group.getFirstAttribute(Utils.DESCRIPTION), groupInvitationInitialRep.isWithoutAcceptance(), groupInvitationInitialRep.getGroupRoles(), emailId, invitationExpirationHour);
 
             if (groupInvitationInitialRep.isWithoutAcceptance()) {
                 groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
