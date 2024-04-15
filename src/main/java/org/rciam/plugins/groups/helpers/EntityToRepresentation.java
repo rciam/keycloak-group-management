@@ -68,10 +68,10 @@ public class EntityToRepresentation {
         return rep;
     }
 
-    public static UserGroupMembershipExtensionRepresentation toRepresentation(UserGroupMembershipExtensionEntity entity, RealmModel realm) {
+    public static UserGroupMembershipExtensionRepresentation toRepresentation(UserGroupMembershipExtensionEntity entity, RealmModel realm, boolean fullPath) {
         UserGroupMembershipExtensionRepresentation rep = new UserGroupMembershipExtensionRepresentation();
         rep.setId(entity.getId());
-        GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true, false, realm);
+        GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true, fullPath, realm);
         rep.setGroup(group);
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
         rep.setJustification(entity.getJustification());
@@ -84,7 +84,7 @@ public class EntityToRepresentation {
     }
 
     public static UserGroupMembershipExtensionRepresentation toRepresentation(UserGroupMembershipExtensionEntity entity, RealmModel realm, String groupId) {
-        UserGroupMembershipExtensionRepresentation rep = toRepresentation(entity, realm);
+        UserGroupMembershipExtensionRepresentation rep = toRepresentation(entity, realm, true);
         rep.setDirect(groupId.equals(rep.getGroup().getId()));
         return rep;
     }
