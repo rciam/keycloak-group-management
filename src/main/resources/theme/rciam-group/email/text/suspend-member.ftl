@@ -1,2 +1,2 @@
 <#ftl output_format="plainText">
-${msg("suspendMemberBody",groupname, subgroupsStr, justification, signatureMessage)}
+${msg("suspendMemberBody",groupPath, subgroupsStr, justification, signatureMessage)}

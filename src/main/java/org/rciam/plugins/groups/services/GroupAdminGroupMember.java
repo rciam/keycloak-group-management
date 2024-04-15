@@ -161,12 +161,22 @@ public class GroupAdminGroupMember {
             throw new NotFoundException("Could not find this User");
         }
         try {
+            String groupPath = ModelToRepresentation.buildGroupPath(group);
             List<String> subgroupPaths = userGroupMembershipExtensionRepository.suspendUser(user, member, justification, group, memberUserAttributeConfigurationRepository);
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
-                    , Utils.GROUP_MEMBERSHIP_SUSPEND, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
+                    , Utils.GROUP_MEMBERSHIP_SUSPEND, groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
 
             customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendSuspensionEmail(ModelToRepresentation.buildGroupPath(group), subgroupPaths, justification);
+            customFreeMarkerEmailTemplateProvider.sendSuspensionEmail(groupPath, subgroupPaths, justification);
+
+            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+                try {
+                    customFreeMarkerEmailTemplateProvider.setUser(admin);
+                    customFreeMarkerEmailTemplateProvider.sendSuspensionEmailToAdmins(groupPath, subgroupPaths, justification, user, groupAdmin);
+                } catch (EmailException e) {
+                    ServicesLogger.LOGGER.failedToSendEmail(e);
+                }
+            });
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         } catch (Exception e) {
@@ -184,23 +194,33 @@ public class GroupAdminGroupMember {
             throw new NotFoundException("Could not find this User");
         }
         try {
+            String groupPath = ModelToRepresentation.buildGroupPath(group);
             userGroupMembershipExtensionRepository.activateUser(user, member, justification, group);
             MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
             Utils.changeUserAttributeValue(user, member, Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm), memberUserAttribute, session);
 
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
-                    , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
+                    , Utils.GROUP_MEMBERSHIP_CREATE, groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
+            try {
+                customFreeMarkerEmailTemplateProvider.setUser(user);
+                customFreeMarkerEmailTemplateProvider.sendActivationEmail(groupPath, justification);
 
+                groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+                    try {
+                        customFreeMarkerEmailTemplateProvider.setUser(admin);
+                        customFreeMarkerEmailTemplateProvider.sendActivationEmailToAdmins(groupPath, justification, user, groupAdmin);
+                    } catch (EmailException e) {
+                        ServicesLogger.LOGGER.failedToSendEmail(e);
+                    }
+                });
+            } catch (EmailException e) {
+                ServicesLogger.LOGGER.failedToSendEmail(e);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             throw new BadRequestException("problem activate group member");
         }
-        try {
-            customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendActivationEmail(group.getName(), justification);
-        } catch (EmailException e) {
-            ServicesLogger.LOGGER.failedToSendEmail(e);
-        }
+
         return Response.noContent().build();
     }
 
