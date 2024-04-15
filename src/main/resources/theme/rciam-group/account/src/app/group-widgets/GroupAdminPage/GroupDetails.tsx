@@ -25,8 +25,7 @@ export const GroupDetails: FC<any> = (props) => {
         groupsService!.doPost<any>("/group-admin/group/" + props.groupId + "/roles", {}, { params: { name: role } })
             .then((response: HttpResponse<any>) => {
                 if (response.status === 200 || response.status === 204) {
-                    props.groupConfiguration.groupRoles.push(role);
-                    props.setGroupConfiguration({ ...props.groupConfiguration });
+                    props.fetchGroupConfiguration();
                     setRoleInput("");
                     setModalInfo({});
                 }
@@ -37,11 +36,7 @@ export const GroupDetails: FC<any> = (props) => {
         groupsService!.doDelete<any>("/group-admin/group/" + props.groupId + "/role/" + role)
             .then((response: HttpResponse<any>) => {
                 if (response.status === 200 || response.status === 204) {
-                    const index = props.groupConfiguration.groupRoles.indexOf(role);
-                    if (index > -1) { // only splice array when item is found
-                        props.groupConfiguration.groupRoles.splice(index, 1); // 2nd parameter means remove one item only
-                    }
-                    props.setGroupConfiguration({ ...props.groupConfiguration });
+                   props.fetchGroupConfiguration();
                 }
                 setModalInfo({});
             }).catch(err => {
@@ -82,15 +77,23 @@ export const GroupDetails: FC<any> = (props) => {
                                 <DataListCell width={3} key="roles">
                                     <div className="gm_role_add_container">
                                         <InputGroup>
-                                            <TextInput id="textInput-basic-1" value={roleInput} placeholder={Msg.localize('adminGroupRolesAddPlaceholder')} onChange={(e) => { setRoleInput(e.trim()); }} onKeyDown={(e) => { e.key === 'Enter' && roleRef?.current?.click(); }} type="email" aria-label="email input field" />
+                                            <TextInput id="textInput-basic-1" value={roleInput} placeholder={Msg.localize('adminGroupRolesAddPlaceholder')} onChange={(e) => { setRoleInput(e.trim());}} onKeyDown={(e) => { e.key === 'Enter' && roleRef?.current?.click(); }} type="email" aria-label="email input field" />
                                         </InputGroup>
                                         <Tooltip content={<div><Msg msgKey='adminGroupRolesAdd' /></div>}>
                                             <Button ref={roleRef} onClick={() => {
-                                                if (props.groupConfiguration?.groupRoles.includes(roleInput)) {
+                                                if (props?.groupConfiguration?.groupRoles&&Object.keys(props.groupConfiguration.groupRoles).includes(roleInput)) {
                                                     setModalInfo({
                                                         title: (Msg.localize('adminGroupRoleExistsTitle')),
                                                         accept_message: Msg.localize('OK'),
                                                         message: (Msg.localize('adminGroupRoleExistsMessage1') + " (" + roleInput + ") " + Msg.localize('adminGroupRoleExistsMessage2')),
+                                                        accept: function () { setModalInfo({}) },
+                                                        cancel: function () { setModalInfo({}) }
+                                                    });
+                                                }
+                                                if (!roleInput){
+                                                    setModalInfo({
+                                                        title: (Msg.localize('adminGroupRoleEmptyTitle')),
+                                                        accept_message: Msg.localize('OK'),
                                                         accept: function () { setModalInfo({}) },
                                                         cancel: function () { setModalInfo({}) }
                                                     });
@@ -100,7 +103,7 @@ export const GroupDetails: FC<any> = (props) => {
                                                         title: (Msg.localize('Confirmation')),
                                                         accept_message: (Msg.localize('Yes')),
                                                         cancel_message: Msg.localize('No'),
-                                                        message: (Msg.localize('adminGroupRoleAddConfirmation1') + " " + roleInput + Msg.localize('adminGroupRoleAddConfirmation2')),
+                                                        message: (Msg.localize('adminGroupRoleAddConfirmation1') + " " + roleInput + " " + Msg.localize('adminGroupRoleAddConfirmation2')),
                                                         accept: function () { addGroupRole(roleInput) },
                                                         cancel: function () { setModalInfo({}) }
                                                     });

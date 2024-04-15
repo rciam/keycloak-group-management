@@ -294,16 +294,16 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         Long count = (Long) queryCount.getSingleResult();
 
-        return new UserGroupMembershipExtensionRepresentationPager(results.map(x -> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList()), count);
+        return new UserGroupMembershipExtensionRepresentationPager(results.map(x -> EntityToRepresentation.toRepresentation(x, realm, false)).collect(Collectors.toList()), count);
     }
 
-    public UserGroupMembershipExtensionRepresentationPager searchByGroup(String groupId, String search, MemberStatusEnum status, String role, Integer first, Integer max) {
+    public UserGroupMembershipExtensionRepresentationPager searchByGroupAndSubGroups(String groupId, List<String> groupIdList, String search, MemberStatusEnum status, String role, Integer first, Integer max) {
 
 
         StringBuilder fromQuery = new StringBuilder("from UserGroupMembershipExtensionEntity f");
-        StringBuilder sqlQuery = new StringBuilder(" where f.group.id = :groupId");
+        StringBuilder sqlQuery = new StringBuilder(" where f.group.id in ( :groupIdList)");
         Map<String, Object> params = new HashMap<>();
-        params.put("groupId", groupId);
+        params.put("groupIdList", groupIdList);
         if (role != null) {
             fromQuery.append(" join f.groupRoles r ");
             sqlQuery.append(" and r.name like :role");
@@ -331,21 +331,17 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         Long count = (Long) queryCount.getSingleResult();
 
-        return new UserGroupMembershipExtensionRepresentationPager(results.map(x -> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList()), count);
+        return new UserGroupMembershipExtensionRepresentationPager(results.map(x -> EntityToRepresentation.toRepresentation(x, realm, groupId)).collect(Collectors.toList()), count);
     }
 
-    public UserRepresentationPager searchByAdminGroups(List<String> groupids, String search, boolean serviceAccountClientLink, MemberStatusEnum status, Integer first, Integer max) {
+    public UserRepresentationPager searchByAdminGroups(List<String> groupids, String search, boolean serviceAccountClientLink, Integer first, Integer max) {
 
-        String sqlQuery = "from UserGroupMembershipExtensionEntity f join UserEntity u on f.user.id = u.id where f.group.id in (:groupids) ";
+        String sqlQuery = "from UserEntity u where ( u.id in ( select distinct(f.user.id) from  UserGroupMembershipExtensionEntity f where f.group.id in (:groupids)) or u.id in ( select distinct(g.user.id) from GroupAdminEntity g where g.group.id in (:groupids)) )";
         Map<String, Object> params = new HashMap<>();
         params.put("groupids", groupids);
         if (search != null) {
             sqlQuery += " and (u.email like :search or u.firstName like :search or u.lastName like :search)";
             params.put("search", "%" + search + "%");
-        }
-        if (status != null) {
-            sqlQuery += " and f.status = :status";
-            params.put("status", status);
         }
         if (!serviceAccountClientLink ){
             sqlQuery += " and u.serviceAccountClientLink is null";

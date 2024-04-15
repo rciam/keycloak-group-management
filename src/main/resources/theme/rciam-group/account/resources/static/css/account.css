@@ -86,7 +86,17 @@
     background-size: cover;
     mask-repeat: no-repeat;
 }
-
+.gm_icon-pending-user {
+    -webkit-mask-image: url('../svg/user-clock-solid.svg') !important;
+    background-color: #FFCA00;
+    height:1rem;
+    width:1rem;
+    mask-image: url('../svg/user-clock-solid.svg') !important;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    
+}
 
 .gm_icon-suspended-user {
     -webkit-mask-image: url('../svg/user-lock-solid.svg') !important;
@@ -110,16 +120,6 @@
     transform: translate(-50%,-50%);
 }
 
-.gm_icon-pending-user {
-    -webkit-mask-image: url('../svg/clock-solid.svg') !important;
-    background-color: #FFC107!important;
-    height:1rem;
-    width:1rem;
-    mask-image: url('../svg/clock-solid.svg') !important;
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%,-50%);
-}
 
 .gm_user-status-container {
     cursor:pointer;
@@ -214,9 +214,13 @@
     mask-repeat: no-repeat;
 }
 
+.gm_suspend-justification-formgroup {
+    margin: 1rem 0;
+}
+
 .gm_activate-button-small {    
     background-color: #228C3A!important;
-    padding: 0.3rem 0.3rem 0.3rem 0.4rem!important;
+    padding: 0.3rem 0.3rem 0.3rem 0.3rem!important;
 }
 
 .gm_activate-button-small:hover {
@@ -563,6 +567,7 @@
 
 
 .gm_checkbox-container {
+    margin-top:-1rem;
     padding: 1rem;
     background-color: #d1d1d1;
 }

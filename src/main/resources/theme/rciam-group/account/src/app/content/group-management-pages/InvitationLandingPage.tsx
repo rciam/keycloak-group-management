@@ -125,7 +125,7 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props)=> {
             <div className="gm_invitation-content-container">
               <Hint>
                 <HintBody>
-                <Msg msgKey='invitationMessage' />{invitationData?.forMember?invitationData?.groupRoles.map((role,index)=>{return <strong> {role}{index !== invitationData.groupRoles.length - 1&&','}</strong>}):'n admin'}.
+                <Msg msgKey='invitationMessage' />{invitationData?.forMember?invitationData?.groupRoles.map((role,index)=>{return <strong> {role}{index !== invitationData.groupRoles.length - 1&&','}</strong>}):' admin'}.
                 </HintBody>
               </Hint>
               {(invitationData?.groupEnrollmentConfiguration?.group?.attributes?.description||invitationData?.group?.attributes?.description)&&<div className="gm_invitation-purpuse">

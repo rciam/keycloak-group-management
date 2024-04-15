@@ -144,7 +144,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
   },[groupId]);
 
   useEffect(()=>{    
-    let isAdmin = false;    
+    let isAdmin = false; 
     if(groupConfiguration?.admins?.length>0){
       groupConfiguration.admins.forEach((admin)=>{
         if(admin.user.id===user.userId){
@@ -153,8 +153,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
       });
     }
     setIsGroupAdmin(isAdmin);
-
-  },[groupConfiguration])
+  },[groupConfiguration,user])
 
   const handleTabClick = (
     event: React.MouseEvent<any> | React.KeyboardEvent | MouseEvent,
@@ -264,7 +263,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
           role="region"
           >
             <Tab eventKey={0} title={<TabTitleText><Msg msgKey='adminGroupDetailsTab' /></TabTitleText>} aria-label="Default content - users">
-              <GroupDetails groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration}/>
+              <GroupDetails groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration}/>
             </Tab>    
             
             <Tab eventKey={1} title={<TabTitleText><Msg msgKey='adminGroupMembersTab' /></TabTitleText>} aria-label="Default content - members">

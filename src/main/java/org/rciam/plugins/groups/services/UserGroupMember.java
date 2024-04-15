@@ -44,7 +44,7 @@ public class UserGroupMember {
     @GET
     @Produces("application/json")
     public UserGroupMembershipExtensionRepresentation getMember() {
-        return EntityToRepresentation.toRepresentation(member, realm);
+        return EntityToRepresentation.toRepresentation(member, realm, false);
     }
 
     @DELETE
