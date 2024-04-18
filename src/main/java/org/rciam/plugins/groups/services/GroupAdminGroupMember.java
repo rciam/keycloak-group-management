@@ -124,8 +124,27 @@ public class GroupAdminGroupMember {
         String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
         memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, name, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
         user.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
+
+        String groupPath = ModelToRepresentation.buildGroupPath(group);
         LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
-                , Utils.GROUP_MEMBERSHIP_UPDATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
+                , Utils.GROUP_MEMBERSHIP_UPDATE, groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
+
+        try {
+            customFreeMarkerEmailTemplateProvider.setUser(user);
+            customFreeMarkerEmailTemplateProvider.sendRolesChangesUserEmail(groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
+
+            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+                try {
+                    customFreeMarkerEmailTemplateProvider.setUser(admin);
+                    customFreeMarkerEmailTemplateProvider.sendRolesChangesGroupAdminEmail(groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), groupAdmin, user);
+                } catch (EmailException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (EmailException e) {
+            ServicesLogger.LOGGER.failedToSendEmail(e);
+        }
+
         return Response.noContent().build();
     }
 
@@ -147,8 +166,26 @@ public class GroupAdminGroupMember {
         String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
         memberUserAttributeValues.removeIf(x -> x.startsWith(memberUserAttribute.getUrnNamespace() + Utils.groupStr + groupName + Utils.colon + Utils.roleStr + name));
         user.setAttribute(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
+
+        String groupPath = ModelToRepresentation.buildGroupPath(group);
         LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
-                , Utils.GROUP_MEMBERSHIP_UPDATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
+                , Utils.GROUP_MEMBERSHIP_UPDATE, groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
+
+        try {
+            customFreeMarkerEmailTemplateProvider.setUser(user);
+            customFreeMarkerEmailTemplateProvider.sendRolesChangesUserEmail(groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
+
+            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+                try {
+                    customFreeMarkerEmailTemplateProvider.setUser(admin);
+                    customFreeMarkerEmailTemplateProvider.sendRolesChangesGroupAdminEmail(groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), groupAdmin, user);
+                } catch (EmailException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (EmailException e) {
+            ServicesLogger.LOGGER.failedToSendEmail(e);
+        }
 
         return Response.noContent().build();
     }
