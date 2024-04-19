@@ -144,7 +144,17 @@
     height:3.2rem;
 }
 
-.gm_search-input-container div {
+.gm_direct-member-checkbox {
+    display:inline-block;
+    margin-left:0.5rem;
+    padding-top:0.3rem;
+}
+
+.gm_direct-member-checkbox input {
+    margin-right:0.5rem;
+}
+
+.gm_search-input-container .gm_search-input {
     margin-left: auto;
     margin-right: 0.5rem;
     float: right;
@@ -665,7 +675,7 @@
     font-size:0.9rem;
   }
   .gm_enrollment_container {
-    padding: 1rem 3rem;
+    padding: 1rem 2rem;
   }
 
   .gm_form-input {

@@ -74,7 +74,7 @@ export const GroupSubGroups: FC<any> = (props) => {
             {props.groupConfiguration?.extraSubGroups&&props.groupConfiguration?.extraSubGroups.length>0 ?
               props.groupConfiguration?.extraSubGroups.map((group:AdminGroup,appIndex:number)=>{
                 return(
-                <GroupListItem  group={group as AdminGroup} userRoles={userRoles} fetchAdminGroups={props.fetchGroupConfiguration} appIndex={appIndex} depth={0} />
+                <GroupListItem  group={group as AdminGroup} isGroupAdmin={props.isGroupAdmin} userRoles={userRoles} fetchAdminGroups={props.fetchGroupConfiguration} appIndex={appIndex} depth={0} />
                 )
               }):
               emptyGroup()

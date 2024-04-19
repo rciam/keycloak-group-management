@@ -11,6 +11,7 @@ import { Msg } from '../../widgets/Msg';
 // @ts-ignore
 import { ContentPage } from '../../content/ContentPage';
 import { GroupRolesTable } from '../GroupRolesTable';
+import { Link } from 'react-router-dom';
 
 
 const reg_url = /^(https?|chrome):\/\/[^\s$.?#].[^\s]*$/
@@ -246,9 +247,9 @@ export const CreateEnrollment: FC<any> = (props) => {
                       </Select>
                     </FormGroup>
                 </React.Fragment>
-            :
-            <Alert  className='gm_content-width' variant="warning" title="This group has no available enrollments" />  
-        }
+                  :
+                  <Alert  className='gm_content-width' variant="warning" title="This group has no available enrollments" />  
+              }
 
         
         
@@ -346,7 +347,14 @@ export const CreateEnrollment: FC<any> = (props) => {
           </React.Fragment>
         :null}
         </React.Fragment>
-        :<Alert  className='gm_content-width' variant="warning" title="There is already an active enrollment request for this group." /> }  
+        :
+          <Alert className='gm_content-width' variant="warning" title={Msg.localize('enrollmentRequestExistsTitle')}>
+            <p>
+              <Msg msgKey='enrollmentRequestExistsMessage'/>{' '}
+              <Link to={"/groups/mygroupenrollments"}>"View My Enrollment Requests”</Link>
+            </p>
+          </Alert>
+       }  
             </Form> 
             </div>
           </ContentPage>

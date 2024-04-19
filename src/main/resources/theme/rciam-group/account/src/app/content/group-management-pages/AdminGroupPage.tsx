@@ -13,14 +13,16 @@ import { GroupSubGroups } from '../../group-widgets/GroupAdminPage/GroupSubgroup
 import { GroupEnrollment } from '../../group-widgets/GroupAdminPage/GroupEnrollment';
 import {TrashIcon } from '@patternfly/react-icons';
 import { Msg } from '../../widgets/Msg';
+import { RoutableTabs, useRoutableTab } from '../../widgets/RoutableTabs';
 
 
 export interface AdminGroupPageProps {
   match:any;
   history:any;
+  location:any;
 }
 
-
+type AdminGroupPageTabs = "details" | "members" | "admins" | "enrollments" | "attributes" | "subgroups";
 
 interface Group {
   id: string;
@@ -129,6 +131,14 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
     setUserRoles(groupsService.getUserRoles());
   },[]);
 
+  const useTab = (tab: AdminGroupPageTabs) => useRoutableTab(tab);
+
+  const detailsTab = useTab("details");
+  const membersTab = useTab("members");
+  const attributesTab = useTab("attributes");
+  const adminsTab = useTab("admins");
+  const subgroupsTab = useTab("subgroups");
+  const enrollmentsTab = useTab("enrollments");
 
   useEffect(()=>{
     setGroupId(props.match.params.id);
@@ -253,36 +263,30 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
 
             </p>
           }
-          
-          <Tabs
-          className="gm_tabs"
-          activeKey={activeTabKey}
-          onSelect={handleTabClick}
-          isBox={false}
-          aria-label="Tabs in the default example"
-          role="region"
-          >
-            <Tab eventKey={0} title={<TabTitleText><Msg msgKey='adminGroupDetailsTab' /></TabTitleText>} aria-label="Default content - users">
+          <RoutableTabs className="gm_tabs"
+            isBox={false}
+            defaultTab={"details"}
+          >                      
+            <Tab {...detailsTab} id="details" title={<TabTitleText><Msg msgKey='adminGroupDetailsTab' /></TabTitleText>} aria-label="Default content - users">
               <GroupDetails groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration}/>
             </Tab>    
             
-            <Tab eventKey={1} title={<TabTitleText><Msg msgKey='adminGroupMembersTab' /></TabTitleText>} aria-label="Default content - members">
-              <GroupMembers isGroupAdmin={isGroupAdmin} groupConfiguration={groupConfiguration} groupId={groupId} user={user}/>
+            <Tab {...membersTab} id="members" title={<TabTitleText><Msg msgKey='adminGroupMembersTab' /></TabTitleText>} aria-label="Default content - members">
+              <GroupMembers isGroupAdmin={isGroupAdmin} history={props.history} groupConfiguration={groupConfiguration} groupId={groupId} user={user}/>
             </Tab>
-            <Tab eventKey={2} title={<TabTitleText><Msg msgKey='adminGroupAdminsTab' /></TabTitleText>} aria-label="Default content - admins">
+            <Tab {...adminsTab} id="admins" title={<TabTitleText><Msg msgKey='adminGroupAdminsTab' /></TabTitleText>} aria-label="Default content - admins">
               <GroupAdmins isGroupAdmin={isGroupAdmin} groupId={groupId} user={user} groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration}/>
             </Tab>
-            <Tab eventKey={3} title={<TabTitleText><Msg msgKey='adminGroupEnrollmentTab' /></TabTitleText>} aria-label="Default content - attributes">   
+            <Tab {...enrollmentsTab} id="enrollments" title={<TabTitleText><Msg msgKey='adminGroupEnrollmentTab' /></TabTitleText>} aria-label="Default content - attributes">   
               <GroupEnrollment isGroupAdmin={isGroupAdmin} groupConfiguration={groupConfiguration} defaultConfiguration={defaultConfiguration}  groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
             </Tab>   
-            <Tab eventKey={4} title={<TabTitleText><Msg msgKey='adminGroupAttributesTab' /></TabTitleText>} aria-label="Default content - attributes">   
+            <Tab {...attributesTab} id="attributes" title={<TabTitleText><Msg msgKey='adminGroupAttributesTab' /></TabTitleText>} aria-label="Default content - attributes">   
               <GroupAttributes isGroupAdmin={isGroupAdmin} groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes}/>
             </Tab>
-            <Tab eventKey={5} title={<TabTitleText><Msg msgKey='adminGroupSubgroupsTab' /></TabTitleText>} aria-label="Default content - attributes">   
+            <Tab {...subgroupsTab} id="subgroups" title={<TabTitleText><Msg msgKey='adminGroupSubgroupsTab' /></TabTitleText>} aria-label="Default content - attributes">   
               <GroupSubGroups isGroupAdmin={isGroupAdmin} groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} />
             </Tab>
-            
-          </Tabs>
+          </RoutableTabs>
       </div>
     </>  
   )

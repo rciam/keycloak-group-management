@@ -185,10 +185,11 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
     depth:number;
     userRoles: String[];
     fetchAdminGroups: Function;
+    isGroupAdmin?:boolean;
   }
   
  
-  export const GroupListItem: FC<GroupListItemProps> = ({group,appIndex,depth,fetchAdminGroups,userRoles}) =>{
+  export const GroupListItem: FC<GroupListItemProps> = ({group,appIndex,depth,fetchAdminGroups,userRoles,isGroupAdmin = false}) =>{
     useEffect(()=>{
       setExpanded(false);
     },[group]);
@@ -233,7 +234,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
       <DropdownItem key="link" onClick={() => onCopyLink()}>
         <Msg msgKey='copyGroupEnrollmentLink' />
       </DropdownItem>,
-      ...('/'+group.name!==group.path&& !(group?.extraSubGroups.length>0)?[<DropdownItem key="action" onClick={()=>{setDeleteGroup(true);}} component="button">
+      ...(isGroupAdmin &&'/'+group.name!==group.path&& !(group?.extraSubGroups.length>0)?[<DropdownItem key="action" onClick={()=>{setDeleteGroup(true);}} component="button">
         <Msg msgKey='deleteGroup' /> 
       </DropdownItem>
       ]:[])

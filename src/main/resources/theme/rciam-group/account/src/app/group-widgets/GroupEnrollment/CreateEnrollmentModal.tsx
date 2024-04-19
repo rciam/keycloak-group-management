@@ -56,12 +56,11 @@ export const EnrollmentModal: FC<any> = (props) => {
     useEffect(()=>{
       if(Object.keys(props.enrollment).length !== 0) {
             setIsModalOpen(true);
-            setEnrollment({...props.enrollment});
         }
         else{
             setIsModalOpen(false);
-            setEnrollment({});
         }
+      setEnrollment({...props.enrollment});
     },[props.enrollment]);
 
     useEffect(()=>{
@@ -104,7 +103,6 @@ export const EnrollmentModal: FC<any> = (props) => {
         }
         
         setErrors(errors);
-        //!(enrollemtn?)
     }
 
     const touchFields = ()=> {
@@ -116,7 +114,8 @@ export const EnrollmentModal: FC<any> = (props) => {
      
     const close = () =>{
       setTouched(touchDefault);
-      props.close();
+      props.setEnrollmentModal({});
+      props.fetchGroupEnrollments();
     }
     
     const updateEnrollment = (attribute,value) =>{
