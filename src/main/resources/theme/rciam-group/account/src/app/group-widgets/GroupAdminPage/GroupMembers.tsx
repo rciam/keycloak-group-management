@@ -163,7 +163,7 @@ export const GroupMembers: FC<any> = (props) => {
     let groupsService = new GroupsServiceClient();
     useEffect(()=>{
       fetchGroupMembers();
-    },[])
+    },[props.groupId]);
 
     useEffect(()=>{
       if(initialRender){
@@ -203,12 +203,13 @@ export const GroupMembers: FC<any> = (props) => {
             setEditMemberRoles(membership)
           }
         })
+        const newSearchParams = new URLSearchParams(searchParams);
+        newSearchParams.delete('membership');
+        props.history.push({
+          search: newSearchParams.toString() ? `?${newSearchParams.toString()}` : '',
+        });
       }
-      const newSearchParams = new URLSearchParams(searchParams);
-      newSearchParams.delete('membership');
-      props.history.push({
-        hash: newSearchParams.toString() ? `#${newSearchParams.toString()}` : '',
-      });
+      
     } 
   
     
