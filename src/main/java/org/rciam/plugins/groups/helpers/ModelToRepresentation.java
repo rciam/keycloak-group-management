@@ -8,6 +8,7 @@ import org.keycloak.representations.idm.FederatedIdentityRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.rciam.plugins.groups.representations.GroupRepresentation;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,7 +43,20 @@ public class ModelToRepresentation extends org.keycloak.models.utils.ModelToRepr
         List<GroupRepresentation> subGroups = group.getSubGroupsStream()
                 .map(subGroup -> toSimpleGroupHierarchy(subGroup, true)).collect(Collectors.toList());
         rep.setExtraSubGroups(subGroups);
+        LinkedList<GroupRepresentation> parents = new LinkedList<>();
+        parentRep(parents, group.getParent());
+        rep.setParents(parents);
         return rep;
+    }
+
+    private static void parentRep(LinkedList<GroupRepresentation> parents, GroupModel parentModel){
+        if ( parentModel != null) {
+            GroupRepresentation parent = new GroupRepresentation();
+            parent.setId(parentModel.getId());
+            parent.setName(parentModel.getName());
+            parents.add(0,parent);
+            parentRep(parents,parentModel.getParent());
+        }
     }
 
     public static GroupRepresentation toSimpleGroupHierarchy(GroupModel group, boolean full) {
