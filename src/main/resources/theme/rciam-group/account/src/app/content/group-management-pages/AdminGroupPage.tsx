@@ -99,6 +99,7 @@ interface GroupConfiguration {
     membershipExpiresAt: string;
     validFrom: string;
     admins: Admin[];
+    parents: any;
     extraSubGroups: Group[];
   }
 
@@ -224,6 +225,13 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
           <BreadcrumbItem to="#/groups/admingroups">
             <Msg msgKey='adminGroupLabel' />
           </BreadcrumbItem>
+          {groupConfiguration?.parents?.map((group,index)=>{
+            return (
+              <BreadcrumbItem to={"#/groups/admingroups/"+group.id}>
+                {group.name}
+              </BreadcrumbItem>
+            )
+          })}
           <BreadcrumbItem isActive>
             {groupConfiguration?.name}
           </BreadcrumbItem>
