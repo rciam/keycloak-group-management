@@ -7,6 +7,7 @@ import { GroupsServiceClient, HttpResponse } from '../../groups-mngnt-service/gr
 import { MinusIcon, PlusIcon, EyeIcon,	TimesIcon,CopyIcon } from '@patternfly/react-icons';
 import { Msg } from '../../widgets/Msg';
 import { Alerts } from '../../widgets/Alerts';
+import { Link } from 'react-router-dom';
 
 
 export const GroupDetails: FC<any> = (props) => {
@@ -60,7 +61,11 @@ export const GroupDetails: FC<any> = (props) => {
                                     <span id="compact-item1"><strong><Msg msgKey='Path' /></strong></span>
                                 </DataListCell>,
                                 <DataListCell width={3} key="secondary content ">
-                                    <span>{props.groupConfiguration?.path}</span>
+                                    <span>/{props.groupConfiguration?.parents?.map((group)=> {
+                                        return (<React.Fragment>
+                                            <Link to={"/groups/admingroups/"+group.id}>{group.name}</Link>{'/'}
+                                        </React.Fragment>)
+                                    })}{props.groupConfiguration.name}</span>
                                 </DataListCell>
                             ]}
                         />
