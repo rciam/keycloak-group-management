@@ -114,8 +114,7 @@ export const EnrollmentModal: FC<any> = (props) => {
      
     const close = () =>{
       setTouched(touchDefault);
-      props.setEnrollmentModal({});
-      props.fetchGroupEnrollments();
+      props.close();
     }
     
     const updateEnrollment = (attribute,value) =>{

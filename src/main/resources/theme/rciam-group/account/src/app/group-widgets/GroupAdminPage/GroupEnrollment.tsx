@@ -38,7 +38,7 @@ export const GroupEnrollment: FC<any> = (props) => {
     const [enrollmentModal,setEnrollmentModal] = useState({});
     const [enrollmentRules, setEnrollmentRules] = useState({});
 
-    const [defaultEnrollmentConfiguration,setDefaultEnrollmentConfiguration] = useState({
+    const staticDefaultEnrollmentConfiguration = {
       group: {id:""},
       membershipExpirationDays : 3,
       name: "",
@@ -56,7 +56,7 @@ export const GroupEnrollment: FC<any> = (props) => {
       commentsLabel: Msg.localize('enrollmentConfigurationCommentsDefaultLabel'),
       commentsDescription: Msg.localize('enrollmentConfigurationCommentsDefaultDescription'),
       groupRoles : []
-    });
+    }
 
     let groupsService = new GroupsServiceClient();
 
@@ -72,7 +72,6 @@ export const GroupEnrollment: FC<any> = (props) => {
       }
     },[props.groupId]);
 
-
     let fetchGroupEnrollments = ()=>{
       groupsService!.doGet<any>("/group-admin/group/"+props.groupId+"/configuration/all")
       .then((response: HttpResponse<any>) => {
@@ -80,6 +79,22 @@ export const GroupEnrollment: FC<any> = (props) => {
           setGroupEnrollments(response.data);
         }
       })
+    }
+
+    let getDefaultEnrollmentConfiguration = () =>{
+      let defaultConfig = staticDefaultEnrollmentConfiguration;
+      for (let field in enrollmentRules){
+        if(enrollmentRules[field].defaultValue){
+          if(isIntegerOrNumericString(enrollmentRules[field].defaultValue)){
+            defaultConfig[field] = parseInt(enrollmentRules[field]); 
+          }
+          else{
+            defaultConfig[field] = enrollmentRules[field].defaultValue; 
+          }
+        }
+      }
+      defaultConfig.group.id = props.groupId;
+      return defaultConfig;
     }
 
     let fetchGroupEnrollmentRules = ()=>{
@@ -94,16 +109,7 @@ export const GroupEnrollment: FC<any> = (props) => {
                 "required": field_rules.required,
                 ...(field_rules.defaultValue&&{"defaultValue":field_rules.defaultValue}) 
               }
-              if(field_rules.defaultValue){
-                  if(isIntegerOrNumericString(field_rules.defaultValue)){
-                    defaultEnrollmentConfiguration[field_rules.field] = parseInt(field_rules.defaultValue); 
-                  }
-                  else{
-                    defaultEnrollmentConfiguration[field_rules.field] = field_rules.defaultValue; 
-                  }
-              }
-            })
-            setDefaultEnrollmentConfiguration({...defaultEnrollmentConfiguration})
+            });
             setEnrollmentRules(rules);
           }
           else{
@@ -131,9 +137,7 @@ export const GroupEnrollment: FC<any> = (props) => {
     return (
       <React.Fragment>
         <ConfirmationModal modalInfo={modalInfo}/>
-        <EnrollmentModal enrollment={{...enrollmentModal}} validationRules={enrollmentRules} fetchGroupEnrollments={fetchGroupEnrollments}  setEnrollmentModal={setEnrollmentModal} groupRoles={props.groupConfiguration.groupRoles} close={()=>{
-          
-          fetchGroupEnrollments();}} groupId={props.groupId}/>
+        <EnrollmentModal enrollment={enrollmentModal} validationRules={enrollmentRules} groupRoles={props.groupConfiguration.groupRoles} close={()=>{fetchGroupEnrollments(); setEnrollmentModal({});}} groupId={props.groupId}/>
         <DataList aria-label="Group Member Datalist" isCompact wrapModifier={"breakWord"}>
             <DataListItem aria-labelledby="compact-item1">
               <DataListItemRow>
@@ -163,8 +167,7 @@ export const GroupEnrollment: FC<any> = (props) => {
                       isPlainButtonAction
                 >
                   <Tooltip content={<div><Msg msgKey='createEnrollmentButton'/></div>}>
-                    
-                    <Button className={"gm_plus-button-small"} onClick={()=>{defaultEnrollmentConfiguration.group.id=props.groupId;  setEnrollmentModal({...defaultEnrollmentConfiguration});}}>
+                    <Button className={"gm_plus-button-small"} onClick={()=>{setEnrollmentModal(getDefaultEnrollmentConfiguration());}}>
                         <div className={"gm_plus-button"}></div>
                     </Button>
                   </Tooltip>

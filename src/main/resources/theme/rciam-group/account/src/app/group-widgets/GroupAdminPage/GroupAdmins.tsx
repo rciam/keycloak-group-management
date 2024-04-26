@@ -82,6 +82,7 @@ export const GroupAdmins: FC<any> = (props) => {
 
     
     const makeAdmin = (userId) =>{
+      setLoading(true);
       groupsService!.doPost<any>("/group-admin/group/"+props.groupId+"/admin/"+userId,{})
       .then((response: HttpResponse<any>) => {
         if(response.status===200||response.status===204){
@@ -89,16 +90,19 @@ export const GroupAdmins: FC<any> = (props) => {
           disapearingMessage(Msg.localize('adminGroupAdded'))
           // setGroupMembers(response.data.results);
         }
+        setLoading(false);
       }).catch((err)=>{console.log(err)})
     } 
 
     const removeAdmin = (userId) => {
+      setLoading(true);
       groupsService!.doDelete<any>("/group-admin/group/"+props.groupId+"/admin/"+userId,{})
       .then((response: HttpResponse<any>) => {
         if(response.status===200||response.status===204){
           props.fetchGroupConfiguration();
           // setGroupMembers(response.data.results);
         }
+        setLoading(false);
       }).catch((err)=>{console.log(err)})
     }
 

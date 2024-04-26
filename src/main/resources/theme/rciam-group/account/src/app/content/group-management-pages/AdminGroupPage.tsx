@@ -111,6 +111,8 @@ interface GroupConfiguration {
 // export class GroupPage extends React.Component<GroupsPageProps, GroupsPageState> {
 export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
 
+  // Get a specific query parameter
+  // const myParam = new URLSearchParams(props.location.search).get('myParam');
 
   const [groupConfiguration,setGroupConfiguration] = useState({} as GroupConfiguration);
   const [groupId,setGroupId] = useState(props.match.params.id);
@@ -166,14 +168,6 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
     setIsGroupAdmin(isAdmin);
   },[groupConfiguration,user])
 
-  const handleTabClick = (
-    event: React.MouseEvent<any> | React.KeyboardEvent | MouseEvent,
-    tabIndex: string | number
-  ) => {
-    setActiveTabKey(tabIndex);
-  };
-
-
   let fetchGroupConfiguration = ()=>{
     groupsService!.doGet<GroupConfiguration>("/group-admin/group/"+groupId+"/all")
     .then((response: HttpResponse<GroupConfiguration>) => {
@@ -206,7 +200,10 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
     groupsService!.doGet<User>("/whoami",{target:"base"})
       .then((response: HttpResponse<User>)=>{
         if(response.status===200&&response.data){
-          setUser(response.data);
+          let user = response.data; 
+          setTimeout(() => {
+            setUser(user);
+          }, 3000);
         }
       }).catch(err=>{
         console.log(err);
