@@ -78,9 +78,9 @@ export const EnrollmentModal: FC<any> = (props) => {
         let errors: Record<string, string> = {};
         !(enrollment?.name?.length>0) && (errors.name = Msg.localize('requredFormError'));
         enrollment?.aup?.url?.length>0 && !reg_url.test(enrollment.aup.url) &&  (errors.aup_url = Msg.localize('invalidUrlFormError'));
-        !(enrollment?.aup?.url?.length>0) && validationRules["aupEntity"]?.required===true && (errors.aup_url = Msg.localize('requredFormError'));
+        !(enrollment?.aup?.url?.length>0) && validationRules?.aupEntity?.required===true && (errors.aup_url = Msg.localize('requredFormError'));
         !(enrollment?.groupRoles?.length>0) && (errors.groupRoles=Msg.localize('groupRolesFormError'));
-        (enrollment?.membershipExpirationDays===0 && validationRules['membershipExpirationDays'].required===true) && (errors.membershipExpirationDays=Msg.localize('fieldMaxZeroFormError'));
+        (enrollment?.membershipExpirationDays===0 && validationRules?.membershipExpirationDays?.required===true) && (errors.membershipExpirationDays=Msg.localize('fieldMaxZeroFormError'));
         (enrollment?.membershipExpirationDays&&!(enrollment?.membershipExpirationDays>0)) && (errors.membershipExpirationDays=Msg.localize('expirationDaysPositiveFormError'));        
         (typeof(enrollment?.membershipExpirationDays)!=='number') && (errors.membershipExpirationDays=Msg.localize('expirationDaysNumberFormError'));
         (enrollment?.commentsNeeded&& (!enrollment?.commentsLabel||enrollment?.commentsLabel.length<1) && (errors.commentsLabel=Msg.localize('requredFormError')));
@@ -543,14 +543,14 @@ export const EnrollmentModal: FC<any> = (props) => {
                         >
                             <FormGroup
                                 label={Msg.localize('URL')}
-                                isRequired={validationRules["aupEntity"]?.required===true}
+                                isRequired={validationRules?.aupEntity?.required===true}
                                 fieldId="simple-form-name-01"
                                 helperTextInvalid={touched.aup_url&&errors.aup_url}
                                 validated={errors.aup_url&&touched.aup_url?'error':'default'}
                                 // helperText=""
                             >
                                 <TextInput
-                                isRequired={validationRules["aupEntity"]?.required===true}
+                                isRequired={validationRules?.aupEntity?.required===true}
                                 type="url"
                                 id="simple-form-name-01"
                                 name="simple-form-name-01"
