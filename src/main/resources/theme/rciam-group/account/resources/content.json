@@ -35,6 +35,13 @@
         "modulePath": "/content/linked-accounts-page/LinkedAccountsPage.js",
         "componentName": "LinkedAccountsPage",
         "hidden": "!features.isLinkedAccountsEnabled"
+      },
+      {
+        "id": "ssh-keys",
+        "path": "security/ssh-keys",
+        "label": "sshKeysSidebarTitle",
+        "modulePath": "/content/ssh-keys/SSHKeysPage.js",
+        "componentName": "SSHKeysPage"
       }
     ]
   },

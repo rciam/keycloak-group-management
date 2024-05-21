@@ -272,6 +272,9 @@ export const GroupEnrollment: FC<any> = (props) => {
                             url: ""
                           }
                         }
+                        if (!enrollment.hasOwnProperty("membershipExpirationDays")){
+                          enrollment.membershipExpirationDays = 0;
+                        }
                         setEnrollmentModal(enrollment)}}>
                         <Link to={"/groups/admingroups/"+groupId}>{enrollment.name||Msg.localize('notAvailable')}</Link>
                       </DataListCell>,

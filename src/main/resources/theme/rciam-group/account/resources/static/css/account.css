@@ -801,3 +801,13 @@
 .gm_primary-color {
     color: #0d6efd!important;;
 }
+
+
+.gm_padding-right {
+    padding-right:1.5rem;
+}
+
+.horizontal-padding-10 {
+    padding-left:10px;
+    padding-right:10px;
+}
