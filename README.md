@@ -19,6 +19,7 @@ A keycloak plugin to support advanced group management features:
 | 0.9.0                    | 18.0.1-2.17      |
 | 0.10.0                   | 22.0.5-1.1 +     |
 | 0.13.0                   | 22.0.5-1.2 +     |
+| 0.18.0                   | 22.0.10-1.4 +    |
 
 ## General configuration options 
 All web services to be executed needs realm management rights role.

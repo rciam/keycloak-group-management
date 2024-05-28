@@ -4,7 +4,8 @@ All notable changes in keycloak-group-management will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.18.0] - 2024-05-23
+## [0.18.0] - 2024-05-23 
+This version is compatible with Keycloak version [22.0.10-1.4](https://github.com/eosc-kc/keycloak/releases/tag/22.0.10-1.4)
 
 ### Added
 - SSH Public Keys Page (UI)
