@@ -44,6 +44,21 @@ public class GroupEnrollmentRequestEntity {
     @JoinColumn(name = "USER_ID")
     private UserEntity user;
 
+    @Column(name = "USER_NAME")
+    private String userName;
+
+    @Column(name = "USER_EMAIL")
+    private String userEmail;
+
+    @Column(name = "USER_IDENTIFIER")
+    private String userIdentifier;
+
+    @Column(name = "USER_ASSURANCE")
+    private String userAssurance;
+
+    @Column(name = "USER_IDP")
+    private String userIdP;
+
     @ManyToOne()
     @JoinColumn(name = "CHECK_ADMIN_ID")
     private UserEntity checkAdmin;
@@ -88,6 +103,46 @@ public class GroupEnrollmentRequestEntity {
 
     public void setUser(UserEntity user) {
         this.user = user;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
+
+    public String getUserIdentifier() {
+        return userIdentifier;
+    }
+
+    public void setUserIdentifier(String userIdentifier) {
+        this.userIdentifier = userIdentifier;
+    }
+
+    public String getUserAssurance() {
+        return userAssurance;
+    }
+
+    public void setUserAssurance(String userAssurance) {
+        this.userAssurance = userAssurance;
+    }
+
+    public String getUserIdP() {
+        return userIdP;
+    }
+
+    public void setUserIdP(String userIdP) {
+        this.userIdP = userIdP;
     }
 
     public UserEntity getCheckAdmin() {

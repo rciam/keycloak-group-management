@@ -5,7 +5,7 @@
     <parent>
         <artifactId>keycloak-parent</artifactId>
         <groupId>org.keycloak</groupId>
-        <version>22.0.5</version>
+        <version>22.0.10</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -25,7 +25,7 @@
         <quarkus.version>3.2.7.Final</quarkus.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <agm-version>0.17.0</agm-version>
+        <agm-version>0.19.0</agm-version>
     </properties>
 
     <dependencies>

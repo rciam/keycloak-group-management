@@ -14,6 +14,7 @@ import jakarta.persistence.TypedQuery;
 
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
@@ -39,12 +40,16 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         return GroupEnrollmentRequestEntity.class;
     }
 
-    public GroupEnrollmentRequestEntity create(GroupEnrollmentRequestRepresentation rep, String userId, GroupEnrollmentConfigurationEntity configuration, boolean isPending) {
+    public GroupEnrollmentRequestEntity create(GroupEnrollmentRequestRepresentation rep, UserModel user, GroupEnrollmentConfigurationEntity configuration, boolean isPending, RealmModel realm) {
         GroupEnrollmentRequestEntity entity = new GroupEnrollmentRequestEntity();
         entity.setId(KeycloakModelUtils.generateId());
-        UserEntity user = new UserEntity();
-        user.setId(userId);
-        entity.setUser(user);
+        UserEntity userEntity = new UserEntity();
+        userEntity.setId(user.getId());
+        entity.setUser(userEntity);
+        String userIdentifier = realm.getAttribute(Utils.USER_IDENTIFIER_FOR_ENROLLMENT) != null ? realm.getAttribute(Utils.USER_IDENTIFIER_FOR_ENROLLMENT) : Utils.DEFAULT_USER_IDENTIFIER_FOR_ENROLLMENT;
+        entity.setUserName(user.getFirstName()+" "+user.getLastName());
+        entity.setUserEmail(user.getEmail());
+        entity.setUserIdentifier("username".equals(userIdentifier)? user.getUsername() : user.getAttributeStream(userIdentifier).collect(Collectors.joining(",")));
         entity.setGroupEnrollmentConfiguration(configuration);
         entity.setComments(rep.getComments());
         entity.setStatus(isPending ? EnrollmentRequestStatusEnum.PENDING_APPROVAL : EnrollmentRequestStatusEnum.NO_APPROVAL);

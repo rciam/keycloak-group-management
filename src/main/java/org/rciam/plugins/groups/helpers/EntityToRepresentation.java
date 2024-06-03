@@ -2,7 +2,6 @@ package org.rciam.plugins.groups.helpers;
 
 import org.keycloak.common.util.MultivaluedHashMap;
 import org.keycloak.models.GroupModel;
-import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupAttributeEntity;
 import org.keycloak.models.jpa.entities.GroupEntity;
@@ -16,10 +15,8 @@ import org.rciam.plugins.groups.representations.GroupEnrollmentConfigurationRepr
 import org.rciam.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 import org.rciam.plugins.groups.representations.GroupInvitationRepresentation;
 import org.rciam.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
-import org.keycloak.representations.idm.FederatedIdentityRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.rciam.plugins.groups.jpa.entities.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -101,6 +98,11 @@ public class EntityToRepresentation {
         GroupEnrollmentRequestRepresentation rep = new GroupEnrollmentRequestRepresentation();
         rep.setId(entity.getId());
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
+        rep.setUserName(entity.getUserName());
+        rep.setUserEmail(entity.getUserEmail());
+        rep.setUserIdentifier(entity.getUserIdentifier());
+        rep.setUserAssurance(entity.getUserAssurance());
+        rep.setUserIdP(entity.getUserIdP());
         if (entity.getCheckAdmin() != null)
             rep.setCheckAdmin(toBriefRepresentation(entity.getCheckAdmin(), realm));
         rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration(), true, realm));

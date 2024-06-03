@@ -760,4 +760,21 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="enrollment_user_values">
+        <addColumn tableName="GROUP_ENROLLMENT_REQUEST">
+            <column name="USER_NAME" type="VARCHAR(512)" />
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT_REQUEST">
+            <column name="USER_EMAIL" type="VARCHAR(256)" />
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT_REQUEST">
+            <column name="USER_IDENTIFIER" type="TEXT" />
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT_REQUEST">
+            <column name="USER_ASSURANCE" type="TEXT" />
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT_REQUEST">
+            <column name="USER_IDP" type="VARCHAR(256)" />
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

@@ -164,7 +164,7 @@ public class UserGroups {
             throw new BadRequestException("You have an ongoing request to become member of this group");
 
         if (configuration.getRequireApproval()) {
-            GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.create(rep, user.getId(), configuration, true);
+            GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.create(rep, user, configuration, true, realm);
             //email to group admins if they must accept it
             //find thems based on group
             groupAdminRepository.getAllAdminIdsGroupUsers(configuration.getGroup().getId()).forEach(adminId -> {
@@ -182,7 +182,7 @@ public class UserGroups {
         } else {
             //user become immediately group member
             userGroupMembershipExtensionRepository.createOrUpdate(rep, session, user, clientConnection);
-            groupEnrollmentRequestRepository.create(rep, user.getId(), configuration, false);
+            groupEnrollmentRequestRepository.create(rep, user, configuration, false, realm);
         }
         return Response.noContent().build();
     }
