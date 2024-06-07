@@ -44,9 +44,11 @@ public class GroupEnrollmentRequestEntity {
     @JoinColumn(name = "USER_ID")
     private UserEntity user;
 
-    @Column(name = "USER_NAME")
-    private String userName;
+    @Column(name = "USER_FIRST_NAME")
+    private String userFirstName;
 
+    @Column(name = "USER_LAST_NAME")
+    private String userLastName;
     @Column(name = "USER_EMAIL")
     private String userEmail;
 
@@ -105,12 +107,20 @@ public class GroupEnrollmentRequestEntity {
         this.user = user;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUserFirstName() {
+        return userFirstName;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUserFirstName(String userFirstName) {
+        this.userFirstName = userFirstName;
+    }
+
+    public String getUserLastName() {
+        return userLastName;
+    }
+
+    public void setUserLastName(String userLastName) {
+        this.userLastName = userLastName;
     }
 
     public String getUserEmail() {

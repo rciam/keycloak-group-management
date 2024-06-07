@@ -762,7 +762,10 @@
 
     <changeSet author="cgeorgilakis@grnet.gr" id="enrollment_user_values">
         <addColumn tableName="GROUP_ENROLLMENT_REQUEST">
-            <column name="USER_NAME" type="VARCHAR(512)" />
+            <column name="USER_FIRST_NAME" type="VARCHAR(256)" />
+        </addColumn>
+        <addColumn tableName="GROUP_ENROLLMENT_REQUEST">
+            <column name="USER_LAST_NAME" type="VARCHAR(256)" />
         </addColumn>
         <addColumn tableName="GROUP_ENROLLMENT_REQUEST">
             <column name="USER_EMAIL" type="VARCHAR(256)" />

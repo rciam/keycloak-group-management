@@ -98,7 +98,8 @@ public class EntityToRepresentation {
         GroupEnrollmentRequestRepresentation rep = new GroupEnrollmentRequestRepresentation();
         rep.setId(entity.getId());
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
-        rep.setUserName(entity.getUserName());
+        rep.setUserFirstName(entity.getUserFirstName());
+        rep.setUserLastName(entity.getUserLastName());
         rep.setUserEmail(entity.getUserEmail());
         rep.setUserIdentifier(entity.getUserIdentifier());
         rep.setUserAssurance(entity.getUserAssurance());

@@ -22,7 +22,8 @@ public class GroupEnrollmentRequestRepresentation {
     private String comments;
     private String adminJustification;
     private String reviewComments;
-    private String userName;
+    private String userFirstName;
+    private String userLastName;
     private String userEmail;
     private String userIdentifier;
     private String userAssurance;
@@ -58,12 +59,20 @@ public class GroupEnrollmentRequestRepresentation {
         this.user = user;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUserFirstName() {
+        return userFirstName;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUserFirstName(String userFirstName) {
+        this.userFirstName = userFirstName;
+    }
+
+    public String getUserLastName() {
+        return userLastName;
+    }
+
+    public void setUserLastName(String userLastName) {
+        this.userLastName = userLastName;
     }
 
     public String getUserEmail() {
