@@ -811,3 +811,11 @@
     padding-left:10px;
     padding-right:10px;
 }
+
+.pf-c-expandable-section__content .pf-c-form__group {
+    padding-bottom: 1.5rem!important;
+}
+
+.gm_form-field-group-title {
+    margin-left:-3rem;
+}
