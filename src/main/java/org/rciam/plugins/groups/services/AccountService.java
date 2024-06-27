@@ -5,6 +5,7 @@ import org.keycloak.common.ClientConnection;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.UserSessionModel;
 import org.rciam.plugins.groups.helpers.AuthenticationHelper;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.resources.admin.AdminAuth;
@@ -24,6 +25,7 @@ public class AccountService {
     private RealmModel realm;
     private final AdminEventBuilder adminEvent;
     private final UserModel user;
+    private final UserSessionModel userSession;
 
     public AccountService(KeycloakSession session, RealmModel realm,ClientConnection clientConnection ) {
         this.session = session;
@@ -36,11 +38,12 @@ public class AccountService {
         this.adminEvent =  new AdminEventBuilder(realm, adminAuth, session, clientConnection);
         adminEvent.realm(realm);
         user = authResult.getUser();
+        userSession = authResult.getSession();
     }
 
     @Path("/user")
     public UserGroups userGroups() {
-        UserGroups service = new UserGroups(session, realm, user);
+        UserGroups service = new UserGroups(session, realm, user, userSession);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

@@ -24,7 +24,10 @@ A keycloak plugin to support advanced group management features:
 ## General configuration options 
 All web services to be executed needs realm management rights role.
 
-1. You should define realm attribute 'keycloakUrl' (Keycloak main url)
+1. You should define realm attributes :
+ - 'keycloakUrl' = Keycloak main url
+ - 'userAssuranceForEnrollment' = User assurance (default 'assurance')
+ - 'userIdentifierForEnrollment' = User identifier (default 'username')
 2. (optional) For general group management configuration options execute following web service (necessary during first time deployed):
 
 `curl --request PUT \

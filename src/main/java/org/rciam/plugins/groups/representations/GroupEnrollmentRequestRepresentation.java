@@ -27,7 +27,8 @@ public class GroupEnrollmentRequestRepresentation {
     private String userEmail;
     private String userIdentifier;
     private String userAssurance;
-    private String userIdP;
+    private String userIdPName;
+    private String userAuthnAuthority;
     private List<String> groupRoles;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= Utils.dateTimeToStringFormat)
@@ -99,12 +100,20 @@ public class GroupEnrollmentRequestRepresentation {
         this.userAssurance = userAssurance;
     }
 
-    public String getUserIdP() {
-        return userIdP;
+    public String getUserIdPName() {
+        return userIdPName;
     }
 
-    public void setUserIdP(String userIdP) {
-        this.userIdP = userIdP;
+    public void setUserIdPName(String userIdPName) {
+        this.userIdPName = userIdPName;
+    }
+
+    public String getUserAuthnAuthority() {
+        return userAuthnAuthority;
+    }
+
+    public void setUserAuthnAuthority(String userAuthnAuthority) {
+        this.userAuthnAuthority = userAuthnAuthority;
     }
 
     public UserRepresentation getCheckAdmin() {

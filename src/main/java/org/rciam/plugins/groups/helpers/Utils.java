@@ -76,6 +76,7 @@ public class Utils {
     public static final String DEFAULT_USER_ASSURANCE_FOR_ENROLLMENT = "assurance";
     public static final String USER_IDENTIFIER_FOR_ENROLLMENT = "userIdentifierForEnrollment";
     public static final String DEFAULT_USER_IDENTIFIER_FOR_ENROLLMENT = "username";
+    public static final String IDENTITY_PROVIDER_AUTHN_AUTHORITY = "identity_provider_authnAuthority";
 
     public static UserAdapter getDummyUser(String email, String firstName, String lastName) {
         UserEntity userEntity = new UserEntity();
@@ -207,6 +208,10 @@ public class Utils {
         IdentityProviderModel idp = realm.getIdentityProviderByAlias(idPAlias);
         rep.setIdentityProvider(idp.getDisplayName() != null ? idp.getDisplayName() : idPAlias);
         return rep;
+    }
+
+    public static String getIdPName(IdentityProviderModel idp) {
+        return idp.getDisplayName() != null ? idp.getDisplayName() : idp.getAlias();
     }
 
 }

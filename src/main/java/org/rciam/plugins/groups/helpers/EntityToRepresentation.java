@@ -103,7 +103,8 @@ public class EntityToRepresentation {
         rep.setUserEmail(entity.getUserEmail());
         rep.setUserIdentifier(entity.getUserIdentifier());
         rep.setUserAssurance(entity.getUserAssurance());
-        rep.setUserIdP(entity.getUserIdP());
+        rep.setUserIdPName(entity.getUserIdPName());
+        rep.setUserAuthnAuthority(entity.getUserAuthnAuthority());
         if (entity.getCheckAdmin() != null)
             rep.setCheckAdmin(toBriefRepresentation(entity.getCheckAdmin(), realm));
         rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration(), true, realm));

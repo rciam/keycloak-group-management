@@ -8,6 +8,7 @@ import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.UserSessionModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
@@ -63,8 +64,9 @@ public class UserGroups {
     private final GeneralJpaService generalJpaService;
     private final UserModel user;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
+    private final UserSessionModel userSession;
 
-    public UserGroups(KeycloakSession session, RealmModel realm, UserModel user) {
+    public UserGroups(KeycloakSession session, RealmModel realm, UserModel user, UserSessionModel userSession) {
         this.session = session;
         this.realm = realm;
         this.user = user;
@@ -79,6 +81,7 @@ public class UserGroups {
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
         this.customFreeMarkerEmailTemplateProvider.setSignatureMessage(memberUserAttribute.getSignatureMessage());
         this.generalJpaService = new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
+        this.userSession = userSession;
     }
 
 
@@ -164,7 +167,7 @@ public class UserGroups {
             throw new BadRequestException("You have an ongoing request to become member of this group");
 
         if (configuration.getRequireApproval()) {
-            GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.create(rep, user, configuration, true, realm);
+            GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.create(rep, user, configuration, true, realm, userSession);
             //email to group admins if they must accept it
             //find thems based on group
             groupAdminRepository.getAllAdminIdsGroupUsers(configuration.getGroup().getId()).forEach(adminId -> {
@@ -182,7 +185,7 @@ public class UserGroups {
         } else {
             //user become immediately group member
             userGroupMembershipExtensionRepository.createOrUpdate(rep, session, user, clientConnection);
-            groupEnrollmentRequestRepository.create(rep, user, configuration, false, realm);
+            groupEnrollmentRequestRepository.create(rep, user, configuration, false, realm, userSession);
         }
         return Response.noContent().build();
     }

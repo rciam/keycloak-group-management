@@ -58,8 +58,11 @@ public class GroupEnrollmentRequestEntity {
     @Column(name = "USER_ASSURANCE")
     private String userAssurance;
 
-    @Column(name = "USER_IDP")
-    private String userIdP;
+    @Column(name = "USER_IDP_NAME")
+    private String userIdPName;
+
+    @Column(name = "USER_AUTHN_AUTHORITY")
+    private String userAuthnAuthority;
 
     @ManyToOne()
     @JoinColumn(name = "CHECK_ADMIN_ID")
@@ -147,12 +150,20 @@ public class GroupEnrollmentRequestEntity {
         this.userAssurance = userAssurance;
     }
 
-    public String getUserIdP() {
-        return userIdP;
+    public String getUserIdPName() {
+        return userIdPName;
     }
 
-    public void setUserIdP(String userIdP) {
-        this.userIdP = userIdP;
+    public void setUserIdPName(String userIdPName) {
+        this.userIdPName = userIdPName;
+    }
+
+    public String getUserAuthnAuthority() {
+        return userAuthnAuthority;
+    }
+
+    public void setUserAuthnAuthority(String userAuthnAuthority) {
+        this.userAuthnAuthority = userAuthnAuthority;
     }
 
     public UserEntity getCheckAdmin() {

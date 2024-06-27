@@ -12,9 +12,12 @@ import java.util.stream.Stream;
 
 import jakarta.persistence.TypedQuery;
 
+import org.keycloak.events.Details;
+import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.UserSessionModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
@@ -40,7 +43,7 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         return GroupEnrollmentRequestEntity.class;
     }
 
-    public GroupEnrollmentRequestEntity create(GroupEnrollmentRequestRepresentation rep, UserModel user, GroupEnrollmentConfigurationEntity configuration, boolean isPending, RealmModel realm) {
+    public GroupEnrollmentRequestEntity create(GroupEnrollmentRequestRepresentation rep, UserModel user, GroupEnrollmentConfigurationEntity configuration, boolean isPending, RealmModel realm, UserSessionModel userSession) {
         GroupEnrollmentRequestEntity entity = new GroupEnrollmentRequestEntity();
         entity.setId(KeycloakModelUtils.generateId());
         UserEntity userEntity = new UserEntity();
@@ -51,6 +54,13 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         entity.setUserLastName(user.getLastName());
         entity.setUserEmail(user.getEmail());
         entity.setUserIdentifier("username".equals(userIdentifier)? user.getUsername() : user.getAttributeStream(userIdentifier).collect(Collectors.joining(",")));
+        String idpAlias = userSession.getNote(Details.IDENTITY_PROVIDER);
+        if (idpAlias != null) {
+            IdentityProviderModel idp = realm.getIdentityProviderByAlias(idpAlias);
+            if (idp != null)
+                entity.setUserIdPName(Utils.getIdPName(idp));
+        }
+        entity.setUserAuthnAuthority(userSession.getNote(Utils.IDENTITY_PROVIDER_AUTHN_AUTHORITY));
         entity.setGroupEnrollmentConfiguration(configuration);
         entity.setComments(rep.getComments());
         entity.setStatus(isPending ? EnrollmentRequestStatusEnum.PENDING_APPROVAL : EnrollmentRequestStatusEnum.NO_APPROVAL);
