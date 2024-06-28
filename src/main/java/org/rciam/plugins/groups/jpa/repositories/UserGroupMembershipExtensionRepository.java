@@ -83,6 +83,10 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         return em.createNamedQuery("getActiveByUser").setParameter("userId", userId).getResultStream();
     }
 
+    public Stream<UserGroupMembershipExtensionEntity> getByGroup(String groupId) {
+        return em.createNamedQuery("getMembersByGroup").setParameter("groupId", groupId).getResultStream();
+    }
+
     @Transactional
     public void dailyExecutedActions() {
         GroupManagementEventEntity eventEntity = eventRepository.getEntity(Utils.eventId);
@@ -554,10 +558,6 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(localIp), userModel, userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
                     , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), entity.getMembershipExpiresAt());
         }
-    }
-
-    public void deleteByGroup(String groupId) {
-        em.createNamedQuery("deleteMembershipExtensionByGroup").setParameter("groupId", groupId).executeUpdate();
     }
 
     public void deleteByUser(String userId) {

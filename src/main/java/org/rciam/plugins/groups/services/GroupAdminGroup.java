@@ -19,10 +19,12 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.models.GroupModel;
@@ -50,6 +52,9 @@ import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 
 public class GroupAdminGroup {
+    @Context
+    private ClientConnection clientConnection;
+
     private final KeycloakSession session;
     private final RealmModel realm;
     private final UserModel groupAdmin;
@@ -89,11 +94,13 @@ public class GroupAdminGroup {
 
     @DELETE
     public void deleteGroup() {
-        if (!isGroupAdmin){
+        if (!isGroupAdmin)
             throw new ForbiddenException();
-        }
+        if (group.getSubGroupsStream().count()>0)
+            throw new BadRequestException("You need firstly to delete child groups.");
+
         List<String> groupAdminsIds = groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).collect(Collectors.toList());
-        generalService.removeGroup(group);
+        generalService.removeGroup(group, groupAdmin, clientConnection);
         groupAdminsIds.stream().map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(admin);

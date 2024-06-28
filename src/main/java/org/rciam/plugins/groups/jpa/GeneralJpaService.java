@@ -4,12 +4,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
+import org.keycloak.common.ClientConnection;
 import org.keycloak.common.util.ObjectUtil;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.events.admin.OperationType;
@@ -19,6 +21,7 @@ import org.keycloak.models.ModelDuplicateException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
+import org.keycloak.models.jpa.entities.UserGroupMembershipEntity;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.GroupResource;
@@ -27,6 +30,7 @@ import org.rciam.plugins.groups.helpers.ModelToRepresentation;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
+import org.rciam.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
@@ -63,11 +67,16 @@ public class GeneralJpaService {
     }
 
     @Transactional
-    public void removeGroup(GroupModel group) {
+    public void removeGroup(GroupModel group, UserModel groupAdmin, ClientConnection clientConnection) {
         //extra delete UserGroupMembershipExtensionEntity, GroupEnrollmentConfigurationEntity, GroupAdminEntity, GroupEnrollmentRequestEntity
         groupEnrollmentRequestRepository.deleteByGroup(group.getId());
         groupInvitationRepository.deleteByGroup(group.getId());
-        userGroupMembershipExtensionRepository.deleteByGroup(group.getId());
+        Stream<UserGroupMembershipExtensionEntity> members = userGroupMembershipExtensionRepository.getByGroup(group.getId());
+        members.forEach(member -> {
+            MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+            UserModel user = session.users().getUserById(realm, member.getUser().getId());
+            userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, groupAdmin.getId(), memberUserAttribute);
+        });
         groupEnrollmentConfigurationRepository.deleteByGroup(group.getId());
         groupAdminRepository.deleteByGroup(group.getId());
         groupRolesRepository.deleteByGroup(group.getId());

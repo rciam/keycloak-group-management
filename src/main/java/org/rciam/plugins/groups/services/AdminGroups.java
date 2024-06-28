@@ -1,6 +1,7 @@
 package org.rciam.plugins.groups.services;
 
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
@@ -78,7 +79,10 @@ public class AdminGroups {
     @DELETE
     public void deleteGroup() {
         this.realmAuth.groups().requireManage(group);
-        generalJpaService.removeGroup(group);
+        if (group.getSubGroupsStream().count()>0)
+            throw new BadRequestException("You need firstly to delete child groups.");
+
+        generalJpaService.removeGroup(group, realmAuth.adminAuth().getUser(),clientConnection);
 
         adminEvent.operation(OperationType.DELETE).representation(group.getName()).resourcePath(session.getContext().getUri()).success();
     }
