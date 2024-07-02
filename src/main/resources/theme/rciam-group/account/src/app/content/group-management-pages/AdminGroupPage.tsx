@@ -200,10 +200,8 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props)=> {
     groupsService!.doGet<User>("/whoami",{target:"base"})
       .then((response: HttpResponse<User>)=>{
         if(response.status===200&&response.data){
-          let user = response.data; 
-          setTimeout(() => {
+          let user = response.data;           
             setUser(user);
-          }, 3000);
         }
       }).catch(err=>{
         console.log(err);
