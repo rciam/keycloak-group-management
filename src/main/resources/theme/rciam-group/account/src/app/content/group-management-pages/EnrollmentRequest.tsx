@@ -162,13 +162,13 @@ export const EnrollmentRequest: FC<any> = (props) => {
               label={Msg.localize('enrollmentEmailLabel')}
               fieldId="simple-form-name-02"
             >
-              <div>{enrollmentRequest?.userEmail?enrollmentRequest?.userEmail:"Not Available"}</div>
+              <div>{enrollmentRequest?.userEmail?enrollmentRequest?.userEmail:Msg.localize('notAvailable')}</div>
             </FormGroup>
             <FormGroup
               label={"Username"}
               fieldId="simple-form-name-02"
             >
-              <div>{enrollmentRequest?.userIdentifier?enrollmentRequest?.userIdentifier:"Not Available"}</div>
+              <div>{enrollmentRequest?.userIdentifier?enrollmentRequest?.userIdentifier:Msg.localize('notAvailable')}</div>
             </FormGroup>
             {/* <FormGroup
               label={Msg.localize('enrollmentAssuranceLabel')}
@@ -185,15 +185,27 @@ export const EnrollmentRequest: FC<any> = (props) => {
                 }
               </div>
             </FormGroup>
+            */}
             <FormGroup
-              label={Msg.localize('enrollmentIdentityProvidersLabel')}
-              fieldId="simple-form-name-04"
+              label={Msg.localize('enrollmentIdentityProviderLabel')}
+              fieldId="simple-form-name-03"
             >
-              <div>{enrollmentRequest?.user?.federatedIdentities && enrollmentRequest?.user?.federatedIdentities.length > 0 ? enrollmentRequest?.user?.federatedIdentities.map((federatedIdentity, index) => {
-                return <Badge key={'single'} className="gm_role_badge" isRead>{federatedIdentity.identityProvider}</Badge>
-              }) :
-                <Msg msgKey='none' />}</div>
-            </FormGroup> */}
+              {enrollmentRequest?.userIdPName ?
+                <Badge key={'single'} className="gm_role_badge" isRead>{enrollmentRequest.userIdPName}</Badge>
+                :
+                <Msg msgKey='notAvailable' />
+              }
+            </FormGroup> 
+            <FormGroup
+              label={Msg.localize('userAuthnAuthorityLabel')}
+              fieldId="simple-form-name-03"
+            >
+              {enrollmentRequest?.userAuthnAuthority ?
+                <Badge key={'single'} className="gm_role_badge" isRead>{enrollmentRequest.userAuthnAuthority}</Badge>
+                :
+                <Msg msgKey='notAvailable' />
+              }
+            </FormGroup> 
             {props.managePage &&
               <ExpandableSection toggleText={expandUserDetails ? 'Hide current user details' : 'Show current user details'} onToggle={() => { setExpandUserDetails(!expandUserDetails) }} isExpanded={expandUserDetails}>
                 <FormGroup
