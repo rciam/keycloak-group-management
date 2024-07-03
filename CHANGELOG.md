@@ -9,6 +9,7 @@ This version is compatible with Keycloak version [22.0.10-1.7](https://github.co
 
 ### Added
 - User attributes for group enrollment
+- Inform others group admins for suspension - reactivation
 
 ### Fixed
 - Fix bug where removing a group will not remove group entitlement user attribute from group members

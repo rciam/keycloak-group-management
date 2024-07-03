@@ -30,6 +30,8 @@ import jakarta.persistence.Table;
         @NamedQuery(name = "getActiveByUser", query = "from UserGroupMembershipExtensionEntity f where f.user.id = :userId and f.status = 'ENABLED'"),
         @NamedQuery(name = "getMembersByGroup", query = "from UserGroupMembershipExtensionEntity f where f.group.id = :groupId"),
         @NamedQuery(name = "getByUserAndGroups", query = "from UserGroupMembershipExtensionEntity f where f.user.id = :userId and f.group.id in (:groupIds)"),
+        @NamedQuery(name = "getByUserAndGroupsAndNotSuspended", query = "from UserGroupMembershipExtensionEntity f where f.user.id = :userId and f.group.id in (:groupIds) and f.status != 'SUSPENDED'"),
+        @NamedQuery(name = "getByUserAndGroupsAndSuspended", query = "from UserGroupMembershipExtensionEntity f where f.user.id = :userId and f.group.id in (:groupIds) and f.status = 'SUSPENDED'"),
         @NamedQuery(name = "getExpiredMemberships", query = "from UserGroupMembershipExtensionEntity f where f.membershipExpiresAt < :date"),
         @NamedQuery(name = "getMembershipsByStatusAndValidFrom", query = "from UserGroupMembershipExtensionEntity f where f.status = :status and f.validFrom <= :date"),
         @NamedQuery(name = "getExpiredMembershipsByGroup", query = "from UserGroupMembershipExtensionEntity f where f.group.id = :groupId and f.membershipExpiresAt < :date"),
