@@ -1,5 +1,5 @@
 <html>
 <body>
-${kcSanitize(msg("activateMemberBodyHtml",groupPath,justification, signatureMessage))?no_esc}
+${kcSanitize(msg("activateMemberBodyHtml",userName,groupPath,subgroupsStrHtml,justification, signatureMessage))?no_esc}
 </body>
 </html>

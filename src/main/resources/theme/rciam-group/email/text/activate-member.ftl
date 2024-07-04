@@ -1,2 +1,2 @@
 <#ftl output_format="plainText">
-${msg("activateMemberBody",groupPath,justification, signatureMessage)}
+${msg("activateMemberBody",userName,groupPath,subgroupsStr,justification, signatureMessage)}

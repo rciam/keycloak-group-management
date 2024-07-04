@@ -21,6 +21,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     private static final String subgroupsHtmlStr = " and its subgroups:<br>";
     private static final String comma = ",";
     private static final String JUSTIFICATION = " with the following justification: ";
+    private static final String USER_REACTIVATION_JUSTIFICATION = "The reactivation was issued with the following justification: ";
 
     private String signatureMessage;
 
@@ -64,9 +65,12 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("suspendMemberGroupAdminsSubject", "suspend-member-group-admins.ftl", attributes);
     }
 
-    public void sendActivationEmail(String groupPath, String justification) throws EmailException {
-        attributes.put("justification", justification != null ? JUSTIFICATION + justification :"");
+    public void sendActivationEmail(String groupPath, List<String> subgroupPaths, String justification) throws EmailException {
+        attributes.put("userName", user.getFirstName() + " " + user.getLastName());
+        attributes.put("justification", justification != null ? USER_REACTIVATION_JUSTIFICATION + justification :"");
         attributes.put("groupPath", groupPath);
+        attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupPaths));
+        attributes.put("subgroupsStrHtml", subgroupsHtmlStrCalculation(subgroupPaths));
         attributes.put("signatureMessage", signatureMessage);
         send("activateMemberSubject", "activate-member.ftl", attributes);
     }

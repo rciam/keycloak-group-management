@@ -201,7 +201,7 @@ public class GroupAdminGroupMember {
                     , Utils.GROUP_MEMBERSHIP_CREATE, groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(user);
-                customFreeMarkerEmailTemplateProvider.sendActivationEmail(groupPath, justification);
+                customFreeMarkerEmailTemplateProvider.sendActivationEmail(groupPath, subgroupPaths, justification);
 
                 groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                     try {
