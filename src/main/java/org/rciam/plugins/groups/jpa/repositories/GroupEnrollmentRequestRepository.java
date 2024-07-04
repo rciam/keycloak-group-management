@@ -60,7 +60,7 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
             if (idp != null)
                 entity.setUserIdPName(Utils.getIdPName(idp));
         }
-        entity.setUserAuthnAuthority(userSession.getNote(Utils.IDENTITY_PROVIDER_AUTHN_AUTHORITY));
+        entity.setUserAuthnAuthority(userSession.getNote(Utils.IDENTITY_PROVIDER_ID));
         entity.setGroupEnrollmentConfiguration(configuration);
         entity.setComments(rep.getComments());
         entity.setStatus(isPending ? EnrollmentRequestStatusEnum.PENDING_APPROVAL : EnrollmentRequestStatusEnum.NO_APPROVAL);
