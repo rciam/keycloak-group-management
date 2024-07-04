@@ -2,6 +2,7 @@ package org.rciam.plugins.groups.email;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.email.EmailException;
@@ -145,24 +146,6 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("userRemovalSubject", "expired-group-membership-user.ftl", attributes);
     }
 
-    private String subgroupsHtmlStrCalculation(List<String> subgroupsPaths) {
-        if (subgroupsPaths.isEmpty())
-            return "";
-
-        StringBuilder sb = new StringBuilder(subgroupsHtmlStr);
-        subgroupsPaths.stream().forEach(x -> sb.append("- ").append(x).append("<br>"));
-        return sb.toString();
-    }
-
-    private String subgroupsStrCalculation(List<String> subgroupsPaths) {
-        if (subgroupsPaths.isEmpty())
-            return "";
-
-        StringBuilder sb = new StringBuilder(subgroupsStr);
-        subgroupsPaths.stream().forEach(x -> sb.append(x).append(comma));
-        return StringUtils.removeEnd(sb.toString(), comma);
-    }
-
     public void sendExpiredGroupMembershipNotification(String groupPath, String date, String groupId, String serverUrl) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("groupname", groupPath);
@@ -277,6 +260,53 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
         attributes.put("signatureMessage", signatureMessage);
         send("deleteGroupAdminInformationSubject", "delete-group-admin-inform.ftl", attributes);
+    }
+
+    public void sendRolesChangesUserEmail(String groupPath, List<String> roles) throws EmailException {
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("groupPath", groupPath);
+        attributes.put("roles", roles.stream().collect(Collectors.joining(",")));
+        attributes.put("rolesHtml", rolesHtmlStrCalculation(roles));
+        attributes.put("signatureMessage", signatureMessage);
+        send("rolesChangesUserSubject", "roles-changes-user.ftl", attributes);
+    }
+
+    public void sendRolesChangesGroupAdminEmail(String groupPath, List<String> roles, UserModel admin, UserModel userChanged) throws EmailException {
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("groupPath", groupPath);
+        attributes.put("roles", roles.stream().collect(Collectors.joining(",")));
+        attributes.put("rolesHtml", rolesHtmlStrCalculation(roles));
+        attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
+        attributes.put("userFullName", userChanged.getFirstName() + " " + userChanged.getLastName());
+        attributes.put("signatureMessage", signatureMessage);
+        send("rolesChangesGroupAdminSubject", "roles-changes-group-admin.ftl", attributes);
+    }
+
+    private String subgroupsHtmlStrCalculation(List<String> subgroupsPaths) {
+        if (subgroupsPaths.isEmpty())
+            return "";
+
+        StringBuilder sb = new StringBuilder(subgroupsHtmlStr);
+        subgroupsPaths.stream().forEach(x -> sb.append("- ").append(x).append("<br>"));
+        return sb.toString();
+    }
+
+    private String subgroupsStrCalculation(List<String> subgroupsPaths) {
+        if (subgroupsPaths.isEmpty())
+            return "";
+
+        StringBuilder sb = new StringBuilder(subgroupsStr);
+        subgroupsPaths.stream().forEach(x -> sb.append(x).append(comma));
+        return StringUtils.removeEnd(sb.toString(), comma);
+    }
+
+    private String rolesHtmlStrCalculation(List<String> roles) {
+        if (roles.isEmpty())
+            return "";
+
+        StringBuilder sb = new StringBuilder();
+        roles.stream().forEach(x -> sb.append("<br>- ").append(x));
+        return sb.toString();
     }
 
 
