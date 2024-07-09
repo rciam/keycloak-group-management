@@ -790,4 +790,12 @@
             <column name="USER_AUTHN_AUTHORITY" type="VARCHAR(256)" />
         </addColumn>
     </changeSet>
+
+    <changeSet author="cgeorgilakis@grnet.gr" id="user_authnAuthorities">
+        <dropColumn tableName="GROUP_ENROLLMENT_REQUEST" columnName="USER_AUTHN_AUTHORITY" />
+        <dropColumn tableName="GROUP_ENROLLMENT_REQUEST" columnName="USER_IDP_NAME" />
+        <addColumn tableName="GROUP_ENROLLMENT_REQUEST">
+            <column name="USER_AUTHN_AUTHORITIES" type="TEXT" />
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

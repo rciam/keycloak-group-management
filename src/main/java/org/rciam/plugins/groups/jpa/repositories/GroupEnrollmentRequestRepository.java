@@ -1,8 +1,10 @@
 package org.rciam.plugins.groups.jpa.repositories;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -10,8 +12,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.persistence.TypedQuery;
 
+import org.jboss.logging.Logger;
 import org.keycloak.events.Details;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
@@ -20,18 +24,23 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.util.JsonSerialization;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.PagerParameters;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
+import org.rciam.plugins.groups.representations.AuthnAuthorityRepresentation;
 import org.rciam.plugins.groups.representations.GroupEnrollmentRequestPager;
 import org.rciam.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 
 public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnrollmentRequestEntity> {
 
+    private static final Logger logger = Logger.getLogger(GroupEnrollmentRequestRepository.class);
     private final GroupRolesRepository groupRolesRepository;
+    private static final String IDENTITY_PROVIDER_AUTHN_AUTHORITIES = "identity_provider_authnAuthorities";
+    private static final String IDENTITY_PROVIDER_ID = "identity_provider_id";
 
     public GroupEnrollmentRequestRepository(KeycloakSession session, RealmModel realm, GroupRolesRepository groupRolesRepository) {
         super(session, realm);
@@ -56,11 +65,13 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         entity.setUserIdentifier("username".equals(userIdentifier)? user.getUsername() : user.getAttributeStream(userIdentifier).collect(Collectors.joining(",")));
         String idpAlias = userSession.getNote(Details.IDENTITY_PROVIDER);
         if (idpAlias != null) {
-            IdentityProviderModel idp = realm.getIdentityProviderByAlias(idpAlias);
-            if (idp != null)
-                entity.setUserIdPName(Utils.getIdPName(idp));
+            try {
+                entity.setUserAuthnAuthorities(getAuthnAuthorities(userSession, idpAlias));
+            } catch (IOException e) {
+                logger.warn("Problem setting userAuthnAuthorities for user enrollment request");
+                e.printStackTrace();
+            }
         }
-        entity.setUserAuthnAuthority(userSession.getNote(Utils.IDENTITY_PROVIDER_ID));
         entity.setGroupEnrollmentConfiguration(configuration);
         entity.setComments(rep.getComments());
         entity.setStatus(isPending ? EnrollmentRequestStatusEnum.PENDING_APPROVAL : EnrollmentRequestStatusEnum.NO_APPROVAL);
@@ -72,6 +83,24 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         }
         create(entity);
         return entity;
+    }
+
+    private String getAuthnAuthorities(UserSessionModel userSession, String idpAlias) throws IOException {
+        LinkedList<AuthnAuthorityRepresentation> authnAuthorities = new LinkedList<>();
+        String previousAauthnAuthorities = userSession.getNote(IDENTITY_PROVIDER_AUTHN_AUTHORITIES);
+        RealmModel realm = userSession.getRealm();
+        IdentityProviderModel idp = realm.getIdentityProviderByAlias(idpAlias);
+        //add first authn autohrities
+        authnAuthorities.add(new AuthnAuthorityRepresentation(userSession.getNote(IDENTITY_PROVIDER_ID), getIdPName(idp)));
+        if (previousAauthnAuthorities != null) {
+                authnAuthorities.addAll(JsonSerialization.readValue(previousAauthnAuthorities, new TypeReference<LinkedList<AuthnAuthorityRepresentation>>() {
+                }));
+        }
+        return JsonSerialization.writeValueAsString(authnAuthorities);
+    }
+
+    private String getIdPName(IdentityProviderModel idp) {
+        return idp.getDisplayName() != null ? idp.getDisplayName() : idp.getAlias();
     }
 
     public Long countOngoingByUserAndGroup(String userId, String groupId) {
