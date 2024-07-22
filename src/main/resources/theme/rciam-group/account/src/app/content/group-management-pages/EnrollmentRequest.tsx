@@ -6,8 +6,7 @@ import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/gr
 import { Loading } from '../../group-widgets/LoadingModal';
 import { Msg } from '../../widgets/Msg';
 import { CopyIcon, ExternalLinkSquareAltIcon, HelpIcon } from '@patternfly/react-icons';
-import { Popover } from '@patternfly/react-core';
-
+import { Popover, List, ListItem } from '@patternfly/react-core';
 export const EnrollmentRequest: FC<any> = (props) => {
 
   const [loading, setLoading] = useState(false);
@@ -200,11 +199,15 @@ export const EnrollmentRequest: FC<any> = (props) => {
               label={Msg.localize('userAuthnAuthorityLabel')}
               fieldId="simple-form-name-03"
             >
-              {enrollmentRequest?.userAuthnAuthority ?
-                <Badge key={'single'} className="gm_role_badge" isRead>{enrollmentRequest.userAuthnAuthority}</Badge>
-                :
-                <Msg msgKey='notAvailable' />
-              }
+              {enrollmentRequest?.userAuthnAuthorities && Array.isArray(JSON.parse(enrollmentRequest?.userAuthnAuthorities))?
+              <List>
+                {JSON.parse(enrollmentRequest.userAuthnAuthorities).map((value, index) => (
+                  <ListItem key={index} style={{ marginLeft: `${index}rem` }}>
+                    {value.id}{value.name === value.id ? '' : ` - ${value.name}`}
+                  </ListItem>
+                ))}
+              </List>
+              :<Msg msgKey='notAvailable'/>}
             </FormGroup> 
             {props.managePage &&
               <ExpandableSection toggleText={expandUserDetails ? 'Hide current user details' : 'Show current user details'} onToggle={() => { setExpandUserDetails(!expandUserDetails) }} isExpanded={expandUserDetails}>
