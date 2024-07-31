@@ -52,6 +52,8 @@ export const EnrollmentRequest: FC<any> = (props) => {
     props.close();
   }
 
+
+  
   return (
     <React.Fragment>
       <Modal
@@ -169,6 +171,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
             >
               <div>{enrollmentRequest?.userIdentifier?enrollmentRequest?.userIdentifier:Msg.localize('notAvailable')}</div>
             </FormGroup>
+          
             {/* <FormGroup
               label={Msg.localize('enrollmentAssuranceLabel')}
               fieldId="simple-form-name-03"
@@ -185,16 +188,6 @@ export const EnrollmentRequest: FC<any> = (props) => {
               </div>
             </FormGroup>
             */}
-            <FormGroup
-              label={Msg.localize('enrollmentIdentityProviderLabel')}
-              fieldId="simple-form-name-03"
-            >
-              {enrollmentRequest?.userIdPName ?
-                <Badge key={'single'} className="gm_role_badge" isRead>{enrollmentRequest.userIdPName}</Badge>
-                :
-                <Msg msgKey='notAvailable' />
-              }
-            </FormGroup> 
             <FormGroup
               label={Msg.localize('userAuthnAuthorityLabel')}
               fieldId="simple-form-name-03"
@@ -226,7 +219,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                 >
                   <div>{enrollmentRequest?.user?.email}</div>
                 </FormGroup>
-                <FormGroup
+                {/* <FormGroup
                   label={Msg.localize('enrollmentAssuranceLabel')}
                   fieldId="simple-form-name-03"
                 >
@@ -240,7 +233,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                         : <Msg msgKey='notAvailable' />
                     }
                   </div>
-                </FormGroup>
+                </FormGroup> */}
                 <FormGroup
                   label={Msg.localize('enrollmentIdentityProvidersLabel')}
                   fieldId="simple-form-name-04"
