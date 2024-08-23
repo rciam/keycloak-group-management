@@ -59,10 +59,12 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         userEntity.setId(user.getId());
         entity.setUser(userEntity);
         String userIdentifier = realm.getAttribute(Utils.USER_IDENTIFIER_FOR_ENROLLMENT) != null ? realm.getAttribute(Utils.USER_IDENTIFIER_FOR_ENROLLMENT) : Utils.DEFAULT_USER_IDENTIFIER_FOR_ENROLLMENT;
+        String assurance = realm.getAttribute(Utils.USER_ASSURANCE_FOR_ENROLLMENT) != null ? realm.getAttribute(Utils.USER_ASSURANCE_FOR_ENROLLMENT) : Utils.DEFAULT_USER_ASSURANCE_FOR_ENROLLMENT;
         entity.setUserFirstName(user.getFirstName());
         entity.setUserLastName(user.getLastName());
         entity.setUserEmail(user.getEmail());
         entity.setUserIdentifier("username".equals(userIdentifier)? user.getUsername() : user.getAttributeStream(userIdentifier).collect(Collectors.joining(",")));
+        entity.setUserAssurance(user.getAttributeStream(assurance).collect(Collectors.toSet()));
         String idpAlias = userSession.getNote(Details.IDENTITY_PROVIDER);
         if (idpAlias != null) {
             try {

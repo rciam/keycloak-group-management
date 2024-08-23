@@ -11,6 +11,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 public class GroupEnrollmentRequestRepresentation {
 
@@ -26,7 +27,7 @@ public class GroupEnrollmentRequestRepresentation {
     private String userLastName;
     private String userEmail;
     private String userIdentifier;
-    private String userAssurance;
+    private Set<String> userAssurance;
     private String userAuthnAuthorities;
     private List<String> groupRoles;
 
@@ -91,11 +92,11 @@ public class GroupEnrollmentRequestRepresentation {
         this.userIdentifier = userIdentifier;
     }
 
-    public String getUserAssurance() {
+    public Set<String> getUserAssurance() {
         return userAssurance;
     }
 
-    public void setUserAssurance(String userAssurance) {
+    public void setUserAssurance(Set<String> userAssurance) {
         this.userAssurance = userAssurance;
     }
 

@@ -798,4 +798,18 @@
             <column name="USER_AUTHN_AUTHORITIES" type="TEXT" />
         </addColumn>
     </changeSet>
+
+    <changeSet author="cgeorgilakis@grnet.gr" id="user_assurance">
+        <dropColumn tableName="GROUP_ENROLLMENT_REQUEST" columnName="USER_ASSURANCE" />
+        <createTable tableName="USER_ASSURANCE">
+            <column name="GROUP_ENROLLMENT_REQUEST_ID" type="VARCHAR(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="VALUE" type="TEXT" >
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseColumnNames="GROUP_ENROLLMENT_REQUEST_ID" baseTableName="USER_ASSURANCE" constraintName="FK_USER_ASSURANCE" referencedColumnNames="ID" referencedTableName="GROUP_ENROLLMENT_REQUEST"/>
+        <addPrimaryKey columnNames="GROUP_ENROLLMENT_REQUEST_ID,VALUE" constraintName="PK_USER_ASSURANCE" tableName="USER_ASSURANCE"/>
+    </changeSet>
 </databaseChangeLog>

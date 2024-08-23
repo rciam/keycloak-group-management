@@ -1,26 +1,14 @@
 package org.rciam.plugins.groups.jpa.entities;
 
 
+import jakarta.persistence.*;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 
-import jakarta.persistence.Access;
-import jakarta.persistence.AccessType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.Table;
-
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "GROUP_ENROLLMENT_REQUEST")
@@ -55,8 +43,10 @@ public class GroupEnrollmentRequestEntity {
     @Column(name = "USER_IDENTIFIER")
     private String userIdentifier;
 
-    @Column(name = "USER_ASSURANCE")
-    private String userAssurance;
+    @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+    @Column(name="VALUE")
+    @CollectionTable(name = "USER_ASSURANCE", joinColumns={ @JoinColumn(name="GROUP_ENROLLMENT_REQUEST_ID") })
+    private Set<String> userAssurance = new HashSet<>();
 
     @Column(name = "USER_AUTHN_AUTHORITIES")
     private String userAuthnAuthorities;
@@ -139,11 +129,11 @@ public class GroupEnrollmentRequestEntity {
         this.userIdentifier = userIdentifier;
     }
 
-    public String getUserAssurance() {
+    public Set<String> getUserAssurance() {
         return userAssurance;
     }
 
-    public void setUserAssurance(String userAssurance) {
+    public void setUserAssurance(Set<String> userAssurance) {
         this.userAssurance = userAssurance;
     }
 
