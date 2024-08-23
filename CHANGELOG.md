@@ -5,13 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.19.2]
-This version is compatible with Keycloak version [22.0.10-1.8](https://github.com/eosc-kc/keycloak/releases/tag/22.0.10-1.7)
 
 ### Fixed
 - Removed Unused Fields and updated Labels in Enrollment Request Review Page 
 
 ## [0.19.1]
-This version is compatible with Keycloak version [22.0.10-1.8](https://github.com/eosc-kc/keycloak/releases/tag/22.0.10-1.7)
 
 ### Added
 - Added AuthnAuthorityRepresentation default constructor
