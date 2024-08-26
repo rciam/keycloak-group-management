@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FC, useState, useEffect } from 'react';
-import { Button, Tooltip, Alert, Form, FormGroup, Modal, ModalVariant, FormFieldGroupHeader, FormFieldGroup, TextArea, Badge, ExpandableSection } from '@patternfly/react-core';
+import { Button, Tooltip, Alert, Form, FormGroup, Modal, ModalVariant, FormFieldGroupHeader, FormFieldGroup, TextArea, Badge, ExpandableSection, DataList, DataListItem, DataListItemRow, DataListItemCells, DataListCell } from '@patternfly/react-core';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 import { Loading } from '../../group-widgets/LoadingModal';
@@ -47,13 +47,13 @@ export const EnrollmentRequest: FC<any> = (props) => {
       }).catch((err) => { console.log(err) })
   }
 
-  let close = ()=>{
+  let close = () => {
     setExpandUserDetails(false);
     props.close();
   }
 
 
-  
+
   return (
     <React.Fragment>
       <Modal
@@ -149,29 +149,29 @@ export const EnrollmentRequest: FC<any> = (props) => {
                 </button>
               </Popover>
             </div>
-              
+
             <FormGroup
               label={Msg.localize('enrollmentFullNameLabel')}
               fieldId="simple-form-name-01"
             // helperText=""
             >
               <div>
-                {enrollmentRequest?.userFirstName||enrollmentRequest?.userLastName?enrollmentRequest?.userFirstName+" " + enrollmentRequest?.userLastName:"Not Available"}
+                {enrollmentRequest?.userFirstName || enrollmentRequest?.userLastName ? enrollmentRequest?.userFirstName + " " + enrollmentRequest?.userLastName : "Not Available"}
               </div>
             </FormGroup>
             <FormGroup
               label={Msg.localize('enrollmentEmailLabel')}
               fieldId="simple-form-name-02"
             >
-              <div>{enrollmentRequest?.userEmail?enrollmentRequest?.userEmail:Msg.localize('notAvailable')}</div>
+              <div>{enrollmentRequest?.userEmail ? enrollmentRequest?.userEmail : Msg.localize('notAvailable')}</div>
             </FormGroup>
             <FormGroup
               label={"Username"}
               fieldId="simple-form-name-02"
             >
-              <div>{enrollmentRequest?.userIdentifier?enrollmentRequest?.userIdentifier:Msg.localize('notAvailable')}</div>
+              <div>{enrollmentRequest?.userIdentifier ? enrollmentRequest?.userIdentifier : Msg.localize('notAvailable')}</div>
             </FormGroup>
-          
+
             {/* <FormGroup
               label={Msg.localize('enrollmentAssuranceLabel')}
               fieldId="simple-form-name-03"
@@ -192,16 +192,71 @@ export const EnrollmentRequest: FC<any> = (props) => {
               label={Msg.localize('userAuthnAuthorityLabel')}
               fieldId="simple-form-name-03"
             >
-              {enrollmentRequest?.userAuthnAuthorities && Array.isArray(JSON.parse(enrollmentRequest?.userAuthnAuthorities))?
-              <List>
-                {JSON.parse(enrollmentRequest.userAuthnAuthorities).map((value, index) => (
-                  <ListItem key={index} style={{ marginLeft: `${index}rem` }}>
-                    {value.id}{value.name === value.id ? '' : ` - ${value.name}`}
-                  </ListItem>
-                ))}
-              </List>
-              :<Msg msgKey='notAvailable'/>}
-            </FormGroup> 
+              {enrollmentRequest?.userAuthnAuthorities && Array.isArray(JSON.parse(enrollmentRequest?.userAuthnAuthorities)) ?
+                <List>
+                  {JSON.parse(enrollmentRequest.userAuthnAuthorities).map((value, index) => (
+                    <ListItem key={index} style={{ marginLeft: `${index}rem` }}>
+                      {value.id}
+                      {value.name && value.name !== value.id && ` - ${value.name}`}
+                      {!value.name && value.name !== value.id && <Msg msgKey="notAvailable" />}
+                    </ListItem>
+                  ))}
+                </List>
+                : <Msg msgKey='notAvailable' />}
+            </FormGroup>
+            <FormGroup
+              label={"Assurance"}
+              fieldId="simple-form-name-03"
+            >
+              <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact wrapModifier={"breakWord"}>
+                <DataListItem id="groups-list-header" aria-labelledby="Columns names">
+                  <DataListItemRow >
+                    <DataListItemCells
+                      dataListCells={[
+                        <DataListCell key='group-name-header' width={2}>
+                          <strong>Value</strong>
+                        </DataListCell>,
+                        <DataListCell key='group-path-header' width={2}>
+                          <strong>Description</strong>
+                        </DataListCell>
+                      ]}
+                    />
+                  </DataListItemRow>
+                </DataListItem>
+
+                {enrollmentRequest?.userAssurance&& Array.isArray(enrollmentRequest.userAssurance) && enrollmentRequest.userAssurance.length>0?enrollmentRequest?.userAssurance.map((value, index) => {
+                  return (
+                    <DataListItem id={`${index}-group`} key={'group-' + index} aria-labelledby="groups-list">
+                      <DataListItemRow>
+                        <DataListItemCells
+                          dataListCells={[
+                            <DataListCell id={`${index}-value`} width={2} key={'value-' + index}>
+                              {value}
+                            </DataListCell>,
+                            <DataListCell id={`${index}-description`} width={2} key={'path-' + index}>
+                              {Msg.localize(value.replace(":", ""))!= value.replace(":", "") ?
+                                <div dangerouslySetInnerHTML={{ __html: Msg.localize(value.replace(":", ""))}} />
+                                :
+                                <Msg msgKey='notAvailable' />}
+                            </DataListCell>
+                          ]}
+                        />
+                      </DataListItemRow>
+                    </DataListItem>
+                  )
+                })
+                :
+                <DataListItem key='emptyItem' aria-labelledby="empty-item">
+                  <DataListItemRow key='emptyRow'>
+                    <DataListItemCells dataListCells={[
+                      <DataListCell key='empty'><Msg msgKey='noAssurance' /></DataListCell>
+                    ]} />
+                  </DataListItemRow>
+                </DataListItem>
+                }
+
+              </DataList>
+            </FormGroup>
             {props.managePage &&
               <ExpandableSection toggleText={expandUserDetails ? 'Hide current user details' : 'Show current user details'} onToggle={() => { setExpandUserDetails(!expandUserDetails) }} isExpanded={expandUserDetails}>
                 <FormGroup
