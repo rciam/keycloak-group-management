@@ -96,7 +96,7 @@ public class GroupAdminGroup {
     public void deleteGroup() {
         if (!isGroupAdmin)
             throw new ForbiddenException();
-        if (group.getSubGroupsStream().count()>0)
+        if (group.getSubGroupsStream().count() > 0)
             throw new BadRequestException("You need firstly to delete child groups.");
 
         List<String> groupAdminsIds = groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).collect(Collectors.toList());
@@ -117,7 +117,7 @@ public class GroupAdminGroup {
     @Path("/configuration/all")
     @Produces("application/json")
     public List<GroupEnrollmentConfigurationRepresentation> getGroupEnrollmentConfigurationsByGroup() {
-        return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(x-> EntityToRepresentation.toRepresentation(x, false, realm)).collect(Collectors.toList());
+        return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(x -> EntityToRepresentation.toRepresentation(x, false, realm)).collect(Collectors.toList());
     }
 
     @GET
@@ -202,7 +202,7 @@ public class GroupAdminGroup {
                 groupEnrollmentRequestRepository.deleteEntity(request);
             });
             groupEnrollmentConfigurationRepository.deleteEntity(id);
-        } else if (entity == null ) {
+        } else if (entity == null) {
             throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
         } else  {
             throw new BadRequestException("Could not delete default group configuration");
@@ -236,7 +236,7 @@ public class GroupAdminGroup {
     @DELETE
     @Path("/role/{name}")
     public Response deleteGroupRole(@PathParam("name") String name) {
-        if (!isGroupAdmin){
+        if (!isGroupAdmin) {
             throw new ForbiddenException();
         }
 
@@ -281,7 +281,6 @@ public class GroupAdminGroup {
     @POST
     @Path("/admin/invite")
     public Response inviteGroupAdmin(UserRepresentation userRep) throws EmailException {
-             
         if (userRep.getEmail() == null)
             throw new ErrorResponseException("Wrong data", "Wrong data", Response.Status.BAD_REQUEST);
 
