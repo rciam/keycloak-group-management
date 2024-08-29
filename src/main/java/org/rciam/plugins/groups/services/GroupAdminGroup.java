@@ -96,7 +96,7 @@ public class GroupAdminGroup {
     public void deleteGroup() {
         if (!isGroupAdmin)
             throw new ForbiddenException();
-        if (group.getSubGroupsStream().count()>0)
+        if (group.getSubGroupsStream().count() > 0)
             throw new BadRequestException("You need firstly to delete child groups.");
 
         List<String> groupAdminsIds = groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).collect(Collectors.toList());
@@ -117,7 +117,7 @@ public class GroupAdminGroup {
     @Path("/configuration/all")
     @Produces("application/json")
     public List<GroupEnrollmentConfigurationRepresentation> getGroupEnrollmentConfigurationsByGroup() {
-        return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(x-> EntityToRepresentation.toRepresentation(x, false, realm)).collect(Collectors.toList());
+        return groupEnrollmentConfigurationRepository.getByGroup(group.getId()).map(x -> EntityToRepresentation.toRepresentation(x, false, realm)).collect(Collectors.toList());
     }
 
     @GET
@@ -202,7 +202,7 @@ public class GroupAdminGroup {
                 groupEnrollmentRequestRepository.deleteEntity(request);
             });
             groupEnrollmentConfigurationRepository.deleteEntity(id);
-        } else if (entity == null ) {
+        } else if (entity == null) {
             throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
         } else  {
             throw new BadRequestException("Could not delete default group configuration");
@@ -236,7 +236,7 @@ public class GroupAdminGroup {
     @DELETE
     @Path("/role/{name}")
     public Response deleteGroupRole(@PathParam("name") String name) {
-        if (!isGroupAdmin){
+        if (!isGroupAdmin) {
             throw new ForbiddenException();
         }
 
@@ -281,7 +281,6 @@ public class GroupAdminGroup {
     @POST
     @Path("/admin/invite")
     public Response inviteGroupAdmin(UserRepresentation userRep) throws EmailException {
-             
         if (userRep.getEmail() == null)
             throw new ErrorResponseException("Wrong data", "Wrong data", Response.Status.BAD_REQUEST);
 
@@ -315,18 +314,22 @@ public class GroupAdminGroup {
     }
 
     @POST
-    @Path("/admin/{userId}")
-    public Response addAsGroupAdmin(@PathParam("userId") String userId) {
-        if (groupAdminRepository.getGroupAdminByUserAndGroup(userId, group.getId()) != null) {
-            throw new BadRequestException("You are already group admin for this group");
+    @Path("/admin")
+    public Response addAsGroupAdmin(@QueryParam("userId") String userId, @QueryParam("username") String username) {
+        UserModel userAdded = userId != null ? session.users().getUserById(realm, userId) : session.users().getUserByUsername(realm, username);
+        if (userAdded == null) {
+            throw new NotFoundException("Could not find this User");
         }
-        groupAdminRepository.addGroupAdmin(userId, group.getId());
+
+        if (groupAdminRepository.getGroupAdminByUserAndGroup(userAdded.getId(), group.getId()) != null) {
+            throw new BadRequestException("This user is already group admin of this group");
+        }
+        groupAdminRepository.addGroupAdmin(userAdded.getId(), group.getId());
 
         try {
-            UserModel userAdded = session.users().getUserById(realm, userId);
             customFreeMarkerEmailTemplateProvider.setUser(userAdded);
             customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
-            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x) && !userId.equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x) && !userAdded.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
                     customFreeMarkerEmailTemplateProvider.sendAddRemoveAdminAdminInformationEmail(true, group.getName(), userAdded, groupAdmin);
@@ -343,13 +346,14 @@ public class GroupAdminGroup {
 
 
     @DELETE
-    @Path("/admin/{userId}")
-    public Response removeGroupAdmin(@PathParam("userId") String userId) {
-        UserModel user = session.users().getUserById(realm, userId);
+    @Path("/admin")
+    public Response removeGroupAdmin(@QueryParam("userId") String userId, @QueryParam("username") String username) {
+        UserModel user = userId != null ? session.users().getUserById(realm, userId) : session.users().getUserByUsername(realm, username);
         if (user == null) {
             throw new NotFoundException("Could not find this User");
         }
-        GroupAdminEntity admin = groupAdminRepository.getGroupAdminByUserAndGroup(userId, group.getId());
+
+        GroupAdminEntity admin = groupAdminRepository.getGroupAdminByUserAndGroup(user.getId(), group.getId());
         if (admin != null) {
             groupAdminRepository.deleteEntity(admin.getId());
             try {
