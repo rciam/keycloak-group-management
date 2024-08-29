@@ -88,7 +88,7 @@ export const GroupAdmins: FC<any> = (props) => {
 
   const makeAdmin = (userId) => {
     setLoading(true);
-    groupsService!.doPost<any>("/group-admin/group/" + props.groupId + "/admin/" + userId, {})
+    groupsService!.doPost<any>("/group-admin/group/" + props.groupId + "/admin",{}, {params: {"userId":userId}})
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
           props.fetchGroupConfiguration();
@@ -107,7 +107,7 @@ export const GroupAdmins: FC<any> = (props) => {
 
   const removeAdmin = (userId) => {
     setLoading(true);
-    groupsService!.doDelete<any>("/group-admin/group/" + props.groupId + "/admin/" + userId, {})
+    groupsService!.doDelete<any>("/group-admin/group/" + props.groupId + "/admin", {params: {"userId":userId}})
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
           props.fetchGroupConfiguration();
