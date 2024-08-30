@@ -186,15 +186,27 @@ public class Utils {
     }
 
     public static Stream<GroupModel> getGroupWithSubgroups(GroupModel group){
-        Set<GroupModel> groups = group.getSubGroupsStream().collect(Collectors.toSet());
+        Set<GroupModel> groups = getAllSubgroups(group);
         groups.add(group);
         return groups.stream();
     }
 
     public static Stream<String> getGroupIdsWithSubgroups(GroupModel group){
-        Set<String> groups = group.getSubGroupsStream().map(GroupModel::getId).collect(Collectors.toSet());
+        Set<String> groups = getAllSubgroupsIds(group);
         groups.add(group.getId());
         return groups.stream();
+    }
+
+    public static Set<String> getAllSubgroupsIds(GroupModel group){
+        Set<String> allSubGroups = group.getSubGroupsStream().map(g -> g.getId()).collect(Collectors.toSet());
+        group.getSubGroupsStream().forEach(g -> allSubGroups.addAll(getAllSubgroupsIds(g)) );
+        return allSubGroups;
+    }
+
+    public static Set<GroupModel> getAllSubgroups(GroupModel group){
+        Set<GroupModel> allSubGroups = group.getSubGroupsStream().collect(Collectors.toSet());
+        group.getSubGroupsStream().forEach(g -> allSubGroups.addAll(getAllSubgroups(g)) );
+        return allSubGroups;
     }
 
     public static boolean hasManageGroupsAccountRole(RealmModel realm, UserModel user) {

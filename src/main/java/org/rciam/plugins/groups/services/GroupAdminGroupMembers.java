@@ -34,10 +34,8 @@ import org.keycloak.services.ErrorResponseException;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.HashSet;
+import java.util.Set;
 
 public class GroupAdminGroupMembers {
 
@@ -131,10 +129,10 @@ public class GroupAdminGroupMembers {
                                                                           @QueryParam("role") String role,
                                                                           @QueryParam("status") MemberStatusEnum status,
                                                                           @QueryParam("direct") @DefaultValue("true") boolean direct){
-        List<String> groupIdsList = new ArrayList<>();
+        Set<String> groupIdsList = new HashSet<>();
         groupIdsList.add(group.getId());
         if (!direct)
-            groupIdsList.addAll(group.getSubGroupsStream().map(GroupModel::getId).collect(Collectors.toList()));
+            groupIdsList.addAll(Utils.getAllSubgroupsIds(group));
         return userGroupMembershipExtensionRepository.searchByGroupAndSubGroups(group.getId(), groupIdsList, search, status, role, first, max);
     }
 

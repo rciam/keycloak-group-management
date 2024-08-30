@@ -1,9 +1,7 @@
 package org.rciam.plugins.groups.jpa.repositories;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -93,16 +91,11 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
     }
 
     public List<String> getAllAdminGroupIds(String userId) {
-        return em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).getResultStream().map(realm::getGroupById).flatMap(g -> this.getLeafGroupsIds(g).stream()).collect(Collectors.toList());
+        return em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).getResultStream().map(realm::getGroupById).flatMap(g -> Utils.getGroupIdsWithSubgroups(g)).collect(Collectors.toList());
     }
 
     public List<String> getAdminGroupIdsByName(String userId, String groupName) {
-        return em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).getResultStream().map(realm::getGroupById).flatMap(Utils::getGroupWithSubgroups).filter(x->groupName == null || x.getName().toLowerCase().contains(groupName.toLowerCase())).flatMap(this::getGroupIdsWithSubgroups).distinct().collect(Collectors.toList());
-    }
-    private Stream<String> getGroupIdsWithSubgroups(GroupModel group){
-        Set<String> groups = group.getSubGroupsStream().map(GroupModel::getId).collect(Collectors.toSet());
-        groups.add(group.getId());
-        return groups.stream();
+        return em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).getResultStream().map(realm::getGroupById).flatMap(Utils::getGroupWithSubgroups).filter(x->groupName == null || x.getName().toLowerCase().contains(groupName.toLowerCase())).flatMap(Utils::getGroupIdsWithSubgroups).distinct().collect(Collectors.toList());
     }
 
     public boolean hasAdminRights(String userId) {
@@ -116,13 +109,6 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
 
     public Stream<String> getAllAdminIdsGroupUsers(String groupId){
         return getAllAdminIdsGroupUsers(realm.getGroupById(groupId));
-    }
-
-    private Set<String> getLeafGroupsIds(GroupModel group) {
-        Set<String> groupIds = new HashSet<>();
-        groupIds.add(group.getId());
-        group.getSubGroupsStream().forEach(g -> groupIds.addAll(getLeafGroupsIds(g)));
-        return groupIds;
     }
 
     public void deleteByGroup(String groupId){

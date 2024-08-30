@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -106,7 +107,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 UserModel user = session.users().getUserById(realm, entity.getUser().getId());
                 GroupModel group = realm.getGroupById(entity.getGroup().getId());
                 logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
-                List<String> subgroupsPaths = deleteMember(entity, group, user, new DummyClientConnection(localIp), null, memberUserAttribute).map(ModelToRepresentation::buildGroupPath).collect(Collectors.toList());
+                List<String> subgroupsPaths = deleteMember(entity, group, user, new DummyClientConnection(localIp), null, memberUserAttribute).stream().map(ModelToRepresentation::buildGroupPath).collect(Collectors.toList());
 
                 customFreeMarkerEmailTemplateProvider.setRealm(realm);
                 try {
@@ -169,7 +170,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     }
 
     @Transactional
-    public Stream<GroupModel> deleteMember(UserGroupMembershipExtensionEntity member, GroupModel group, UserModel user, ClientConnection clientConnection, String actionUserId, MemberUserAttributeConfigurationEntity memberUserAttribute) {
+    public Set<GroupModel> deleteMember(UserGroupMembershipExtensionEntity member, GroupModel group, UserModel user, ClientConnection clientConnection, String actionUserId, MemberUserAttributeConfigurationEntity memberUserAttribute) {
         logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
         List<String> roleNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
         String groupName = "";
@@ -185,15 +186,15 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 , Utils.GROUP_MEMBERSHIP_DELETE, ModelToRepresentation.buildGroupPath(group), roleNames, LocalDate.now());
 
         //delete also subgroup members if exists
-        List<String> subgroupsIds = group.getSubGroupsStream().map(GroupModel::getId).collect(Collectors.toList());
-        if (!subgroupsIds.isEmpty()) {
-            em.createNamedQuery("getByUserAndGroups", UserGroupMembershipExtensionEntity.class).setParameter("userId", user.getId()).setParameter("groupIds", subgroupsIds).getResultStream().forEach(memberEntity -> {
+        Set<GroupModel> subgroups = Utils.getAllSubgroups(group);
+        if (!subgroups.isEmpty()) {
+            em.createNamedQuery("getByUserAndGroups", UserGroupMembershipExtensionEntity.class).setParameter("userId", user.getId()).setParameter("groupIds", subgroups.stream().map(GroupModel::getId).collect(Collectors.toList())).getResultStream().forEach(memberEntity -> {
                 try {
                     List<String> roleSubgroupNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
-                    String id = memberEntity.getGroup().getId();
+                    String groupId = memberEntity.getGroup().getId();
                     String groupNameCh = Utils.getGroupNameForMemberUserAttribute(memberEntity.getGroup(), realm);
                     em.remove(memberEntity);
-                    GroupModel groupChild = group.getSubGroupsStream().filter(groupModel -> id.equals(groupModel.getId())).findAny().get();
+                    GroupModel groupChild = subgroups.stream().filter(x-> groupId.equals(x.getId())).findFirst().get();
                     user.leaveGroup(groupChild);
                     clearUserAttribute(groupNameCh, user, memberUserAttribute);
                     em.flush();
@@ -205,7 +206,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
             });
         }
-        return group.getSubGroupsStream();
+        return subgroups;
     }
 
     @Transactional
@@ -222,7 +223,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
 
         //suspend also subgroup members if exists
-        List<String> subgroupsIds = group.getSubGroupsStream().map(GroupModel::getId).collect(Collectors.toList());
+        Set<String> subgroupsIds = Utils.getAllSubgroupsIds(group);
         if (!subgroupsIds.isEmpty()) {
             List<String> results = new ArrayList<>();
             em.createNamedQuery("getByUserAndGroupsAndNotSuspended", UserGroupMembershipExtensionEntity.class).setParameter("userId", user.getId()).setParameter("groupIds", subgroupsIds).getResultStream().forEach(memberEntity -> {
@@ -305,7 +306,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         return new UserGroupMembershipExtensionRepresentationPager(results.map(x -> EntityToRepresentation.toRepresentation(x, realm, false)).collect(Collectors.toList()), count);
     }
 
-    public UserGroupMembershipExtensionRepresentationPager searchByGroupAndSubGroups(String groupId, List<String> groupIdList, String search, MemberStatusEnum status, String role, Integer first, Integer max) {
+    public UserGroupMembershipExtensionRepresentationPager searchByGroupAndSubGroups(String groupId, Set<String> groupIdList, String search, MemberStatusEnum status, String role, Integer first, Integer max) {
 
 
         StringBuilder fromQuery = new StringBuilder("from UserGroupMembershipExtensionEntity f");
@@ -385,7 +386,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
 
         //reactivate also subgroup members if exists
-        List<String> subgroupsIds = group.getSubGroupsStream().map(GroupModel::getId).collect(Collectors.toList());
+        Set<String> subgroupsIds = Utils.getAllSubgroupsIds(group);
         if (!subgroupsIds.isEmpty()) {
             List<String> results = new ArrayList<>();
             em.createNamedQuery("getByUserAndGroupsAndSuspended", UserGroupMembershipExtensionEntity.class).setParameter("userId", user.getId()).setParameter("groupIds", subgroupsIds).getResultStream().forEach(memberEntity -> {
