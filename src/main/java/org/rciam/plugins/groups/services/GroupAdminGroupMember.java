@@ -1,6 +1,7 @@
 package org.rciam.plugins.groups.services;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,6 +27,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.services.ForbiddenException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
+import org.rciam.plugins.groups.enums.MemberStatusEnum;
 import org.rciam.plugins.groups.helpers.LoginEventHelper;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
@@ -73,6 +75,19 @@ public class GroupAdminGroupMember {
     @PUT
     @Consumes("application/json")
     public Response updateMember(UserGroupMembershipExtensionRepresentation rep) throws UnsupportedEncodingException {
+        //validation tasks
+        //1. active member
+        //2. at least one role
+        //3. Member since: date cannot be in the past
+        //4. Expiration date: date cannot be in the past
+        if (MemberStatusEnum.SUSPENDED.equals(member.getStatus())) {
+            throw new BadRequestException("Suspended members can not be updated");
+        } else if (rep.getGroupRoles() == null || rep.getGroupRoles().isEmpty()) {
+            throw new BadRequestException("At least one role must be existed");
+        } else if (LocalDate.now().isAfter(rep.getMembershipExpiresAt())) {
+           throw new BadRequestException("Expiration date must not be in the past");
+       }
+
         userGroupMembershipExtensionRepository.update(rep, member, group, session, groupAdmin, clientConnection);
 
         try {
@@ -116,7 +131,10 @@ public class GroupAdminGroupMember {
             member.setGroupRoles(Stream.of(role).collect(Collectors.toList()));
         } else if (member.getGroupRoles().stream().noneMatch(x -> role.getId().equals(x.getId()))) {
             member.getGroupRoles().add(role);
+        }  else {
+            throw new BadRequestException("This role already exists.");
         }
+
         userGroupMembershipExtensionRepository.update(member);
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
         UserModel user = session.users().getUserById(realm, member.getUser().getId());
@@ -196,6 +214,8 @@ public class GroupAdminGroupMember {
         UserModel user = userGroupMembershipExtensionRepository.getUserModel(session, member.getUser());
         if (user == null) {
             throw new NotFoundException("Could not find this User");
+        } else if (MemberStatusEnum.ENABLED.equals(member.getStatus())) {
+            throw new BadRequestException("Only enabled users can be suspended.");
         }
         try {
             String groupPath = ModelToRepresentation.buildGroupPath(group);
@@ -229,6 +249,8 @@ public class GroupAdminGroupMember {
         UserModel user = userGroupMembershipExtensionRepository.getUserModel(session, member.getUser());
         if (user == null) {
             throw new NotFoundException("Could not find this User");
+        } else if (MemberStatusEnum.SUSPENDED.equals(member.getStatus())) {
+            throw new BadRequestException("Only suspended users can be reactivated.");
         }
         try {
             String groupPath = ModelToRepresentation.buildGroupPath(group);
