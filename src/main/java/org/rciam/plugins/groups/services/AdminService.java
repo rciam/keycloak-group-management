@@ -36,6 +36,7 @@ import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEnt
 import org.rciam.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupRolesRepository;
+import org.rciam.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.rciam.plugins.groups.representations.MemberUserAttributeConfigurationRepresentation;
 import org.rciam.plugins.groups.scheduled.AgmTimerProvider;
 import org.rciam.plugins.groups.scheduled.MemberUserAttributeCalculatorTask;
@@ -62,6 +63,7 @@ public class AdminService {
     private final GroupRolesRepository groupRolesRepository;
     private final GeneralJpaService generalJpaService;
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
+    private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
 
     public AdminService(KeycloakSession session, RealmModel realm, ClientConnection clientConnection, AdminPermissionEvaluator realmAuth) {
         this.session = session;
@@ -74,6 +76,7 @@ public class AdminService {
         this.groupRolesRepository = new GroupRolesRepository(session, realm);
         this.adminEvent =  new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
         this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
+        this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
         adminEvent.realm(realm);
     }
 
@@ -171,5 +174,12 @@ public class AdminService {
         } else {
             throw new ErrorResponseException("User couldn't be deleted","User couldn't be deleted", Response.Status.BAD_REQUEST);
         }
+    }
+
+    @POST
+    @Path("/effective-expiration-date/calculation")
+    public Response calculateEffectiveExpirationDate() {
+        userGroupMembershipExtensionRepository.migrateEffectiveExpiresAt();
+        return Response.noContent().build();
     }
 }

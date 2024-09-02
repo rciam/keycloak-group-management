@@ -73,6 +73,8 @@ public class EntityToRepresentation {
         rep.setUser(toBriefRepresentation(entity.getUser(), realm));
         rep.setJustification(entity.getJustification());
         rep.setMembershipExpiresAt(entity.getMembershipExpiresAt());
+        rep.setEffectiveMembershipExpiresAt(entity.getEffectiveMembershipExpiresAt());
+        rep.setEffectiveGroupId(entity.getEffectiveGroupId());
         rep.setValidFrom(entity.getValidFrom());
         rep.setStatus(entity.getStatus());
         if (entity.getGroupRoles() != null)
