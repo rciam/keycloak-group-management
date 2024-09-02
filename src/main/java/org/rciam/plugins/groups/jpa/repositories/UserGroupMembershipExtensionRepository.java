@@ -526,9 +526,6 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         if (isNotMember && MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
             user.joinGroup(group);
             eventState = Utils.GROUP_MEMBERSHIP_CREATE;
-        } else if (!isNotMember && MemberStatusEnum.PENDING.equals(entity.getStatus())) {
-            user.leaveGroup(group);
-            eventState = Utils.GROUP_MEMBERSHIP_DELETE;
         }
 
         //only if user keep not being member of group do not do anything

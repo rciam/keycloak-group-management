@@ -78,15 +78,20 @@ public class GroupAdminGroupMember {
         //validation tasks
         //1. active member
         //2. at least one role
-        //3. Member since: date cannot be in the past
+        //3. Member since: date cannot be in the past or after expiration for PENDING members
         //4. Expiration date: date cannot be in the past
         if (MemberStatusEnum.SUSPENDED.equals(member.getStatus())) {
             throw new BadRequestException("Suspended members can not be updated");
         } else if (rep.getGroupRoles() == null || rep.getGroupRoles().isEmpty()) {
             throw new BadRequestException("At least one role must be existed");
-        } else if (LocalDate.now().isAfter(rep.getMembershipExpiresAt())) {
-           throw new BadRequestException("Expiration date must not be in the past");
-       }
+        } else if (rep.getMembershipExpiresAt() != null && LocalDate.now().isAfter(rep.getMembershipExpiresAt())) {
+            throw new BadRequestException("Expiration date must not be in the past");
+        } else if (MemberStatusEnum.PENDING.equals(member.getStatus()) && ( rep.getValidFrom() == null || LocalDate.now().isAfter(rep.getValidFrom()) || (rep.getMembershipExpiresAt() != null && rep.getMembershipExpiresAt().isBefore(rep.getValidFrom())))) {
+            throw new BadRequestException("Member since must not be in the past or after expiration date");
+        } else if (MemberStatusEnum.ENABLED.equals(member.getStatus())) {
+            //For enabled member do to change valid from
+            rep.setValidFrom(member.getValidFrom());
+        }
 
         userGroupMembershipExtensionRepository.update(rep, member, group, session, groupAdmin, clientConnection);
 
