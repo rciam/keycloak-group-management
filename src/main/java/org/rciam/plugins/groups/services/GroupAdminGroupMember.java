@@ -27,13 +27,16 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.services.ForbiddenException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
+import org.rciam.plugins.groups.enums.GroupTypeEnum;
 import org.rciam.plugins.groups.enums.MemberStatusEnum;
 import org.rciam.plugins.groups.helpers.LoginEventHelper;
 import org.rciam.plugins.groups.helpers.Utils;
+import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentConfigurationRulesEntity;
 import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.rciam.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.rciam.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupAdminRepository;
+import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRulesRepository;
 import org.rciam.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.rciam.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
@@ -55,6 +58,7 @@ public class GroupAdminGroupMember {
 
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
     private final GroupAdminRepository groupAdminRepository;
+    private final GroupEnrollmentConfigurationRulesRepository groupEnrollmentConfigurationRulesRepository;
     private final UserGroupMembershipExtensionEntity member;
     private final boolean isGroupAdmin;
 
@@ -68,6 +72,7 @@ public class GroupAdminGroupMember {
         this.groupAdminRepository = groupAdminRepository;
         this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
+        this.groupEnrollmentConfigurationRulesRepository = new GroupEnrollmentConfigurationRulesRepository(session);
         this.member = member;
         this.isGroupAdmin = isGroupAdmin;
     }
@@ -91,6 +96,14 @@ public class GroupAdminGroupMember {
         } else if (MemberStatusEnum.ENABLED.equals(member.getStatus())) {
             //For enabled member do to change valid from
             rep.setValidFrom(member.getValidFrom());
+        }
+        GroupEnrollmentConfigurationRulesEntity configurationRule = groupEnrollmentConfigurationRulesRepository.getByRealmAndTypeAndField(realm.getId(), member.getGroup().getParentId().trim().isEmpty() ? GroupTypeEnum.SUBGROUP : GroupTypeEnum.TOP_LEVEL, "membershipExpirationDays");
+        if (configurationRule != null && configurationRule.getRequired() && rep.getMembershipExpiresAt() == null) {
+            throw new BadRequestException("Expiration date must not be empty");
+        } else if (configurationRule != null && configurationRule.getMax() != null && MemberStatusEnum.PENDING.equals(member.getStatus()) && rep.getValidFrom().plusDays(Long.valueOf(configurationRule.getMax())).isAfter(rep.getMembershipExpiresAt())) {
+            throw new BadRequestException("Membership can not last more than "+ configurationRule.getMax() + " days");
+        } else if (configurationRule != null && configurationRule.getMax() != null && MemberStatusEnum.ENABLED.equals(member.getStatus()) && LocalDate.now().plusDays(Long.valueOf(configurationRule.getMax())).isAfter(rep.getMembershipExpiresAt())) {
+            throw new BadRequestException("Membership can not last more than "+ configurationRule.getMax() + " days");
         }
 
         userGroupMembershipExtensionRepository.update(rep, member, group, session, groupAdmin, clientConnection);
