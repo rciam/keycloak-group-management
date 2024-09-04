@@ -232,7 +232,7 @@ public class GroupAdminGroupMember {
         UserModel user = userGroupMembershipExtensionRepository.getUserModel(session, member.getUser());
         if (user == null) {
             throw new NotFoundException("Could not find this User");
-        } else if (MemberStatusEnum.ENABLED.equals(member.getStatus())) {
+        } else if (!MemberStatusEnum.ENABLED.equals(member.getStatus())) {
             throw new BadRequestException("Only enabled users can be suspended.");
         }
         try {
@@ -267,9 +267,14 @@ public class GroupAdminGroupMember {
         UserModel user = userGroupMembershipExtensionRepository.getUserModel(session, member.getUser());
         if (user == null) {
             throw new NotFoundException("Could not find this User");
-        } else if (MemberStatusEnum.SUSPENDED.equals(member.getStatus())) {
+        } else if (!MemberStatusEnum.SUSPENDED.equals(member.getStatus())) {
             throw new BadRequestException("Only suspended users can be reactivated.");
         }
+        List<String> parentGroupIds = Utils.findParentGroupIds(group);
+        if (!parentGroupIds.isEmpty() && userGroupMembershipExtensionRepository.countByUserAndGroupsAndSuspended(user.getId(),parentGroupIds) > 0) {
+            throw new BadRequestException("Only suspended users can be reactivated.");
+        }
+
         try {
             String groupPath = ModelToRepresentation.buildGroupPath(group);
             List<String> subgroupPaths = userGroupMembershipExtensionRepository.reActivateUser(user, member, justification, group, memberUserAttributeConfigurationRepository);

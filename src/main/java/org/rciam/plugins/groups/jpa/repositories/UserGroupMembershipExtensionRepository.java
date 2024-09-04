@@ -81,6 +81,10 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         return results.isEmpty() ? null : results.get(0);
     }
 
+    public Long countByUserAndGroupsAndSuspended(String userId, List<String> groupIds) {
+        return em.createNamedQuery("countByUserAndGroupsAndSuspended", Long.class).setParameter("userId", userId).setParameter("groupIds", groupIds).getSingleResult();
+    }
+
     public Stream<UserGroupMembershipExtensionEntity> getActiveByUser(String userId) {
         return em.createNamedQuery("getActiveByUser").setParameter("userId", userId).getResultStream();
     }

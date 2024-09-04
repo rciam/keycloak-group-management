@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -118,6 +119,15 @@ public class Utils {
             parent = parent.getParent();
         }
         return groupName;
+    }
+
+    public static List<String> findParentGroupIds(GroupModel group) {
+        List<String> parentIds =  new ArrayList<>();
+        while (group.getParent() != null) {
+            parentIds.add(group.getParentId());
+            group = group.getParent();
+        }
+        return parentIds;
     }
 
     private static String encode(String x) throws UnsupportedEncodingException {
