@@ -324,8 +324,8 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         if (search != null) {
             fromQuery.append(", UserEntity u");
-            sqlQuery.append(" and f.user.id = u.id and (u.email like :search or u.firstName like :search or u.lastName like :search)");
-            params.put("search", "%" + search + "%");
+            sqlQuery.append(" and f.user.id = u.id and (lower(u.email) like :search or lower(u.firstName) like :search or lower(u.lastName) like :search or lower(u.username) like :search)");
+            params.put("search", "%" + search.toLowerCase() + "%");
         }
         if (status != null) {
             sqlQuery.append(" and f.status = :status");
