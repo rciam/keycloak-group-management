@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Support adding/ removing group admin by username
 - Add support for search group members by username
+- Remove realm (admin endpoint)
 
 ### Fixed
 - When search for subgroup (ids) in group management must return all tree hierarchy
