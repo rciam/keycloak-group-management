@@ -272,7 +272,7 @@ public class GroupAdminGroupMember {
         }
         List<String> parentGroupIds = Utils.findParentGroupIds(group);
         if (!parentGroupIds.isEmpty() && userGroupMembershipExtensionRepository.countByUserAndGroupsAndSuspended(user.getId(),parentGroupIds) > 0) {
-            throw new BadRequestException("Only suspended users can be reactivated.");
+            throw new BadRequestException("Unable to reactivate membership because it's suspended in a higher-level group.");
         }
 
         try {
