@@ -91,7 +91,7 @@ public class GroupAdminGroupMember {
             throw new BadRequestException("At least one role must be existed");
         } else if (rep.getMembershipExpiresAt() != null && LocalDate.now().isAfter(rep.getMembershipExpiresAt())) {
             throw new BadRequestException("Expiration date must not be in the past");
-        } else if (MemberStatusEnum.PENDING.equals(member.getStatus()) && ( rep.getValidFrom() == null || LocalDate.now().isAfter(rep.getValidFrom()) || (rep.getMembershipExpiresAt() != null && rep.getMembershipExpiresAt().isBefore(rep.getValidFrom())))) {
+        } else if (MemberStatusEnum.PENDING.equals(member.getStatus()) && ( rep.getValidFrom() == null || LocalDate.now().isBefore(rep.getValidFrom()) || (rep.getMembershipExpiresAt() != null && rep.getMembershipExpiresAt().isBefore(rep.getValidFrom())))) {
             throw new BadRequestException("Member since must not be in the past or after expiration date");
         } else if (MemberStatusEnum.ENABLED.equals(member.getStatus())) {
             //For enabled member do to change valid from
@@ -100,9 +100,9 @@ public class GroupAdminGroupMember {
         GroupEnrollmentConfigurationRulesEntity configurationRule = groupEnrollmentConfigurationRulesRepository.getByRealmAndTypeAndField(realm.getId(), member.getGroup().getParentId().trim().isEmpty() ? GroupTypeEnum.SUBGROUP : GroupTypeEnum.TOP_LEVEL, "membershipExpirationDays");
         if (configurationRule != null && configurationRule.getRequired() && rep.getMembershipExpiresAt() == null) {
             throw new BadRequestException("Expiration date must not be empty");
-        } else if (configurationRule != null && configurationRule.getMax() != null && MemberStatusEnum.PENDING.equals(member.getStatus()) && rep.getValidFrom().plusDays(Long.valueOf(configurationRule.getMax())).isAfter(rep.getMembershipExpiresAt())) {
+        } else if (configurationRule != null && configurationRule.getMax() != null && MemberStatusEnum.PENDING.equals(member.getStatus()) && rep.getValidFrom().plusDays(Long.valueOf(configurationRule.getMax())).isBefore(rep.getMembershipExpiresAt())) {
             throw new BadRequestException("Membership can not last more than "+ configurationRule.getMax() + " days");
-        } else if (configurationRule != null && configurationRule.getMax() != null && MemberStatusEnum.ENABLED.equals(member.getStatus()) && LocalDate.now().plusDays(Long.valueOf(configurationRule.getMax())).isAfter(rep.getMembershipExpiresAt())) {
+        } else if (configurationRule != null && configurationRule.getMax() != null && MemberStatusEnum.ENABLED.equals(member.getStatus()) && LocalDate.now().plusDays(Long.valueOf(configurationRule.getMax())).isBefore(rep.getMembershipExpiresAt())) {
             throw new BadRequestException("Membership can not last more than "+ configurationRule.getMax() + " days");
         }
 

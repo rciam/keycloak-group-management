@@ -21,7 +21,7 @@ public class GroupEnrollmentConfigurationRulesRepository extends GeneralReposito
     }
 
     public GroupEnrollmentConfigurationRulesEntity getByRealmAndTypeAndField(String realmId, GroupTypeEnum type, String field){
-        return em.createNamedQuery("getEnrollmentConfigurationRulesByRealmAndTypeAndField", GroupEnrollmentConfigurationRulesEntity.class).setParameter("realmId",realmId).setParameter("type",type).setParameter("field",field).getResultStream().findAny().get();
+        return em.createNamedQuery("getEnrollmentConfigurationRulesByRealmAndTypeAndField", GroupEnrollmentConfigurationRulesEntity.class).setParameter("realmId",realmId).setParameter("type",type).setParameter("field",field).getResultStream().findAny().orElse(null);
     }
 
     @Override

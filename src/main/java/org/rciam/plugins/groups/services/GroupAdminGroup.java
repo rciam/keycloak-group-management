@@ -1,6 +1,7 @@
 package org.rciam.plugins.groups.services;
 
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,8 @@ import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.services.ForbiddenException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
+import org.rciam.plugins.groups.enums.GroupTypeEnum;
+import org.rciam.plugins.groups.enums.MemberStatusEnum;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.GeneralJpaService;
@@ -66,12 +69,14 @@ public class GroupAdminGroup {
     private final GroupAdminRepository groupAdminRepository;
     private final GroupRolesRepository groupRolesRepository;
     private final GroupInvitationRepository groupInvitationRepository;
+    private final GroupEnrollmentConfigurationRulesRepository groupEnrollmentConfigurationRulesRepository;
     private final GeneralJpaService generalService;
     private final AdminEventBuilder adminEvent;
     //based on this boolean, do not allow manage-groups users to do specific actions
     private final boolean isGroupAdmin;
 
-    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel groupAdmin, GroupModel group, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, AdminEventBuilder adminEvent, boolean isGroupAdmin) {
+
+    public GroupAdminGroup(KeycloakSession session, RealmModel realm, UserModel groupAdmin, GroupModel group, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, GroupEnrollmentConfigurationRulesRepository groupEnrollmentConfigurationRulesRepository, AdminEventBuilder adminEvent, boolean isGroupAdmin) {
         this.session = session;
         this.realm = realm;
         this.groupAdmin = groupAdmin;
@@ -83,6 +88,7 @@ public class GroupAdminGroup {
         this.groupEnrollmentConfigurationRepository.setGroupRolesRepository(this.groupRolesRepository);
         this.groupEnrollmentRequestRepository = groupEnrollmentRequestRepository;
         this.groupInvitationRepository = new GroupInvitationRepository(session, realm);
+        this.groupEnrollmentConfigurationRulesRepository = groupEnrollmentConfigurationRulesRepository;
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session);
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         MemberUserAttributeConfigurationEntity memberUserAttribute = (new MemberUserAttributeConfigurationRepository(session)).getByRealm(realm.getId());
@@ -174,6 +180,23 @@ public class GroupAdminGroup {
     @Path("/configuration")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response saveGroupEnrollmentConfiguration(GroupEnrollmentConfigurationRepresentation rep) {
+        GroupEnrollmentConfigurationRulesEntity rule = groupEnrollmentConfigurationRulesRepository.getByRealmAndTypeAndField(realm.getId(), group.getParentId() != null ? GroupTypeEnum.SUBGROUP : GroupTypeEnum.TOP_LEVEL, "membershipExpirationDays");
+        if (rule != null && rule.getRequired() && rep.getMembershipExpirationDays() == null) {
+            throw new BadRequestException("Expiration date must not be empty");
+        } else if (rule != null && rule.getMax() != null && (rep.getMembershipExpirationDays() == null || (rep.getMembershipExpirationDays() > Long.valueOf(rule.getMax())))) {
+            throw new BadRequestException("Membership can not last more than "+ rule.getMax() + " days");
+        }
+
+        rule = groupEnrollmentConfigurationRulesRepository.getByRealmAndTypeAndField(realm.getId(), group.getParentId() != null ? GroupTypeEnum.SUBGROUP : GroupTypeEnum.TOP_LEVEL, "validFrom");
+        if (rule != null && rule.getRequired() && rep.getValidFrom() == null) {
+            throw new BadRequestException("Valid from must not be empty");
+        }
+
+        rule = groupEnrollmentConfigurationRulesRepository.getByRealmAndTypeAndField(realm.getId(), group.getParentId() != null ? GroupTypeEnum.SUBGROUP : GroupTypeEnum.TOP_LEVEL, "aup");
+        if (rule != null && rule.getRequired() && rep.getAup() == null) {
+            throw new BadRequestException("Aup must not be empty");
+        }
+
         if (rep.getId() == null) {
             groupEnrollmentConfigurationRepository.create(rep, group.getId());
         } else {
