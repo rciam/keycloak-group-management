@@ -16,6 +16,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
   let groupsService = new GroupsServiceClient();
   const [reviewerComment, setReviewerComment] = useState("")
   const [expandUserDetails, setExpandUserDetails] = useState(false);
+  const [alert, setAlert] = useState({});
 
   useEffect(() => {
     if (Object.keys(props.enrollmentRequest).length !== 0) {
@@ -61,7 +62,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
         header={
           <React.Fragment >
             <h1 className="pf-c-modal-box__title gm_flex-center">
-              {enrollmentRequest?.status === 'PENDING_APPROVAL' ? <Msg msgKey='reviewRequestTitle' /> : <Msg msgKey='viewRequestTitle' />}
+              {enrollmentRequest?.status === 'PENDING_APPROVAL' && props.managePage ? <Msg msgKey='reviewRequestTitle' /> : <Msg msgKey='viewRequestTitle' />}
               {props.managePage && <Tooltip {...(!!(copyTooltip) ? { trigger: 'manual', isVisible: true } : { trigger: 'mouseenter' })}
                 content={
                   <div>
@@ -198,7 +199,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                     <ListItem key={index} style={{ marginLeft: `${index}rem` }}>
                       {value.id}
                       {value.name && value.name !== value.id && ` - ${value.name}`}
-                      {!value.name && value.name !== value.id && <Msg msgKey="notAvailable" />}
+                      {!value.name && value.name !== value.id &&<> - <Msg msgKey="notAvailable" /></>}
                     </ListItem>
                   ))}
                 </List>

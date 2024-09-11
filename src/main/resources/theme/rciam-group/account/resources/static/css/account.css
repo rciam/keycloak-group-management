@@ -268,7 +268,7 @@
 }
 
 .gm_cell-center {
-    width:5rem;
+    width:7rem;
     display: flex!important;
     align-items: center!important;
     justify-content: center!important;
@@ -520,6 +520,26 @@
     margin-bottom:1rem;
 }
 
+.gm_placeholder_membership_action {
+    width: 1.7rem !important;
+    display: inline-block;
+}
+
+.gm_small_icon_button {
+    width: 1.6rem;
+    height: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.gm_actions_container {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    display: flex; 
+}
+
 
 .gm_view-groups-header svg {
     margin-bottom: -0.1rem;
@@ -577,7 +597,6 @@
 
 
 .gm_checkbox-container {
-    margin-top:-1rem;
     padding: 1rem;
     background-color: #d1d1d1;
 }
@@ -818,4 +837,36 @@
 
 .gm_form-field-group-title {
     margin-left:-3rem;
+}
+
+
+.gm_dark_button {
+    background-color:#212529!important;
+    color: #ffffff!important;
+}
+
+
+.gm_dark_button:hover {
+    background-color:#424649!important;
+}
+
+.gm_dark_button.pf-m-disabled {
+    /* Your styles here */
+    background-color: #26292c!important;
+    color: #4e5052!important;
+}
+
+.gm_green_button {
+    background-color:#198754!important;   
+}
+
+.gm_green_button:hover {
+    background-color:#198754!important;   
+}
+
+
+.gm_switch_container {
+    display: block;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
 }

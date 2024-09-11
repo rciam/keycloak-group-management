@@ -180,7 +180,6 @@ const ConfirmationModal = (props: any) => {
                     variant="secondary"
                     isDanger
                     onClick={() => {
-                        console.log(props.deleteSSHKeyIndex);
                         props.deleteSSHKey(props.deleteSSHKeyIndex);
                     }}
                 >

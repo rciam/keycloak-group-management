@@ -12,9 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Validate group enrollment configuration based on rules (REST API)
 - Can not reactivate member if a parent member is suspended
 - Delete realm admin REST API
+- Edit Membership in Group Admin View
 
 ### Fixed
 - When search for subgroup (ids) in group management must return all tree hierarchy
+- Default Value for Enrollment Expiration Days Bug
+- Group Management Labels Update
 
 ## [0.20.0]
 

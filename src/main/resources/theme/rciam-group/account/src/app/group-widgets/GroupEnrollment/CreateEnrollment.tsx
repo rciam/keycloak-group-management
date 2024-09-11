@@ -259,7 +259,7 @@ export const CreateEnrollment: FC<any> = (props) => {
               ("The membership ")+ 
               (enrollment.validFrom &&isFutureDate(dateParse(enrollment.validFrom))? "will take effect at " +formatDateToString(dateParse(enrollment.validFrom)):"")+
               (enrollment.validFrom &&isFutureDate(dateParse(enrollment.validFrom))&&parseInt(enrollment.membershipExpirationDays)>0 ?" and it ": "")+
-              (parseInt(enrollment.membershipExpirationDays)>0? "will expire in " + enrollment.membershipExpirationDays+ " days after activation":" does not have an expiration date.")} 
+              (parseInt(enrollment.membershipExpirationDays)>0? "will expire on " + enrollment.membershipExpirationDays+ " days after activation":" does not have an expiration date.")} 
             />  
 
             

@@ -36,11 +36,10 @@ export const GroupEnrollment: FC<any> = (props) => {
     const [modalInfo,setModalInfo] = useState({});
     const [groupEnrollments,setGroupEnrollments] = useState<any>([]);
     const [enrollmentModal,setEnrollmentModal] = useState({});
-    const [enrollmentRules, setEnrollmentRules] = useState({});
 
     const staticDefaultEnrollmentConfiguration = {
       group: {id:""},
-      membershipExpirationDays : 3,
+      membershipExpirationDays : 32,
       name: "",
       active: true,
       requireApproval: true,
@@ -60,11 +59,7 @@ export const GroupEnrollment: FC<any> = (props) => {
 
     let groupsService = new GroupsServiceClient();
 
-    useEffect(()=>{
-      if(Object.keys(props.groupConfiguration).length !== 0){
-        fetchGroupEnrollmentRules();
-      }
-    },[props.groupConfiguration])
+
 
     useEffect(()=>{
       if(props.groupId){
@@ -83,13 +78,13 @@ export const GroupEnrollment: FC<any> = (props) => {
 
     let getDefaultEnrollmentConfiguration = () =>{
       let defaultConfig = staticDefaultEnrollmentConfiguration;
-      for (let field in enrollmentRules){
-        if(enrollmentRules[field].defaultValue){
-          if(isIntegerOrNumericString(enrollmentRules[field].defaultValue)){
-            defaultConfig[field] = parseInt(enrollmentRules[field]); 
+      for (let field in props.enrollmentRules){
+        if(props.enrollmentRules[field].defaultValue){
+          if(isIntegerOrNumericString(props.enrollmentRules[field].defaultValue)){
+            defaultConfig[field] = parseInt(props.enrollmentRules[field].defaultValue);
           }
           else{
-            defaultConfig[field] = enrollmentRules[field].defaultValue; 
+            defaultConfig[field] = props.enrollmentRules[field].defaultValue; 
           }
         }
       }
@@ -97,27 +92,7 @@ export const GroupEnrollment: FC<any> = (props) => {
       return defaultConfig;
     }
 
-    let fetchGroupEnrollmentRules = ()=>{
-      groupsService!.doGet<any>("/group-admin/configuration-rules",{params:{type:(("/"+props.groupConfiguration?.name)!==props.groupConfiguration?.path?'SUBGROUP':'TOP_LEVEL')}})
-      .then((response: HttpResponse<any>) => {
-        if(response.status===200&&response.data){
-          if(response.data.length>0){
-            let rules = {};
-            response.data.forEach(field_rules=>{
-              rules[field_rules.field] = {
-                "max": parseInt(field_rules.max),
-                "required": field_rules.required,
-                ...(field_rules.defaultValue&&{"defaultValue":field_rules.defaultValue}) 
-              }
-            });
-            setEnrollmentRules(rules);
-          }
-          else{
-            setEnrollmentRules({});
-          }
-        }
-      })
-    }
+
 
     const noGroupEnrollments= ()=>{
         return (
@@ -137,7 +112,7 @@ export const GroupEnrollment: FC<any> = (props) => {
     return (
       <React.Fragment>
         <ConfirmationModal modalInfo={modalInfo}/>
-        <EnrollmentModal enrollment={enrollmentModal} validationRules={enrollmentRules} groupRoles={props.groupConfiguration.groupRoles} close={()=>{fetchGroupEnrollments(); setEnrollmentModal({});}} groupId={props.groupId}/>
+        <EnrollmentModal enrollment={enrollmentModal} validationRules={props.enrollmentRules} groupRoles={props.groupConfiguration.groupRoles} close={()=>{fetchGroupEnrollments(); setEnrollmentModal({});}} groupId={props.groupId}/>
         <DataList aria-label="Group Member Datalist" isCompact wrapModifier={"breakWord"}>
             <DataListItem aria-labelledby="compact-item1">
               <DataListItemRow>
@@ -190,7 +165,7 @@ export const GroupEnrollment: FC<any> = (props) => {
     enrollment: any; // Replace 'any' with the actual type of 'enrollment'
     index: number;
     updateAttributes: (any) => void;
-    defaultConfiguration: string;
+    defaultConfiguration: any;
     groupConfiguration:any;
     groupId:string;
     setEnrollmentModal: (any)=> void;

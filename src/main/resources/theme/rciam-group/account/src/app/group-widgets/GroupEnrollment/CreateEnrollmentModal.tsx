@@ -60,6 +60,7 @@ export const EnrollmentModal: FC<any> = (props) => {
         else{
             setIsModalOpen(false);
         }
+        
       setEnrollment({...props.enrollment});
     },[props.enrollment]);
 
@@ -68,10 +69,6 @@ export const EnrollmentModal: FC<any> = (props) => {
             validateEnrollment();
         }
     },[enrollment]);
-
-    useEffect(()=>{
-      setValidationRules(props.validationRules);
-    },[props.validationRules]);
 
     
     const validateEnrollment = () => {
@@ -191,10 +188,18 @@ export const EnrollmentModal: FC<any> = (props) => {
 
       const isPastDate = (date: Date): string => {
         const currentDate = new Date();
-        if (date < currentDate&&(props.enrollment.validFrom!==dateFormat(date))) {
+        
+        // Normalize both dates to remove the time part for an accurate comparison
+        const currentDateWithoutTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+        const selectedDateWithoutTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+        // Check if the selected date is in the past and not the same as the validFrom date
+        if (
+          selectedDateWithoutTime < currentDateWithoutTime &&
+          props.enrollment.validFrom !== dateFormat(selectedDateWithoutTime)
+        ) {
           return Msg.localize('validFromPastFormError');
-        }
-        else{
+        } else {
           return "";
         }
         
@@ -204,7 +209,6 @@ export const EnrollmentModal: FC<any> = (props) => {
     return (
       <React.Fragment>
         <Loading active={loading}/>
-
         <Modal
                 variant={ModalVariant.large}
                 header={
@@ -273,11 +277,9 @@ export const EnrollmentModal: FC<any> = (props) => {
 
                     </Tooltip>
                     ,
-                    
                     <Button key="cancel" variant="link" onClick={()=>{ close()}}>
                         <Msg msgKey='Cancel' />
                     </Button>
-                    
                 ]}
                 >
                     <ConfirmationModal modalInfo={modalInfo}/>
@@ -317,7 +319,6 @@ export const EnrollmentModal: FC<any> = (props) => {
                               // helperText=""
                           >
                           <Tooltip  {...(!(validationRules?.membershipExpirationDays?.required) ? { trigger:'manual', isVisible:false }:{trigger:'mouseenter'})} content={<div><Msg msgKey='enrollmentConfigurationExpirationSwitchDisabledTooltip' /></div>}>
-                                                          
                               <Switch
                                 id="simple-switch-membershipExpirationDays"
                                 aria-label="simple-switch-membershipExpirationDays"
@@ -335,7 +336,6 @@ export const EnrollmentModal: FC<any> = (props) => {
                                     }
                                 }}
                                 />
-                            
                             </Tooltip>
                             
                             {enrollment.membershipExpirationDays===0?
