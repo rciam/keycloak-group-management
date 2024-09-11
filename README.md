@@ -21,6 +21,8 @@ A keycloak plugin to support advanced group management features:
 | 0.13.0                   | 22.0.5-1.2 +     |
 | 0.18.0                   | 22.0.10-1.4 +    |
 | 0.19.0                   | 22.0.10-1.8 +    |
+| 0.20.0                   | 22.0.10-1.8 +    |
+| 0.21.0                   | 22.0.11-1.8 +    |
 
 
 
