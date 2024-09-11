@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for search group members by username
 - Validate group enrollment configuration based on rules (REST API)
 - Can not reactivate member if a parent member is suspended
+- Delete realm admin REST API
 
 ### Fixed
 - When search for subgroup (ids) in group management must return all tree hierarchy

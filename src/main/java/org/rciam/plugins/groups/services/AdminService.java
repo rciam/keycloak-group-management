@@ -90,6 +90,9 @@ public class AdminService {
         if (memberUserAttributeConfigurationEntity != null)
             memberUserAttributeConfigurationRepository.deleteEntity(memberUserAttributeConfigurationEntity);
 
+        realm.getGroupsStream().forEach(group -> generalJpaService.removeGroup(group, realmAuth.adminAuth().getUser(),clientConnection, true));
+
+        //Keycloak code for realm remove
         if (!new RealmManager(session).removeRealm(realm)) {
             throw new NotFoundException("Realm doesn't exist");
         }

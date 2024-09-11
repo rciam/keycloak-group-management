@@ -106,7 +106,7 @@ public class GroupAdminGroup {
             throw new BadRequestException("You need firstly to delete child groups.");
 
         List<String> groupAdminsIds = groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).collect(Collectors.toList());
-        generalService.removeGroup(group, groupAdmin, clientConnection);
+        generalService.removeGroup(group, groupAdmin, clientConnection, false);
         groupAdminsIds.stream().map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(admin);
