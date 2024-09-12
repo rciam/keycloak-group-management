@@ -157,7 +157,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                     ,
                     date
                     ,
-                    Msg.localize("validateMembershipExpiresErrorMax",[props.enrollmentRules.membershipExpirationDays.max])
+                    Msg.localize("validateMembershipExpiresErrorMax",[JSON.stringify(props.enrollmentRules.membershipExpirationDays.max)])
                 )
                 if (rulesValidationError) {
                     return rulesValidationError

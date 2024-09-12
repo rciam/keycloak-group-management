@@ -50,7 +50,6 @@ export const EnrollmentModal: FC<any> = (props) => {
     const [enrollment,setEnrollment] = useState<any>({});
     const [isModalOpen,setIsModalOpen] = useState<boolean>(false)
     const [errors,setErrors] = useState<any>({});
-    const [validationRules,setValidationRules] = useState<any>({});
     const [touched,setTouched] = useState<any>(touchDefault);
 
     useEffect(()=>{
@@ -75,9 +74,9 @@ export const EnrollmentModal: FC<any> = (props) => {
         let errors: Record<string, string> = {};
         !(enrollment?.name?.length>0) && (errors.name = Msg.localize('requredFormError'));
         enrollment?.aup?.url?.length>0 && !reg_url.test(enrollment.aup.url) &&  (errors.aup_url = Msg.localize('invalidUrlFormError'));
-        !(enrollment?.aup?.url?.length>0) && validationRules?.aupEntity?.required===true && (errors.aup_url = Msg.localize('requredFormError'));
+        !(enrollment?.aup?.url?.length>0) && props.validationRules?.aupEntity?.required===true && (errors.aup_url = Msg.localize('requredFormError'));
         !(enrollment?.groupRoles?.length>0) && (errors.groupRoles=Msg.localize('groupRolesFormError'));
-        (enrollment?.membershipExpirationDays===0 && validationRules?.membershipExpirationDays?.required===true) && (errors.membershipExpirationDays=Msg.localize('fieldMaxZeroFormError'));
+        (enrollment?.membershipExpirationDays===0 && props.validationRules?.membershipExpirationDays?.required===true) && (errors.membershipExpirationDays=Msg.localize('fieldMaxZeroFormError'));
         (enrollment?.membershipExpirationDays&&!(enrollment?.membershipExpirationDays>0)) && (errors.membershipExpirationDays=Msg.localize('expirationDaysPositiveFormError'));        
         (typeof(enrollment?.membershipExpirationDays)!=='number') && (errors.membershipExpirationDays=Msg.localize('expirationDaysNumberFormError'));
         (enrollment?.commentsNeeded&& (!enrollment?.commentsLabel||enrollment?.commentsLabel.length<1) && (errors.commentsLabel=Msg.localize('requredFormError')));
@@ -91,14 +90,13 @@ export const EnrollmentModal: FC<any> = (props) => {
             !(parsedDate instanceof Date &&isFinite(parsedDate.getTime())) && (errors.validFrom=Msg.localize('validFromInvalidFormError'));
           }
         }
-        if(Object.keys(validationRules).length !== 0){
-          for(const field in validationRules){
-            field==='validFrom'&& validationRules[field]?.required&& !enrollment?.validFrom && (errors.validFrom=Msg.localize('validFromRequiredFormError'));
-            validationRules[field]?.max && parseInt(validationRules[field].max) && (enrollment[field] > parseInt(validationRules[field]?.max )) && (errors[field]=Msg.localize('fieldMaxFormError')+ " (" + validationRules[field]?.max + ")" )   
+        if(Object.keys(props.validationRules).length !== 0){
+          for(const field in props.validationRules){
+            field==='validFrom'&& props.validationRules[field]?.required&& !enrollment?.validFrom && (errors.validFrom=Msg.localize('validFromRequiredFormError'));
+            props.validationRules[field]?.max && parseInt(props.validationRules[field].max) && (enrollment[field] > parseInt(props.validationRules[field]?.max )) && (errors[field]=Msg.localize('fieldMaxFormError')+ " (" + props.validationRules[field]?.max + ")" )   
             // validationRules[field]?.max && parseInt(validationRules[field].max) && enrollment[field]===0 && (errors[field]=  Msg.localize('fieldMaxZeroFormError')+ " (" + validationRules[field]?.max + ")" )
           }
         }
-        
         setErrors(errors);
     }
 
@@ -318,11 +316,11 @@ export const EnrollmentModal: FC<any> = (props) => {
                               }}
                               // helperText=""
                           >
-                          <Tooltip  {...(!(validationRules?.membershipExpirationDays?.required) ? { trigger:'manual', isVisible:false }:{trigger:'mouseenter'})} content={<div><Msg msgKey='enrollmentConfigurationExpirationSwitchDisabledTooltip' /></div>}>
+                          <Tooltip  {...(!(props.validationRules?.membershipExpirationDays?.required) ? { trigger:'manual', isVisible:false }:{trigger:'mouseenter'})} content={<div><Msg msgKey='enrollmentConfigurationExpirationSwitchDisabledTooltip' /></div>}>
                               <Switch
                                 id="simple-switch-membershipExpirationDays"
                                 aria-label="simple-switch-membershipExpirationDays"
-                                isDisabled={validationRules?.membershipExpirationDays?.required&& (isIntegerOrNumericString(enrollment?.membershipExpirationDays)&&enrollment.membershipExpirationDays!==0)}
+                                isDisabled={props.validationRules?.membershipExpirationDays?.required&& (isIntegerOrNumericString(enrollment?.membershipExpirationDays)&&enrollment.membershipExpirationDays!==0)}
                                 isChecked={isIntegerOrNumericString(enrollment?.membershipExpirationDays)&&enrollment.membershipExpirationDays!==0}
                                 onChange={(value)=>{
                                     
@@ -331,7 +329,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                                         setEnrollment({...enrollment});
                                     }
                                     else{
-                                        enrollment.membershipExpirationDays = ((validationRules?.membershipExpirationDays?.defaultValue&& isIntegerOrNumericString(validationRules?.membershipExpirationDays?.defaultValue))?parseInt(validationRules.membershipExpirationDays.defaultValue):3)   
+                                        enrollment.membershipExpirationDays = ((props.validationRules?.membershipExpirationDays?.defaultValue&& isIntegerOrNumericString(props.validationRules?.membershipExpirationDays?.defaultValue))?parseInt(props.validationRules.membershipExpirationDays.defaultValue):32)   
                                         setEnrollment({...enrollment});
                                     }
                                 }}
@@ -543,14 +541,14 @@ export const EnrollmentModal: FC<any> = (props) => {
                         >
                             <FormGroup
                                 label={Msg.localize('URL')}
-                                isRequired={validationRules?.aupEntity?.required===true}
+                                isRequired={props.validationRules?.aupEntity?.required===true}
                                 fieldId="simple-form-name-01"
                                 helperTextInvalid={touched.aup_url&&errors.aup_url}
                                 validated={errors.aup_url&&touched.aup_url?'error':'default'}
                                 // helperText=""
                             >
                                 <TextInput
-                                isRequired={validationRules?.aupEntity?.required===true}
+                                isRequired={props.validationRules?.aupEntity?.required===true}
                                 type="url"
                                 id="simple-form-name-01"
                                 name="simple-form-name-01"
