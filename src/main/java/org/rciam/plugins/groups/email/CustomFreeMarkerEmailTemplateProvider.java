@@ -1,8 +1,10 @@
 package org.rciam.plugins.groups.email;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.email.EmailException;
@@ -10,6 +12,7 @@ import org.keycloak.email.freemarker.FreeMarkerEmailTemplateProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakUriInfo;
 import org.keycloak.models.UserModel;
+import org.rciam.plugins.groups.helpers.Utils;
 
 public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTemplateProvider {
 
@@ -237,21 +240,27 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send(added ? "addGroupAdminAdminInformationSubject" : "removeGroupAdminAdminInformationSubject", "add-remove-groupadmin-admin-inform.ftl", attributes);
     }
 
-    public void sendMemberUpdateAdminInformEmail(String groupname, UserModel userChanged, UserModel admin) throws EmailException {
+    public void sendMemberUpdateAdminInformEmail(String groupPath, UserModel userChanged, UserModel admin, LocalDate validFrom, LocalDate membershipExpiresAt, List<String> roles) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
-        attributes.put("groupname", groupname);
+        attributes.put("groupPath", groupPath);
         attributes.put("userFullName", userChanged.getFirstName() + " " + userChanged.getLastName());
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
+        attributes.put("validFrom", validFrom.format(Utils.dateFormatter));
+        attributes.put("membershipExpiresAt",  membershipExpiresAt != null ? membershipExpiresAt.format(Utils.dateFormatter) : "N/A");
+        attributes.put("roles", roles.stream().collect(Collectors.joining(",")));
         attributes.put("signatureMessage", signatureMessage);
-        send("memberUpdateAdminInformSubject", "member-update-admin-inform.ftl", attributes);
+        send("memberUpdateAdminInformSubject", Stream.of(groupPath).collect(Collectors.toList()),"member-update-admin-inform.ftl", attributes);
     }
 
-    public void sendMemberUpdateUserInformEmail(String groupname, UserModel admin) throws EmailException {
+    public void sendMemberUpdateUserInformEmail(String groupPath, UserModel admin, LocalDate validFrom, LocalDate membershipExpiresAt, List<String> roles) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
-        attributes.put("groupname", groupname);
+        attributes.put("groupPath", groupPath);
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
+        attributes.put("validFrom", validFrom.format(Utils.dateFormatter));
+        attributes.put("membershipExpiresAt", membershipExpiresAt != null ? membershipExpiresAt.format(Utils.dateFormatter) : "N/A");
+        attributes.put("roles", roles.stream().collect(Collectors.joining(",")));
         attributes.put("signatureMessage", signatureMessage);
-        send("memberUpdateUserInformSubject", "member-update-user-inform.ftl", attributes);
+        send("memberUpdateUserInformSubject", Stream.of(groupPath).collect(Collectors.toList()), "member-update-user-inform.ftl", attributes);
     }
 
     public void sendDeleteGroupAdminInformationEmail(String groupPath, UserModel admin) throws EmailException {

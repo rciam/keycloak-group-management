@@ -107,16 +107,17 @@ public class GroupAdminGroupMember {
         }
 
         userGroupMembershipExtensionRepository.update(rep, member, group, session, groupAdmin, clientConnection);
+        String groupPath = ModelToRepresentation.buildGroupPath(group);
 
         try {
             UserModel memberUser = session.users().getUserById(realm, member.getUser().getId());
             customFreeMarkerEmailTemplateProvider.setUser(memberUser);
-            customFreeMarkerEmailTemplateProvider.sendMemberUpdateUserInformEmail(group.getName(), groupAdmin);
+            customFreeMarkerEmailTemplateProvider.sendMemberUpdateUserInformEmail(groupPath, groupAdmin, rep.getValidFrom(), rep.getMembershipExpiresAt(), rep.getGroupRoles());
 
             groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
-                    customFreeMarkerEmailTemplateProvider.sendMemberUpdateAdminInformEmail(group.getName(), memberUser, groupAdmin);
+                    customFreeMarkerEmailTemplateProvider.sendMemberUpdateAdminInformEmail(groupPath, memberUser, groupAdmin, rep.getValidFrom(), rep.getMembershipExpiresAt(), rep.getGroupRoles());
                 } catch (EmailException e) {
                     ServicesLogger.LOGGER.failedToSendEmail(e);
                 }

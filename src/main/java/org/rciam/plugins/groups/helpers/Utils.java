@@ -43,7 +43,7 @@ import static org.keycloak.userprofile.UserProfileContext.USER_API;
 
 public class Utils {
 
-    public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    public static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public static final String dateToStringFormat = "yyyy-MM-dd";
 
     public static final String dateTimeToStringFormat = "yyyy-MM-dd HH:mm:ss";
