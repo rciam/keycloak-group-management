@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,7 +57,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     private static final Logger logger = Logger.getLogger(UserGroupMembershipExtensionRepository.class);
     private static final String orderbyStr = " order by f.user.lastName, f.user.firstName";
     private static final String localIp = "127.0.0.1";
-    private GroupManagementEventRepository eventRepository;
+    private final GroupManagementEventRepository eventRepository;
     private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private GroupRolesRepository groupRolesRepository;
 
@@ -82,6 +83,10 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     public UserGroupMembershipExtensionEntity getByUserAndGroup(String groupId, String userId) {
         List<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getByUserAndGroup").setParameter("groupId", groupId).setParameter("userId", userId).getResultList();
         return results.isEmpty() ? null : results.get(0);
+    }
+
+    public Long countByUserAndGroupsAndSuspended(String userId, List<String> groupIds) {
+        return em.createNamedQuery("countByUserAndGroupsAndSuspended", Long.class).setParameter("userId", userId).setParameter("groupIds", groupIds).getSingleResult();
     }
 
     public Stream<UserGroupMembershipExtensionEntity> getActiveByUser(String userId) {
@@ -120,7 +125,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 UserModel user = session.users().getUserById(realm, entity.getUser().getId());
                 GroupModel group = realm.getGroupById(entity.getGroup().getId());
                 logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
-                List<String> subgroupsPaths = deleteMember(entity, group, user, new DummyClientConnection(localIp), null, memberUserAttribute).stream().map(ModelToRepresentation::buildGroupPath).collect(Collectors.toList());
+                List<String> subgroupsPaths = deleteMember(entity, group, user, new DummyClientConnection(localIp), null, memberUserAttribute, false).stream().map(ModelToRepresentation::buildGroupPath).collect(Collectors.toList());
 
                 customFreeMarkerEmailTemplateProvider.setRealm(realm);
                 try {
@@ -186,43 +191,49 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     }
 
     @Transactional
-    public Set<GroupModel> deleteMember(UserGroupMembershipExtensionEntity member, GroupModel group, UserModel user, ClientConnection clientConnection, String actionUserId, MemberUserAttributeConfigurationEntity memberUserAttribute) {
-        logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
-        List<String> roleNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
+    public Set<GroupModel> deleteMember(UserGroupMembershipExtensionEntity member, GroupModel group, UserModel user, ClientConnection clientConnection, String actionUserId, MemberUserAttributeConfigurationEntity memberUserAttribute, boolean isRealmRemove) {
         String groupName = "";
-        try {
-            groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
-        } catch (UnsupportedEncodingException e) {
-            logger.warn("problem calculating user attribute value for group : " + group.getId() + " and user :  " + user.getId());
-        }
-        deleteEntity(member.getId());
-        user.leaveGroup(group);
-        clearUserAttribute(groupName, user, memberUserAttribute);
-        LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, actionUserId
-                , Utils.GROUP_MEMBERSHIP_DELETE, ModelToRepresentation.buildGroupPath(group), roleNames, LocalDate.now());
+        if (isRealmRemove) {
+            deleteEntity(member);
+            return new HashSet<>();
+        } else {
+            logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
+            List<String> roleNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
+            try {
+                groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
+            } catch (UnsupportedEncodingException e) {
+                logger.warn("problem calculating user attribute value for group : " + group.getId() + " and user :  " + user.getId());
+            }
 
-        //delete also subgroup members if exists
-        Set<GroupModel> subgroups = Utils.getAllSubgroups(group);
-        if (!subgroups.isEmpty()) {
-            getByGroup(user.getId(),subgroups.stream().map(GroupModel::getId).collect(Collectors.toSet())).forEach(memberEntity -> {
-                try {
-                    List<String> roleSubgroupNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
-                    String groupId = memberEntity.getGroup().getId();
-                    String groupNameCh = Utils.getGroupNameForMemberUserAttribute(memberEntity.getGroup(), realm);
-                    em.remove(memberEntity);
-                    GroupModel groupChild = subgroups.stream().filter(x-> groupId.equals(x.getId())).findFirst().get();
-                    user.leaveGroup(groupChild);
-                    clearUserAttribute(groupNameCh, user, memberUserAttribute);
-                    em.flush();
-                    LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, actionUserId
-                            , Utils.GROUP_MEMBERSHIP_DELETE, ModelToRepresentation.buildGroupPath(groupChild), roleSubgroupNames, LocalDate.now());
-                } catch (UnsupportedEncodingException e) {
-                    logger.warn("problem calculating user attribute value for group : " + group.getId() + " and user :  " + user.getId());
-                }
+            deleteEntity(member.getId());
+            user.leaveGroup(group);
+            clearUserAttribute(groupName, user, memberUserAttribute);
+            LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, actionUserId
+                    , Utils.GROUP_MEMBERSHIP_DELETE, ModelToRepresentation.buildGroupPath(group), roleNames, LocalDate.now());
 
-            });
+            //delete also subgroup members if exists
+            Set<GroupModel> subgroups = Utils.getAllSubgroups(group);
+            if (!subgroups.isEmpty()) {
+                getByGroup(user.getId(),subgroups.stream().map(GroupModel::getId).collect(Collectors.toSet())).forEach(memberEntity -> {
+                    try {
+                        List<String> roleSubgroupNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
+                        String groupId = memberEntity.getGroup().getId();
+                        String groupNameCh = Utils.getGroupNameForMemberUserAttribute(memberEntity.getGroup(), realm);
+                        em.remove(memberEntity);
+                        GroupModel groupChild = subgroups.stream().filter(x -> groupId.equals(x.getId())).findFirst().get();
+                        user.leaveGroup(groupChild);
+                        clearUserAttribute(groupNameCh, user, memberUserAttribute);
+                        em.flush();
+                        LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, actionUserId
+                                , Utils.GROUP_MEMBERSHIP_DELETE, ModelToRepresentation.buildGroupPath(groupChild), roleSubgroupNames, LocalDate.now());
+                    } catch (UnsupportedEncodingException e) {
+                        logger.warn("problem calculating user attribute value for group : " + group.getId() + " and user :  " + user.getId());
+                    }
+
+                });
+            }
+            return subgroups;
         }
-        return subgroups;
     }
 
     @Transactional
@@ -336,8 +347,8 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         if (search != null) {
             fromQuery.append(", UserEntity u");
-            sqlQuery.append(" and f.user.id = u.id and (u.email like :search or u.firstName like :search or u.lastName like :search)");
-            params.put("search", "%" + search + "%");
+            sqlQuery.append(" and f.user.id = u.id and (lower(u.email) like :search or lower(u.firstName) like :search or lower(u.lastName) like :search or lower(u.username) like :search)");
+            params.put("search", "%" + search.toLowerCase() + "%");
         }
         if (status != null) {
             sqlQuery.append(" and f.status = :status");

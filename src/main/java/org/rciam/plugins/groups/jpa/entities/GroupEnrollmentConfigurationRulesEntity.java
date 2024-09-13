@@ -22,7 +22,8 @@ import java.util.Objects;
 @Table(name = "GROUP_ENROLLMENT_CONFIGURATION_RULES")
 @NamedQueries({
         @NamedQuery(name = "getEnrollmentConfigurationRulesByRealm", query = "from GroupEnrollmentConfigurationRulesEntity f where f.realmEntity.id = :realmId"),
-        @NamedQuery(name = "getEnrollmentConfigurationRulesByRealmAndType", query = "from GroupEnrollmentConfigurationRulesEntity f where f.realmEntity.id = :realmId and f.type = :type")
+        @NamedQuery(name = "getEnrollmentConfigurationRulesByRealmAndType", query = "from GroupEnrollmentConfigurationRulesEntity f where f.realmEntity.id = :realmId and f.type = :type"),
+        @NamedQuery(name = "getEnrollmentConfigurationRulesByRealmAndTypeAndField", query = "from GroupEnrollmentConfigurationRulesEntity f where f.realmEntity.id = :realmId and f.type = :type  and f.field = :field")
 })
 public class GroupEnrollmentConfigurationRulesEntity {
 

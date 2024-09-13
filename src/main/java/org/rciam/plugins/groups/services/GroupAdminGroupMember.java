@@ -27,13 +27,16 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.services.ForbiddenException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
+import org.rciam.plugins.groups.enums.GroupTypeEnum;
 import org.rciam.plugins.groups.enums.MemberStatusEnum;
 import org.rciam.plugins.groups.helpers.LoginEventHelper;
 import org.rciam.plugins.groups.helpers.Utils;
+import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentConfigurationRulesEntity;
 import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.rciam.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.rciam.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupAdminRepository;
+import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRulesRepository;
 import org.rciam.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.rciam.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
@@ -55,6 +58,7 @@ public class GroupAdminGroupMember {
 
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
     private final GroupAdminRepository groupAdminRepository;
+    private final GroupEnrollmentConfigurationRulesRepository groupEnrollmentConfigurationRulesRepository;
     private final UserGroupMembershipExtensionEntity member;
     private final boolean isGroupAdmin;
 
@@ -68,6 +72,7 @@ public class GroupAdminGroupMember {
         this.groupAdminRepository = groupAdminRepository;
         this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
+        this.groupEnrollmentConfigurationRulesRepository = new GroupEnrollmentConfigurationRulesRepository(session);
         this.member = member;
         this.isGroupAdmin = isGroupAdmin;
     }
@@ -86,11 +91,19 @@ public class GroupAdminGroupMember {
             throw new BadRequestException("At least one role must be existed");
         } else if (rep.getMembershipExpiresAt() != null && LocalDate.now().isAfter(rep.getMembershipExpiresAt())) {
             throw new BadRequestException("Expiration date must not be in the past");
-        } else if (MemberStatusEnum.PENDING.equals(member.getStatus()) && ( rep.getValidFrom() == null || LocalDate.now().isAfter(rep.getValidFrom()) || (rep.getMembershipExpiresAt() != null && rep.getMembershipExpiresAt().isBefore(rep.getValidFrom())))) {
+        } else if (MemberStatusEnum.PENDING.equals(member.getStatus()) && ( rep.getValidFrom() == null || LocalDate.now().isBefore(rep.getValidFrom()) || (rep.getMembershipExpiresAt() != null && rep.getMembershipExpiresAt().isBefore(rep.getValidFrom())))) {
             throw new BadRequestException("Member since must not be in the past or after expiration date");
         } else if (MemberStatusEnum.ENABLED.equals(member.getStatus())) {
             //For enabled member do to change valid from
             rep.setValidFrom(member.getValidFrom());
+        }
+        GroupEnrollmentConfigurationRulesEntity configurationRule = groupEnrollmentConfigurationRulesRepository.getByRealmAndTypeAndField(realm.getId(), member.getGroup().getParentId().trim().isEmpty() ? GroupTypeEnum.SUBGROUP : GroupTypeEnum.TOP_LEVEL, "membershipExpirationDays");
+        if (configurationRule != null && configurationRule.getRequired() && rep.getMembershipExpiresAt() == null) {
+            throw new BadRequestException("Expiration date must not be empty");
+        } else if (configurationRule != null && configurationRule.getMax() != null && MemberStatusEnum.PENDING.equals(member.getStatus()) && rep.getValidFrom().plusDays(Long.valueOf(configurationRule.getMax())).isBefore(rep.getMembershipExpiresAt())) {
+            throw new BadRequestException("Membership can not last more than "+ configurationRule.getMax() + " days");
+        } else if (configurationRule != null && configurationRule.getMax() != null && MemberStatusEnum.ENABLED.equals(member.getStatus()) && LocalDate.now().plusDays(Long.valueOf(configurationRule.getMax())).isBefore(rep.getMembershipExpiresAt())) {
+            throw new BadRequestException("Membership can not last more than "+ configurationRule.getMax() + " days");
         }
 
         userGroupMembershipExtensionRepository.update(rep, member, group, session, groupAdmin, clientConnection);
@@ -119,7 +132,7 @@ public class GroupAdminGroupMember {
     public Response deleteMember() {
         UserModel user = session.users().getUserById(realm, member.getUser().getId());
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-        userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId()), memberUserAttribute);
+        userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId()), memberUserAttribute, false);
         return Response.noContent().build();
     }
 
@@ -219,7 +232,7 @@ public class GroupAdminGroupMember {
         UserModel user = userGroupMembershipExtensionRepository.getUserModel(session, member.getUser());
         if (user == null) {
             throw new NotFoundException("Could not find this User");
-        } else if (MemberStatusEnum.ENABLED.equals(member.getStatus())) {
+        } else if (!MemberStatusEnum.ENABLED.equals(member.getStatus())) {
             throw new BadRequestException("Only enabled users can be suspended.");
         }
         try {
@@ -254,9 +267,14 @@ public class GroupAdminGroupMember {
         UserModel user = userGroupMembershipExtensionRepository.getUserModel(session, member.getUser());
         if (user == null) {
             throw new NotFoundException("Could not find this User");
-        } else if (MemberStatusEnum.SUSPENDED.equals(member.getStatus())) {
+        } else if (!MemberStatusEnum.SUSPENDED.equals(member.getStatus())) {
             throw new BadRequestException("Only suspended users can be reactivated.");
         }
+        List<String> parentGroupIds = Utils.findParentGroupIds(group);
+        if (!parentGroupIds.isEmpty() && userGroupMembershipExtensionRepository.countByUserAndGroupsAndSuspended(user.getId(),parentGroupIds) > 0) {
+            throw new BadRequestException("Unable to reactivate membership because it's suspended in a higher-level group.");
+        }
+
         try {
             String groupPath = ModelToRepresentation.buildGroupPath(group);
             List<String> subgroupPaths = userGroupMembershipExtensionRepository.reActivateUser(user, member, justification, group, memberUserAttributeConfigurationRepository);

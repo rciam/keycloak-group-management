@@ -82,7 +82,7 @@ public class AdminGroups {
         if (group.getSubGroupsStream().count()>0)
             throw new BadRequestException("You need firstly to delete child groups.");
 
-        generalJpaService.removeGroup(group, realmAuth.adminAuth().getUser(),clientConnection);
+        generalJpaService.removeGroup(group, realmAuth.adminAuth().getUser(),clientConnection, false);
 
         adminEvent.operation(OperationType.DELETE).representation(group.getName()).resourcePath(session.getContext().getUri()).success();
     }

@@ -17,7 +17,7 @@ import { useEffect } from "react";
   export const Alerts:React.FC<any> = (props) => {
 
     useEffect(()=>{
-        setTimeout(() => props.close(), 8000);
+        setTimeout(() => props.close(), 18000);
     },[props.alert])
 
     return (

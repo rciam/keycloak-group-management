@@ -4,13 +4,26 @@ All notable changes in keycloak-group-management will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.1]
+
+### Fixed
+- Bug in Msg Params
+- Bug in Enrollment Configuration Rules in Edit Enrollment Modal  
+
 ## [0.21.0]
 
 ### Added
 - Support adding/ removing group admin by username
+- Add support for search group members by username
+- Validate group enrollment configuration based on rules (REST API)
+- Can not reactivate member if a parent member is suspended
+- Delete realm admin REST API
+- Edit Membership in Group Admin View
 
 ### Fixed
 - When search for subgroup (ids) in group management must return all tree hierarchy
+- Default Value for Enrollment Expiration Days Bug
+- Group Management Labels Update
 
 ## [0.20.0]
 

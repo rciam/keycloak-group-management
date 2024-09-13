@@ -29,10 +29,13 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.services.managers.RealmManager;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.GeneralJpaService;
+import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentConfigurationRulesEntity;
 import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
+import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRulesRepository;
 import org.rciam.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupRolesRepository;
@@ -64,6 +67,7 @@ public class AdminService {
     private final GeneralJpaService generalJpaService;
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
+ private final GroupEnrollmentConfigurationRulesRepository groupEnrollmentConfigurationRulesRepository;
 
     public AdminService(KeycloakSession session, RealmModel realm, ClientConnection clientConnection, AdminPermissionEvaluator realmAuth) {
         this.session = session;
@@ -76,8 +80,30 @@ public class AdminService {
         this.groupRolesRepository = new GroupRolesRepository(session, realm);
         this.adminEvent =  new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
         this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
+this.groupEnrollmentConfigurationRulesRepository =  new GroupEnrollmentConfigurationRulesRepository(session);
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
         adminEvent.realm(realm);
+    }
+
+    @DELETE
+    public void deleteRealm() {
+        realmAuth.realm().requireManageRealm();
+        groupEnrollmentConfigurationRulesRepository.getByRealm(realm.getId()).forEach(rule -> groupEnrollmentConfigurationRulesRepository.deleteEntity(rule));
+        MemberUserAttributeConfigurationEntity memberUserAttributeConfigurationEntity = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+        if (memberUserAttributeConfigurationEntity != null)
+            memberUserAttributeConfigurationRepository.deleteEntity(memberUserAttributeConfigurationEntity);
+
+        realm.getGroupsStream().forEach(group -> generalJpaService.removeGroup(group, realmAuth.adminAuth().getUser(),clientConnection, true));
+
+        //Keycloak code for realm remove
+        if (!new RealmManager(session).removeRealm(realm)) {
+            throw new NotFoundException("Realm doesn't exist");
+        }
+
+        // The delete event is associated with the realm of the user executing the operation,
+        // instead of the realm being deleted.
+       adminEvent.operation(OperationType.DELETE).resource(ResourceType.REALM)
+                .realm(realmAuth.adminAuth().getRealm().getId()).resourcePath(realm.getName()).success();
     }
 
     @PUT

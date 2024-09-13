@@ -51,7 +51,7 @@ public class UserGroupMember {
     public Response leaveGroup() {
         GroupModel group = realm.getGroupById(member.getGroup().getId());
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-        userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, user.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(user.getId()), memberUserAttribute);
+        userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, user.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(user.getId()), memberUserAttribute, false);
         return Response.noContent().build();
     }
 

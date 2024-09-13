@@ -118,7 +118,7 @@ public class GroupAdminService {
         }
 
 
-        GroupAdminGroup service = new GroupAdminGroup(session, realm, groupAdmin, group, userGroupMembershipExtensionRepository, groupAdminRepository, groupEnrollmentRequestRepository, adminEvent, isGroupAdmin);
+        GroupAdminGroup service = new GroupAdminGroup(session, realm, groupAdmin, group, userGroupMembershipExtensionRepository, groupAdminRepository, groupEnrollmentRequestRepository, groupEnrollmentConfigurationRulesRepository, adminEvent, isGroupAdmin);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
