@@ -459,7 +459,7 @@ export const GroupMembers: FC<any> = (props) => {
                       >
                         <div>
                           <Button isSmall variant="tertiary" isDisabled={member.status === "SUSPENDED"} className="gm_small_icon_button" onClick={() => {
-                            if (directMembers) { setEditMembership(member); } else { props.history.push({ pathname: '/groups/admingroups/' + member.group.id, search: '?tab=members&membership=' + member.id }) }
+                            if (member.direct) { setEditMembership(member); } else { props.history.push({ pathname: '/groups/admingroups/' + member.group.id, search: '?tab=members&membership=' + member.id }) }
                           }}>
                             <PencilAltIcon />
                           </Button>

@@ -84,7 +84,7 @@ export const EnrollmentModal: FC<any> = (props) => {
         if(enrollment?.validFrom){
           let parsedDate = dateParse(enrollment?.validFrom);
           if(parsedDate instanceof Date &&isFinite(parsedDate.getTime())){
-            isPastDate(parsedDate) && props.enrollment.validFrom!==enrollment.validFrom && (errors.validFrom=Msg.localize('validFromPastFormError'))
+            isPastDate(parsedDate) && props.enrollment.validFrom!==enrollment.validFrom && (errors.validFrom=Msg.localize('pastDateError'))
           }
           else{
             !(parsedDate instanceof Date &&isFinite(parsedDate.getTime())) && (errors.validFrom=Msg.localize('validFromInvalidFormError'));
@@ -196,7 +196,7 @@ export const EnrollmentModal: FC<any> = (props) => {
           selectedDateWithoutTime < currentDateWithoutTime &&
           props.enrollment.validFrom !== dateFormat(selectedDateWithoutTime)
         ) {
-          return Msg.localize('validFromPastFormError');
+          return Msg.localize('pastDateError');
         } else {
           return "";
         }

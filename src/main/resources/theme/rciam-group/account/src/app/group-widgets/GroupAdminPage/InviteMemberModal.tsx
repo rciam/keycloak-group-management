@@ -7,6 +7,7 @@ import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/gr
 import {ValidateEmail} from '../../js/utils.js'
 import { Alert, Button, Checkbox, DataList, DataListCell, DataListItem, DataListItemCells, DataListItemRow, FormAlert, Modal, ModalVariant, Select, SelectOption, SelectVariant, Spinner, Wizard, WizardStep } from '@patternfly/react-core';
 import { Msg } from '../../widgets/Msg';
+import {isPastDate, dateParse} from '../../widgets/Date';
 
 
 
@@ -232,7 +233,7 @@ export const InviteMemberModal: React.FC<any> = (props) => {
                         <DataListItemCells
                           dataListCells={[
                             <DataListCell key="primary content">
-                              <span id="compact-item1"><strong><Msg msgKey='invitationMemberhipDuration' /></strong></span>
+                              <span id="compact-item1"><strong><Msg msgKey='invitationMemberhipDuration' />:</strong></span>
                             </DataListCell>,
                             <DataListCell width={3} key="secondary content ">
                               <span>{enrollment?.membershipExpirationDays?enrollment?.membershipExpirationDays +" "+Msg.localize('Days'):Msg.localize('Permanent')} </span>  
@@ -241,12 +242,28 @@ export const InviteMemberModal: React.FC<any> = (props) => {
                         />
                       </DataListItemRow>
                   </DataListItem>
+                  {enrollment?.validFrom&&!isPastDate(dateParse(enrollment?.validFrom))&&
+                    <DataListItem aria-labelledby="compact-item1">
+                    <DataListItemRow>
+                      <DataListItemCells
+                        dataListCells={[
+                          <DataListCell key="primary content">
+                            <span id="compact-item1"><strong><Msg msgKey='validFrom' />:</strong></span>
+                          </DataListCell>,
+                          <DataListCell width={3} key="secondary content ">
+                            <span>{enrollment?.validFrom}</span>  
+                          </DataListCell>
+                        ]}
+                      />
+                    </DataListItemRow>
+                </DataListItem>
+                  }
                   <DataListItem aria-labelledby="compact-item2">
                     <DataListItemRow className="gm_role_row">
                       <DataListItemCells
                         dataListCells={[
                             <DataListCell key="primary content">
-                                <span id="compact-item1"><strong><Msg msgKey='invitationRoleSelection' /></strong></span>
+                                <span id="compact-item1"><strong><Msg msgKey='invitationRoleSelection' />:</strong></span>
                             </DataListCell>,
                             <DataListCell width={3} key="roles">
                               <table className="gm_roles-table">
