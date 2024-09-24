@@ -196,7 +196,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
         <React.Fragment>
             <Modal
                 variant={ModalVariant.medium}
-                title={Msg.localize('adminGroupMemberEditRole')}
+                title={Msg.localize('adminGroupEditMembeship')}
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
                 actions={[
