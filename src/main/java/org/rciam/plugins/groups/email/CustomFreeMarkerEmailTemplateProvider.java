@@ -20,6 +20,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     private static final String enrollmentUrl = "realms/{realmName}/account/#/groups/groupenrollments?id={id}";
     private static final String enrollmentStartUrl = "realms/{realmName}/account/#/enroll?groupPath={path}";
     private static final String finishGroupInvitation = "realms/{realmName}/account/#/invitation/{id}";
+    private static final String adminGroupPageUrl = "realms/{realmName}/account/#/groups/admingroups/{id}?tab=admins";
 
     private static final String subgroupsStr = " and its subgroups: ";
     private static final String subgroupsHtmlStr = " and its subgroups:<br>";
@@ -38,15 +39,19 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         return this;
     }
 
-    public void sendGroupAdminEmail(String groupName, boolean isAdded) throws EmailException {
+    public void sendGroupAdminEmail(boolean isAdded, String groupPath, String groupId, UserModel groupadmin) throws EmailException {
         String title = isAdded ? "addGroupAdminSubject" : "removeGroupAdminSubject";
         String text1 = isAdded ? "added" : "removed";
         String text2 = isAdded ? "to" : "from";
+        KeycloakUriInfo uriInfo = session.getContext().getUri();
+        String text3 = isAdded ? "For more information about the group, please visit the following link: " + uriInfo.getBaseUri().toString() + adminGroupPageUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId) : "";
         attributes.put("text1", text1);
         attributes.put("text2", text2);
-        attributes.put("groupname", groupName);
+        attributes.put("text3", text3);
+        attributes.put("groupPath", groupPath);
+        attributes.put("groupadmin", groupadmin.getFirstName() + " " + groupadmin.getLastName());
         attributes.put("signatureMessage", signatureMessage);
-        send(title, "add-remove-group-admin.ftl", attributes);
+        send(title, Stream.of(groupPath).collect(Collectors.toList()), "add-remove-group-admin.ftl", attributes);
     }
 
     public void sendSuspensionEmail(String groupPath, List<String> subgroupPaths, String justification) throws EmailException {
@@ -231,13 +236,15 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send(forMember ? "groupInvitationSubject" : "groupInvitationAdminInformSubject", "invitation-admin-inform.ftl", attributes);
     }
 
-    public void sendAddRemoveAdminAdminInformationEmail(boolean added, String groupname, UserModel adminAdded, UserModel adminAction) throws EmailException {
+    public void sendAddRemoveAdminAdminInformationEmail(boolean added, String groupPath, String groupId, UserModel adminAdded, UserModel adminAction) throws EmailException {
         attributes.put("text", added ? "added as" : "removed from");
-        attributes.put("groupname", groupname);
+        attributes.put("groupPath", groupPath);
         attributes.put("adminAdded", adminAdded.getFirstName() + " " + adminAdded.getLastName());
         attributes.put("adminAction", adminAction.getFirstName() + " " + adminAction.getLastName());
+        KeycloakUriInfo uriInfo = session.getContext().getUri();
+        attributes.put("groupUrl",  uriInfo.getBaseUri().toString() + adminGroupPageUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
         attributes.put("signatureMessage", signatureMessage);
-        send(added ? "addGroupAdminAdminInformationSubject" : "removeGroupAdminAdminInformationSubject", "add-remove-groupadmin-admin-inform.ftl", attributes);
+        send(added ? "addGroupAdminAdminInformationSubject" : "removeGroupAdminAdminInformationSubject", Stream.of(groupPath).collect(Collectors.toList()), "add-remove-groupadmin-admin-inform.ftl", attributes);
     }
 
     public void sendMemberUpdateAdminInformEmail(String groupPath, UserModel userChanged, UserModel admin, LocalDate validFrom, LocalDate membershipExpiresAt, List<String> roles) throws EmailException {

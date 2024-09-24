@@ -348,14 +348,15 @@ public class GroupAdminGroup {
             throw new BadRequestException("This user is already group admin of this group");
         }
         groupAdminRepository.addGroupAdmin(userAdded.getId(), group.getId());
+        String groupPath = ModelToRepresentation.buildGroupPath(group);
 
         try {
             customFreeMarkerEmailTemplateProvider.setUser(userAdded);
-            customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
+            customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(true, groupPath, group.getId(), groupAdmin);
             groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x) && !userAdded.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
-                    customFreeMarkerEmailTemplateProvider.sendAddRemoveAdminAdminInformationEmail(true, group.getName(), userAdded, groupAdmin);
+                    customFreeMarkerEmailTemplateProvider.sendAddRemoveAdminAdminInformationEmail(true, groupPath, group.getId(), userAdded, groupAdmin);
                 } catch (EmailException e) {
                     throw new RuntimeException(e);
                 }
@@ -379,13 +380,14 @@ public class GroupAdminGroup {
         GroupAdminEntity admin = groupAdminRepository.getGroupAdminByUserAndGroup(user.getId(), group.getId());
         if (admin != null) {
             groupAdminRepository.deleteEntity(admin.getId());
+            String groupPath = ModelToRepresentation.buildGroupPath(group);
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(user);
-                customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), false);
+                customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(false, groupPath, group.getId(), groupAdmin);
                 groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(a -> {
                     try {
                         customFreeMarkerEmailTemplateProvider.setUser(a);
-                        customFreeMarkerEmailTemplateProvider.sendAddRemoveAdminAdminInformationEmail(false, group.getName(), user, groupAdmin);
+                        customFreeMarkerEmailTemplateProvider.sendAddRemoveAdminAdminInformationEmail(false, groupPath, group.getId(), user, groupAdmin);
                     } catch (EmailException e) {
                         throw new RuntimeException(e);
                     }

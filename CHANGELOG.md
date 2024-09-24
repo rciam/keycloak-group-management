@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Improve update membership emails
+- Improve add/remove admin emails
 - Added Valid From to Invitation Flow
 
 ## [0.21.1]

@@ -1,2 +1,2 @@
 <#ftl output_format="plainText">
-${msg("addRemoveGroupAdminBody",text1,text2,groupname, signatureMessage)}
+${msg("addRemoveGroupAdminBody", text1, groupadmin, groupPath, text3, signatureMessage)}
