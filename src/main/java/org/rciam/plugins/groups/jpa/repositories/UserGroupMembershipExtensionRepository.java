@@ -430,9 +430,11 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         if (isNotMember) {
             entity.setValidFrom(configuration.getValidFrom() == null || !configuration.getValidFrom().isAfter(LocalDate.now()) ? LocalDate.now() : configuration.getValidFrom());
         }
-        if (configuration.getMembershipExpirationDays() != null) {
+        if (configuration.getMembershipExpirationDays() != null && entity.getValidFrom().isAfter(LocalDate.now())) {
             entity.setMembershipExpiresAt(entity.getValidFrom().plusDays(configuration.getMembershipExpirationDays()));
-        } else {
+        } else if (configuration.getMembershipExpirationDays() != null) {
+            entity.setMembershipExpiresAt(LocalDate.now().plusDays(configuration.getMembershipExpirationDays()));
+        }else {
             entity.setMembershipExpiresAt(null);
         }
         entity.setGroup(configuration.getGroup());

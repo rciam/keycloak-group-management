@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improve add/remove admin emails
 - Added Valid From to Invitation Flow
 
+### Fixed
+- Correct calculation of membership expiration for enrollment request of an already member
+
 ## [0.21.1]
 
 ### Fixed
