@@ -168,14 +168,15 @@ public class UserGroups {
 
         if (configuration.getRequireApproval()) {
             GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.create(rep, user, configuration, true, realm, userSession);
+            GroupModel group = realm.getGroupById(configuration.getGroup().getId());
             //email to group admins if they must accept it
             //find thems based on group
-            groupAdminRepository.getAllAdminIdsGroupUsers(configuration.getGroup().getId()).forEach(adminId -> {
+            groupAdminRepository.getAllAdminIdsGroupUsers(group.getId()).forEach(adminId -> {
                 try {
                     UserModel admin = session.users().getUserById(realm, adminId);
                     if (admin != null) {
                         customFreeMarkerEmailTemplateProvider.setUser(admin);
-                        customFreeMarkerEmailTemplateProvider.sendGroupAdminEnrollmentCreationEmail(user, configuration.getGroup().getName(), rep.getGroupRoles(), rep.getComments(), entity.getId());
+                        customFreeMarkerEmailTemplateProvider.sendGroupAdminEnrollmentCreationEmail(user, ModelToRepresentation.buildGroupPath(group), rep.getGroupRoles(), rep.getComments(), entity.getId());
                     }
                 } catch (EmailException e) {
                     ServicesLogger.LOGGER.failedToSendEmail(e);

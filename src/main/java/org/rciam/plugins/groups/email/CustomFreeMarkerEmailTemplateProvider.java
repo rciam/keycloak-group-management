@@ -110,30 +110,30 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("inviteGroupAdminSubject", "invite-group-admin.ftl", attributes);
     }
 
-    public void sendAcceptRejectEnrollmentEmail(boolean isAccepted, String groupname, String justification) throws EmailException {
+    public void sendAcceptRejectEnrollmentEmail(boolean isAccepted, String groupPath, String justification) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
-        attributes.put("groupname", groupname);
+        attributes.put("groupPath", groupPath);
         attributes.put("action", isAccepted ? "accepted" : "rejected");
         attributes.put("justification", justification != null ? justification : "");
         attributes.put("signatureMessage", signatureMessage);
-        send(isAccepted ? "acceptEnrollmentSubject" : "rejectEnrollmentSubject", "accept-reject-enrollment.ftl", attributes);
+        send(isAccepted ? "acceptEnrollmentSubject" : "rejectEnrollmentSubject", Stream.of(groupPath).collect(Collectors.toList()), "accept-reject-enrollment.ftl", attributes);
     }
 
-    public void sendGroupAdminEnrollmentCreationEmail(UserModel userRequest, String groupname, List<String> groupRoles, String reason, String enrollmentId) throws EmailException {
+    public void sendGroupAdminEnrollmentCreationEmail(UserModel userRequest, String groupPath, List<String> groupRoles, String reason, String enrollmentId) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("userName", userRequest.getFirstName() + " " + userRequest.getLastName());
         if (groupRoles != null && !groupRoles.isEmpty()) {
-            StringBuilder sb = new StringBuilder(groupname).append(" with roles : ");
+            StringBuilder sb = new StringBuilder(groupPath).append(" with roles : ");
             groupRoles.stream().forEach(role -> sb.append(role).append(", "));
-            groupname = StringUtils.removeEnd(sb.toString(), ", ") + " and ";
+            groupPath = StringUtils.removeEnd(sb.toString(), ", ") + " and ";
         }
-        attributes.put("groupname", groupname);
+        attributes.put("groupname", groupPath);
         attributes.put("reason", reason != null ? reason : "");
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();
         attributes.put("urlLink", baseUri.toString() + enrollmentUrl.replace("{realmName}", realm.getName()).replace("{id}", enrollmentId));
         attributes.put("signatureMessage", signatureMessage);
-        send("groupadminEnrollmentRequestCreationSubject", "groupadmin-enrollment-creation.ftl", attributes);
+        send("groupadminEnrollmentRequestCreationSubject", Stream.of(groupPath).collect(Collectors.toList()), "groupadmin-enrollment-creation.ftl", attributes);
     }
 
     public void sendExpiredGroupMemberEmailToAdmin(UserModel userRequest, String groupname, List<String> subgroupsPaths) throws EmailException {
