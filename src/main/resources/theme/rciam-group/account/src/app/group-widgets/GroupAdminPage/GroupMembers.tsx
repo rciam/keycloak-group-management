@@ -345,7 +345,7 @@ export const GroupMembers: FC<any> = (props) => {
               </DataListCell>,
               ...(!directMembers ? [
                 <DataListCell className="gm_vertical_center_cell" width={3} key="group-path-hd">
-                  <strong><Msg msgKey='adminGroupPathCell' /></strong>
+                  <strong><Msg msgKey='groupPath' /></strong>
                 </DataListCell>,
                 <DataListCell className="gm_vertical_center_cell" width={2} key="direct-hd">
                   <strong><Msg msgKey='adminGroupDirectMembership' /></strong>

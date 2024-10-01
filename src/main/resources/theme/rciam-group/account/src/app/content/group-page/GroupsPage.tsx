@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {Link} from 'react-router-dom';
-import {FC,useState,useEffect} from 'react';
-import {LongArrowAltDownIcon,LongArrowAltUpIcon,AngleDownIcon } from '@patternfly/react-icons';
+import { Link } from 'react-router-dom';
+import { FC, useState, useEffect } from 'react';
+import { LongArrowAltDownIcon, LongArrowAltUpIcon, AngleDownIcon } from '@patternfly/react-icons';
 
 
 import {
@@ -38,7 +38,7 @@ interface Group {
 }
 
 interface Response {
-  results:Group[];
+  results: Group[];
   count: BigInteger;
 }
 export const GroupsPage: FC<GroupsPageProps> = (props) => {
@@ -46,20 +46,20 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
   let groupsService = new GroupsServiceClient();
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
-  const [groups,setGroups] = useState([]as Group[]);
-  const [totalItems,setTotalItems] = useState<number>(0);
-  const [orderBy,setOrderBy] = useState<string>('');
-  const [asc,setAsc] = useState<boolean>(true);
+  const [groups, setGroups] = useState([] as Group[]);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [orderBy, setOrderBy] = useState<string>('');
+  const [asc, setAsc] = useState<boolean>(true);
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchGroups();
-  },[]);
+  }, []);
 
 
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchGroups();
-  },[perPage,page,orderBy,asc]);
+  }, [perPage, page, orderBy, asc]);
 
   const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
     setPage(newPage);
@@ -77,17 +77,17 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
 
 
 
-  const fetchGroups = () =>  {
-    groupsService!.doGet<Response>("/user/groups",{params:{first:(perPage*(page-1)),max:perPage,...(orderBy?{order:orderBy}:{}),asc:asc?"true":"false"}})
+  const fetchGroups = () => {
+    groupsService!.doGet<Response>("/user/groups", { params: { first: (perPage * (page - 1)), max: perPage, ...(orderBy ? { order: orderBy } : {}), asc: asc ? "true" : "false" } })
       .then((response: HttpResponse<Response>) => {
-        let count = response?.data?.count||0;
+        let count = response?.data?.count || 0;
         setTotalItems(count as number);
-        setGroups(response?.data?.results||[] as Group[]);
+        setGroups(response?.data?.results || [] as Group[]);
       });
   }
 
-  
-  const emptyGroup= ()=> {
+
+  const emptyGroup = () => {
 
     return (
       <DataListItem key='emptyItem' aria-labelledby="empty-item">
@@ -102,22 +102,25 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
 
   const renderGroupList = (membership, appIndex: number) => {
     return (
-      <Link to={"/groups/showgroups/"+membership.group.id}>        
+      <Link to={"/groups/showgroups/" + membership.group.id}>
         <DataListItem id={`${appIndex}-group`} key={'group-' + appIndex} aria-labelledby="groups-list" >
           <DataListItemRow>
             <DataListItemCells
               dataListCells={[
                 <DataListCell id={`${appIndex}-group-name`} width={2} key={'name-' + appIndex}>
-                  {membership.group.name} 
+                  {membership.group.name}
+                </DataListCell>,
+                <DataListCell id={`${appIndex}-group-path`} width={2} key={'groupPath-' + appIndex}>
+                  {membership.group.path}
                 </DataListCell>,
                 <DataListCell id={`${appIndex}-group-roles`} width={2} key={'directMembership-' + appIndex}>
-                  {membership.groupRoles.map((role,index)=>{
-                        return <Badge key={index} className="gm_role_badge" isRead>{role}</Badge>
-                      })}
+                  {membership.groupRoles.map((role, index) => {
+                    return <Badge key={index} className="gm_role_badge" isRead>{role}</Badge>
+                  })}
                 </DataListCell>,
                 <DataListCell id={`${appIndex}-group-membershipExpiration`} width={2} key={'directMembership-' + appIndex}>
-                {membership.membershipExpiresAt||<Msg msgKey='Never'/>}
-              </DataListCell>
+                  {membership.membershipExpiresAt || <Msg msgKey='Never' />}
+                </DataListCell>
               ]}
             />
           </DataListItemRow>
@@ -127,52 +130,55 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
   }
 
   const orderResults = (type) => {
-    if(orderBy!==type){
+    if (orderBy !== type) {
       setOrderBy(type); setAsc(true);
     }
-    else if(asc){
+    else if (asc) {
       setAsc(false);
     }
-    else{
+    else {
       setAsc(true);
     }
   }
-  
-  
-    return (
-      <ContentPage title={Msg.localize('groupLabel')}>
-        <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact wrapModifier={"breakWord"}>
-          <DataListItem id="groups-list-header" aria-labelledby="Columns names">
-            <DataListItemRow className="gm_view-groups-header">
-              <DataListItemCells
-                dataListCells={[
-                  <DataListCell key='group-name-header' width={2} onClick={()=>{orderResults('')}}>
-                    <strong><Msg msgKey='nameDatalistTitle' /></strong>{!orderBy?<AngleDownIcon/>:asc?<LongArrowAltDownIcon />:<LongArrowAltUpIcon/>}
-                  </DataListCell>,
-                  <DataListCell key='group-roles' width={2}>
-                    <strong><Msg msgKey='rolesDatalistTitle' /></strong>
-                  </DataListCell>,
-                  <DataListCell key='group-membership-expiration-header' width={2} onClick={()=>{orderResults('membershipExpiresAt')}}>
-                  <strong><Msg msgKey='membershipDatalistTitle'/></strong> {orderBy!=='membershipExpiresAt'?<AngleDownIcon/>:asc?<LongArrowAltDownIcon/>:<LongArrowAltUpIcon/>}
+
+
+  return (
+    <ContentPage title={Msg.localize('groupLabel')}>
+      <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact wrapModifier={"breakWord"}>
+        <DataListItem id="groups-list-header" aria-labelledby="Columns names">
+          <DataListItemRow className="gm_view-groups-header">
+            <DataListItemCells
+              dataListCells={[
+                <DataListCell key='group-name-header' width={2} onClick={() => { orderResults('') }}>
+                  <strong><Msg msgKey='nameDatalistTitle' /></strong>{!orderBy ? <AngleDownIcon /> : asc ? <LongArrowAltDownIcon /> : <LongArrowAltUpIcon />}
                 </DataListCell>,
-                ]}
-              />
-            </DataListItemRow>
-          </DataListItem>
-          {groups.length === 0
-            ? emptyGroup()
-            : groups.map((group: Group, appIndex: number) =>
-              renderGroupList(group, appIndex))}
-        </DataList>
-        <Pagination
-            itemCount={totalItems}
-            perPage={perPage}
-            page={page}
-            onSetPage={onSetPage}
-            widgetId="top-example"
-            onPerPageSelect={onPerPageSelect}
-          />
-      </ContentPage>
-    );
-  
+                 <DataListCell key='group-path' width={2}>
+                 <strong><Msg msgKey='groupPath' /></strong>
+               </DataListCell>,
+                <DataListCell key='group-roles' width={2}>
+                  <strong><Msg msgKey='rolesDatalistTitle' /></strong>
+                </DataListCell>,
+                <DataListCell key='group-membership-expiration-header' width={2} onClick={() => { orderResults('membershipExpiresAt') }}>
+                  <strong><Msg msgKey='membershipDatalistTitle' /></strong> {orderBy !== 'membershipExpiresAt' ? <AngleDownIcon /> : asc ? <LongArrowAltDownIcon /> : <LongArrowAltUpIcon />}
+                </DataListCell>,
+              ]}
+            />
+          </DataListItemRow>
+        </DataListItem>
+        {groups.length === 0
+          ? emptyGroup()
+          : groups.map((group: Group, appIndex: number) =>
+            renderGroupList(group, appIndex))}
+      </DataList>
+      <Pagination
+        itemCount={totalItems}
+        perPage={perPage}
+        page={page}
+        onSetPage={onSetPage}
+        widgetId="top-example"
+        onPerPageSelect={onPerPageSelect}
+      />
+    </ContentPage>
+  );
+
 };
