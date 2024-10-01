@@ -6,8 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.22.1]
 
+### Added
+- Group Path in Members Group View
+
 ### Fixed
 - Emails fixes
+- Multiselect Roles in Enrollment Fix
 
 ## [0.22.0]
 
