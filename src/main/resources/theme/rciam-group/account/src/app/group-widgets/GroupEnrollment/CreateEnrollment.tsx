@@ -157,7 +157,7 @@ export const CreateEnrollment: FC<any> = (props) => {
         let errors: Record<string, string> = {};
         (!enrollmentRequest?.comments&&enrollment.commentsNeeded) && (errors.comments = Msg.localize('requredFormError'));
         !(enrollmentRequest?.groupRoles?.length>0) && (errors.groupRoles=Msg.localize('groupRolesFormError'));
-        (!enrollment.multiselectRoles&&enrollmentRequest.groupRoles.length>1) && (errors.groupRoles=Msg.localize('groupRolesFormErrorMulitple'));
+        (!enrollment.multiselectRole&&enrollmentRequest.groupRoles.length>1) && (errors.groupRoles=Msg.localize('groupRolesFormErrorMulitple'));
         setErrors(errors);
         //!(enrollemtn?)
     }

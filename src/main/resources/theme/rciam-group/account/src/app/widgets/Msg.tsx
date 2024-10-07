@@ -50,7 +50,6 @@ export class Msg extends React.Component<MsgProps> {
     public static localize(msgKey: string, params?: string[]): string {
         let message: string = l18nMsg[this.processKey(msgKey)];
         if (message === undefined) message = msgKey;
-
         if ((params !== undefined) && (params.length > 0)) {
             params.forEach((value: string, index: number) => {
                 value = this.processParam(value);
@@ -74,7 +73,7 @@ export class Msg extends React.Component<MsgProps> {
 
     // if the param has Freemarker syntax, try to look up its value
     private static processParam(param: string): string {
-        if (!(param.startsWith('${') && param.endsWith('}'))) return param;
+        if (!(param?.startsWith('${') && param?.endsWith('}'))) return param;
 
         // remove Freemarker syntax
         const key: string = param.substring(2, param.length - 1);

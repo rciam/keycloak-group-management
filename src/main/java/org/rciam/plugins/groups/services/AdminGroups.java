@@ -24,6 +24,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelDuplicateException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.utils.ModelToRepresentation;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.Utils;
@@ -133,7 +134,7 @@ public class AdminGroups {
 
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(user);
-                    customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), true);
+                    customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(true, ModelToRepresentation.buildGroupPath(group), group.getId(), realmAuth.adminAuth().getUser());
                 } catch (EmailException e) {
                     ServicesLogger.LOGGER.failedToSendEmail(e);
                 }
@@ -159,7 +160,7 @@ public class AdminGroups {
             groupAdminRepository.deleteEntity(admin.getId());
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(user);
-                customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(group.getName(), false);
+                customFreeMarkerEmailTemplateProvider.sendGroupAdminEmail(false, ModelToRepresentation.buildGroupPath(group), group.getId(), realmAuth.adminAuth().getUser());
             } catch (EmailException e) {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
             }

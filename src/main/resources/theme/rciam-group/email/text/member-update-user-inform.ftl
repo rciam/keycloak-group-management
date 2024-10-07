@@ -1,2 +1,2 @@
 <#ftl output_format="plainText">
-${msg("memberUpdateUserInformBody", fullname, adminFullName, userFullName, groupname, signatureMessage)}
+${msg("memberUpdateUserInformBody", fullname, adminFullName, groupPath, validFrom, membershipExpiresAt, roles, signatureMessage)}

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button, Tooltip, ModalVariant, Modal, Form, FormGroup, Popover, DatePicker, Switch } from '@patternfly/react-core';
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 import { Msg } from '../../widgets/Msg';
+import {isPastDate, dateParse, addDays,isFirstDateBeforeSecond,dateFormat} from '../../widgets/Date';
 import { HelpIcon } from '@patternfly/react-icons';
 import { Loading } from '../LoadingModal';
 import { Alerts } from '../../widgets/Alerts';
@@ -61,61 +62,15 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
         validateMembership();
     }, [membership])
 
-    const isPastDate = (date: Date, field: string): string => {
-        const currentDate = new Date();
-        // Normalize both dates to remove the time part for an accurate comparison
-        const currentDateWithoutTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-        const selectedDateWithoutTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-        // Check if the selected date is in the past and not the same as the validFrom date
-        if (
-            selectedDateWithoutTime < currentDateWithoutTime &&
-            props.membership[field] !== dateFormat(selectedDateWithoutTime)
-        ) {
-            return Msg.localize('validFromPastFormError');
-        } else {
-            return "";
-        }
-    };
-
-    const addDays = (date: Date, days: number): Date => {
-        const result = new Date(date);
-        result.setDate(result.getDate() + days);
-        return result;
-    };
-    const dateParse = (date: string) => {
-        const split = date.split('-');
-        if (split.length !== 3) {
-            return new Date();
-        }
-        const month = split[1];
-        const day = split[2];
-        const year = split[0];
-        return new Date(`${year.padStart(4, '0')}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T00:00:00`);
-    };
-
-    const isFirstDateBeforeSecond = (firstDate: Date | null, secondDate: Date, errorMessage: string) => {
-        // Normalize both dates to remove the time part for an accurate comparison    
-        if (firstDate) {
-            const firstDateWithoutTime = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
-            const secondDateWithoutTime = new Date(secondDate.getFullYear(), secondDate.getMonth(), secondDate.getDate());
-
-            // Check if the first date is before the second date
-            if (firstDateWithoutTime < secondDateWithoutTime) {
-                return errorMessage;
-            } else {
-                return "";
-            }
-        }
-        else {
-            return "";
-        }
-    };
-
+   
     const validateValidFrom = (date: Date): string => {
         if (dateFormat(date) !== props.membership.validFrom) {
-            let pastDateError = isPastDate(date, 'validFrom');
-            if (pastDateError) {
-                return pastDateError;
+            const selectedDateWithoutTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            if(props.membership['validFrom'] !== dateFormat(selectedDateWithoutTime)){
+                let pastDateError = isPastDate(date);
+                if (pastDateError) {
+                    return pastDateError;
+                }
             }
             // Now check if membership.membershipExpiresAt exists, and run the comparison
             if (membership.membershipExpiresAt) {
@@ -133,9 +88,12 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
 
     const validateMembershipExpiresAt = (date: Date | null): string => {
         if (date) {
-            let pastDateError = isPastDate(date, 'membershipExpiresAt');
-            if (pastDateError) {
-                return pastDateError;
+            const selectedDateWithoutTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            if(props.membership['membershipExpiresAt'] !== dateFormat(selectedDateWithoutTime)){
+                let pastDateError = isPastDate(date);
+                if (pastDateError) {
+                    return pastDateError;
+                }
             }
 
             // Now check if membership.membershipExpiresAt exists, and run the comparison
@@ -150,7 +108,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                 // Normalize both dates to remove the time part for an accurate comparison
                 const currentDateWithoutTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
                 const rulesValidationError = isFirstDateBeforeSecond(
-                    isPastDate(dateParse(membership.validFrom), 'validFrom') ?
+                    isPastDate(dateParse(membership.validFrom)) ?
                         addDays(currentDateWithoutTime, parseInt(props.enrollmentRules.membershipExpirationDays.max))
                         :
                         addDays(dateParse(membership.validFrom), parseInt(props.enrollmentRules.membershipExpirationDays.max))
@@ -174,9 +132,6 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
 
     const validatorValidFrom: ((date: Date) => string)[] = [validateValidFrom];
     const validatorMembershipExpiresAt: ((date: Date) => string)[] = [validateMembershipExpiresAt];
-
-    const dateFormat = (date: Date) =>
-        date.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
 
     const submit = () => {
         touchFields();
@@ -241,7 +196,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
         <React.Fragment>
             <Modal
                 variant={ModalVariant.medium}
-                title={Msg.localize('adminGroupMemberEditRole')}
+                title={Msg.localize('adminGroupEditMembeship')}
                 isOpen={isModalOpen}
                 onClose={handleModalToggle}
                 actions={[

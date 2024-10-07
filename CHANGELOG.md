@@ -4,6 +4,25 @@ All notable changes in keycloak-group-management will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.23.0] - 2024-10-07
+
+### Added
+- Group Path in Members Group View
+
+### Fixed
+- Emails fixes
+- Multiselect Roles in Enrollment Fix
+
+## [0.22.0]
+
+### Changed
+- Improve update membership emails
+- Improve add/remove admin emails
+- Added Valid From to Invitation Flow
+
+### Fixed
+- Correct calculation of membership expiration for enrollment request of an already member
+
 ## [0.21.1]
 
 ### Fixed

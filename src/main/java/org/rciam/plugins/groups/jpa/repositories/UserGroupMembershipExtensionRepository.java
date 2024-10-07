@@ -296,7 +296,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                     UserModel user = session.users().getUserById(realmModel, entity.getUser().getId());
                     customFreeMarkerEmailTemplateProvider.setUser(user);
                     try {
-                        customFreeMarkerEmailTemplateProvider.sendExpiredGroupMembershipNotification(ModelToRepresentation.buildGroupPath(group), entity.getMembershipExpiresAt().format(Utils.formatter), group.getId(), serverUrl);
+                        customFreeMarkerEmailTemplateProvider.sendExpiredGroupMembershipNotification(ModelToRepresentation.buildGroupPath(group), entity.getMembershipExpiresAt().format(Utils.dateFormatter), group.getId(), serverUrl);
                     } catch (EmailException e) {
                         e.printStackTrace();
                         logger.info("problem sending email to user  " + user.getFirstName() + " " + user.getLastName());
@@ -330,7 +330,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         Long count = (Long) queryCount.getSingleResult();
 
-        return new UserGroupMembershipExtensionRepresentationPager(results.map(x -> EntityToRepresentation.toRepresentation(x, realm, false)).collect(Collectors.toList()), count);
+        return new UserGroupMembershipExtensionRepresentationPager(results.map(x -> EntityToRepresentation.toRepresentation(x, realm, true)).collect(Collectors.toList()), count);
     }
 
     public UserGroupMembershipExtensionRepresentationPager searchByGroupAndSubGroups(String groupId, Set<String> groupIdList, String search, MemberStatusEnum status, String role, Integer first, Integer max) {
@@ -446,9 +446,11 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         if (isNotMember) {
             entity.setValidFrom(configuration.getValidFrom() == null || !configuration.getValidFrom().isAfter(LocalDate.now()) ? LocalDate.now() : configuration.getValidFrom());
         }
-        if (configuration.getMembershipExpirationDays() != null) {
+        if (configuration.getMembershipExpirationDays() != null && entity.getValidFrom().isAfter(LocalDate.now())) {
             entity.setMembershipExpiresAt(entity.getValidFrom().plusDays(configuration.getMembershipExpirationDays()));
-        } else {
+        } else if (configuration.getMembershipExpirationDays() != null) {
+            entity.setMembershipExpiresAt(LocalDate.now().plusDays(configuration.getMembershipExpirationDays()));
+        }else {
             entity.setMembershipExpiresAt(null);
         }
         entity.setGroup(configuration.getGroup());

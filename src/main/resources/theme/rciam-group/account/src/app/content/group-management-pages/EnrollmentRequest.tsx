@@ -74,7 +74,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                   disapearingTooltip();
                   let link = groupsService.getBaseUrl() + '/account/#/groups/groupenrollments?id=' + encodeURI(enrollmentRequest?.id);
                   navigator.clipboard.writeText(link)
-                }} ><CopyIcon /> </Button>
+                }}><CopyIcon/> </Button>
               </Tooltip>}
             </h1>
 

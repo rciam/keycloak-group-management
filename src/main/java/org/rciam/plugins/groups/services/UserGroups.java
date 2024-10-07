@@ -168,14 +168,15 @@ public class UserGroups {
 
         if (configuration.getRequireApproval()) {
             GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.create(rep, user, configuration, true, realm, userSession);
+            GroupModel group = realm.getGroupById(configuration.getGroup().getId());
             //email to group admins if they must accept it
             //find thems based on group
-            groupAdminRepository.getAllAdminIdsGroupUsers(configuration.getGroup().getId()).forEach(adminId -> {
+            groupAdminRepository.getAllAdminIdsGroupUsers(group.getId()).forEach(adminId -> {
                 try {
                     UserModel admin = session.users().getUserById(realm, adminId);
                     if (admin != null) {
                         customFreeMarkerEmailTemplateProvider.setUser(admin);
-                        customFreeMarkerEmailTemplateProvider.sendGroupAdminEnrollmentCreationEmail(user, configuration.getGroup().getName(), rep.getGroupRoles(), rep.getComments(), entity.getId());
+                        customFreeMarkerEmailTemplateProvider.sendGroupAdminEnrollmentCreationEmail(user, ModelToRepresentation.buildGroupPath(group), rep.getGroupRoles(), rep.getComments(), entity.getId());
                     }
                 } catch (EmailException e) {
                     ServicesLogger.LOGGER.failedToSendEmail(e);
@@ -238,10 +239,11 @@ public class UserGroups {
             groupAdminRepository.addGroupAdmin(user.getId(), invitationEntity.getGroup().getId());
         }
         List<String> groupRoles = invitationEntity.getGroupRoles() != null ? invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()) : new ArrayList<>();
-        groupAdminRepository.getAllAdminIdsGroupUsers(invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId() : invitationEntity.getGroup().getId()).map(userId -> session.users().getUserById(realm, userId)).forEach(admin -> {
+        GroupModel group = realm.getGroupById(invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId() : invitationEntity.getGroup().getId());
+        groupAdminRepository.getAllAdminIdsGroupUsers(group.getId()).map(userId -> session.users().getUserById(realm, userId)).forEach(admin -> {
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(admin);
-                customFreeMarkerEmailTemplateProvider.sendAcceptInvitationEmail(user, invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getName() : invitationEntity.getGroup().getName(), invitationEntity.getForMember(), groupRoles);
+                customFreeMarkerEmailTemplateProvider.sendAcceptInvitationEmail(user, ModelToRepresentation.buildGroupPath(group), group.getId(), invitationEntity.getForMember(), groupRoles);
             } catch (EmailException e) {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
             }
@@ -262,11 +264,12 @@ public class UserGroups {
 
         List<String> groupRoles = invitationEntity.getGroupRoles() != null ? invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()) : new ArrayList<>();
         groupInvitationRepository.deleteEntity(id);
+        GroupModel group = realm.getGroupById(invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId() : invitationEntity.getGroup().getId());
         // rejection email
-        groupAdminRepository.getAllAdminIdsGroupUsers(invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId() : invitationEntity.getGroup().getId()).map(userId -> session.users().getUserById(realm, userId)).forEach(admin -> {
+        groupAdminRepository.getAllAdminIdsGroupUsers(group.getId()).map(userId -> session.users().getUserById(realm, userId)).forEach(admin -> {
             try {
                 customFreeMarkerEmailTemplateProvider.setUser(admin);
-                customFreeMarkerEmailTemplateProvider.sendRejectionInvitationEmail(user, invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getName() : invitationEntity.getGroup().getName(), invitationEntity.getForMember(), groupRoles);
+                customFreeMarkerEmailTemplateProvider.sendRejectionInvitationEmail(user, ModelToRepresentation.buildGroupPath(group), group.getId(), invitationEntity.getForMember(), groupRoles);
             } catch (EmailException e) {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
             }

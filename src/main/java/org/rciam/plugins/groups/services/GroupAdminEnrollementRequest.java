@@ -15,10 +15,12 @@ import jakarta.ws.rs.core.Response;
 
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
+import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
+import org.keycloak.models.utils.ModelToRepresentation;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
@@ -88,8 +90,9 @@ public class GroupAdminEnrollementRequest {
         updateEnrollmentRequest(enrollmentEntity, EnrollmentRequestStatusEnum.ACCEPTED, adminJustification);
 
         try {
+            GroupModel group= realm.getGroupById(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getId());
             customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm, enrollmentEntity.getUser().getId()));
-            customFreeMarkerEmailTemplateProvider.sendAcceptRejectEnrollmentEmail(true, enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getName(), enrollmentEntity.getAdminJustification());
+            customFreeMarkerEmailTemplateProvider.sendAcceptRejectEnrollmentEmail(true, ModelToRepresentation.buildGroupPath(group), enrollmentEntity.getAdminJustification());
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         }
@@ -105,8 +108,9 @@ public class GroupAdminEnrollementRequest {
         updateEnrollmentRequest(enrollmentEntity, EnrollmentRequestStatusEnum.REJECTED, adminJustification);
 
         try {
+            GroupModel group= realm.getGroupById(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getId());
             customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm, enrollmentEntity.getUser().getId()));
-            customFreeMarkerEmailTemplateProvider.sendAcceptRejectEnrollmentEmail(false, enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getName(), enrollmentEntity.getAdminJustification());
+            customFreeMarkerEmailTemplateProvider.sendAcceptRejectEnrollmentEmail(false, ModelToRepresentation.buildGroupPath(group), enrollmentEntity.getAdminJustification());
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         }

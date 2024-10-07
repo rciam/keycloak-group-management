@@ -21,7 +21,7 @@ public class LoginEventHelper {
                 .detail(Utils.EVENT_ACTION_USER, actionUserId )
                 .detail(Utils.EVENT_ROLES, groupRolesNames);
         if (expirationDate != null)
-            event.detail(Utils.EVENT_MEMBERSHIP_EXPIRATION, expirationDate.format(Utils.formatter));
+            event.detail(Utils.EVENT_MEMBERSHIP_EXPIRATION, expirationDate.format(Utils.dateFormatter));
         event.success();
     }
 }
