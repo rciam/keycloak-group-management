@@ -86,9 +86,11 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
           <BreadcrumbItem to="#/groups/showgroups">
             <Msg msgKey='groupLabel' />
           </BreadcrumbItem>
-          <BreadcrumbItem isActive>
-            {groupMembership?.group?.name}
-          </BreadcrumbItem>
+          {groupMembership?.group?.path.split("/").filter(item => item).map((value,index)=>{
+            return <BreadcrumbItem>
+            {value}
+          </BreadcrumbItem> 
+          })}
         </Breadcrumb>
         <ContentPage title={groupMembership?.group?.name || ""}>
           <p className="gm_group_desc">
