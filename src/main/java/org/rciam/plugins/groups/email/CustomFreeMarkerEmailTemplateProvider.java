@@ -123,13 +123,20 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     public void sendGroupAdminEnrollmentCreationEmail(UserModel userRequest, String groupPath, List<String> groupRoles, String reason, String enrollmentId) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("userName", userRequest.getFirstName() + " " + userRequest.getLastName());
-        String groupPathStr = groupPath;
         if (groupRoles != null && !groupRoles.isEmpty()) {
-            StringBuilder sb = new StringBuilder(groupPathStr).append(" group with roles: ");
-            groupRoles.stream().forEach(role -> sb.append(role).append(", "));
-            groupPathStr = StringUtils.removeEnd(sb.toString(), ", ");
+            StringBuilder sb = new StringBuilder("");
+            StringBuilder sbText = new StringBuilder("");
+            groupRoles.stream().forEach(role -> {
+                sb.append("• ").append(role).append("<br>");
+                sbText.append("• ").append(role).append("\n");
+            });
+            attributes.put("groupRoles", sb.toString());
+            attributes.put("groupRolesText", sbText.toString());
+        } else  {
+            attributes.put("groupRoles", "");
+            attributes.put("groupRolesText", "");
         }
-        attributes.put("groupname", groupPathStr);
+        attributes.put("groupPath", groupPath);
         attributes.put("reason", reason != null ?  "Justification: " + reason : "");
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();
@@ -197,10 +204,10 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("userfullname", userModel.getFirstName() + " " + userModel.getLastName());
         attributes.put("email", userModel.getEmail());
-        //attributes.put("type", forMember ? "member" : "admin");
-        String groupPathStr = groupPath;
+        attributes.put("type", forMember ? "join" : "become an administrator of");
+        String groupPathStr = groupPath+" group";
         if (forMember && groupRoles != null && !groupRoles.isEmpty()) {
-            StringBuilder sb2 = new StringBuilder(groupPathStr).append(" with roles : ");
+            StringBuilder sb2 = new StringBuilder(groupPathStr).append(" with the following roles : ");
             groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
             groupPathStr = StringUtils.removeEnd(sb2.toString(), ", ");
         }
@@ -209,17 +216,18 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         String groupUrl = forMember ? uriInfo.getBaseUri().toString() + membersGroupPageUrl : uriInfo.getBaseUri().toString() + adminGroupPageUrl;
         attributes.put("groupUrl", groupUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
         attributes.put("signatureMessage", signatureMessage);
-        send("groupAcceptInvitationSubject", Stream.of(groupPath).collect(Collectors.toList()), "accept-invitation.ftl", attributes);
+        String titleType = forMember ? "joining" : "becoming an administrator of";
+        send("groupAcceptInvitationSubject", Stream.of(titleType, groupPath).collect(Collectors.toList()), "accept-invitation.ftl", attributes);
     }
 
     public void sendRejectionInvitationEmail(UserModel userModel, String groupPath, String groupId, boolean forMember, List<String> groupRoles) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("userfullname", userModel.getFirstName() + " " + userModel.getLastName());
         attributes.put("email", userModel.getEmail());
-       // attributes.put("type", forMember ? "member" : "admin");
-        String groupPathStr = groupPath;
+        attributes.put("type", forMember ? "join" : "become an administrator of");
+        String groupPathStr = groupPath+" group";
         if (forMember && groupRoles != null && !groupRoles.isEmpty()) {
-            StringBuilder sb2 = new StringBuilder(groupPathStr).append(" with roles : ");
+            StringBuilder sb2 = new StringBuilder(groupPathStr).append(" with the following roles : ");
             groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
             groupPathStr = StringUtils.removeEnd(sb2.toString(), ", ");
         }
@@ -228,7 +236,8 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         String groupUrl = forMember ? uriInfo.getBaseUri().toString() + membersGroupPageUrl : uriInfo.getBaseUri().toString() + adminGroupPageUrl;
         attributes.put("groupUrl", groupUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
         attributes.put("signatureMessage", signatureMessage);
-        send("groupRejectionInvitationSubject", Stream.of(groupPath).collect(Collectors.toList()), "reject-invitation.ftl", attributes);
+        String titleType = forMember ? "joining" : "becoming an administrator of";
+        send("groupRejectionInvitationSubject", Stream.of(titleType, groupPath).collect(Collectors.toList()), "reject-invitation.ftl", attributes);
     }
 
     public void sendInvitionAdminInformationEmail(String email, boolean forMember, String groupname, UserModel admin, List<String> groupRoles) throws EmailException {
