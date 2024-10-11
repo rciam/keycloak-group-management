@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class EntityToRepresentation {
 
@@ -29,7 +30,7 @@ public class EntityToRepresentation {
 
     public static GroupEnrollmentConfigurationRepresentation toRepresentation(GroupEnrollmentConfigurationEntity entity, boolean fullPath, RealmModel realm) {
         GroupEnrollmentConfigurationRepresentation rep = new GroupEnrollmentConfigurationRepresentation(entity.getId());
-        GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true, fullPath, realm);
+        GroupRepresentation group = toBriefRepresentation(entity.getGroup(), false, fullPath, realm);
         rep.setGroup(group);
         rep.setName(entity.getName());
         rep.setActive(entity.isActive());
@@ -120,12 +121,15 @@ public class EntityToRepresentation {
         return rep;
     }
 
-    public static GroupRepresentation toBriefRepresentation(GroupEntity entity, boolean attributes, boolean fullPath, RealmModel realm) {
+    public static GroupRepresentation toBriefRepresentation(GroupEntity entity, boolean setExpirationPeriod, boolean fullPath, RealmModel realm) {
         GroupRepresentation rep = new GroupRepresentation();
         rep.setId(entity.getId());
         rep.setName(entity.getName());
-        if (attributes && entity.getAttributes() != null)
-            rep.setAttributes(getGroupAttributes(entity.getAttributes()));
+        rep.setAttributes(getGroupAttributes(entity.getAttributes()));
+        if (setExpirationPeriod && !rep.getAttributes().containsKey(Utils.expirationNotificationPeriod)) {
+            rep.getAttributes().put(Utils.expirationNotificationPeriod, Stream.of(realm.getAttribute(Utils.expirationNotificationPeriod) != null ? realm.getAttribute(Utils.expirationNotificationPeriod) : "21").collect(Collectors.toList()));
+        }
+
         if (fullPath) {
             GroupModel group = realm.getGroupById(entity.getId());
             rep.setPath(ModelToRepresentation.buildGroupPath(group));
@@ -163,7 +167,7 @@ public class EntityToRepresentation {
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
         if (entity.getGroup() != null) {
-            GroupRepresentation group = toBriefRepresentation(entity.getGroup(), true, false, realm);
+            GroupRepresentation group = toBriefRepresentation(entity.getGroup(), false, false, realm);
             rep.setGroup(group);
         }
 
