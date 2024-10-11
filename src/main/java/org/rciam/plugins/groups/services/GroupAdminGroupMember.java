@@ -97,7 +97,7 @@ public class GroupAdminGroupMember {
             //For enabled member do to change valid from
             rep.setValidFrom(member.getValidFrom());
         }
-        GroupEnrollmentConfigurationRulesEntity configurationRule = groupEnrollmentConfigurationRulesRepository.getByRealmAndTypeAndField(realm.getId(), member.getGroup().getParentId().trim().isEmpty() ? GroupTypeEnum.SUBGROUP : GroupTypeEnum.TOP_LEVEL, "membershipExpirationDays");
+        GroupEnrollmentConfigurationRulesEntity configurationRule = groupEnrollmentConfigurationRulesRepository.getByRealmAndTypeAndField(realm.getId(), member.getGroup().getParentId().trim().isEmpty() ? GroupTypeEnum.TOP_LEVEL : GroupTypeEnum.SUBGROUP, "membershipExpirationDays");
         if (configurationRule != null && configurationRule.getRequired() && rep.getMembershipExpiresAt() == null) {
             throw new BadRequestException("Expiration date must not be empty");
         } else if (configurationRule != null && configurationRule.getMax() != null && MemberStatusEnum.PENDING.equals(member.getStatus()) && rep.getValidFrom().plusDays(Long.valueOf(configurationRule.getMax())).isBefore(rep.getMembershipExpiresAt())) {
