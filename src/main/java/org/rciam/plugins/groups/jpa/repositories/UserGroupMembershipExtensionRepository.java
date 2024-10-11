@@ -556,7 +556,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     @Transactional
     public void update(UserGroupMembershipExtensionRepresentation rep, UserGroupMembershipExtensionEntity entity, GroupModel group, KeycloakSession session, UserModel groupAdmin, ClientConnection clientConnection) throws UnsupportedEncodingException {
         boolean isNotMember = !MemberStatusEnum.ENABLED.equals(entity.getStatus());
-        boolean isMembershipExpiresAtChanges = ( rep.getMembershipExpiresAt() == null && entity.getMembershipExpiresAt() == null) || (rep.getMembershipExpiresAt() != null && rep.getMembershipExpiresAt().equals(entity.getMembershipExpiresAt()));
+        boolean isMembershipExpiresAtChanges = !(( rep.getMembershipExpiresAt() == null && entity.getMembershipExpiresAt() == null) || (rep.getMembershipExpiresAt() != null && rep.getMembershipExpiresAt().equals(entity.getMembershipExpiresAt())));
         entity.setValidFrom(rep.getValidFrom());
         if (isMembershipExpiresAtChanges){
             //only if membershipExpiresAt has been changed
