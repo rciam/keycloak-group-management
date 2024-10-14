@@ -55,7 +55,6 @@ import static org.keycloak.userprofile.UserProfileContext.USER_API;
 public class UserGroupMembershipExtensionRepository extends GeneralRepository<UserGroupMembershipExtensionEntity> {
 
     private static final Logger logger = Logger.getLogger(UserGroupMembershipExtensionRepository.class);
-    private static final String orderbyStr = " order by f.user.lastName, f.user.firstName";
     private static final String localIp = "127.0.0.1";
     private final GroupManagementEventRepository eventRepository;
     private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
@@ -333,7 +332,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         return new UserGroupMembershipExtensionRepresentationPager(results.map(x -> EntityToRepresentation.toRepresentation(x, realm, true)).collect(Collectors.toList()), count);
     }
 
-    public UserGroupMembershipExtensionRepresentationPager searchByGroupAndSubGroups(String groupId, Set<String> groupIdList, String search, MemberStatusEnum status, String role, Integer first, Integer max) {
+    public UserGroupMembershipExtensionRepresentationPager searchByGroupAndSubGroups(String groupId, Set<String> groupIdList, String search, MemberStatusEnum status, String role, PagerParameters pagerParameters) {
 
 
         StringBuilder fromQuery = new StringBuilder("from UserGroupMembershipExtensionEntity f");
@@ -355,7 +354,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             params.put("status", status);
         }
 
-        Query queryList = em.createQuery("select f " + fromQuery + sqlQuery + orderbyStr).setFirstResult(first).setMaxResults(max);
+        Query queryList = em.createQuery("select f " + fromQuery + sqlQuery + " order by " + pagerParameters.getOrder() + " " + pagerParameters.getOrderType()).setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax());
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             queryList.setParameter(entry.getKey(), entry.getValue());
         }
