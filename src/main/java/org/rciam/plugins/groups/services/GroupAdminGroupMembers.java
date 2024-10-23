@@ -130,7 +130,7 @@ public class GroupAdminGroupMembers {
                                                                           @QueryParam("role") String role,
                                                                           @QueryParam("status") MemberStatusEnum status,
                                                                           @QueryParam("direct") @DefaultValue("true") boolean direct,
-                                                                          @QueryParam("order") @DefaultValue("f.user.lastName, f.user.firstName") String order,
+                                                                          @QueryParam("order") @DefaultValue("f.user.lastName, f.user.firstName, f.user.email") String order,
                                                                           @QueryParam("asc") @DefaultValue("true") boolean asc){
         Set<String> groupIdsList = new HashSet<>();
         groupIdsList.add(group.getId());
