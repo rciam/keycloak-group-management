@@ -4,7 +4,7 @@ import { DataList, DataListItem, DataListItemCells, DataListItemRow, DataListCel
 // @ts-ignore
 import { ConfirmationModal } from '../Modals';
 import { GroupsServiceClient, HttpResponse } from '../../groups-mngnt-service/groups.service';
-import { MinusIcon, PlusIcon, EyeIcon,	TimesIcon,CopyIcon } from '@patternfly/react-icons';
+import { MinusIcon, PlusIcon, EyeIcon, TimesIcon, CopyIcon } from '@patternfly/react-icons';
 import { Msg } from '../../widgets/Msg';
 import { Alerts } from '../../widgets/Alerts';
 import { Link } from 'react-router-dom';
@@ -37,7 +37,7 @@ export const GroupDetails: FC<any> = (props) => {
         groupsService!.doDelete<any>("/group-admin/group/" + props.groupId + "/role/" + role)
             .then((response: HttpResponse<any>) => {
                 if (response.status === 200 || response.status === 204) {
-                   props.fetchGroupConfiguration();
+                    props.fetchGroupConfiguration();
                 }
                 setModalInfo({});
             }).catch(err => {
@@ -61,9 +61,9 @@ export const GroupDetails: FC<any> = (props) => {
                                     <span id="compact-item1"><strong><Msg msgKey='Path' /></strong></span>
                                 </DataListCell>,
                                 <DataListCell width={3} key="secondary content ">
-                                    <span>/{props.groupConfiguration?.parents?.map((group)=> {
+                                    <span>/{props.groupConfiguration?.parents?.map((group) => {
                                         return (<React.Fragment>
-                                            <Link to={"/groups/admingroups/"+group.id}>{group.name}</Link>{'/'}
+                                            <Link to={"/groups/admingroups/" + group.id}>{group.name}</Link>{'/'}
                                         </React.Fragment>)
                                     })}{props.groupConfiguration.name}</span>
                                 </DataListCell>
@@ -71,7 +71,23 @@ export const GroupDetails: FC<any> = (props) => {
                         />
                     </DataListItemRow>
                 </DataListItem>
-                
+                <DataListItem aria-labelledby="compact-item1">
+                    <DataListItemRow>
+                        <DataListItemCells
+                            dataListCells={[
+                                <DataListCell key="primary content">
+                                    <span id="compact-item1"><strong><Msg msgKey='enrollmentDiscoveryLink' /></strong></span>
+                                </DataListCell>,
+                                <DataListCell width={3} key="secondary content ">
+                                    <ClipboardCopy isReadOnly hoverTip="Copy" clickTip="Copied" className="gm_copy-text-input">
+                                        {groupsService.getBaseUrl() + '/account/#/enroll?groupPath=' + encodeURI(props.groupConfiguration.path)}
+                                    </ClipboardCopy>
+                                </DataListCell>
+                            ]}
+                        />
+                    </DataListItemRow>
+                </DataListItem>
+
                 <DataListItem aria-labelledby="compact-item2">
                     <DataListItemRow className="gm_role_row">
                         <DataListItemCells
@@ -79,14 +95,14 @@ export const GroupDetails: FC<any> = (props) => {
                                 <DataListCell key="primary content">
                                     <span id="compact-item1"><strong><Msg msgKey='adminGroupRoles' /></strong></span>
                                 </DataListCell>,
-                                <DataListCell width={3} key="roles">
+                                <DataListCell width={3} key="roles">,
                                     <div className="gm_role_add_container">
                                         <InputGroup>
-                                            <TextInput id="textInput-basic-1" value={roleInput} placeholder={Msg.localize('adminGroupRolesAddPlaceholder')} onChange={(e) => { setRoleInput(e.trim());}} onKeyDown={(e) => { e.key === 'Enter' && roleRef?.current?.click(); }} type="email" aria-label="email input field" />
+                                            <TextInput id="textInput-basic-1" value={roleInput} placeholder={Msg.localize('adminGroupRolesAddPlaceholder')} onChange={(e) => { setRoleInput(e.trim()); }} onKeyDown={(e) => { e.key === 'Enter' && roleRef?.current?.click(); }} type="email" aria-label="email input field" />
                                         </InputGroup>
                                         <Tooltip content={<div><Msg msgKey='adminGroupRolesAdd' /></div>}>
                                             <Button ref={roleRef} onClick={() => {
-                                                if (props?.groupConfiguration?.groupRoles&&Object.keys(props.groupConfiguration.groupRoles).includes(roleInput)) {
+                                                if (props?.groupConfiguration?.groupRoles && Object.keys(props.groupConfiguration.groupRoles).includes(roleInput)) {
                                                     setModalInfo({
                                                         title: (Msg.localize('adminGroupRoleExistsTitle')),
                                                         accept_message: Msg.localize('OK'),
@@ -95,7 +111,7 @@ export const GroupDetails: FC<any> = (props) => {
                                                         cancel: function () { setModalInfo({}) }
                                                     });
                                                 }
-                                                if (!roleInput){
+                                                if (!roleInput) {
                                                     setModalInfo({
                                                         title: (Msg.localize('adminGroupRoleEmptyTitle')),
                                                         accept_message: Msg.localize('OK'),
@@ -126,12 +142,12 @@ export const GroupDetails: FC<any> = (props) => {
                                                     Role Entitlement
                                                 </th>
                                                 <th>
-                                                    
+
                                                 </th>
-                                            </tr>  
+                                            </tr>
                                         </thead>
                                         <tbody>
-                                            {props?.groupConfiguration?.groupRoles&&Object.keys(props.groupConfiguration.groupRoles).map((role, index) => {
+                                            {props?.groupConfiguration?.groupRoles && Object.keys(props.groupConfiguration.groupRoles).map((role, index) => {
                                                 return <tr>
                                                     <td>
                                                         {role}
@@ -157,7 +173,6 @@ export const GroupDetails: FC<any> = (props) => {
                                                             </Button>
                                                         </Tooltip>
                                                     </td>
-                                                  
                                                 </tr>
                                             })}
                                         </tbody>

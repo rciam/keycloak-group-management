@@ -234,7 +234,7 @@ export const EnrollmentRequests: FC<any> = (props) => {
             
           
           
-            <EnrollmentRequest enrollmentRequest={selectedRequest} managePage={props.manage} close={()=>{setSelectedRequest({}); fetchEnrollmentRequests();}}/>
+            <EnrollmentRequest history={props.history} enrollmentRequest={selectedRequest} managePage={props.manage} close={()=>{setSelectedRequest({}); fetchEnrollmentRequests();}}/>
             <DataList aria-label="Enrollment Request Datalist" isCompact wrapModifier={"breakWord"}>
                 <DataListItem aria-labelledby="compact-item1">
                   <DataListItemRow>

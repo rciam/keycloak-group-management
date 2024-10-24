@@ -1,28 +1,27 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 import { FC, useState, useEffect } from 'react';
-import { LongArrowAltDownIcon, LongArrowAltUpIcon, AngleDownIcon } from '@patternfly/react-icons';
-
-
+import { LongArrowAltDownIcon, LongArrowAltUpIcon, AngleDownIcon, ExclamationTriangleIcon, InfoCircleIcon } from '@patternfly/react-icons';
 import {
-  Checkbox,
   DataList,
   DataListItem,
   DataListItemRow,
   DataListCell,
   DataListItemCells,
   Pagination,
-  Tooltip,
-  Badge,
+  Badge, DataListAction,
+  Popover, KebabToggle, Dropdown, DropdownItem
 } from '@patternfly/react-core';
-
+import { dateParse, addDays, isFirstDateBeforeSecond } from '../../widgets/Date';
 // @ts-ignore
 import { ContentPage } from '../ContentPage';
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
 import { Msg } from '../../widgets/Msg';
+import { Button } from '@patternfly/react-core';
 
 export interface GroupsPageProps {
+  history: any;
 }
 
 export interface GroupsPageState {
@@ -100,34 +99,7 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
     )
   }
 
-  const renderGroupList = (membership, appIndex: number) => {
-    return (
-      <Link to={"/groups/showgroups/" + membership.group.id}>
-        <DataListItem id={`${appIndex}-group`} key={'group-' + appIndex} aria-labelledby="groups-list" >
-          <DataListItemRow>
-            <DataListItemCells
-              dataListCells={[
-                <DataListCell id={`${appIndex}-group-name`} width={2} key={'name-' + appIndex}>
-                  {membership.group.name}
-                </DataListCell>,
-                <DataListCell id={`${appIndex}-group-path`} width={2} key={'groupPath-' + appIndex}>
-                  {membership.group.path}
-                </DataListCell>,
-                <DataListCell id={`${appIndex}-group-roles`} width={2} key={'directMembership-' + appIndex}>
-                  {membership.groupRoles.map((role, index) => {
-                    return <Badge key={index} className="gm_role_badge" isRead>{role}</Badge>
-                  })}
-                </DataListCell>,
-                <DataListCell id={`${appIndex}-group-membershipExpiration`} width={2} key={'directMembership-' + appIndex}>
-                  {membership.membershipExpiresAt || <Msg msgKey='Never' />}
-                </DataListCell>
-              ]}
-            />
-          </DataListItemRow>
-        </DataListItem>
-      </Link>
-    )
-  }
+
 
   const orderResults = (type) => {
     if (orderBy !== type) {
@@ -152,23 +124,55 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
                 <DataListCell key='group-name-header' width={2} onClick={() => { orderResults('') }}>
                   <strong><Msg msgKey='nameDatalistTitle' /></strong>{!orderBy ? <AngleDownIcon /> : asc ? <LongArrowAltDownIcon /> : <LongArrowAltUpIcon />}
                 </DataListCell>,
-                 <DataListCell key='group-path' width={2}>
-                 <strong><Msg msgKey='groupPath' /></strong>
-               </DataListCell>,
+                <DataListCell key='group-path' width={2}>
+                  <strong><Msg msgKey='groupPath' /></strong>
+                </DataListCell>,
                 <DataListCell key='group-roles' width={2}>
                   <strong><Msg msgKey='rolesDatalistTitle' /></strong>
                 </DataListCell>,
-                <DataListCell key='group-membership-expiration-header' width={2} onClick={() => { orderResults('membershipExpiresAt') }}>
-                  <strong><Msg msgKey='membershipDatalistTitle' /></strong> {orderBy !== 'membershipExpiresAt' ? <AngleDownIcon /> : asc ? <LongArrowAltDownIcon /> : <LongArrowAltUpIcon />}
+                <DataListCell key='group-membership-expiration-header' width={2}>
+                  <div className="gm_order_by_container" onClick={() => { orderResults('effectiveMembershipExpiresAt') }}>
+                    <strong><Msg msgKey='membershipDatalistTitle' /></strong>
+                    {orderBy !== 'effectiveMembershipExpiresAt' ? <AngleDownIcon /> : asc ? <LongArrowAltDownIcon /> : <LongArrowAltUpIcon />}
+                  </div>
+                  {/* <div className="gm_group-memberships-more-info">
+                    <Popover
+                      bodyContent={
+                        <div>
+                          <Msg msgKey='membershipExpiresAtPopoverDatalist' />
+                        </div>
+                      }
+                    >
+                      <button
+                        type="button"
+                        aria-label="More info for name field"
+                        onClick={e => e.preventDefault()}
+                        aria-describedby="simple-form-name-01"
+                        className="pf-c-form__group-label-help"
+                      >
+                        <HelpIcon />
+                      </button>
+                    </Popover>
+                  </div> */}
                 </DataListCell>,
               ]}
             />
+            <DataListAction
+              className="gm_cell-center"
+              aria-labelledby="check-action-item1 check-action-action2"
+              id="check-action-action1"
+              aria-label="Actions"
+              isPlainButtonAction
+            ><div className="gm_cell-placeholder"></div></DataListAction>
           </DataListItemRow>
         </DataListItem>
         {groups.length === 0
           ? emptyGroup()
-          : groups.map((group: Group, appIndex: number) =>
-            renderGroupList(group, appIndex))}
+          : groups.map((group: Group, appIndex: number) => {
+            return <MembershipDatalistItem membership={group} history={props.history} currentDate={new Date(new Date().setHours(0, 0, 0, 0))} appIndex={appIndex} />
+          })
+
+        }
       </DataList>
       <Pagination
         itemCount={totalItems}
@@ -181,4 +185,142 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
     </ContentPage>
   );
 
+};
+
+const MembershipDatalistItem = (props) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [expirationWarning, setExpirationWarning] = useState(false);
+  const [effectiveGroupPath, setEffectiveGroupPath] = useState("");
+  let groupsService = new GroupsServiceClient();
+
+  // Compute expirationWarning and fetch group data on membership change
+  useEffect(() => {
+    if (props.membership?.effectiveMembershipExpiresAt && props.membership?.group?.attributes['expiration-notification-period'][0]) {
+      const warning = isFirstDateBeforeSecond(
+        dateParse(props.membership.effectiveMembershipExpiresAt),
+        addDays(props.currentDate, parseInt(props.membership.group.attributes['expiration-notification-period'][0])),
+        'warning'
+      );
+      setExpirationWarning(!!warning);  // Set warning as true or false
+    }
+    if (props.membership?.effectiveGroupId) {
+      fetchGroup();
+    }
+  }, [props.membership]);
+
+  const onToggle = (isOpen: boolean) => {
+    setIsOpen(isOpen);
+  };
+
+  // Fetch the group path based on the effectiveGroupId
+  const fetchGroup = () => {
+    groupsService!.doGet<any>(`/user/group/${props.membership?.effectiveGroupId}/member`)
+      .then((response: HttpResponse<any>) => {
+        if (response.status === 200 && response.data) {
+          setEffectiveGroupPath(response.data.group.path);
+        }
+      });
+  };
+
+  const onSelect = () => {
+    setIsOpen(false);
+    const element = document.getElementById('toggle-kebab');
+    element && element.focus();
+  };
+
+  return (
+    <DataListItem id={`${props.appIndex}-group`} key={'group-' + props.appIndex + expirationWarning} aria-labelledby="groups-list" >
+      <DataListItemRow>
+        <DataListItemCells
+          dataListCells={[
+            <DataListCell id={`${props.appIndex}-group-name`} width={2} key={'name-' + props.appIndex}>
+              <Link to={"/groups/showgroups/" + props.membership.group.id}>
+                {props.membership.group.name}
+              </Link>
+            </DataListCell>,
+            <DataListCell id={`${props.appIndex}-group-path`} width={2} key={'groupPath-' + props.appIndex}>
+              {props.membership.group.path}
+            </DataListCell>,
+            <DataListCell id={`${props.appIndex}-group-roles`} width={2} key={'directMembership-' + props.appIndex}>
+              {props.membership.groupRoles.map((role, index) => (
+                <Badge key={index} className="gm_role_badge" isRead>{role}</Badge>
+              ))}
+            </DataListCell>,
+            <DataListCell id={`${props.appIndex}-group-membershipExpiration`} width={2} key={'directMembership-' + props.appIndex}>
+              <Popover
+                {...(!(props.membership?.effectiveGroupId || expirationWarning) && { isVisible: false })}
+                bodyContent={
+                  <div>
+                    {expirationWarning && props.membership?.effectiveGroupId ? (
+                      <>
+                        <Msg msgKey='membershipExpirationEffectiveNotification' />
+                        <Link to={`/enroll?groupPath=${encodeURI(effectiveGroupPath)}`}>
+                          <Button className="gm_popover-expiration-button" isSmall>Extend</Button>
+                        </Link>
+                      </>
+                    ) : expirationWarning ? (
+                      <>
+                        <Msg msgKey='membershipExpirationNotification' />
+                        <Link to={`/enroll?groupPath=${encodeURI(props.membership.group.path)}`}>
+                          <Button className="gm_popover-expiration-button" isSmall>Extend</Button>
+                        </Link>                      </>
+                    ) : (
+                      <>
+                        <Msg msgKey='effectiveExpirationHelp' />
+                        <Link to={`/groups/showgroups/${props.membership?.effectiveGroupId}`}>
+                          <Button className="gm_popover-expiration-button" isSmall>View</Button>
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                }
+              >
+                {expirationWarning ? (
+                  <span className="gm_effective-expiration-popover-trigger">
+                    <div style={{ display: 'inline-block' }} className={expirationWarning ? 'gm_warning-text' : ""}>
+                      {props.membership.effectiveMembershipExpiresAt || <Msg msgKey='Never' />}
+                    </div>
+                    <div className="gm_effective-helper-warning">
+                      <ExclamationTriangleIcon />
+                    </div>
+                  </span>
+                ) : props.membership?.effectiveGroupId ? (
+                  <span className="gm_effective-expiration-popover-trigger">
+                    <div style={{ display: 'inline-block' }} className={expirationWarning ? 'gm_warning-text' : ""}>
+                      {props.membership.effectiveMembershipExpiresAt || <Msg msgKey='Never' />}
+                    </div>
+                    <div className="gm_effective-helper-info">
+                      <InfoCircleIcon />
+                    </div>
+                  </span>
+                ) : (
+                  props.membership.effectiveMembershipExpiresAt || <Msg msgKey='Never' />
+                )}
+              </Popover>
+            </DataListCell>
+          ]}
+        />
+        <DataListAction
+          className="gm_cell-center gm_kebab-menu-cell"
+          aria-labelledby="check-action-item1 check-action-action2"
+          id="check-action-action1"
+          aria-label="Actions"
+          isPlainButtonAction
+        >
+          <Dropdown
+            alignments={{ sm: 'right', md: 'right', lg: 'right', xl: 'right', '2xl': 'right' }}
+            onSelect={onSelect}
+            toggle={<KebabToggle id="toggle-kebab" onToggle={onToggle} />}
+            isOpen={isOpen}
+            isPlain
+            dropdownItems={[
+              <Link to={`/enroll?groupPath=${encodeURI(props.membership.group.path)}`}><DropdownItem key="link">
+                <Msg msgKey='enrollmentDiscoveryPageLink' />
+              </DropdownItem></Link>,
+            ]}
+          />
+        </DataListAction>
+      </DataListItemRow>
+    </DataListItem >
+  );
 };

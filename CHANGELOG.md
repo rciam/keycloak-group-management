@@ -4,6 +4,16 @@ All notable changes in keycloak-group-management will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## Added 
+- Effective Expiration
+- Exposed Enrollment Discovery Page to Members
+- Warning indications for Expiring Memberships
+- Extended Edit Membership View
+
+## Fixed
+- Group Members Admin View Bug
+
 ## [0.23.0] - 2024-10-07
 
 ### Added

@@ -77,3 +77,21 @@ export function formatDateToString(date) {
 
   return `${month} ${day}, ${year}`;
 }
+
+export const isFirstDateBeforeSecond = (firstDate, secondDate, errorMessage) => {
+  // Normalize both dates to remove the time part for an accurate comparison    
+  if (firstDate) {
+      const firstDateWithoutTime = new Date(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
+      const secondDateWithoutTime = new Date(secondDate.getFullYear(), secondDate.getMonth(), secondDate.getDate());
+
+      // Check if the first date is before the second date
+      if (firstDateWithoutTime < secondDateWithoutTime) {
+          return errorMessage;
+      } else {
+          return "";
+      }
+  }
+  else {
+      return "";
+  }
+};

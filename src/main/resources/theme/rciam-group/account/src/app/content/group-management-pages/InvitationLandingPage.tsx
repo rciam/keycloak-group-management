@@ -125,52 +125,49 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props) => 
           <>
             <span className="gm_invitation-landing-title"><Msg msgKey='invitationGreetings' /> {invitationData?.groupEnrollmentConfiguration?.group?.name || invitationData?.group?.name}</span>
             <div className="gm_invitation-content-container">
-              <Hint>
-                <HintBody>
-                  <Msg msgKey="invitationMessage" />
-                  {invitationData?.forMember ? (
-                    invitationData.groupRoles.map((role, index) => (
-                      <strong key={index}>
-                        {role}
-                        {index !== invitationData.groupRoles.length - 1 && ', '}
-                      </strong>
-                    ))
-                  ) : (
-                    ' admin'
-                  )}
-                  {". "}
-                  {invitationData?.groupEnrollmentConfiguration?.validFrom && !isPastDate(dateParse(invitationData?.groupEnrollmentConfiguration?.validFrom)) ? (
-                    <>
-                      <Msg msgKey="validFromMessageInvitation" />
-                      <strong> {invitationData.groupEnrollmentConfiguration.validFrom}</strong>
-                    </>
-                  ) : (
-                    <Msg msgKey='noValidFromMessageInvitation' />
-                  )}
-                </HintBody>
-              </Hint>
               {(invitationData?.groupEnrollmentConfiguration?.group?.attributes?.description || invitationData?.group?.attributes?.description) && <div className="gm_invitation-purpuse">
                 <h1><Msg msgKey='Description' /></h1>
                 {invitationData?.groupEnrollmentConfiguration?.group?.attributes?.description[0] || invitationData?.group?.attributes?.description[0]}
               </div>}
+              <Hint>
+                <HintBody>
+                  <Msg msgKey='invitationMessage' />{invitationData?.forMember ? invitationData?.groupRoles.map((role, index) => { return <strong> {role}{index !== invitationData.groupRoles.length - 1 && ','}</strong> }) : ' admin'}.
+                </HintBody>
+              </Hint>
               {invitationData?.forMember &&
-                <HelperText>
-                  <HelperTextItem variant="warning" hasIcon>
-                    <p>
-                      {invitationData?.groupEnrollmentConfiguration?.membershipExpirationDays ?
-                        <React.Fragment>
-                          <Msg msgKey='invitationExpirationMessage' />
-                          <strong>
-                            {" "+invitationData?.groupEnrollmentConfiguration?.membershipExpirationDays+" "}
-                            <Msg msgKey='days' />
-                          </strong>
-                        </React.Fragment>
-                        :
-                        <Msg msgKey='invitationExpirationMessageInfinite' />
-                      }
-                    </p>
-                  </HelperTextItem>
-                </HelperText>
+                <>
+                  <HelperText>
+                    <HelperTextItem variant="warning" hasIcon>
+                      <p>
+                        {
+                          invitationData?.groupEnrollmentConfiguration?.membershipExpirationDays ?
+                            <React.Fragment>
+                              <div dangerouslySetInnerHTML={{ 
+                                __html: 
+                                  (invitationData?.groupEnrollmentConfiguration?.validFrom?
+                                    Msg.localize("invitationExpirationMeddageValidFrom", [invitationData.groupEnrollmentConfiguration.validFrom,JSON.stringify(invitationData?.groupEnrollmentConfiguration?.membershipExpirationDays)])
+                                    :Msg.localize("invitationExpirationMessage", [JSON.stringify(invitationData?.groupEnrollmentConfiguration?.membershipExpirationDays)])) 
+                                  }} /></React.Fragment>
+                            :
+                            
+                            (invitationData?.groupEnrollmentConfiguration?.validFrom ?
+                              <div dangerouslySetInnerHTML={{ 
+                                __html: Msg.localize("invitationExpirationMeddageInfiniteValidFrom", [invitationData.groupEnrollmentConfiguration.validFrom])
+                              }}/>
+                              :
+                              <Msg msgKey='invitationExpirationMessageInfinite' />
+                            )
+                        }
+                      </p></HelperTextItem>
+                  </HelperText>
+                  <HelperText>
+                    <HelperTextItem variant="warning" hasIcon>
+                      <p>
+                        <Msg msgKey='invitationExpirationInfo' /> <a onClick={() => { props.history.push('/groups/showgroups'); }}>My Groups</a> page.
+                      </p>
+                    </HelperTextItem>
+                  </HelperText>
+                </>
               }
 
               {invitationData?.groupEnrollmentConfiguration?.aup?.url ?
