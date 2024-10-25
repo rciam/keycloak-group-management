@@ -95,7 +95,7 @@ export const GroupDetails: FC<any> = (props) => {
                                 <DataListCell key="primary content">
                                     <span id="compact-item1"><strong><Msg msgKey='adminGroupRoles' /></strong></span>
                                 </DataListCell>,
-                                <DataListCell width={3} key="roles">,
+                                <DataListCell width={3} key="roles">
                                     <div className="gm_role_add_container">
                                         <InputGroup>
                                             <TextInput id="textInput-basic-1" value={roleInput} placeholder={Msg.localize('adminGroupRolesAddPlaceholder')} onChange={(e) => { setRoleInput(e.trim()); }} onKeyDown={(e) => { e.key === 'Enter' && roleRef?.current?.click(); }} type="email" aria-label="email input field" />

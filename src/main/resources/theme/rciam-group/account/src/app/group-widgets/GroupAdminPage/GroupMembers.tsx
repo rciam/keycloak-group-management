@@ -179,7 +179,7 @@ export const GroupMembers: FC<any> = (props) => {
   const [alert, setAlert] = useState({});
   const [searchString, setSearchString] = useState("");
   const [groupId, setGroupId] = useState(props.groupId);
-  const [orderBy, setOrderBy] = useState("f.user.lastName,f.user.firstName");
+  const [orderBy, setOrderBy] = useState("default");
   const [asc, setAsc] = useState<boolean>(true);
 
 
@@ -255,7 +255,7 @@ export const GroupMembers: FC<any> = (props) => {
   }
 
   let fetchGroupMembers = (searchString: string | undefined = undefined) => {
-    groupsService!.doGet<any>("/group-admin/group/" + props.groupId + "/members?first=" + (perPage * (page - 1)) + "&max=" + perPage + (searchString ? "&search=" + searchString : "") + "&order="+ orderBy + "&asc=" + asc, {
+    groupsService!.doGet<any>("/group-admin/group/" + props.groupId + "/members?first=" + (perPage * (page - 1)) + "&max=" + perPage + (searchString ? "&search=" + searchString : "") + (orderBy!=="default"?"&order="+ orderBy:"") + "&asc=" + asc, {
       params: { ...(statusSelection ? { status: statusSelection } : {}), ...(roleSelection ? { role: roleSelection } : {}), ...(!directMembers ? { direct: 'false' } : {}) }
     })
       .then((response: HttpResponse<any>) => {
@@ -348,9 +348,9 @@ export const GroupMembers: FC<any> = (props) => {
                 <strong><Msg msgKey='UniqueIdentifier' /></strong>
               </DataListCell>,
               <DataListCell className="gm_vertical_center_cell" width={3} key="email-hd">
-                <div className="gm_order_by_container" onClick={() => { orderResults('f.user.lastName,f.user.firstName') }}>
+                <div className="gm_order_by_container" onClick={() => { orderResults('default') }}>
                   <strong><Msg msgKey='adminGroupMemberCellNameEmail' /></strong>
-                  {orderBy !== 'f.user.lastName,f.user.firstName' ? <AngleDownIcon /> : asc ? <LongArrowAltDownIcon /> : <LongArrowAltUpIcon />}
+                  {orderBy !== 'default' ? <AngleDownIcon /> : asc ? <LongArrowAltDownIcon /> : <LongArrowAltUpIcon />}
                 </div>
               </DataListCell>,
               <DataListCell className="gm_vertical_center_cell" width={3} key="email-hd">
