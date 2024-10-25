@@ -206,12 +206,19 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("email", userModel.getEmail());
         attributes.put("type", forMember ? "join" : "become an administrator of");
         String groupPathStr = groupPath+" group";
+        String groupPathStrText = groupPath+" group";
         if (forMember && groupRoles != null && !groupRoles.isEmpty()) {
-            StringBuilder sb2 = new StringBuilder(groupPathStr).append(" with the following roles : ");
-            groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
-            groupPathStr = StringUtils.removeEnd(sb2.toString(), ", ");
+            StringBuilder sb = new StringBuilder(groupPathStr).append(" with the following roles:");
+            StringBuilder sbText = new StringBuilder(groupPathStr).append(" with the following roles: ");
+            groupRoles.stream().forEach(role -> {
+                sb.append("<br>•").append(role);
+                sbText.append(role).append(", ");
+            });
+            groupPathStrText = StringUtils.removeEnd(sbText.toString(), ", ");
+            groupPathStr = sb.toString();
         }
         attributes.put("groupPath", groupPathStr);
+        attributes.put("groupPathText", groupPathStrText);
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         String groupUrl = forMember ? uriInfo.getBaseUri().toString() + membersGroupPageUrl : uriInfo.getBaseUri().toString() + adminGroupPageUrl;
         attributes.put("groupUrl", groupUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
@@ -226,12 +233,19 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("email", userModel.getEmail());
         attributes.put("type", forMember ? "join" : "become an administrator of");
         String groupPathStr = groupPath+" group";
+        String groupPathStrText = groupPath+" group";
         if (forMember && groupRoles != null && !groupRoles.isEmpty()) {
-            StringBuilder sb2 = new StringBuilder(groupPathStr).append(" with the following roles : ");
-            groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
-            groupPathStr = StringUtils.removeEnd(sb2.toString(), ", ");
+            StringBuilder sb = new StringBuilder(groupPathStr).append(" with the following roles:");
+            StringBuilder sbText = new StringBuilder(groupPathStr).append(" with the following roles: ");
+            groupRoles.stream().forEach(role -> {
+                sb.append("<br>•").append(role);
+                sbText.append(role).append(", ");
+            });
+            groupPathStrText = StringUtils.removeEnd(sbText.toString(), ", ");
+            groupPathStr = sb.toString();
         }
         attributes.put("groupPath", groupPathStr);
+        attributes.put("groupPathText", groupPathStrText);
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         String groupUrl = forMember ? uriInfo.getBaseUri().toString() + membersGroupPageUrl : uriInfo.getBaseUri().toString() + adminGroupPageUrl;
         attributes.put("groupUrl", groupUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));

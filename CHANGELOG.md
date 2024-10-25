@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 - Group Members Admin View Bug
 
+## [0.23.1] - 2024-10-08
+
+### Changed
+- Improve accept/ reject member invitation email
+
+
 ## [0.23.0] - 2024-10-07
 
 ### Added
