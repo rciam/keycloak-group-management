@@ -26,6 +26,7 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "USER_GROUP_MEMBERSHIP_EXTENSION")
 @NamedQueries({
+        @NamedQuery(name = "getAllMembers", query = "from UserGroupMembershipExtensionEntity f"),
         @NamedQuery(name = "getByUserAndGroup", query = "from UserGroupMembershipExtensionEntity f where f.group.id = :groupId and f.user.id = :userId"),
         @NamedQuery(name = "getActiveByUser", query = "from UserGroupMembershipExtensionEntity f where f.user.id = :userId and f.status = 'ENABLED'"),
         @NamedQuery(name = "getMembersByGroup", query = "from UserGroupMembershipExtensionEntity f where f.group.id = :groupId"),
@@ -36,6 +37,8 @@ import jakarta.persistence.Table;
         @NamedQuery(name = "getExpiredMemberships", query = "from UserGroupMembershipExtensionEntity f where f.membershipExpiresAt < :date"),
         @NamedQuery(name = "getMembershipsByStatusAndValidFrom", query = "from UserGroupMembershipExtensionEntity f where f.status = :status and f.validFrom <= :date"),
         @NamedQuery(name = "getExpiredMembershipsByGroup", query = "from UserGroupMembershipExtensionEntity f where f.group.id = :groupId and f.membershipExpiresAt < :date"),
+        @NamedQuery(name = "getByUserAndGroupsAndNullExpiration", query = "from UserGroupMembershipExtensionEntity f where  f.user.id = :userId and f.status = 'ENABLED' and f.membershipExpiresAt is not null and f.group.id in (:groupIds) order by f.membershipExpiresAt"),
+        @NamedQuery(name = "getByUserAndGroupsAndLessExpiration", query = "from UserGroupMembershipExtensionEntity f where  f.user.id = :userId and f.status = 'ENABLED' and f.membershipExpiresAt < :expirationDate and f.group.id in (:groupIds) order by f.membershipExpiresAt"),
         @NamedQuery(name = "deleteMembershipExtensionByGroup", query = "delete from UserGroupMembershipExtensionEntity g where g.group.id = :groupId"),
         @NamedQuery(name = "deleteMembershipExtensionByUser", query = "delete from UserGroupMembershipExtensionEntity g where g.user.id = :userId")
 })
@@ -67,6 +70,13 @@ public class UserGroupMembershipExtensionEntity {
 
     @Column(name = "MEMBERSHIP_EXPIRES_AT")
     private LocalDate membershipExpiresAt;
+
+    @Column(name = "EFFECTIVE_MEMBERSHIP_EXPIRES_AT")
+    private LocalDate effectiveMembershipExpiresAt;
+
+    @Column(name = "EFFECTIVE_GROUP_ID")
+    private String effectiveGroupId;
+
     @Column(name = "JUSTIFICATION")
     private String justification;
 
@@ -131,6 +141,22 @@ public class UserGroupMembershipExtensionEntity {
 
     public void setMembershipExpiresAt(LocalDate membershipExpiresAt) {
         this.membershipExpiresAt = membershipExpiresAt;
+    }
+
+    public LocalDate getEffectiveMembershipExpiresAt() {
+        return effectiveMembershipExpiresAt;
+    }
+
+    public void setEffectiveMembershipExpiresAt(LocalDate effectiveMembershipExpiresAt) {
+        this.effectiveMembershipExpiresAt = effectiveMembershipExpiresAt;
+    }
+
+    public String getEffectiveGroupId() {
+        return effectiveGroupId;
+    }
+
+    public void setEffectiveGroupId(String effectiveGroupId) {
+        this.effectiveGroupId = effectiveGroupId;
     }
 
     public String getJustification() {

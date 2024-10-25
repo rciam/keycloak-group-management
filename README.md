@@ -174,22 +174,23 @@ Role name can be changed in database( column GROUP_ROLE_NAME of table GROUP_MANA
 
 **Admin web services**
 
-| Path                                       | Method  | Description                                       | Classes                            |
---------------------------------------------|---------|---------------------------------------------------|------------------------------------| 
- /admin/group                               | POST    | create top level group                            | AdminService                       |     
- /admin/configuration                       | PUT     | change realm settings (realm attributes)          | AdminService                       | 
- /admin/member-user-attribute/configuration | GET     | get member user attribute configuration           | AdminService                       |
- /admin/member-user-attribute/configuration | POST    | update member user attribute configuration        | AdminService                       |
- /admin/configuration-rules                 | GET     | get group enrollment configuration rules          | AdminEnrollmentConfigurationRules  |
- /admin/configuration-rules                 | POST    | create group enrollment configuration rule        | AdminEnrollmentConfigurationRules  |
- /admin/configuration-rules/{id}            | GET     | get group enrollment configuration rule by id     | AdminEnrollmentConfigurationRules  |
- /admin/configuration-rules/{id}            | PUT     | update group enrollment configuration rule        | AdminEnrollmentConfigurationRules  |
- /admin/configuration-rules/{id}            | DELETE  | delete group enrollment configuration rule        | AdminEnrollmentConfigurationRules  |
- /admin/memberUserAttribute/calculation     | POST    | update member user attribute value for all users  | AdminService                       |
- /admin/user/{id}                           | DELETE  | delete user                                       | AdminService                       |
- /admin/group/{groupId}                     | DELETE  | delete group                                      | AdminGroups                        |
- /admin/group/{groupId}/configuration/{id}  | GET     | get  group enrollment configuration               | AdminGroups                        |
- /admin/group/{groupId}/configuration       | POST    | create/update group enrollment configuration      | AdminGroups                        |
- /admin/group/{groupId}/admin/{userId}      | POST    | create group admin                                | AdminGroups                        |
- /admin/group/{groupId}/admin/{userId}      | DELETE  | delete group admin                                | AdminGroups                        |
- /admin/group/{groupId}/children            | POST    | create child group                                | AdminGroups                        |
+| Path                                       | Method  | Description                                                           | Classes                            |
+---------------------------------------------|---------|-----------------------------------------------------------------------|------------------------------------| 
+ /admin/group                                | POST    | create top level group                                                | AdminService                       |     
+ /admin/configuration                        | PUT     | change realm settings (realm attributes)                              | AdminService                       | 
+ /admin/member-user-attribute/configuration  | GET     | get member user attribute configuration                               | AdminService                       |
+ /admin/member-user-attribute/configuration  | POST    | update member user attribute configuration                            | AdminService                       |
+ /admin/configuration-rules                  | GET     | get group enrollment configuration rules                              | AdminEnrollmentConfigurationRules  |
+ /admin/configuration-rules                  | POST    | create group enrollment configuration rule                            | AdminEnrollmentConfigurationRules  |
+ /admin/configuration-rules/{id}             | GET     | get group enrollment configuration rule by id                         | AdminEnrollmentConfigurationRules  |
+ /admin/configuration-rules/{id}             | PUT     | update group enrollment configuration rule                            | AdminEnrollmentConfigurationRules  |
+ /admin/configuration-rules/{id}             | DELETE  | delete group enrollment configuration rule                            | AdminEnrollmentConfigurationRules  |
+ /admin/memberUserAttribute/calculation      | POST    | update member user attribute value for all users                      | AdminService                       |
+ /admin/effective-expiration-date/calculation| POST    | update user group membership effective expiration date for all realms | AdminService                       | 
+ /admin/user/{id}                            | DELETE  | delete user                                                           | AdminService                       |
+ /admin/group/{groupId}                      | DELETE  | delete group                                                          | AdminGroups                        |
+ /admin/group/{groupId}/configuration/{id}   | GET     | get  group enrollment configuration                                   | AdminGroups                        |
+ /admin/group/{groupId}/configuration        | POST    | create/update group enrollment configuration                          | AdminGroups                        |
+ /admin/group/{groupId}/admin/{userId}       | POST    | create group admin                                                    | AdminGroups                        |
+ /admin/group/{groupId}/admin/{userId}       | DELETE  | delete group admin                                                    | AdminGroups                        |
+ /admin/group/{groupId}/children             | POST    | create child group                                                    | AdminGroups                        |

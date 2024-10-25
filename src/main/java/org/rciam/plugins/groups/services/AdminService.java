@@ -18,7 +18,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import org.jboss.logging.Logger;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.events.admin.OperationType;
@@ -33,25 +32,23 @@ import org.keycloak.services.managers.RealmManager;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.GeneralJpaService;
-import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentConfigurationRulesEntity;
 import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRulesRepository;
 import org.rciam.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupRolesRepository;
+import org.rciam.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.rciam.plugins.groups.representations.MemberUserAttributeConfigurationRepresentation;
 import org.rciam.plugins.groups.scheduled.AgmTimerProvider;
 import org.rciam.plugins.groups.scheduled.MemberUserAttributeCalculatorTask;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ErrorResponseException;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
-import org.keycloak.services.resources.admin.GroupsResource;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 
 public class AdminService {
 
-    private static final Logger logger = Logger.getLogger(AdminService.class);
     private static final List<String> realmAttributesNames = Stream.of(Utils.expirationNotificationPeriod, Utils.invitationExpirationPeriod).collect(Collectors.toList());
 
     @Context
@@ -65,6 +62,7 @@ public class AdminService {
     private final GroupRolesRepository groupRolesRepository;
     private final GeneralJpaService generalJpaService;
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
+    private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final GroupEnrollmentConfigurationRulesRepository groupEnrollmentConfigurationRulesRepository;
 
     public AdminService(KeycloakSession session, RealmModel realm, ClientConnection clientConnection, AdminPermissionEvaluator realmAuth) {
@@ -79,13 +77,14 @@ public class AdminService {
         this.adminEvent =  new AdminEventBuilder(realm, realmAuth.adminAuth(), session, clientConnection);
         this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
         this.groupEnrollmentConfigurationRulesRepository =  new GroupEnrollmentConfigurationRulesRepository(session);
+        this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
         adminEvent.realm(realm);
     }
 
     @DELETE
     public void deleteRealm() {
         realmAuth.realm().requireManageRealm();
-        groupEnrollmentConfigurationRulesRepository.getByRealm(realm.getId()).forEach(rule -> groupEnrollmentConfigurationRulesRepository.deleteEntity(rule));
+        groupEnrollmentConfigurationRulesRepository.getByRealm(realm.getId()).forEach(groupEnrollmentConfigurationRulesRepository::deleteEntity);
         MemberUserAttributeConfigurationEntity memberUserAttributeConfigurationEntity = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
         if (memberUserAttributeConfigurationEntity != null)
             memberUserAttributeConfigurationRepository.deleteEntity(memberUserAttributeConfigurationEntity);
@@ -197,5 +196,12 @@ public class AdminService {
         } else {
             throw new ErrorResponseException("User couldn't be deleted","User couldn't be deleted", Response.Status.BAD_REQUEST);
         }
+    }
+
+    @POST
+    @Path("/effective-expiration-date/calculation")
+    public Response calculateEffectiveExpirationDate() {
+        userGroupMembershipExtensionRepository.migrateEffectiveExpiresAt();
+        return Response.noContent().build();
     }
 }

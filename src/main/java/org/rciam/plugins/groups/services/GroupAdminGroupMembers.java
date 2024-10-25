@@ -19,6 +19,7 @@ import org.keycloak.services.ForbiddenException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.enums.MemberStatusEnum;
 import org.rciam.plugins.groups.helpers.ModelToRepresentation;
+import org.rciam.plugins.groups.helpers.PagerParameters;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentConfigurationEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupAdminRepository;
@@ -34,6 +35,7 @@ import org.keycloak.services.ErrorResponseException;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -128,12 +130,14 @@ public class GroupAdminGroupMembers {
                                                                           @QueryParam("search") String search,
                                                                           @QueryParam("role") String role,
                                                                           @QueryParam("status") MemberStatusEnum status,
-                                                                          @QueryParam("direct") @DefaultValue("true") boolean direct){
+                                                                          @QueryParam("direct") @DefaultValue("true") boolean direct,
+                                                                          @QueryParam("order") @DefaultValue("f.user.lastName, f.user.firstName, f.user.email") String order,
+                                                                          @QueryParam("asc") @DefaultValue("true") boolean asc){
         Set<String> groupIdsList = new HashSet<>();
         groupIdsList.add(group.getId());
         if (!direct)
             groupIdsList.addAll(Utils.getAllSubgroupsIds(group));
-        return userGroupMembershipExtensionRepository.searchByGroupAndSubGroups(group.getId(), groupIdsList, search, status, role, first, max);
+        return userGroupMembershipExtensionRepository.searchByGroupAndSubGroups(group.getId(), groupIdsList, search, status, role, new PagerParameters(first, max, Arrays.asList(order.split(",")), asc ? "asc" : "desc"));
     }
 
 }

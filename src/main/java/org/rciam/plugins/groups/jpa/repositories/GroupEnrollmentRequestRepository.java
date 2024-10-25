@@ -132,7 +132,7 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
             parameters.put("status", status);
         }
 
-        TypedQuery<GroupEnrollmentRequestEntity> query = em.createQuery("select f " + sqlQueryMain.toString()+ " order by f." + pagerParameters.getOrder() + " " + pagerParameters.getOrderType(), GroupEnrollmentRequestEntity.class);
+        TypedQuery<GroupEnrollmentRequestEntity> query = em.createQuery("select f " + sqlQueryMain.toString()+ " order by f." + pagerParameters.getOrder().get(0) + " " + pagerParameters.getOrderType(), GroupEnrollmentRequestEntity.class);
         TypedQuery<Long> queryCount = em.createQuery("select count(f) " + sqlQueryMain.toString(), Long.class);
         for (Map.Entry<String, Object> e : parameters.entrySet()) {
             query.setParameter(e.getKey(), e.getValue());
@@ -158,7 +158,7 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
             parameters.put("status", status);
         }
 
-        TypedQuery<GroupEnrollmentRequestEntity> query = em.createQuery("select f " + sqlQueryMain.toString()+ " order by f." + pagerParameters.getOrder() + " " + pagerParameters.getOrderType(), GroupEnrollmentRequestEntity.class);
+        TypedQuery<GroupEnrollmentRequestEntity> query = em.createQuery("select f " + sqlQueryMain.toString()+ " order by f." + pagerParameters.getOrder().get(0) + " " + pagerParameters.getOrderType(), GroupEnrollmentRequestEntity.class);
         TypedQuery<Long> queryCount = em.createQuery("select count(f) " + sqlQueryMain.toString(), Long.class);
         for (Map.Entry<String, Object> e : parameters.entrySet()) {
             query.setParameter(e.getKey(), e.getValue());

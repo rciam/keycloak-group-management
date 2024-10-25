@@ -44,6 +44,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class UserGroups {
 
@@ -93,7 +94,7 @@ public class UserGroups {
                                                                             @QueryParam("max") @DefaultValue("10") Integer max,
                                                                             @QueryParam("order") @DefaultValue("group.name") String order,
                                                                             @QueryParam("asc") @DefaultValue("true") boolean asc) {
-        return userGroupMembershipExtensionRepository.userpager(user.getId(), search, new PagerParameters(first, max, order, asc ? "asc" : "desc"));
+        return userGroupMembershipExtensionRepository.userpager(user.getId(), search, new PagerParameters(first, max, Stream.of(order).collect(Collectors.toList()), asc ? "asc" : "desc"));
     }
 
     @Path("/group/{groupId}")
@@ -153,7 +154,7 @@ public class UserGroups {
                                                         @QueryParam("status") EnrollmentRequestStatusEnum status,
                                                         @QueryParam("order") @DefaultValue("submittedDate") String order,
                                                         @QueryParam("asc") @DefaultValue("false") boolean asc) {
-        return groupEnrollmentRequestRepository.groupEnrollmentPager(user.getId(), groupId, groupName, status, new PagerParameters(first, max, order, asc ? "asc" : "desc"));
+        return groupEnrollmentRequestRepository.groupEnrollmentPager(user.getId(), groupId, groupName, status, new PagerParameters(first, max, Stream.of(order).collect(Collectors.toList()), asc ? "asc" : "desc"));
     }
 
     @POST

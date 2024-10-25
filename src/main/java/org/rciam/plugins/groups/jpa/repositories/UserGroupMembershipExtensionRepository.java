@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.Logger;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
@@ -26,6 +27,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 import org.keycloak.userprofile.UserProfile;
 import org.keycloak.userprofile.UserProfileProvider;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
@@ -46,13 +48,14 @@ import org.rciam.plugins.groups.representations.GroupEnrollmentRequestRepresenta
 import org.rciam.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
 import org.rciam.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
 import org.rciam.plugins.groups.representations.UserRepresentationPager;
+import org.rciam.plugins.groups.scheduled.AgmTimerProvider;
+import org.rciam.plugins.groups.scheduled.SubgroupsExpirationDateCalculationTask;
 
 import static org.keycloak.userprofile.UserProfileContext.USER_API;
 
 public class UserGroupMembershipExtensionRepository extends GeneralRepository<UserGroupMembershipExtensionEntity> {
 
     private static final Logger logger = Logger.getLogger(UserGroupMembershipExtensionRepository.class);
-    private static final String orderbyStr = " order by f.user.lastName, f.user.firstName";
     private static final String localIp = "127.0.0.1";
     private final GroupManagementEventRepository eventRepository;
     private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
@@ -92,6 +95,16 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
     public Stream<UserGroupMembershipExtensionEntity> getByGroup(String groupId) {
         return em.createNamedQuery("getMembersByGroup").setParameter("groupId", groupId).getResultStream();
+    }
+
+    public Stream<UserGroupMembershipExtensionEntity> getByGroup(String userId, Set<String> groupIds) {
+        return em.createNamedQuery("getByUserAndGroups", UserGroupMembershipExtensionEntity.class).setParameter("userId", userId).setParameter("groupIds", groupIds).getResultStream();
+    }
+
+    public UserGroupMembershipExtensionEntity getMinExpirationDateForUserAndGroups(String userId, List<String> groupIds, LocalDate expirationDate) {
+        return expirationDate == null
+                ? em.createNamedQuery("getByUserAndGroupsAndNullExpiration", UserGroupMembershipExtensionEntity.class).setParameter("userId", userId).setParameter("groupIds", groupIds).getResultStream().findFirst().orElse(null)
+                : em.createNamedQuery("getByUserAndGroupsAndLessExpiration", UserGroupMembershipExtensionEntity.class).setParameter("userId", userId).setParameter("groupIds", groupIds).setParameter("expirationDate", expirationDate).getResultStream().findFirst().orElse(null);
     }
 
     @Transactional
@@ -149,6 +162,9 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 }
                 LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(localIp), userModel, member.getChangedBy() != null ? member.getChangedBy().getId() : userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
                         , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
+
+                AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
+                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), userModel.getId(), group.getId(), member.getMembershipExpiresAt()), 100),  100, "SubgroupsExpirationDateCalculationTask_"+ member.getId());
             });
 
             if (eventEntity == null) {
@@ -198,7 +214,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             //delete also subgroup members if exists
             Set<GroupModel> subgroups = Utils.getAllSubgroups(group);
             if (!subgroups.isEmpty()) {
-                em.createNamedQuery("getByUserAndGroups", UserGroupMembershipExtensionEntity.class).setParameter("userId", user.getId()).setParameter("groupIds", subgroups.stream().map(GroupModel::getId).collect(Collectors.toList())).getResultStream().forEach(memberEntity -> {
+                getByGroup(user.getId(),subgroups.stream().map(GroupModel::getId).collect(Collectors.toSet())).forEach(memberEntity -> {
                     try {
                         List<String> roleSubgroupNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
                         String groupId = memberEntity.getGroup().getId();
@@ -237,7 +253,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         Set<String> subgroupsIds = Utils.getAllSubgroupsIds(group);
         if (!subgroupsIds.isEmpty()) {
             List<String> results = new ArrayList<>();
-            em.createNamedQuery("getByUserAndGroupsAndNotSuspended", UserGroupMembershipExtensionEntity.class).setParameter("userId", user.getId()).setParameter("groupIds", subgroupsIds).getResultStream().forEach(memberEntity -> {
+            getByGroup(user.getId(), subgroupsIds).forEach(memberEntity -> {
                 try {
                     memberEntity.setStatus(MemberStatusEnum.SUSPENDED);
                     memberEntity.setJustification(justification);
@@ -302,7 +318,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             sqlQuery += "where f.user.id = :userId and f.status = 'ENABLED'";
         }
 
-        Query queryList = em.createQuery("select f " + sqlQuery + " order by f." + pagerParameters.getOrder() + " " + pagerParameters.getOrderType()).setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax());
+        Query queryList = em.createQuery("select f " + sqlQuery + " order by f." + pagerParameters.getOrder().get(0) + " " + pagerParameters.getOrderType()).setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax());
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             queryList.setParameter(entry.getKey(), entry.getValue());
         }
@@ -317,7 +333,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         return new UserGroupMembershipExtensionRepresentationPager(results.map(x -> EntityToRepresentation.toRepresentation(x, realm, true)).collect(Collectors.toList()), count);
     }
 
-    public UserGroupMembershipExtensionRepresentationPager searchByGroupAndSubGroups(String groupId, Set<String> groupIdList, String search, MemberStatusEnum status, String role, Integer first, Integer max) {
+    public UserGroupMembershipExtensionRepresentationPager searchByGroupAndSubGroups(String groupId, Set<String> groupIdList, String search, MemberStatusEnum status, String role, PagerParameters pagerParameters) {
 
 
         StringBuilder fromQuery = new StringBuilder("from UserGroupMembershipExtensionEntity f");
@@ -339,7 +355,9 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             params.put("status", status);
         }
 
-        Query queryList = em.createQuery("select f " + fromQuery + sqlQuery + orderbyStr).setFirstResult(first).setMaxResults(max);
+        StringBuilder sb = new StringBuilder("select f " + fromQuery + sqlQuery + " order by ");
+        pagerParameters.getOrder().stream().forEach(order -> sb.append(order+ " "+ pagerParameters.getOrderType()+ ",") );
+        Query queryList = em.createQuery(StringUtils.removeEnd(sb.toString(), ",")).setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax());
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             queryList.setParameter(entry.getKey(), entry.getValue());
         }
@@ -400,7 +418,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         Set<String> subgroupsIds = Utils.getAllSubgroupsIds(group);
         if (!subgroupsIds.isEmpty()) {
             List<String> results = new ArrayList<>();
-            em.createNamedQuery("getByUserAndGroupsAndSuspended", UserGroupMembershipExtensionEntity.class).setParameter("userId", user.getId()).setParameter("groupIds", subgroupsIds).getResultStream().forEach(memberEntity -> {
+            getByGroup(user.getId(), subgroupsIds).forEach(memberEntity -> {
                 try {
                     memberEntity.setStatus(MemberStatusEnum.ENABLED);
                     memberEntity.setJustification(justification);
@@ -439,6 +457,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         entity.setGroup(configuration.getGroup());
         entity.setUser(enrollmentEntity.getUser());
+        setEffectiveGroupMembershipExpiresAt(entity);
         UserEntity editorUser = new UserEntity();
         editorUser.setId(groupAdmin.getId());
         entity.setChangedBy(editorUser);
@@ -462,13 +481,19 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         if (!isNotMember || MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
             GroupModel group = realm.getGroupById(configuration.getGroup().getId());
             UserModel user = session.users().getUserById(realm, enrollmentEntity.getUser().getId());
-            if (isNotMember && MemberStatusEnum.ENABLED.equals(entity.getStatus()))
+            if (isNotMember && MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
                 user.joinGroup(group);
+            }
 
             Utils.changeUserAttributeValue(user, entity, Utils.getGroupNameForMemberUserAttribute(group), memberUserAttribute, session);
             String eventState = isNotMember && MemberStatusEnum.ENABLED.equals(entity.getStatus()) ? Utils.GROUP_MEMBERSHIP_CREATE : Utils.GROUP_MEMBERSHIP_UPDATE;
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
                     , eventState, ModelToRepresentation.buildGroupPath(group), entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), entity.getMembershipExpiresAt());
+
+            if (MemberStatusEnum.ENABLED.equals(entity.getStatus()) && group.getSubGroupsStream().count() > 0) {
+                AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
+                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), user.getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, "SubgroupsExpirationDateCalculationTask_"+ entity.getId());
+            }
         }
 
 
@@ -483,15 +508,20 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             entity = new UserGroupMembershipExtensionEntity();
             entity.setId(KeycloakModelUtils.generateId());
         }
-        entity.setMembershipExpiresAt(null);
         if (isNotMember) {
             entity.setValidFrom(configuration.getValidFrom() == null || !configuration.getValidFrom().isAfter(LocalDate.now()) ? LocalDate.now() : configuration.getValidFrom());
+        }
+        if (configuration.getMembershipExpirationDays() != null) {
+            entity.setMembershipExpiresAt(entity.getValidFrom().plusDays(configuration.getMembershipExpirationDays()));
+        } else {
+            entity.setMembershipExpiresAt(null);
         }
         entity.setStatus(entity.getValidFrom().isAfter(LocalDate.now()) ? MemberStatusEnum.PENDING : MemberStatusEnum.ENABLED);
         entity.setGroup(configuration.getGroup());
         UserEntity userEntity = new UserEntity();
         userEntity.setId(user.getId());
         entity.setUser(userEntity);
+        setEffectiveGroupMembershipExpiresAt(entity);
         entity.setChangedBy(null);
         entity.setJustification(null);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
@@ -516,6 +546,11 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             String eventState = isNotMember && MemberStatusEnum.ENABLED.equals(entity.getStatus()) ? Utils.GROUP_MEMBERSHIP_CREATE : Utils.GROUP_MEMBERSHIP_UPDATE;
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, user.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(user.getId())
                     , eventState, ModelToRepresentation.buildGroupPath(group), rep.getGroupRoles(), entity.getMembershipExpiresAt());
+
+            if (MemberStatusEnum.ENABLED.equals(entity.getStatus()) && group.getSubGroupsStream().count() > 0) {
+                AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
+                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), user.getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, "SubgroupsExpirationDateCalculationTask_"+ entity.getId());
+            }
         }
 
     }
@@ -523,8 +558,13 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     @Transactional
     public void update(UserGroupMembershipExtensionRepresentation rep, UserGroupMembershipExtensionEntity entity, GroupModel group, KeycloakSession session, UserModel groupAdmin, ClientConnection clientConnection) throws UnsupportedEncodingException {
         boolean isNotMember = !MemberStatusEnum.ENABLED.equals(entity.getStatus());
-        entity.setMembershipExpiresAt(rep.getMembershipExpiresAt());
+        boolean isMembershipExpiresAtChanges = !(( rep.getMembershipExpiresAt() == null && entity.getMembershipExpiresAt() == null) || (rep.getMembershipExpiresAt() != null && rep.getMembershipExpiresAt().equals(entity.getMembershipExpiresAt())));
         entity.setValidFrom(rep.getValidFrom());
+        if (isMembershipExpiresAtChanges){
+            //only if membershipExpiresAt has been changed
+            entity.setMembershipExpiresAt(rep.getMembershipExpiresAt());
+            setEffectiveGroupMembershipExpiresAt(entity);
+        }
         entity.setStatus(LocalDate.now().isBefore(entity.getValidFrom()) ? MemberStatusEnum.PENDING : MemberStatusEnum.ENABLED);
         if (rep.getGroupRoles() != null) {
             entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, entity.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toList()));
@@ -550,10 +590,15 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
                     , eventState, ModelToRepresentation.buildGroupPath(group), rep.getGroupRoles(), entity.getMembershipExpiresAt());
         }
+
+        if (isMembershipExpiresAtChanges && MemberStatusEnum.ENABLED.equals(entity.getStatus()) && group.getSubGroupsStream().count() > 0) {
+            AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
+            timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), entity.getUser().getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, "SubgroupsExpirationDateCalculationTask_"+ entity.getId());
+        }
     }
 
     @Transactional
-    public void create(GroupInvitationEntity invitationEntity, UserModel userModel, KeycloakUriInfo uri, MemberUserAttributeConfigurationEntity memberUserAttribute, ClientConnection clientConnection) {
+    public UserGroupMembershipExtensionEntity create(GroupInvitationEntity invitationEntity, UserModel userModel, KeycloakUriInfo uri, MemberUserAttributeConfigurationEntity memberUserAttribute, ClientConnection clientConnection) {
         GroupEnrollmentConfigurationEntity configuration = invitationEntity.getGroupEnrollmentConfiguration();
         UserGroupMembershipExtensionEntity entity = new UserGroupMembershipExtensionEntity();
         entity.setId(KeycloakModelUtils.generateId());
@@ -573,6 +618,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         UserEntity userEntity = new UserEntity();
         userEntity.setId(userModel.getId());
         entity.setUser(userEntity);
+        setEffectiveGroupMembershipExpiresAt(entity);
         entity.setChangedBy(invitationEntity.getCheckAdmin());
         entity.setJustification(null);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
@@ -600,11 +646,62 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             }
             LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(localIp), userModel, userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
                     , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), entity.getMembershipExpiresAt());
+
+            if (group.getSubGroupsStream().count() > 0) {
+                AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
+                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), userModel.getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, "SubgroupsExpirationDateCalculationTask_"+ entity.getId());
+            }
         }
+
+        return entity;
+    }
+
+    @Transactional
+    public void migrateEffectiveExpiresAt(){
+        em.createNamedQuery("getAllMembers", UserGroupMembershipExtensionEntity.class).getResultStream().forEach(member -> {
+            setEffectiveGroupMembershipExpiresAtForMigration(member);
+            em.merge(member);
+        });
     }
 
     public void deleteByUser(String userId) {
         em.createNamedQuery("deleteMembershipExtensionByUser").setParameter("userId", userId).executeUpdate();
     }
+
+    private void setEffectiveGroupMembershipExpiresAt(UserGroupMembershipExtensionEntity member) {
+        if (! member.getGroup().getParentId().trim().isEmpty()) {
+            GroupModel group = session.groups().getGroupById(realm, member.getGroup().getId());
+            List<String> parentsIds = Utils.findParentGroupIds(group);
+            UserGroupMembershipExtensionEntity effectiveMember = getMinExpirationDateForUserAndGroups(member.getUser().getId(), parentsIds, member.getMembershipExpiresAt());
+            if (effectiveMember != null) {
+                member.setEffectiveMembershipExpiresAt(effectiveMember.getMembershipExpiresAt());
+                member.setEffectiveGroupId(effectiveMember.getGroup().getId());
+            } else {
+                member.setEffectiveMembershipExpiresAt(member.getMembershipExpiresAt());
+                member.setEffectiveGroupId(null);
+            }
+        } else {
+            member.setEffectiveMembershipExpiresAt(member.getMembershipExpiresAt());
+        }
+    }
+
+    private void setEffectiveGroupMembershipExpiresAtForMigration(UserGroupMembershipExtensionEntity member) {
+        if (! member.getGroup().getParentId().trim().isEmpty()) {
+            RealmModel realmModel = session.realms().getRealm(member.getGroup().getRealm());
+            GroupModel group = session.groups().getGroupById(realmModel, member.getGroup().getId());
+            List<String> parentsIds = Utils.findParentGroupIds(group);
+            UserGroupMembershipExtensionEntity effectiveMember = getMinExpirationDateForUserAndGroups(member.getUser().getId(), parentsIds, member.getMembershipExpiresAt());
+            if (effectiveMember != null) {
+                member.setEffectiveMembershipExpiresAt(effectiveMember.getMembershipExpiresAt());
+                member.setEffectiveGroupId(effectiveMember.getGroup().getId());
+            } else {
+                member.setEffectiveMembershipExpiresAt(member.getMembershipExpiresAt());
+            }
+        } else {
+            member.setEffectiveMembershipExpiresAt(member.getMembershipExpiresAt());
+        }
+    }
+
+
 
 }

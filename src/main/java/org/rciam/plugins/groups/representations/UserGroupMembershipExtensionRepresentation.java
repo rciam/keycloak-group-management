@@ -28,6 +28,11 @@ public class UserGroupMembershipExtensionRepresentation {
     @JsonSerialize(using = LocalDateSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate membershipExpiresAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Utils.dateToStringFormat)
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate effectiveMembershipExpiresAt;
+    private String effectiveGroupId;
     private String justification;
     private GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
     private List<String> groupRoles;
@@ -91,6 +96,22 @@ public class UserGroupMembershipExtensionRepresentation {
 
     public void setMembershipExpiresAt(LocalDate membershipExpiresAt) {
         this.membershipExpiresAt = membershipExpiresAt;
+    }
+
+    public LocalDate getEffectiveMembershipExpiresAt() {
+        return effectiveMembershipExpiresAt;
+    }
+
+    public void setEffectiveMembershipExpiresAt(LocalDate effectiveMembershipExpiresAt) {
+        this.effectiveMembershipExpiresAt = effectiveMembershipExpiresAt;
+    }
+
+    public String getEffectiveGroupId() {
+        return effectiveGroupId;
+    }
+
+    public void setEffectiveGroupId(String effectiveGroupId) {
+        this.effectiveGroupId = effectiveGroupId;
     }
 
     public String getJustification() {

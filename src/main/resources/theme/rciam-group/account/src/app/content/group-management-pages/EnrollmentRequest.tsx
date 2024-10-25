@@ -199,7 +199,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                     <ListItem key={index} style={{ marginLeft: `${index}rem` }}>
                       {value.id}
                       {value.name && value.name !== value.id && ` - ${value.name}`}
-                      {!value.name && value.name !== value.id &&<> - <Msg msgKey="notAvailable" /></>}
+                      {!value.name && value.name !== value.id && <> - <Msg msgKey="notAvailable" /></>}
                     </ListItem>
                   ))}
                 </List>
@@ -225,7 +225,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                   </DataListItemRow>
                 </DataListItem>
 
-                {enrollmentRequest?.userAssurance&& Array.isArray(enrollmentRequest.userAssurance) && enrollmentRequest.userAssurance.length>0?enrollmentRequest?.userAssurance.map((value, index) => {
+                {enrollmentRequest?.userAssurance && Array.isArray(enrollmentRequest.userAssurance) && enrollmentRequest.userAssurance.length > 0 ? enrollmentRequest?.userAssurance.map((value, index) => {
                   return (
                     <DataListItem id={`${index}-group`} key={'group-' + index} aria-labelledby="groups-list">
                       <DataListItemRow>
@@ -235,8 +235,8 @@ export const EnrollmentRequest: FC<any> = (props) => {
                               {value}
                             </DataListCell>,
                             <DataListCell id={`${index}-description`} width={2} key={'path-' + index}>
-                              {Msg.localize(value.replace(":", ""))!= value.replace(":", "") ?
-                                <div dangerouslySetInnerHTML={{ __html: Msg.localize(value.replace(":", ""))}} />
+                              {Msg.localize(value.replace(":", "")) != value.replace(":", "") ?
+                                <div dangerouslySetInnerHTML={{ __html: Msg.localize(value.replace(":", "")) }} />
                                 :
                                 <Msg msgKey='notAvailable' />}
                             </DataListCell>
@@ -246,14 +246,14 @@ export const EnrollmentRequest: FC<any> = (props) => {
                     </DataListItem>
                   )
                 })
-                :
-                <DataListItem key='emptyItem' aria-labelledby="empty-item">
-                  <DataListItemRow key='emptyRow'>
-                    <DataListItemCells dataListCells={[
-                      <DataListCell key='empty'><Msg msgKey='noAssurance' /></DataListCell>
-                    ]} />
-                  </DataListItemRow>
-                </DataListItem>
+                  :
+                  <DataListItem key='emptyItem' aria-labelledby="empty-item">
+                    <DataListItemRow key='emptyRow'>
+                      <DataListItemCells dataListCells={[
+                        <DataListCell key='empty'><Msg msgKey='noAssurance' /></DataListCell>
+                      ]} />
+                    </DataListItemRow>
+                  </DataListItem>
                 }
 
               </DataList>
@@ -342,6 +342,29 @@ export const EnrollmentRequest: FC<any> = (props) => {
             <FormGroup
               label={Msg.localize('enrollmentExpirationLabel')}
               fieldId="simple-form-name-09"
+              labelIcon={
+                <Popover
+                  bodyContent={
+                    <div>
+                      <Msg msgKey='membershipExpiresAtHelperText'/>
+                      {!props.managePage&&
+                      <>
+                        <Msg msgKey='membershipExpiresAtMemberHelperText'/> <a onClick={()=>{ props.history.push('/groups/showgroups');}}>My Groups</a>  page.
+                      </>}
+                    </div>
+                  }
+                >
+                  <button
+                    type="button"
+                    aria-label="More info for name field"
+                    onClick={e => e.preventDefault()}
+                    aria-describedby="simple-form-name-01"
+                    className="pf-c-form__group-label-help"
+                  >
+                    <HelpIcon noVerticalAlign />
+                  </button>
+                </Popover>
+              }
             >
               <div>{enrollmentRequest?.groupEnrollmentConfiguration?.membershipExpirationDays ? enrollmentRequest?.groupEnrollmentConfiguration?.membershipExpirationDays : Msg.localize('reviewEnrollmentMembershipNoExpiration')}</div>
             </FormGroup>

@@ -3,12 +3,11 @@ import { useState, useEffect } from 'react';
 import { Button, Tooltip, ModalVariant, Modal, Form, FormGroup, Popover, DatePicker, Switch } from '@patternfly/react-core';
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 import { Msg } from '../../widgets/Msg';
-import {isPastDate, dateParse, addDays,isFirstDateBeforeSecond,dateFormat} from '../../widgets/Date';
+import { isPastDate, dateParse, addDays, isFirstDateBeforeSecond, dateFormat } from '../../widgets/Date';
 import { HelpIcon } from '@patternfly/react-icons';
 import { Loading } from '../LoadingModal';
 import { Alerts } from '../../widgets/Alerts';
 import { GroupRolesTable } from '../GroupRolesTable';
-
 
 interface EditMembershipModalProps {
     membership: Membership;
@@ -17,6 +16,7 @@ interface EditMembershipModalProps {
     groupId: any;
     fetchGroupMembers: any;
     enrollmentRules: any;
+
 };
 
 interface Membership {
@@ -25,6 +25,9 @@ interface Membership {
     membershipExpiresAt?: string;
     id?: any;
     status?: string;
+    user?:any;
+    group?:any;
+
 }
 
 export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) => {
@@ -62,11 +65,11 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
         validateMembership();
     }, [membership])
 
-   
+
     const validateValidFrom = (date: Date): string => {
         if (dateFormat(date) !== props.membership.validFrom) {
             const selectedDateWithoutTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-            if(props.membership['validFrom'] !== dateFormat(selectedDateWithoutTime)){
+            if (props.membership['validFrom'] !== dateFormat(selectedDateWithoutTime)) {
                 let pastDateError = isPastDate(date);
                 if (pastDateError) {
                     return pastDateError;
@@ -89,7 +92,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
     const validateMembershipExpiresAt = (date: Date | null): string => {
         if (date) {
             const selectedDateWithoutTime = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-            if(props.membership['membershipExpiresAt'] !== dateFormat(selectedDateWithoutTime)){
+            if (props.membership['membershipExpiresAt'] !== dateFormat(selectedDateWithoutTime)) {
                 let pastDateError = isPastDate(date);
                 if (pastDateError) {
                     return pastDateError;
@@ -115,7 +118,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                     ,
                     date
                     ,
-                    Msg.localize("validateMembershipExpiresErrorMax",[JSON.stringify(props.enrollmentRules.membershipExpirationDays.max)])
+                    Msg.localize("validateMembershipExpiresErrorMax", [JSON.stringify(props.enrollmentRules.membershipExpirationDays.max)])
                 )
                 if (rulesValidationError) {
                     return rulesValidationError
@@ -167,8 +170,8 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                     setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "success", description: Msg.localize('updateMembershipSuccessMessage') })
                 }
                 else {
-                    if(response.data.error){
-                        setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "danger", description: Msg.localize('updateMembershipErrorMessage',[response.data.error]) })
+                    if (response.data.error) {
+                        setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "danger", description: Msg.localize('updateMembershipErrorMessage', [response.data.error]) })
                     }
                 }
             })
@@ -215,6 +218,37 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                 <Alerts alert={alert} close={() => { setAlert({}) }} />
                 <Loading active={loading} />
                 <Form>
+                <FormGroup
+                        label={Msg.localize('groupPath')+":"}
+                        fieldId="simple-form-name-01"
+                    // helperText=""
+                    >
+                        <div>
+                            {props.membership?.group?.path  ? props.membership.group.path : "Not Available"}
+                        </div>
+                    </FormGroup>
+                    <FormGroup
+                        label={Msg.localize('enrollmentFullNameLabel')}
+                        fieldId="simple-form-name-01"
+                    // helperText=""
+                    >
+                        <div>
+                            {props.membership?.user?.firstName || props.membership?.user?.lastName ? props.membership.user.firstName + " " + props.membership.user.lastName : "Not Available"}
+                        </div>
+                    </FormGroup>
+                    <FormGroup
+                        label={Msg.localize('enrollmentEmailLabel')}
+                        fieldId="simple-form-name-02"
+                    >
+                        <div>{props.membership?.user?.email ? props.membership.user.email : Msg.localize('notAvailable')}</div>
+                    </FormGroup>
+                    <FormGroup
+                        label={"Username:"}
+                        fieldId="simple-form-name-02"
+                    >
+                        <div>{props.membership?.user?.username ? props.membership.user.username : Msg.localize('notAvailable')}</div>
+                    </FormGroup>
+
                     <FormGroup
                         label={Msg.localize('groupDatalistCellRoles')}
                         isRequired

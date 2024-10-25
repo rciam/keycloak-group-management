@@ -1,12 +1,16 @@
 import * as React from 'react';
 import { FC, useState, useEffect } from 'react';
-import { Tabs, Tab, TabTitleText, DataList, DataListItem, DataListItemCells, DataListItemRow, DataListCell, Breadcrumb, BreadcrumbItem, Badge, } from '@patternfly/react-core';
+import { Tabs, Tab, TabTitleText, DataList, DataListItem, DataListItemCells, DataListItemRow, DataListCell, Breadcrumb, BreadcrumbItem, Badge, Popover } from '@patternfly/react-core';
 // @ts-ignore
 import { ContentPage } from '../ContentPage';
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
 import { Msg } from '../../widgets/Msg';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
+import { HelpIcon, ExclamationTriangleIcon, InfoCircleIcon } from '@patternfly/react-icons';
+import { dateParse, addDays, isFirstDateBeforeSecond } from '../../widgets/Date';
+import { Link } from 'react-router-dom';
+import { Button } from '@patternfly/react-core';
 
 export interface GroupsPageProps {
   match: any;
@@ -41,6 +45,8 @@ interface GroupMembership {
   user: User;
   status: string;
   membershipExpiresAt: string;
+  effectiveMembershipExpiresAt: string;
+  effectiveGroupId: string;
   aupExpiresAt: string;
   validFrom: string;
   groupRoles: string[];
@@ -51,14 +57,35 @@ interface GroupMembership {
 
 // export class GroupPage extends React.Component<GroupsPageProps, GroupsPageState> {
 export const GroupPage: FC<GroupsPageProps> = (props) => {
+  const [groupMembership, setGroupMembership] = useState({} as GroupMembership);
+  const [groupId, setGroupId] = useState(props.match.params.id);
+  const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
+  const [expirationWarning, setExpirationWarning] = useState(false);
+  const [effectiveGroupPath, setEffectiveGroupPath] = useState("");
 
   let groupsService = new GroupsServiceClient();
   useEffect(() => {
     fetchGroups();
-  }, []);
-  const [groupMembership, setGroupMembership] = useState({} as GroupMembership);
-  const [groupId] = useState(props.match.params.id);
-  const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
+  }, [groupId]);
+
+  useEffect(() => {
+    if (groupMembership && groupMembership?.effectiveMembershipExpiresAt && groupMembership?.group?.attributes['expiration-notification-period'][0]) {
+      let warning = isFirstDateBeforeSecond(dateParse(groupMembership.effectiveMembershipExpiresAt),
+        addDays(new Date(new Date().setHours(0, 0, 0, 0)), parseInt(groupMembership.group.attributes['expiration-notification-period'][0])), 'warning'
+      );
+      setExpirationWarning(!!warning);
+      if (groupMembership?.effectiveGroupId) {
+        fetchParentPath();
+      }
+    }
+
+
+  }, [groupMembership])
+
+  useEffect(() => {
+    setGroupId(props.match.params.id)
+  }, [props.match.params.id])
+
 
   const handleTabClick = (
     event: React.MouseEvent<any> | React.KeyboardEvent | MouseEvent,
@@ -68,6 +95,14 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
   };
 
 
+  let fetchParentPath = () => {
+    groupsService!.doGet<any>("/user/group/" + groupMembership?.effectiveGroupId + "/member")
+      .then((response: HttpResponse<any>) => {
+        if (response.status === 200 && response.data) {
+          setEffectiveGroupPath(response.data.group.path);
+        }
+      })
+  }
   let fetchGroups = () => {
     groupsService!.doGet<GroupMembership>("/user/group/" + groupId + "/member")
       .then((response: HttpResponse<GroupMembership>) => {
@@ -78,7 +113,7 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
   }
   return (
     <>
-      <div className="gm_content">
+      <div className={"gm_content "} >
         <Breadcrumb className="gm_breadcumb">
           <BreadcrumbItem to="#">
             <Msg msgKey='accountConsole' />
@@ -86,22 +121,27 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
           <BreadcrumbItem to="#/groups/showgroups">
             <Msg msgKey='groupLabel' />
           </BreadcrumbItem>
-          {groupMembership?.group?.path.split("/").filter(item => item).map((value,index)=>{
+          {groupMembership?.group?.path.split("/").filter(item => item).map((value, index) => {
             return <BreadcrumbItem>
-            {value}
-          </BreadcrumbItem> 
+              {value}
+            </BreadcrumbItem>
           })}
         </Breadcrumb>
         <ContentPage title={groupMembership?.group?.name || ""}>
+
           <p className="gm_group_desc">
             {(groupMembership?.group?.attributes?.description && groupMembership?.group?.attributes?.description[0]) || Msg.localize('noDescription')}
           </p>
+          <div className="gm_update-membership-button">
+            <Link to={'/enroll?groupPath=' + encodeURI(groupMembership?.group?.path)}><Button>Update Membership</Button></Link>
+
+          </div>
           <Tabs
             className="gm_tabs"
             activeKey={activeTabKey}
             onSelect={handleTabClick}
             isBox={false}
-            aria-label="Tabs in the default example"
+            aria-label={"Tabs in the default example"}
             role="region"
           >
             <Tab eventKey={0} title={<TabTitleText><Msg msgKey='groupMembershipTab' /></TabTitleText>} aria-label="Default content - users">
@@ -120,32 +160,6 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
                     />
                   </DataListItemRow>
                 </DataListItem>
-                <DataListItem aria-labelledby="valid-from-item">
-                  <DataListItemRow>
-                    <DataListItemCells
-                      dataListCells={[
-                        <DataListCell key="title">
-                          <span id="compact-item2"><strong><Msg msgKey='groupDatalistCellMembershipSince' /></strong></span>
-                        </DataListCell>,
-                        <DataListCell key="value">
-                          <span>{groupMembership?.validFrom || Msg.localize('notAvailable')}</span>
-                        </DataListCell>
-                      ]}
-                    />
-                  </DataListItemRow>
-                </DataListItem>
-                <DataListItem aria-labelledby="compact-item1">
-                  <DataListItemRow>
-                    <DataListItemCells
-                      dataListCells={[
-                        <DataListCell key="primary content">
-                          <span id="compact-item1"><strong><Msg msgKey='groupDatalistCellMembershipExp' /></strong></span>
-                        </DataListCell>,
-                        <DataListCell key="secondary content">{groupMembership?.membershipExpiresAt || <Msg msgKey='Never' />}</DataListCell>
-                      ]}
-                    />
-                  </DataListItemRow>
-                </DataListItem>
                 <DataListItem aria-labelledby="compact-item2">
                   <DataListItemRow>
                     <DataListItemCells
@@ -156,7 +170,74 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
                         <DataListCell key="secondary content ">
                           {groupMembership?.groupRoles ? groupMembership?.groupRoles.map((role, index) => {
                             return <Badge key={index} className="gm_role_badge" isRead>{role}</Badge>
-                          }) :Msg.localize('groupDatalistCellNoRoles')}
+                          }) : Msg.localize('groupDatalistCellNoRoles')}
+                        </DataListCell>
+                      ]}
+                    />
+                  </DataListItemRow>
+                </DataListItem>
+                <DataListItem aria-labelledby="compact-item1">
+                  <DataListItemRow>
+                    <DataListItemCells
+                      dataListCells={[
+                        <DataListCell key="primary content">
+                          <strong><Msg msgKey='adminGroupMemberCellMembershipExp' /></strong>
+                        </DataListCell>,
+                        <DataListCell key="secondary content">
+                          {groupMembership?.effectiveGroupId || expirationWarning ?
+                            <Popover
+                              {...(!(groupMembership?.effectiveGroupId || expirationWarning) && { isVisible: false })}
+                              bodyContent={
+                                <div>
+                                  {expirationWarning && groupMembership?.effectiveGroupId ?
+                                    <>
+                                      <Msg msgKey='membershipExpirationEffectiveNotification' />
+                                      <Link to={'/enroll?groupPath=' + encodeURI(effectiveGroupPath)}>
+                                        <Button className="gm_popover-expiration-button" isSmall>Extend</Button>
+                                      </Link>
+                                    </>
+                                    : expirationWarning ?
+                                      <>
+                                        <Msg msgKey='membershipExpirationNotification' />
+                                        <Link to={'/enroll?groupPath=' + encodeURI(groupMembership?.group?.path)}>
+                                          <Button className="gm_popover-expiration-button" isSmall>Extend</Button>
+                                        </Link>
+                                      </>
+                                      :
+                                      <>
+                                        <Msg msgKey='effectiveExpirationHelp' />
+                                        <Link to={"/groups/showgroups/" + groupMembership?.effectiveGroupId}>
+                                          <Button className="gm_popover-expiration-button" isSmall>View</Button>
+                                        </Link>
+                                      </>
+                                  }
+                                </div>
+                              }
+                            >
+                              {expirationWarning ?
+                                <span className="gm_effective-expiration-popover-trigger">
+                                  <div style={{ display: 'inline-block' }} className={expirationWarning ? 'gm_warning-text' : ""}>
+                                    {groupMembership?.effectiveMembershipExpiresAt || <Msg msgKey='Never' />}
+                                  </div>
+                                  <div className="gm_effective-helper-warning">
+                                    <ExclamationTriangleIcon />
+                                  </div>
+                                </span>
+                                :
+                                <span className="gm_effective-expiration-popover-trigger">
+                                  <div style={{ display: 'inline-block' }} className={expirationWarning ? 'gm_warning-text' : ""}>
+                                    {groupMembership?.effectiveMembershipExpiresAt || <Msg msgKey='Never' />}
+                                  </div>
+                                  <div className="gm_effective-helper-info">
+                                    <InfoCircleIcon />
+                                  </div>
+                                </span>
+                              }
+                            </Popover>
+                            : <div>
+                              {groupMembership?.effectiveMembershipExpiresAt || <Msg msgKey='Never' />}
+                            </div>}
+
                         </DataListCell>
                       ]}
                     />
