@@ -1,13 +1,15 @@
 package org.rciam.plugins.groups.helpers;
 
+import java.util.List;
+
 public class PagerParameters {
 
     private Integer first;
     private Integer max;
-    private String order;
+    private List<String> order;
     private String orderType;
 
-    public PagerParameters(Integer first, Integer max, String order, String orderType){
+    public PagerParameters(Integer first, Integer max, List<String> order, String orderType){
         this.first = first;
         this.max = max;
         this.order = order;
@@ -30,11 +32,11 @@ public class PagerParameters {
         this.max = max;
     }
 
-    public String getOrder() {
+    public List<String> getOrder() {
         return order;
     }
 
-    public void setOrder(String order) {
+    public void setOrder(List<String> order) {
         this.order = order;
     }
 

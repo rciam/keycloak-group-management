@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
@@ -181,7 +182,7 @@ public class GroupAdminService {
                                                            @QueryParam("order") @DefaultValue("submittedDate") String order,
                                                            @QueryParam("asc") @DefaultValue("false") boolean asc) {
         List<String> groupIds = groupAdminRepository.getAdminGroupIdsByName(groupAdmin.getId(), groupName);
-        return groupEnrollmentRequestRepository.groupAdminEnrollmentPager(groupIds, userSearch, status, new PagerParameters(first, max, order, asc ? "asc" : "desc"));
+        return groupEnrollmentRequestRepository.groupAdminEnrollmentPager(groupIds, userSearch, status, new PagerParameters(first, max, Stream.of(order).collect(Collectors.toList()), asc ? "asc" : "desc"));
     }
 
     @Path("/enroll-request/{enrollId}")

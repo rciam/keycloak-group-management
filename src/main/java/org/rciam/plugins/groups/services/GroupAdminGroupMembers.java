@@ -35,6 +35,7 @@ import org.keycloak.services.ErrorResponseException;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -136,7 +137,7 @@ public class GroupAdminGroupMembers {
         groupIdsList.add(group.getId());
         if (!direct)
             groupIdsList.addAll(Utils.getAllSubgroupsIds(group));
-        return userGroupMembershipExtensionRepository.searchByGroupAndSubGroups(group.getId(), groupIdsList, search, status, role, new PagerParameters(first, max, order, asc ? "asc" : "desc"));
+        return userGroupMembershipExtensionRepository.searchByGroupAndSubGroups(group.getId(), groupIdsList, search, status, role, new PagerParameters(first, max, Arrays.asList(order.split(",")), asc ? "asc" : "desc"));
     }
 
 }

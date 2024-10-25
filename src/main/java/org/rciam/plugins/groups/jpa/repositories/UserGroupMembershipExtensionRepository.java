@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.logging.Logger;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
@@ -317,7 +318,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             sqlQuery += "where f.user.id = :userId and f.status = 'ENABLED'";
         }
 
-        Query queryList = em.createQuery("select f " + sqlQuery + " order by f." + pagerParameters.getOrder() + " " + pagerParameters.getOrderType()).setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax());
+        Query queryList = em.createQuery("select f " + sqlQuery + " order by f." + pagerParameters.getOrder().get(0) + " " + pagerParameters.getOrderType()).setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax());
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             queryList.setParameter(entry.getKey(), entry.getValue());
         }
@@ -354,7 +355,9 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             params.put("status", status);
         }
 
-        Query queryList = em.createQuery("select f " + fromQuery + sqlQuery + " order by " + pagerParameters.getOrder() + " " + pagerParameters.getOrderType()).setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax());
+        StringBuilder sb = new StringBuilder("select f " + fromQuery + sqlQuery + " order by ");
+        pagerParameters.getOrder().stream().forEach(order -> sb.append(order+ " "+ pagerParameters.getOrderType()+ ",") );
+        Query queryList = em.createQuery(StringUtils.removeEnd(sb.toString(), ",")).setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax());
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             queryList.setParameter(entry.getKey(), entry.getValue());
         }
