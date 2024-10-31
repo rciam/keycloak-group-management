@@ -822,4 +822,11 @@
         </addColumn>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="update-enrollment-request-state">
+        <update tableName="GROUP_ENROLLMENT_REQUEST">
+            <column name="STATE" value="SELF_APPROVED"/>
+            <where>STATE = 'NO_APPROVAL'</where>
+        </update>
+    </changeSet>
+
 </databaseChangeLog>

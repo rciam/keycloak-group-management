@@ -76,7 +76,7 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         }
         entity.setGroupEnrollmentConfiguration(configuration);
         entity.setComments(rep.getComments());
-        entity.setStatus(isPending ? EnrollmentRequestStatusEnum.PENDING_APPROVAL : EnrollmentRequestStatusEnum.NO_APPROVAL);
+        entity.setStatus(isPending ? EnrollmentRequestStatusEnum.PENDING_APPROVAL : EnrollmentRequestStatusEnum.SELF_APPROVED);
         entity.setSubmittedDate(LocalDateTime.now());
         if (!isPending)
             entity.setApprovedDate(LocalDateTime.now());
