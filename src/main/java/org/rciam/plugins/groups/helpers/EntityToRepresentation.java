@@ -167,7 +167,7 @@ public class EntityToRepresentation {
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
         if (entity.getGroup() != null) {
-            GroupRepresentation group = toBriefRepresentation(entity.getGroup(), false, false, realm);
+            GroupRepresentation group = toBriefRepresentation(entity.getGroup(), false, true, realm);
             rep.setGroup(group);
         }
 
