@@ -1,2 +1,2 @@
 <#ftl output_format="plainText">
-${msg("groupadminEnrollmentRequestCreationBody",fullname, userName, groupname, groupRolesTxt, reason, urlLink, signatureMessage)}
+${msg("groupadminEnrollmentRequestCreationBody",fullname, userName, groupPath, groupRolesTxt, reason, urlLink, signatureMessage)}

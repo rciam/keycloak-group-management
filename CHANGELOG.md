@@ -9,15 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Rename NO_APPROVAL group enrollment request status to SELF_APPROVED
 
+### Fixed
+- Fix null in enrollment request without approval email
+
 ## [1.0.0rc1] - 2024-10-25
 
-## Added 
+### Added 
 - Effective Expiration
 - Exposed Enrollment Discovery Page to Members
 - Warning indications for Expiring Memberships
 - Extended Edit Membership View
 
-## Fixed
+### Fixed
 - Group Members Admin View Bug
 - Correct geting rules for update member
 
