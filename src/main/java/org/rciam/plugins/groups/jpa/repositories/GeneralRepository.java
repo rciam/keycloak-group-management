@@ -51,10 +51,6 @@ public abstract class GeneralRepository<T> {
         em.flush();
     }
 
-    public UserModel getUserModel(KeycloakSession session, UserEntity user){
-        return new UserAdapter(session, realm, em, user);
-    }
-
     protected void setRealm(RealmModel realm) {
         this.realm = realm;
     }

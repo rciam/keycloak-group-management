@@ -3,7 +3,6 @@ package org.rciam.plugins.groups.helpers;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +39,7 @@ import org.keycloak.services.ErrorResponseException;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.GroupResource;
 
-import static org.keycloak.userprofile.UserProfileContext.USER_API;
+import static org.keycloak.userprofile.UserProfileContext.ACCOUNT;
 
 public class Utils {
 
@@ -162,7 +161,6 @@ public class Utils {
         }
         adminEvent.resourcePath(session.getContext().getUri()).representation(rep).success();
 
-        //GroupRepresentation childRep = ModelToRepresentation.toGroupHierarchy(child, true);
         //custom agm implementation
         if (groupEnrollmentConfigurationRepository.getByGroup(rep.getId()).collect(Collectors.toList()).isEmpty()) {
             //group configuration creation
@@ -176,8 +174,10 @@ public class Utils {
         return x.equals(urnNamespace + groupStr + groupName) || x.startsWith(urnNamespace + groupStr + groupName + colon + roleStr) || x.startsWith(urnNamespace + groupStr + groupName + sharp);
     }
 
-    public static void changeUserAttributeValue(UserModel user, UserGroupMembershipExtensionEntity member, String groupName, MemberUserAttributeConfigurationEntity memberUserAttribute, KeycloakSession session) throws UnsupportedEncodingException {
-        List<String> memberUserAttributeValues = user.getAttributeStream(memberUserAttribute.getUserAttribute()).collect(Collectors.toList());
+    public static void changeUserAttributeValue(UserModel user, UserGroupMembershipExtensionEntity member, String groupName, 
+            MemberUserAttributeConfigurationEntity memberUserAttribute, KeycloakSession session, boolean isUpdated, 
+            Map<String, List<String>> attributes) throws UnsupportedEncodingException {
+        List<String> memberUserAttributeValues = attributes.get(memberUserAttribute.getUserAttribute()) != null ? attributes.get(memberUserAttribute.getUserAttribute()) : new ArrayList<>();
         memberUserAttributeValues.removeIf(x -> Utils.removeMemberUserAttributeCondition(x, memberUserAttribute.getUrnNamespace(), groupName));
         if (member.getGroupRoles() == null || member.getGroupRoles().isEmpty()) {
             memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
@@ -190,9 +190,14 @@ public class Utils {
                 }
             }).collect(Collectors.toList()));
         }
-        Map<String, List<String>> attributes = user.getAttributes();
         attributes.put(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
-        UserProfile profile = session.getProvider(UserProfileProvider.class).create(USER_API, attributes, user);
+        if (isUpdated) {
+            updateUser(session, attributes, user);
+        }
+    }
+
+    public static void updateUser(KeycloakSession session, Map<String, List<String>> attributes, UserModel user){
+        UserProfile profile = session.getProvider(UserProfileProvider.class).create(ACCOUNT, attributes, user);
         profile.update(true);
     }
 

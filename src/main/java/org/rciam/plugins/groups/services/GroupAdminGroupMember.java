@@ -230,7 +230,7 @@ public class GroupAdminGroupMember {
     @POST
     @Path("/suspend")
     public Response suspendUser(@QueryParam("justification") String justification) {
-        UserModel user = userGroupMembershipExtensionRepository.getUserModel(session, member.getUser());
+        UserModel user = session.users().getUserById(realm, member.getUser().getId());
         if (user == null) {
             throw new NotFoundException("Could not find this User");
         } else if (!MemberStatusEnum.ENABLED.equals(member.getStatus())) {
@@ -265,7 +265,7 @@ public class GroupAdminGroupMember {
     @POST
     @Path("/activate")
     public Response activateUser(@QueryParam("justification") String justification) {
-        UserModel user = userGroupMembershipExtensionRepository.getUserModel(session, member.getUser());
+        UserModel user = session.users().getUserById(realm, member.getUser().getId());
         if (user == null) {
             throw new NotFoundException("Could not find this User");
         } else if (!MemberStatusEnum.SUSPENDED.equals(member.getStatus())) {
