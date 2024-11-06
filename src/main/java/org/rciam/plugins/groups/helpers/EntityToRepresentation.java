@@ -163,7 +163,7 @@ public class EntityToRepresentation {
         rep.setCreationDate(entity.getCreationDate());
         rep.setForMember(entity.getForMember());
         if (entity.getGroupEnrollmentConfiguration() != null)
-            rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration(), false,  realm));
+            rep.setGroupEnrollmentConfiguration(toRepresentation(entity.getGroupEnrollmentConfiguration(), true,  realm));
         if (entity.getGroupRoles() != null)
             rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
         if (entity.getGroup() != null) {
