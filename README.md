@@ -130,7 +130,7 @@ Main url : {server_url}/realms/{realm}/agm
 
 **Group admin web services ( for group specific web services user must have admin rights to this group)**
 
-| Path                                                               | Method | Description   |                                                               | Classes                      |
+| Path                                                               | Method | Description                                                                   | Classes                      |
 |--------------------------------------------------------------------|--------|-------------------------------------------------------------------------------|------------------------------|
 | /account/group-admin/groups                                        | GET    | get all groups that this user has admin rights                                | GroupAdminService            |
 | /account/group-admin/configuration-rules                           | GET    | get group enrollment configuration rules based on group type                  | GroupAdminService            |
@@ -155,9 +155,9 @@ Main url : {server_url}/realms/{realm}/agm
 | /account/group-admin/group/{groupId}/member/{memberId}/role/{name} | DELETE | delete role from group member                                                 | GroupAdminGroupMember        |
 | /account/group-admin/group/{groupId}/member/{memberId}/suspend     | POST   | suspend group member                                                          | GroupAdminGroupMember        |
 | /account/group-admin/group/{groupId}/member/{memberId}/activate    | POST   | activate group member                                                         | GroupAdminGroupMember        |
-| /account/group-admin/group/{groupId}/admin                         | POST   | add user as admin using user id or username                                                           | GroupAdminGroup              |
+| /account/group-admin/group/{groupId}/admin                         | POST   | add user as admin using user id or username                                   | GroupAdminGroup              |
 | /account/group-admin/group/{groupId}/admin/invite                  | POST   | invite user as group admin for this groupId group                             | GroupAdminGroup              |
-| /account/group-admin/group/{groupId}/admin                         | DELETE | delete group admin using user id or username                                                            | GroupAdminService            |
+| /account/group-admin/group/{groupId}/admin                         | DELETE | delete group admin using user id or username                                  | GroupAdminService            |
 | /account/group-admin/enroll-requests                               | GET    | get all group admin enrollment requests                                       | GroupAdminService            |
 | /account/group-admin/enroll-request/{enrollId}                     | GET    | get enrollment request                                                        | GroupAdminEnrollementRequest |
 | /account/group-admin/enroll-request/{enrollId}/extra-info          | POST   | request extra infrormation from user                                          | GroupAdminEnrollementRequest |
