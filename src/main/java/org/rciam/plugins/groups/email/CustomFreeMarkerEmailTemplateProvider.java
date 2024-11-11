@@ -60,6 +60,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("groupPath", groupPath);
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupPaths));
         attributes.put("signatureMessage", signatureMessage);
+        //, Stream.of(groupPath).collect(Collectors.toList())
         send("suspendMemberSubject", "suspend-member.ftl", attributes);
     }
 
@@ -72,6 +73,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("memberName", member.getFirstName() + " " + member.getLastName());
         attributes.put("groupadmin", groupadmin.getFirstName() + " " + groupadmin.getLastName());
         attributes.put("signatureMessage", signatureMessage);
+        //, Stream.of(groupPath).collect(Collectors.toList())
         send("suspendMemberGroupAdminsSubject", "suspend-member-group-admins.ftl", attributes);
     }
 
@@ -108,7 +110,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("urlLink", baseUri.toString() + finishGroupInvitation.replace("{realmName}", realm.getName()).replace("{id}", invitationId));
         attributes.put("invitationExpirationHour", invitationExpirationHour);
         attributes.put("signatureMessage", signatureMessage);
-        send("inviteGroupAdminSubject", "invite-group-admin.ftl", attributes);
+        send("inviteGroupAdminSubject", Stream.of(groupPath).collect(Collectors.toList()), "invite-group-admin.ftl", attributes);
     }
 
     public void sendAcceptRejectEnrollmentEmail(boolean isAccepted, String groupPath, String justification) throws EmailException {
@@ -173,7 +175,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("groupMembershipExpirationNotificationSubject", "group-membership-expiration-notification.ftl", attributes);
     }
 
-    public void sendGroupInvitationEmail(UserModel groupadmin, String groupName, String groupPath, String description, boolean withoutAcceptance, List<String> groupRoles, String id, Long  invitationExpirationHour) throws EmailException {
+    public void sendGroupInvitationEmail(UserModel groupadmin, String groupName, String groupPath, String description, List<String> groupRoles, String id, Long  invitationExpirationHour) throws EmailException {
         attributes.put("groupadmin", groupadmin.getFirstName() + " " + groupadmin.getLastName());
         attributes.put("groupName", groupName);
         attributes.put("groupPath", groupPath);
@@ -194,10 +196,10 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         }
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         URI baseUri = uriInfo.getBaseUri();
-        attributes.put("urlLink", baseUri.toString() + (withoutAcceptance ? finishGroupInvitation : enrollmentStartUrl).replace("{realmName}", realm.getName()).replace("{id}", id).replace("{path}", groupPath));
+        attributes.put("urlLink", baseUri.toString() + finishGroupInvitation.replace("{realmName}", realm.getName()).replace("{id}", id).replace("{path}", groupPath));
         attributes.put("invitationExpirationHour", invitationExpirationHour != null ? "expire after "+invitationExpirationHour+" hours" :"not expire");
         attributes.put("signatureMessage", signatureMessage);
-        send("groupInvitationSubject", "user-group-invitation.ftl", attributes);
+        send("groupInvitationSubject", Stream.of(groupPath).collect(Collectors.toList()), "user-group-invitation.ftl", attributes);
     }
 
     public void sendAcceptInvitationEmail(UserModel userModel, String groupPath, String groupId, boolean forMember, List<String> groupRoles) throws EmailException {

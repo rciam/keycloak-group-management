@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix null in enrollment request without approval email
 - Fix implementation for user attribute update
 
+### Changed
+- Change 
+
 ## [1.0.0rc1] - 2024-10-25
 
 ### Added 
