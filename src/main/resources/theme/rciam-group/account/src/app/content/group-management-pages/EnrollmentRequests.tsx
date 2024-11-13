@@ -13,10 +13,9 @@ import { TableActionBar } from '../../group-widgets/GroupAdminPage/TableActionBa
 
 export const EnrollmentRequests: FC<any> = (props) => {
 
-    const titleId = 'typeahead-select-id-1';
 
     let groupsService = new GroupsServiceClient();
-    let statusOptions = ["PENDING_APPROVAL","WAITING_FOR_REPLY","ACCEPTED","REJECTED","ARCHIVED","NO_APPROVAL"];
+    let statusOptions = ["PENDING_APPROVAL","WAITING_FOR_REPLY","ACCEPTED","REJECTED","ARCHIVED","SELF_APPROVED"];
     const [selectedRequest,setSelectedRequest] = useState<any>({});
     const [enrollmentRequests,setEnrollmentRequests] = useState<any>([]);
     const [page, setPage] = useState(1);

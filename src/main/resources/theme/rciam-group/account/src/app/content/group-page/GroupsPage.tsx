@@ -10,7 +10,8 @@ import {
   DataListItemCells,
   Pagination,
   Badge, DataListAction,
-  Popover, KebabToggle, Dropdown, DropdownItem
+  Popover, KebabToggle, Dropdown, DropdownItem,
+  Spinner
 } from '@patternfly/react-core';
 import { dateParse, addDays, isFirstDateBeforeSecond } from '../../widgets/Date';
 // @ts-ignore
@@ -49,6 +50,7 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [orderBy, setOrderBy] = useState<string>('');
   const [asc, setAsc] = useState<boolean>(true);
+  const [loading,setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     fetchGroups();
@@ -77,12 +79,14 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
 
 
   const fetchGroups = () => {
-    groupsService!.doGet<Response>("/user/groups", { params: { first: (perPage * (page - 1)), max: perPage, ...(orderBy ? { order: orderBy } : {}), asc: asc ? "true" : "false" } })
-      .then((response: HttpResponse<Response>) => {
+    setLoading(true);
+    groupsService!.doGet<Response>("/user/groups", { params: { first: (perPage * (page - 1)), max: perPage, ...(orderBy ? { order: orderBy } : {}), asc: asc ? "true" : "false" } }).then((response: HttpResponse<Response>) => {
+        setLoading(false);
         let count = response?.data?.count || 0;
         setTotalItems(count as number);
         setGroups(response?.data?.results || [] as Group[]);
       });
+      
   }
 
 
@@ -166,7 +170,10 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
             ><div className="gm_cell-placeholder"></div></DataListAction>
           </DataListItemRow>
         </DataListItem>
-        {groups.length === 0
+        { loading?
+              <div tabIndex={0} id="modal-no-header-description" className="gm_loader-modal-container">
+                <Spinner isSVG diameter="100px" aria-label="Contents of the custom size example" />
+              </div>:groups.length === 0
           ? emptyGroup()
           : groups.map((group: Group, appIndex: number) => {
             return <MembershipDatalistItem membership={group} history={props.history} currentDate={new Date(new Date().setHours(0, 0, 0, 0))} appIndex={appIndex} />

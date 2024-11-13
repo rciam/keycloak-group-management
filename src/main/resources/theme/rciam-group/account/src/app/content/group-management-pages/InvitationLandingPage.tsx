@@ -33,6 +33,7 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props) => 
   const [loading, setLoading] = useState(false);
   const [acceptAup, setAcceptAup] = useState(false);
   const [actionBlocked, setActionBlocked] = useState(false);
+  const [isParentGroup,setIsParentGroup] = useState(false);
 
 
   useEffect(() => {
@@ -48,9 +49,11 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props) => 
         setLoading(false);
         if (response.status === 200 && response.data) {
           setInvitationData(response.data);
-        }
-        else {
-
+          // Check if group is a parent group
+          if(response.data?.groupEnrollmentConfiguration?.group?.path && response.data.groupEnrollmentConfiguration.group.path.split("/").length ===2){
+            setIsParentGroup(true);
+          } 
+          
         }
 
       }).catch((err) => {
@@ -129,6 +132,10 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props) => 
                 <h1><Msg msgKey='Description' /></h1>
                 {invitationData?.groupEnrollmentConfiguration?.group?.attributes?.description[0] || invitationData?.group?.attributes?.description[0]}
               </div>}
+              <div className="gm_invitation-purpuse">
+                <h1><Msg msgKey='groupPath' /></h1>
+                {invitationData?.groupEnrollmentConfiguration?.group?.path || "Group/Path/test"}
+              </div>
               <Hint>
                 <HintBody>
                   <Msg msgKey='invitationMessage' />{invitationData?.forMember ? invitationData?.groupRoles.map((role, index) => { return <strong> {role}{index !== invitationData.groupRoles.length - 1 && ','}</strong> }) : ' admin'}.
@@ -160,13 +167,15 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props) => 
                         }
                       </p></HelperTextItem>
                   </HelperText>
-                  <HelperText>
-                    <HelperTextItem variant="warning" hasIcon>
-                      <p>
-                        <Msg msgKey='invitationExpirationInfo' /> <a onClick={() => { props.history.push('/groups/showgroups'); }}>My Groups</a> page.
-                      </p>
-                    </HelperTextItem>
-                  </HelperText>
+                  {!isParentGroup &&
+                    <HelperText>
+                      <HelperTextItem variant="warning" hasIcon>
+                        <p>
+                          <Msg msgKey='invitationExpirationInfo' /> <a onClick={() => { props.history.push('/groups/showgroups'); }}>My Groups</a> page.
+                        </p>
+                      </HelperTextItem>
+                    </HelperText>            
+                  }
                 </>
               }
 

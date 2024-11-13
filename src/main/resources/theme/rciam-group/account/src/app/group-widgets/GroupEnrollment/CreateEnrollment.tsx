@@ -38,6 +38,8 @@ export const CreateEnrollment: FC<any> = (props) => {
     groupRoles: [],
     comments: ""
   });
+  const [isParentGroup,setIsParentGroup] = useState<boolean>(false);
+
 
   let groupsService = new GroupsServiceClient();
   useEffect(() => {
@@ -81,6 +83,10 @@ export const CreateEnrollment: FC<any> = (props) => {
     groupsService!.doGet<any>("/user/configuration/" + id)
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 && response.data) {
+           // Check if group is a top level group
+           if(response.data.group?.path&&response.data.group.path.split('/').length ===2){
+            setIsParentGroup(true);
+          }
           setGroup(response.data.group);
           setEnrollments([response.data]);
         }
@@ -95,6 +101,10 @@ export const CreateEnrollment: FC<any> = (props) => {
           if (response.data.length > 0) {
             if (response.data[0].group?.attributes?.defaultConfiguration) {
               setDefaultId(response.data[0].group?.attributes?.defaultConfiguration[0]);
+            }
+            // Check if group is a top level group
+            if(response.data[0].group?.path&&response.data[0].group.path.split('/').length ===2){
+              setIsParentGroup(true);
             }
             setGroup(response.data[0].group);
           }
@@ -158,7 +168,7 @@ export const CreateEnrollment: FC<any> = (props) => {
     let errors: Record<string, string> = {};
     (!enrollmentRequest?.comments && enrollment.commentsNeeded) && (errors.comments = Msg.localize('requredFormError'));
     !(enrollmentRequest?.groupRoles?.length > 0) && (errors.groupRoles = Msg.localize('groupRolesFormError'));
-    (!enrollment.multiselectRoles && enrollmentRequest.groupRoles.length > 1) && (errors.groupRoles = Msg.localize('groupRolesFormErrorMulitple'));
+    (!enrollment.multiselectRole && enrollmentRequest.groupRoles.length > 1) && (errors.groupRoles = Msg.localize('groupRolesFormErrorMulitple'));
     setErrors(errors);
     //!(enrollemtn?)
   }
@@ -264,11 +274,13 @@ export const CreateEnrollment: FC<any> = (props) => {
                         (enrollment.validFrom && isFutureDate(dateParse(enrollment.validFrom)) && parseInt(enrollment.membershipExpirationDays) > 0 ? " and it " : "") +
                         (parseInt(enrollment.membershipExpirationDays) > 0 ? "will expire on " + enrollment.membershipExpirationDays + " days after activation" : " does not have an expiration date.")}
                       />
-                      <HelperText className="gm_helper-text-create-enrollment">
-                        <HelperTextItem variant="warning" hasIcon>
-                          <p><Msg msgKey='effectiveExpirationInfo' /></p>
-                        </HelperTextItem>
-                      </HelperText>
+                      {!isParentGroup&&
+                        <HelperText className="gm_helper-text-create-enrollment">
+                          <HelperTextItem variant="warning" hasIcon>
+                            <p><Msg msgKey='effectiveExpirationInfo' /></p>
+                          </HelperTextItem>
+                        </HelperText>
+                      }
                       {enrollment.commentsNeeded &&
                         <FormGroup
                           label={enrollment.commentsLabel}

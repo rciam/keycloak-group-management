@@ -320,7 +320,7 @@ export const GroupMembers: FC<any> = (props) => {
       <Loading active={loading} />
       <ConfirmationModal modalInfo={modalInfo} />
       <UserActionModal setAlert={setAlert} user={selectedUser} setUser={setSelectedUser} groupId={props.groupId} fetchGroupMembers={fetchGroupMembers} />
-      <EditMembershipModal membership={editMembership} enrollmentRules={props.enrollmentRules} setMembership={setEditMembership} groupRoles={props.groupConfiguration?.groupRoles} groupId={props.groupId} fetchGroupMembers={fetchGroupMembers} />
+      <EditMembershipModal membership={editMembership} setMembership={setEditMembership} fetchGroupMembers={fetchGroupMembers} />
       <TableActionBar
         childComponent={
           <React.Fragment>
@@ -456,7 +456,18 @@ export const GroupMembers: FC<any> = (props) => {
                                 <Msg msgKey='membershipExpirationEffectiveNotification' />
                                 <Button className="gm_popover-expiration-button" isSmall onClick={() => {
                                   if (member.effectiveGroupId === groupId) {
-                                    setEditMembership(member);
+                                    if(member.group.id!==groupId){
+                                      const searchParams = new URLSearchParams(location.hash.split('?')[1]);
+                                      searchParams.set("membership",member?.id ||"");
+                                      props.history.push({
+                                          search: searchParams.toString() ? `?${searchParams.toString()}` : '',
+                                      });
+                                      setDirectMembers(true);
+                                      setSearchString(member.user.username);                                      
+                                    }
+                                    else{
+                                      setEditMembership(member);
+                                    }
                                     hide();
                                   }
                                   else {
@@ -582,7 +593,9 @@ export const GroupMembers: FC<any> = (props) => {
                       >
                         <div>
                           <Button isSmall variant="tertiary" isDisabled={member.status === "SUSPENDED"} className="gm_small_icon_button" onClick={() => {
-                            if (member.direct) { setEditMembership(member); } else { props.history.push({ pathname: '/groups/admingroups/' + member.group.id, search: '?tab=members&membership=' + member.id }) }
+                            if (member.direct) { setEditMembership(member); } else { 
+                              setEditMembership(member);
+                            }
                           }}>
                             <PencilAltIcon />
                           </Button>

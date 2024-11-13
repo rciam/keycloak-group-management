@@ -12,11 +12,7 @@ import { GroupRolesTable } from '../GroupRolesTable';
 interface EditMembershipModalProps {
     membership: Membership;
     setMembership: any;
-    groupRoles: any;
-    groupId: any;
     fetchGroupMembers: any;
-    enrollmentRules: any;
-
 };
 
 interface Membership {
@@ -48,6 +44,8 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
     });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [touched, setTouched] = useState<any>(touchDefault);
+    const [enrollmentRules,setEnrollmentRules] = useState<any>({});
+    const [groupConfiguration,setGroupConfiguration] = useState<any>({});
 
     useEffect(() => {
         setIsModalOpen(Object.keys(props.membership).length > 0);
@@ -56,10 +54,44 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                 "validFrom": props.membership.validFrom,
                 "membershipExpiresAt": props.membership.membershipExpiresAt,
                 "groupRoles": [...props.membership.groupRoles]
-            })
+            });
+            fetchGroupEnrollmentRules();
+            fetchGroupConfiguration();
         }
-    }, [props.membership])
 
+    }, [props.membership]);
+
+    let fetchGroupConfiguration = () => {
+        groupsService!.doGet<any>("/group-admin/group/" + props.membership.group.id + "/all")
+          .then((response: HttpResponse<any>) => {
+            if (response.status === 200 && response.data) {
+              setGroupConfiguration(response.data);
+            }
+          })
+      }
+
+
+    let fetchGroupEnrollmentRules = () => {
+        groupsService!.doGet<any>("/group-admin/configuration-rules", { params: { type: (("/" + props.membership.group?.name) !== props.membership.group?.path ? 'SUBGROUP' : 'TOP_LEVEL') } })
+          .then((response: HttpResponse<any>) => {
+            if (response.status === 200 && response.data) {
+              if (response.data.length > 0) {
+                let rules = {};
+                response.data.forEach(field_rules => {
+                  rules[field_rules.field] = {
+                    "max": parseInt(field_rules.max),
+                    "required": field_rules.required,
+                    ...(field_rules.defaultValue && { "defaultValue": field_rules.defaultValue })
+                  }
+                });
+                setEnrollmentRules(rules);
+              }
+              else {
+                setEnrollmentRules({});
+              }
+            }
+          })
+      }
 
     useEffect(() => {
         validateMembership();
@@ -106,19 +138,19 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                     return expirationError;
                 }
             }
-            if (props.enrollmentRules?.membershipExpirationDays?.max) {
+            if (enrollmentRules?.membershipExpirationDays?.max) {
                 const currentDate = new Date();
                 // Normalize both dates to remove the time part for an accurate comparison
                 const currentDateWithoutTime = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
                 const rulesValidationError = isFirstDateBeforeSecond(
                     isPastDate(dateParse(membership.validFrom)) ?
-                        addDays(currentDateWithoutTime, parseInt(props.enrollmentRules.membershipExpirationDays.max))
+                        addDays(currentDateWithoutTime, parseInt(enrollmentRules.membershipExpirationDays.max))
                         :
-                        addDays(dateParse(membership.validFrom), parseInt(props.enrollmentRules.membershipExpirationDays.max))
+                        addDays(dateParse(membership.validFrom), parseInt(enrollmentRules.membershipExpirationDays.max))
                     ,
                     date
                     ,
-                    Msg.localize("validateMembershipExpiresErrorMax", [JSON.stringify(props.enrollmentRules.membershipExpirationDays.max)])
+                    Msg.localize("validateMembershipExpiresErrorMax", [JSON.stringify(enrollmentRules.membershipExpirationDays.max)])
                 )
                 if (rulesValidationError) {
                     return rulesValidationError
@@ -126,7 +158,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
             }
         }
         else {
-            if (props.enrollmentRules?.membershipExpirationDays?.required || props.enrollmentRules?.membershipExpirationDays?.max) {
+            if (enrollmentRules?.membershipExpirationDays?.required || enrollmentRules?.membershipExpirationDays?.max) {
                 return Msg.localize("validateMembershipExpiratErrorRequired");
             }
         }
@@ -161,7 +193,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
 
     let updateMembership = () => {
         setLoading(true);
-        groupsService!.doPut<any>("/group-admin/group/" + props.groupId + "/member/" + props.membership?.id, { ...membership })
+        groupsService!.doPut<any>("/group-admin/group/" + props.membership.group.id + "/member/" + props.membership?.id, { ...membership })
             .then((response: HttpResponse<any>) => {
                 props.fetchGroupMembers();
                 setLoading(false);
@@ -260,7 +292,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                         }}
                         validated={errors.groupRoles && touched.groupRoles ? 'error' : 'default'}
                     >
-                        <GroupRolesTable groupRoles={props.groupRoles ? Object.keys(props.groupRoles) : []} selectedRoles={membership.groupRoles} setSelectedRoles={(roles) => {
+                        <GroupRolesTable groupRoles={groupConfiguration.groupRoles ? Object.keys(groupConfiguration.groupRoles) : []} selectedRoles={membership.groupRoles} setSelectedRoles={(roles) => {
                             membership.groupRoles = roles;
                             setMembership({ ...membership });
                         }} />
@@ -287,7 +319,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                     </FormGroup>
                     <FormGroup
                         label={Msg.localize('groupDatalistCellMembershipExp')}
-                        isRequired={!!props.enrollmentRules?.membershipExpirationDays?.required}
+                        isRequired={!!enrollmentRules?.membershipExpirationDays?.required}
                         fieldId="simple-form-name-01"
                         helperTextInvalid={(touched.membershipExpiresAt && !membership?.membershipExpiresAt) && errors.membershipExpiresAt}
                         onBlur={() => {
@@ -317,7 +349,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                     >
                         <div className="gm_switch_container">
                             <Tooltip
-                                {...(!(props.enrollmentRules?.membershipExpirationDays?.required) ? { trigger: 'manual', isVisible: false } : { trigger: 'mouseenter' })} content={<div><Msg msgKey='enrollmentConfigurationExpirationDateSwitchDisabledTooltip' /></div>}
+                                {...(!(enrollmentRules?.membershipExpirationDays?.required) ? { trigger: 'manual', isVisible: false } : { trigger: 'mouseenter' })} content={<div><Msg msgKey='enrollmentConfigurationExpirationDateSwitchDisabledTooltip' /></div>}
                             >
                                 <Switch
                                     aria-label="simple-switch-membershipExpirationDays"

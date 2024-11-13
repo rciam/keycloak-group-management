@@ -12,6 +12,7 @@ import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/gr
 import { Msg } from '../../widgets/Msg';
 import { TableActionBar } from '../../group-widgets/GroupAdminPage/TableActionBar';
 import { CreateGroupModal, DeleteSubgroupModal } from '../../group-widgets/Modals';
+import { Spinner } from '@patternfly/react-core';
 
 export interface AdminGroupsPageProps {
   match :any;
@@ -56,6 +57,7 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
   const [totalItems,setTotalItems] = useState<number>(0);
   const [initialRender,setInitialRender] = useState(true);
   const [userRoles,setUserRoles] = useState<String[]>([]);
+  const [loading,setLoading] = useState(false);
 
   const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
     setPage(newPage);
@@ -88,14 +90,16 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
 
 
   let fetchAdminGroups= (searchString = undefined)=> {
-
-    groupsService!.doGet<Response>("/group-admin/groups?first="+ (perPage*(page-1))+ "&max=" + perPage + (searchString?"&search="+searchString:""))
-      .then((response: HttpResponse<Response>) => {
-        let count = response?.data?.count||0;
-        setTotalItems(count as number);
-        setGroups(response?.data?.results||[] as AdminGroup[]);
-        //setExpandedIds([]);        
-      });
+    setLoading(true);
+ 
+  
+      groupsService!.doGet<Response>("/group-admin/groups?first=" + (perPage * (page - 1)) + "&max=" + perPage + (searchString ? "&search=" + searchString : "")).then((response: HttpResponse<Response>) => {
+      setLoading(false);
+      const count = response?.data?.count || 0;
+      setTotalItems(count as number);
+      setGroups(response?.data?.results || [] as AdminGroup[]);
+      // setExpandedIds([]);
+    });
   }
 
 
@@ -155,14 +159,19 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = (props) =>{
                 ><div className="gm_cell-placeholder"></div></DataListAction>
               </DataListItemRow>
             </DataListItem>
-            {groups.length===0 ?
+            {
+              loading?
+              <div tabIndex={0} id="modal-no-header-description" className="gm_loader-modal-container">
+                <Spinner isSVG diameter="100px" aria-label="Contents of the custom size example" />
+              </div>:
+              groups.length===0 ?
               emptyGroup():
               groups.map((group:AdminGroup,appIndex:number)=>{
                 return(
                 <GroupListItem group={group as AdminGroup} userRoles={userRoles}  fetchAdminGroups={fetchAdminGroups} appIndex={appIndex} depth={0} />
                 )
               })
-              }
+            }
           </DataList>
           <Pagination
             itemCount={totalItems}
