@@ -45,7 +45,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         String text1 = isAdded ? "added" : "removed";
         String text2 = isAdded ? "to" : "from";
         KeycloakUriInfo uriInfo = session.getContext().getUri();
-        String text3 = isAdded ? "For more information about the group, please visit the following link: " + uriInfo.getBaseUri().toString() + adminGroupPageUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId) : "";
+        String text3 = isAdded ? "For more information about the group, please visit the following link:\n " + uriInfo.getBaseUri().toString() + adminGroupPageUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId) : "";
         attributes.put("text1", text1);
         attributes.put("text2", text2);
         attributes.put("text3", text3);
@@ -56,17 +56,30 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendSuspensionEmail(String groupPath, List<String> subgroupPaths, String justification) throws EmailException {
-        attributes.put("justification", justification != null ? JUSTIFICATION + justification :"");
+        attributes.put("userName", user.getFirstName() + " " + user.getLastName());
+        if (justification != null) {
+            attributes.put("justification", new StringBuilder("\n\nJustification:\n").append(justification));
+            attributes.put("justificationHtml", new StringBuilder("<br><br>Justification:<br>").append(justification).append("</p>"));
+        } else{
+            attributes.put("justification", "");
+            attributes.put("justificationHtml", "");
+        }
         attributes.put("groupPath", groupPath);
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupPaths));
         attributes.put("signatureMessage", signatureMessage);
         //, Stream.of(groupPath).collect(Collectors.toList())
-        send("suspendMemberSubject", "suspend-member.ftl", attributes);
+        send("suspendMemberSubject", Stream.of(groupPath).collect(Collectors.toList()), "suspend-member.ftl", attributes);
     }
 
     public void sendSuspensionEmailToAdmins(String groupPath, List<String> subgroupPaths, String justification, UserModel member, UserModel groupadmin) throws EmailException {
         attributes.put("userName", user.getFirstName() + " " + user.getLastName());
-        attributes.put("justification", justification != null ? JUSTIFICATION + justification :"");
+        if (justification != null) {
+            attributes.put("justification", JUSTIFICATION + "\n"+justification);
+            attributes.put("justificationHtml", JUSTIFICATION +"<br>" +justification);
+        } else{
+            attributes.put("justification", "");
+            attributes.put("justificationHtml", "");
+        }
         attributes.put("groupPath", groupPath);
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupPaths));
         attributes.put("subgroupsStrHtml", subgroupsHtmlStrCalculation(subgroupPaths));
@@ -74,29 +87,41 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("groupadmin", groupadmin.getFirstName() + " " + groupadmin.getLastName());
         attributes.put("signatureMessage", signatureMessage);
         //, Stream.of(groupPath).collect(Collectors.toList())
-        send("suspendMemberGroupAdminsSubject", "suspend-member-group-admins.ftl", attributes);
+        send("suspendMemberGroupAdminsSubject", Stream.of(groupPath).collect(Collectors.toList()), "suspend-member-group-admins.ftl", attributes);
     }
 
     public void sendActivationEmail(String groupPath, List<String> subgroupPaths, String justification) throws EmailException {
         attributes.put("userName", user.getFirstName() + " " + user.getLastName());
-        attributes.put("justification", justification != null ? USER_REACTIVATION_JUSTIFICATION + justification :"");
+        if (justification != null) {
+            attributes.put("justification", USER_REACTIVATION_JUSTIFICATION + "\n"+justification);
+            attributes.put("justificationHtml", USER_REACTIVATION_JUSTIFICATION +"<br>" +justification);
+        } else{
+            attributes.put("justification", "");
+            attributes.put("justificationHtml", "");
+        }
         attributes.put("groupPath", groupPath);
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupPaths));
         attributes.put("subgroupsStrHtml", subgroupsHtmlStrCalculation(subgroupPaths));
         attributes.put("signatureMessage", signatureMessage);
-        send("activateMemberSubject", "activate-member.ftl", attributes);
+        send("activateMemberSubject", Stream.of(groupPath).collect(Collectors.toList()), "activate-member.ftl", attributes);
     }
 
     public void sendActivationEmailToAdmins(String groupPath, List<String> subgroupPaths, String justification, UserModel member, UserModel groupadmin) throws EmailException {
         attributes.put("userName", user.getFirstName() + " " + user.getLastName());
-        attributes.put("justification", justification != null ? JUSTIFICATION + justification :"");
+        if (justification != null) {
+            attributes.put("justification", JUSTIFICATION + "\n"+justification);
+            attributes.put("justificationHtml", JUSTIFICATION +"<br>" +justification);
+        } else{
+            attributes.put("justification", "");
+            attributes.put("justificationHtml", "");
+        }
         attributes.put("groupPath", groupPath);
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupPaths));
         attributes.put("subgroupsStrHtml", subgroupsHtmlStrCalculation(subgroupPaths));
         attributes.put("memberName", member.getFirstName() + " " + member.getLastName());
         attributes.put("groupadmin", groupadmin.getFirstName() + " " + groupadmin.getLastName());
         attributes.put("signatureMessage", signatureMessage);
-        send("activateMemberGroupAdminsSubject", "activate-member-group-admins.ftl", attributes);
+        send("activateMemberGroupAdminsSubject", Stream.of(groupPath).collect(Collectors.toList()), "activate-member-group-admins.ftl", attributes);
     }
 
 

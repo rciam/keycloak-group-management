@@ -4,6 +4,11 @@ All notable changes in keycloak-group-management will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0rc3]
+
+### Changed
+- Change suspend and reactivate email
+
 ## [1.0.0rc2] - 2024-11-13
 ### Added
 - Spinner when loading groups for Admin and Group Members
