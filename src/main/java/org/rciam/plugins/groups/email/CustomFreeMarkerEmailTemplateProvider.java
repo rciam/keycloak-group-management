@@ -142,7 +142,13 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("groupPath", groupPath);
         attributes.put("action", isAccepted ? "accepted" : "rejected");
-        attributes.put("justification", justification != null ? "Comment from reviewer: " + justification : "");
+        if (justification != null) {
+            attributes.put("justification", "Comment from reviewer: "+justification);
+            attributes.put("justificationHtml", "Comment from reviewer: <b>" +justification+"</b>");
+        } else{
+            attributes.put("justification", "");
+            attributes.put("justificationHtml", "");
+        }
         attributes.put("signatureMessage", signatureMessage);
         send(isAccepted ? "acceptEnrollmentSubject" : "rejectEnrollmentSubject", Stream.of(groupPath).collect(Collectors.toList()), "accept-reject-enrollment.ftl", attributes);
     }
@@ -187,7 +193,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupsPaths));
         attributes.put("urlLink", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentStartUrl.replace("{realmName}", realm.getName()).replace("{path}", groupPath));
         attributes.put("signatureMessage", signatureMessage);
-        send("userRemovalSubject", "expired-group-membership-user.ftl", attributes);
+        send("userRemovalSubject", Stream.of(groupPath).collect(Collectors.toList()), "expired-group-membership-user.ftl", attributes);
     }
 
     public void sendExpiredGroupMembershipNotification(String groupPath, String date, String groupId, String serverUrl) throws EmailException {
@@ -197,7 +203,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("urlLink", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentStartUrl.replace("{realmName}", realm.getName()).replace("{path}", groupPath));
         attributes.put("signatureMessage", signatureMessage);
         session.getContext().setRealm(this.realm);
-        send("groupMembershipExpirationNotificationSubject", "group-membership-expiration-notification.ftl", attributes);
+        send("groupMembershipExpirationNotificationSubject", Stream.of(groupPath).collect(Collectors.toList()), "group-membership-expiration-notification.ftl", attributes);
     }
 
     public void sendGroupInvitationEmail(UserModel groupadmin, String groupName, String groupPath, String description, List<String> groupRoles, String id, Long  invitationExpirationHour) throws EmailException {

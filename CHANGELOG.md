@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Change suspend and reactivate email
+- Change group membership update email
+
+### Fixed
+- General email fixes
 
 ## [1.0.0rc2] - 2024-11-13
 ### Added
