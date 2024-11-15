@@ -133,7 +133,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 groupAdminRepository.getAllAdminIdsGroupUsers(group).map(id -> session.users().getUserById(realm, id)).filter(Objects::nonNull).forEach(admin -> {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
                     try {
-                        customFreeMarkerEmailTemplateProvider.sendExpiredGroupMemberEmailToAdmin(user, group.getName(), subgroupsPaths);
+                        customFreeMarkerEmailTemplateProvider.sendExpiredGroupMemberEmailToAdmin(user, ModelToRepresentation.buildGroupPath(group), subgroupsPaths);
                     } catch (EmailException e) {
                         logger.warn("problem sending email to group admin " + admin.getFirstName() + " " + admin.getLastName());
                     }

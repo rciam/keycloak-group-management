@@ -178,13 +178,13 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("groupadminEnrollmentRequestCreationSubject", Stream.of(groupPath).collect(Collectors.toList()), "groupadmin-enrollment-creation.ftl", attributes);
     }
 
-    public void sendExpiredGroupMemberEmailToAdmin(UserModel userRequest, String groupname, List<String> subgroupsPaths) throws EmailException {
+    public void sendExpiredGroupMemberEmailToAdmin(UserModel userRequest, String groupPath, List<String> subgroupsPaths) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("userName", userRequest.getFirstName() + " " + userRequest.getLastName());
-        attributes.put("groupname", groupname);
+        attributes.put("groupPath", groupPath);
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupsPaths));
         attributes.put("signatureMessage", signatureMessage);
-        send("adminGroupUserRemovalSubject", "expired-group-membership-admin.ftl", attributes);
+        send("adminGroupUserRemovalSubject", Stream.of(groupPath).collect(Collectors.toList()), "expired-group-membership-admin.ftl", attributes);
     }
 
     public void sendExpiredGroupMemberEmailToUser(String groupPath, String groupId, List<String> subgroupsPaths, String serverUrl) throws EmailException {
