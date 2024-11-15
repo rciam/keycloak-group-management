@@ -98,7 +98,7 @@ public class GroupAdminGroupMembers {
             groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
-                    customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(user.getEmail(), true, group.getName(), groupAdmin, groupInvitationInitialRep.getGroupRoles());
+                    customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(user.getEmail(), true, ModelToRepresentation.buildGroupPath(group), groupAdmin, groupInvitationInitialRep.getGroupRoles());
                 } catch (EmailException e) {
                     throw new RuntimeException(e);
                 }

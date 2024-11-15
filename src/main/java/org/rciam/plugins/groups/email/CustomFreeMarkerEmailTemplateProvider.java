@@ -287,19 +287,21 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("groupRejectionInvitationSubject", Stream.of(titleType, groupPath).collect(Collectors.toList()), "reject-invitation.ftl", attributes);
     }
 
-    public void sendInvitionAdminInformationEmail(String email, boolean forMember, String groupname, UserModel admin, List<String> groupRoles) throws EmailException {
+    public void sendInvitionAdminInformationEmail(String email, boolean forMember, String groupPath, UserModel admin, List<String> groupRoles) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("email", email);
-        attributes.put("type", forMember ? "member" : "admin");
+        attributes.put("type", forMember ? "a member" : "an administrator");
         if (forMember && groupRoles != null && !groupRoles.isEmpty()) {
-            StringBuilder sb2 = new StringBuilder(groupname).append(" with roles : ");
+            StringBuilder sb2 = new StringBuilder(groupPath).append(" with roles: ");
             groupRoles.stream().forEach(role -> sb2.append(role).append(", "));
-            groupname = StringUtils.removeEnd(sb2.toString(), ", ");
+            String groupPathEnchance = StringUtils.removeEnd(sb2.toString(), ", ");
+            attributes.put("groupPath", groupPathEnchance);
+        } else {
+            attributes.put("groupPath", groupPath);
         }
-        attributes.put("groupname", groupname);
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
         attributes.put("signatureMessage", signatureMessage);
-        send(forMember ? "groupInvitationSubject" : "groupInvitationAdminInformSubject", "invitation-admin-inform.ftl", attributes);
+        send(forMember ? "groupInvitationSubject" : "groupInvitationAdminInformSubject", Stream.of(groupPath).collect(Collectors.toList()), "invitation-admin-inform.ftl", attributes);
     }
 
     public void sendAddRemoveAdminAdminInformationEmail(boolean added, String groupPath, String groupId, UserModel adminAdded, UserModel adminAction) throws EmailException {

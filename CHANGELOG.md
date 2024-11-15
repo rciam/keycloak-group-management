@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Change suspend and reactivate email
 - Change group membership update email
+- Change invitation emails for group admins
 
 ### Fixed
 - General email fixes

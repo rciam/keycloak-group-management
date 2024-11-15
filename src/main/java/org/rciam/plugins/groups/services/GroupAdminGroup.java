@@ -322,7 +322,7 @@ public class GroupAdminGroup {
             groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
-                    customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(userRep.getEmail(), false, group.getName(), groupAdmin, null);
+                    customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(userRep.getEmail(), false, org.rciam.plugins.groups.helpers.ModelToRepresentation.buildGroupPath(group), groupAdmin, null);
                 } catch (EmailException e) {
                     throw new RuntimeException(e);
                 }
