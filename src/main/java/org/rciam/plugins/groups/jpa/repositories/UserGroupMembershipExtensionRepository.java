@@ -27,6 +27,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.enums.MemberStatusEnum;
@@ -128,6 +129,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                     customFreeMarkerEmailTemplateProvider.setUser(user);
                     customFreeMarkerEmailTemplateProvider.sendExpiredGroupMemberEmailToUser(ModelToRepresentation.buildGroupPath(group), group.getId(), subgroupsPaths, serverUrl);
                 } catch (EmailException e) {
+                    ServicesLogger.LOGGER.failedToSendEmail(e);
                     logger.warn("problem sending email to user " + user.getFirstName() + " " + user.getLastName());
                 }
                 groupAdminRepository.getAllAdminIdsGroupUsers(group).map(id -> session.users().getUserById(realm, id)).filter(Objects::nonNull).forEach(admin -> {
@@ -135,6 +137,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                     try {
                         customFreeMarkerEmailTemplateProvider.sendExpiredGroupMemberEmailToAdmin(user, ModelToRepresentation.buildGroupPath(group), subgroupsPaths);
                     } catch (EmailException e) {
+                        ServicesLogger.LOGGER.failedToSendEmail(e);
                         logger.warn("problem sending email to group admin " + admin.getFirstName() + " " + admin.getLastName());
                     }
 
@@ -175,7 +178,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 eventEntity.setDate(LocalDate.now());
                 eventRepository.update(eventEntity);
 
-                if (LocalDate.now().isAfter(eventEntity.getDateForWeekTasks().plusDays(6))) {
+                if (LocalDate.now().isAfter(eventEntity.getDateForWeekTasks().plusDays(7))) {
                     //weekly tasks execution
                     weeklyTaskExecution(customFreeMarkerEmailTemplateProvider, session);
                     eventEntity.setDateForWeekTasks(LocalDate.now());
@@ -282,6 +285,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
 
     private void weeklyTaskExecution(CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, KeycloakSession session) {
+        logger.info("Group managemnet weekly task is executed");
         session.realms().getRealmsStream().forEach(realmModel -> {
             MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
             MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realmModel.getId());
@@ -295,11 +299,13 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 results.forEach(entity -> {
                     UserModel user = session.users().getUserById(realmModel, entity.getUser().getId());
                     customFreeMarkerEmailTemplateProvider.setUser(user);
+                    session.getContext().setRealm(realmModel);
                     try {
                         customFreeMarkerEmailTemplateProvider.sendExpiredGroupMembershipNotification(ModelToRepresentation.buildGroupPath(group), entity.getMembershipExpiresAt().format(Utils.dateFormatter), group.getId(), serverUrl);
                     } catch (EmailException e) {
                         e.printStackTrace();
-                        logger.info("problem sending email to user  " + user.getFirstName() + " " + user.getLastName());
+                        ServicesLogger.LOGGER.failedToSendEmail(e);
+                        logger.warn("problem sending email to user  " + user.getFirstName() + " " + user.getLastName());
                     }
                 });
             });

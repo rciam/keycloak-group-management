@@ -202,7 +202,6 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("date", date);
         attributes.put("urlLink", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentStartUrl.replace("{realmName}", realm.getName()).replace("{path}", groupPath));
         attributes.put("signatureMessage", signatureMessage);
-        session.getContext().setRealm(this.realm);
         send("groupMembershipExpirationNotificationSubject", Stream.of(groupPath).collect(Collectors.toList()), "group-membership-expiration-notification.ftl", attributes);
     }
 
