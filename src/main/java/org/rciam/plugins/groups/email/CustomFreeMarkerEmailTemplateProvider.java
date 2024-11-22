@@ -1,17 +1,26 @@
 package org.rciam.plugins.groups.email;
 
 import java.net.URI;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.email.EmailException;
 import org.keycloak.email.freemarker.FreeMarkerEmailTemplateProvider;
+import org.keycloak.email.freemarker.beans.ProfileBean;
+import org.keycloak.forms.login.freemarker.model.UrlBean;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakUriInfo;
 import org.keycloak.models.UserModel;
+import org.keycloak.theme.FreeMarkerException;
+import org.keycloak.theme.Theme;
+import org.keycloak.theme.beans.MessageFormatterMethod;
 import org.rciam.plugins.groups.helpers.Utils;
 
 public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTemplateProvider {
@@ -390,6 +399,44 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         StringBuilder sb = new StringBuilder();
         roles.stream().forEach(x -> sb.append("<br>- ").append(x));
         return sb.toString();
+    }
+
+    //override method in order not to have problem with finding Keycloak url from request
+    //This does not work with background process like notification and membership expiration emails
+    @Override
+    protected EmailTemplate processTemplate(String subjectKey, List<Object> subjectAttributes, String template, Map<String, Object> attributes) throws EmailException {
+        try {
+            Theme theme = getTheme();
+            Locale locale = session.getContext().resolveLocale(user);
+            attributes.put("locale", locale);
+
+            Properties messages = theme.getEnhancedMessages(realm, locale);
+            attributes.put("msg", new MessageFormatterMethod(locale, messages));
+
+            attributes.put("properties", theme.getProperties());
+            attributes.put("realmName", getRealmName());
+            attributes.put("user", new ProfileBean(user));
+
+            String subject = new MessageFormat(messages.getProperty(subjectKey, subjectKey), locale).format(subjectAttributes.toArray());
+            String textTemplate = String.format("text/%s", template);
+            String textBody;
+            try {
+                textBody = freeMarker.processTemplate(attributes, textTemplate, theme);
+            } catch (final FreeMarkerException e) {
+                throw new EmailException("Failed to template plain text email.", e);
+            }
+            String htmlTemplate = String.format("html/%s", template);
+            String htmlBody;
+            try {
+                htmlBody = freeMarker.processTemplate(attributes, htmlTemplate, theme);
+            } catch (final FreeMarkerException e) {
+                throw new EmailException("Failed to template html email.", e);
+            }
+
+            return new EmailTemplate(subject, textBody, htmlBody);
+        } catch (Exception e) {
+            throw new EmailException("Failed to template email", e);
+        }
     }
 
 
