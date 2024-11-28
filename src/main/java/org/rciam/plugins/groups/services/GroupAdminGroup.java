@@ -1,6 +1,7 @@
 package org.rciam.plugins.groups.services;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
@@ -197,8 +198,10 @@ public class GroupAdminGroup {
             throw new BadRequestException("Aup must not be empty");
         }
 
+        Response.ResponseBuilder builder = Response.noContent();
         if (rep.getId() == null) {
             groupEnrollmentConfigurationRepository.create(rep, group.getId());
+            builder.location(session.getContext().getUri().getAbsolutePathBuilder().path(rep.getId()).build());
         } else {
             GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(rep.getId());
             if (entity != null) {
@@ -212,7 +215,7 @@ public class GroupAdminGroup {
             }
         }
         //aup change action
-        return Response.noContent().build();
+        return builder.build();
     }
 
     @DELETE

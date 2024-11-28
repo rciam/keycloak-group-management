@@ -178,7 +178,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 eventEntity.setDate(LocalDate.now());
                 eventRepository.update(eventEntity);
 
-                if (LocalDate.now().isAfter(eventEntity.getDateForWeekTasks().plusDays(7))) {
+                if (LocalDate.now().isAfter(eventEntity.getDateForWeekTasks().plusDays(6))) {
                     //weekly tasks execution
                     weeklyTaskExecution(customFreeMarkerEmailTemplateProvider, session);
                     eventEntity.setDateForWeekTasks(LocalDate.now());

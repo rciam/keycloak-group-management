@@ -47,6 +47,7 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         entity.setGroup(group);
         toEntity(entity, rep, groupId);
         create(entity);
+        rep.setId(entity.getId());
     }
 
     public void createDefault(GroupModel group, String groupName, String realmId) {
@@ -70,7 +71,7 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
             r.setName(x.getName());
             return r;
         }).collect(Collectors.toList()));
-        entity.setCommentsNeeded(configurationRulesList.stream().noneMatch(x -> "multiselectRole".equals(x.getField()) &&  "false".equals(x.getDefaultValue())) );
+        entity.setCommentsNeeded(configurationRulesList.stream().noneMatch(x -> "commentsNeeded".equals(x.getField()) &&  "false".equals(x.getDefaultValue())) );
         if (entity.getCommentsNeeded()) {
             String label = configurationRulesList.stream().filter(x -> "commentsLabel".equals(x.getField())).findAny().orElse(new GroupEnrollmentConfigurationRulesEntity()).getDefaultValue();
             entity.setCommentsLabel(label != null ? label : "Comments");

@@ -1,2 +1,2 @@
 <#ftl output_format="plainText">
-${msg("groupMembershipExpirationNotificationBody",fullname, groupname, date, urlLink, signatureMessage)}
+${msg("groupMembershipExpirationNotificationBody",fullname, groupPath, date, urlLink, signatureMessage)}

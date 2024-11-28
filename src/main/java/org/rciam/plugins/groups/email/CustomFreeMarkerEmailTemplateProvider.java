@@ -207,7 +207,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
 
     public void sendExpiredGroupMembershipNotification(String groupPath, String date, String groupId, String serverUrl) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
-        attributes.put("groupname", groupPath);
+        attributes.put("groupPath", groupPath);
         attributes.put("date", date);
         attributes.put("urlLink", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentStartUrl.replace("{realmName}", realm.getName()).replace("{path}", groupPath));
         attributes.put("signatureMessage", signatureMessage);
