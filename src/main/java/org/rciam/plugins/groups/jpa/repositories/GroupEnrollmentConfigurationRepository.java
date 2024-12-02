@@ -123,8 +123,11 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         entity.setInvitationConclusion(rep.getInvitationConclusion());
         entity.setInvitationIntroduction(rep.getInvitationIntroduction());
         entity.setMultiselectRole(rep.getMultiselectRole());
-        if (rep.getAup() != null)
-            entity.setAupEntity(toEntity(rep.getAup()));
+        if (rep.getAup() != null) {
+            entity.setAupEntity(toEntity(rep.getAup(), entity.getAupEntity()));
+        } else {
+            entity.setAupEntity(null);
+        }
         if (rep.getGroupRoles() != null) {
             entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> {
                 GroupRolesEntity r = groupRolesRepository.getGroupRolesByNameAndGroup(x, groupId);
@@ -152,8 +155,10 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
 
     }
 
-    private GroupAupEntity toEntity(GroupAupRepresentation rep) {
-        GroupAupEntity entity = new GroupAupEntity();
+    private GroupAupEntity toEntity(GroupAupRepresentation rep, GroupAupEntity entity) {
+        if (entity == null)
+            entity = new GroupAupEntity();
+
         entity.setId(rep.getId() != null ? rep.getId() : KeycloakModelUtils.generateId());
         entity.setType(rep.getType());
         entity.setContent(rep.getContent());
