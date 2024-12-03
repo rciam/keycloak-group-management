@@ -224,9 +224,7 @@ public class GroupAdminGroup {
     public Response deleteGroupEnrollmentConfiguration(@PathParam("id") String id) {
         GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(id);
         if (entity != null && group.getFirstAttribute(Utils.DEFAULT_CONFIGURATION_NAME) != null) {
-            groupEnrollmentRequestRepository.getRequestsByConfiguration(entity.getId()).forEach(request -> {
-                groupEnrollmentRequestRepository.deleteEntity(request);
-            });
+            groupEnrollmentRequestRepository.getRequestsByConfiguration(entity.getId()).forEach(request -> groupEnrollmentRequestRepository.deleteEntity(request));
             groupEnrollmentConfigurationRepository.deleteEntity(id);
         } else if (entity == null) {
             throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);

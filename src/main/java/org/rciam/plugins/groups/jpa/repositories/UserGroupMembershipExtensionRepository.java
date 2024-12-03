@@ -24,6 +24,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakUriInfo;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.models.utils.ModelToRepresentation;
@@ -53,7 +54,9 @@ import org.rciam.plugins.groups.scheduled.SubgroupsExpirationDateCalculationTask
 public class UserGroupMembershipExtensionRepository extends GeneralRepository<UserGroupMembershipExtensionEntity> {
 
     private static final Logger logger = Logger.getLogger(UserGroupMembershipExtensionRepository.class);
-    private static final String localIp = "127.0.0.1";
+    private static final String LOCAL_IP = "127.0.0.1";
+    private static final String PROBLEM_CALCULATING_USER_ATTRIBUTE = "problem calculating user attribute value for group : ";
+    private static final String CALCULATION_TASK = "SubgroupsExpirationDateCalculationTask_";
     private final GroupManagementEventRepository eventRepository;
     private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private GroupRolesRepository groupRolesRepository;
@@ -122,7 +125,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 UserModel user = session.users().getUserById(realm, entity.getUser().getId());
                 GroupModel group = realm.getGroupById(entity.getGroup().getId());
                 logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
-                List<String> subgroupsPaths = deleteMember(entity, group, user, new DummyClientConnection(localIp), null, memberUserAttribute, false).stream().map(ModelToRepresentation::buildGroupPath).collect(Collectors.toList());
+                List<String> subgroupsPaths = deleteMember(entity, group, user, new DummyClientConnection(LOCAL_IP), null, memberUserAttribute, false).stream().map(ModelToRepresentation::buildGroupPath).collect(Collectors.toList());
 
                 customFreeMarkerEmailTemplateProvider.setRealm(realm);
                 try {
@@ -157,13 +160,13 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 try {
                     Utils.changeUserAttributeValue(userModel, member, Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm), memberUserAttribute, session, true, userModel.getAttributes());
                 } catch (UnsupportedEncodingException e) {
-                    logger.warn("problem calculating user attribute value for group : " + member.getGroup().getId() + " and user :  " + member.getUser().getId());
+                    logger.warn(PROBLEM_CALCULATING_USER_ATTRIBUTE + member.getGroup().getId() + " and user :  " + member.getUser().getId());
                 }
-                LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(localIp), userModel, member.getChangedBy() != null ? member.getChangedBy().getId() : userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
+                LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(LOCAL_IP), userModel, member.getChangedBy() != null ? member.getChangedBy().getId() : userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
                         , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
 
                 AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
-                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), userModel.getId(), group.getId(), member.getMembershipExpiresAt()), 100),  100, "SubgroupsExpirationDateCalculationTask_"+ member.getId());
+                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), userModel.getId(), group.getId(), member.getMembershipExpiresAt()), 100),  100, CALCULATION_TASK+ member.getId());
             });
 
             if (eventEntity == null) {
@@ -201,13 +204,13 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             try {
                 groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
             } catch (UnsupportedEncodingException e) {
-                logger.warn("problem calculating user attribute value for group : " + group.getId() + " and user :  " + user.getId());
+                logger.warn(PROBLEM_CALCULATING_USER_ATTRIBUTE + group.getId() + " and user :  " + user.getId());
             }
 
             deleteEntity(member.getId());
             user.leaveGroup(group);
             Map<String, List<String>> attributes =  user.getAttributes();
-            clearUserAttribute(groupName, user, memberUserAttribute, attributes);
+            clearUserAttribute(groupName, memberUserAttribute, attributes);
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, actionUserId
                     , Utils.GROUP_MEMBERSHIP_DELETE, ModelToRepresentation.buildGroupPath(group), roleNames, LocalDate.now());
 
@@ -222,12 +225,12 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                         em.remove(memberEntity);
                         GroupModel groupChild = subgroups.stream().filter(x -> groupId.equals(x.getId())).findFirst().get();
                         user.leaveGroup(groupChild);
-                        clearUserAttribute(groupNameCh, user, memberUserAttribute, attributes);
+                        clearUserAttribute(groupNameCh, memberUserAttribute, attributes);
                         em.flush();
                         LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, actionUserId
                                 , Utils.GROUP_MEMBERSHIP_DELETE, ModelToRepresentation.buildGroupPath(groupChild), roleSubgroupNames, LocalDate.now());
                     } catch (UnsupportedEncodingException e) {
-                        logger.warn("problem calculating user attribute value for group : " + group.getId() + " and user :  " + user.getId());
+                        logger.warn(PROBLEM_CALCULATING_USER_ATTRIBUTE + group.getId() + " and user :  " + user.getId());
                     }
 
                 });
@@ -246,9 +249,9 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
         Map<String, List<String>> attributes =  user.getAttributes();
         try {
-            clearUserAttribute(Utils.getGroupNameForMemberUserAttribute(group), user, memberUserAttribute, attributes);
+            clearUserAttribute(Utils.getGroupNameForMemberUserAttribute(group), memberUserAttribute, attributes);
         } catch (UnsupportedEncodingException e) {
-            logger.warn("problem calculating user attribute value for group : " + group.getId() + " and user :  " + user.getId());
+            logger.warn(PROBLEM_CALCULATING_USER_ATTRIBUTE + group.getId() + " and user :  " + user.getId());
         }
 
         //suspend also subgroup members if exists
@@ -263,9 +266,9 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                     GroupModel groupChild = realm.getGroupById(memberEntity.getGroup().getId());
                     results.add(ModelToRepresentation.buildGroupPath(groupChild));
                     user.leaveGroup(groupChild);
-                    clearUserAttribute(Utils.getGroupNameForMemberUserAttribute(groupChild), user, memberUserAttribute, attributes);
+                    clearUserAttribute(Utils.getGroupNameForMemberUserAttribute(groupChild), memberUserAttribute, attributes);
                 } catch (UnsupportedEncodingException e) {
-                    logger.warn("problem calculating user attribute value for group : " + group.getId() + " and user :  " + user.getId());
+                    logger.warn(PROBLEM_CALCULATING_USER_ATTRIBUTE + group.getId() + " and user :  " + user.getId());
                 }
             });
             Utils.updateUser(session, attributes, user);
@@ -275,7 +278,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         return new ArrayList<>();
     }
 
-    private void clearUserAttribute(String groupName, UserModel user, MemberUserAttributeConfigurationEntity memberUserAttribute, Map<String, List<String>> attributes) {
+    private void clearUserAttribute(String groupName, MemberUserAttributeConfigurationEntity memberUserAttribute, Map<String, List<String>> attributes) {
         List<String> memberUserAttributeValues = attributes.get(memberUserAttribute.getUserAttribute());
         if (memberUserAttributeValues != null && !memberUserAttributeValues.isEmpty()) {
             memberUserAttributeValues.removeIf(x -> Utils.removeMemberUserAttributeCondition(x, memberUserAttribute.getUrnNamespace(), groupName));
@@ -418,7 +421,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         try {
             Utils.changeUserAttributeValue(user, member, Utils.getGroupNameForMemberUserAttribute(group), memberUserAttribute, session, false, attributes);
         } catch (UnsupportedEncodingException e) {
-            logger.warn("problem calculating user attribute value for group : " + group.getId() + " and user :  " + user.getId());
+            logger.warn(PROBLEM_CALCULATING_USER_ATTRIBUTE + group.getId() + " and user :  " + user.getId());
         }
 
         //reactivate also subgroup members if exists
@@ -435,7 +438,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                     user.joinGroup(groupChild);
                     Utils.changeUserAttributeValue(user, memberEntity, Utils.getGroupNameForMemberUserAttribute(groupChild), memberUserAttribute, session, false, attributes);
                 } catch (UnsupportedEncodingException e) {
-                    logger.warn("problem calculating user attribute value for group : " + memberEntity.getGroup().getId() + " and user :  " + user.getId());
+                    logger.warn(PROBLEM_CALCULATING_USER_ATTRIBUTE + memberEntity.getGroup().getId() + " and user :  " + user.getId());
                 }
             });
             Utils.updateUser(session, attributes, user);
@@ -457,11 +460,9 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         if (isNotMember) {
             entity.setValidFrom(configuration.getValidFrom() == null || !configuration.getValidFrom().isAfter(LocalDate.now()) ? LocalDate.now() : configuration.getValidFrom());
         }
-        if (configuration.getMembershipExpirationDays() != null && entity.getValidFrom().isAfter(LocalDate.now())) {
+        if (configuration.getMembershipExpirationDays() != null ) {
             entity.setMembershipExpiresAt(entity.getValidFrom().plusDays(configuration.getMembershipExpirationDays()));
-        } else if (configuration.getMembershipExpirationDays() != null) {
-            entity.setMembershipExpiresAt(LocalDate.now().plusDays(configuration.getMembershipExpirationDays()));
-        }else {
+        } else {
             entity.setMembershipExpiresAt(null);
         }
         entity.setGroup(configuration.getGroup());
@@ -473,17 +474,13 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setJustification(enrollmentEntity.getAdminJustification());
         entity.setStatus(entity.getValidFrom().isAfter(LocalDate.now()) ? MemberStatusEnum.PENDING : MemberStatusEnum.ENABLED);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
-        if (enrollmentEntity.getGroupRoles() != null) {
-            entity.setGroupRoles(enrollmentEntity.getGroupRoles().stream().map(x -> {
-                GroupRolesEntity r = new GroupRolesEntity();
-                r.setId(x.getId());
-                r.setGroup(x.getGroup());
-                r.setName(x.getName());
-                return r;
-            }).collect(Collectors.toList()));
-        } else {
-            entity.setGroupRoles(null);
-        }
+        entity.setGroupRoles(enrollmentEntity.getGroupRoles().stream().map(x -> {
+            GroupRolesEntity r = new GroupRolesEntity();
+            r.setId(x.getId());
+            r.setGroup(x.getGroup());
+            r.setName(x.getName());
+            return r;
+        }).collect(Collectors.toList()));
         update(entity);
 
         //only if user keep not being member of group do not do anything
@@ -495,13 +492,13 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             }
 
             Utils.changeUserAttributeValue(user, entity, Utils.getGroupNameForMemberUserAttribute(group), memberUserAttribute, session, true, user.getAttributes());
-            String eventState = isNotMember && MemberStatusEnum.ENABLED.equals(entity.getStatus()) ? Utils.GROUP_MEMBERSHIP_CREATE : Utils.GROUP_MEMBERSHIP_UPDATE;
+            String eventState = isNotMember  ? Utils.GROUP_MEMBERSHIP_CREATE : Utils.GROUP_MEMBERSHIP_UPDATE;
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
                     , eventState, ModelToRepresentation.buildGroupPath(group), entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), entity.getMembershipExpiresAt());
 
             if (MemberStatusEnum.ENABLED.equals(entity.getStatus()) && group.getSubGroupsStream().count() > 0) {
                 AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
-                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), user.getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, "SubgroupsExpirationDateCalculationTask_"+ entity.getId());
+                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), user.getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, CALCULATION_TASK+ entity.getId());
             }
         }
 
@@ -534,11 +531,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setChangedBy(null);
         entity.setJustification(null);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
-        if (rep.getGroupRoles() != null) {
-            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, configuration.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toList()));
-        } else {
-            entity.setGroupRoles(null);
-        }
+        entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, configuration.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toList()));
 
         update(entity);
 
@@ -552,13 +545,13 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
             MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
             Utils.changeUserAttributeValue(user, entity, Utils.getGroupNameForMemberUserAttribute(group), memberUserAttribute, session, true, user.getAttributes());
-            String eventState = isNotMember && MemberStatusEnum.ENABLED.equals(entity.getStatus()) ? Utils.GROUP_MEMBERSHIP_CREATE : Utils.GROUP_MEMBERSHIP_UPDATE;
+            String eventState = isNotMember  ? Utils.GROUP_MEMBERSHIP_CREATE : Utils.GROUP_MEMBERSHIP_UPDATE;
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, user.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(user.getId())
                     , eventState, ModelToRepresentation.buildGroupPath(group), rep.getGroupRoles(), entity.getMembershipExpiresAt());
 
             if (MemberStatusEnum.ENABLED.equals(entity.getStatus()) && group.getSubGroupsStream().count() > 0) {
                 AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
-                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), user.getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, "SubgroupsExpirationDateCalculationTask_"+ entity.getId());
+                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), user.getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, CALCULATION_TASK+ entity.getId());
             }
         }
 
@@ -602,7 +595,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
         if (isMembershipExpiresAtChanges && MemberStatusEnum.ENABLED.equals(entity.getStatus()) && group.getSubGroupsStream().count() > 0) {
             AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
-            timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), entity.getUser().getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, "SubgroupsExpirationDateCalculationTask_"+ entity.getId());
+            timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), entity.getUser().getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, CALCULATION_TASK+ entity.getId());
         }
     }
 
@@ -651,14 +644,14 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             try {
                 Utils.changeUserAttributeValue(userModel, entity, Utils.getGroupNameForMemberUserAttribute(group), memberUserAttribute, session, true, userModel.getAttributes());
             } catch (UnsupportedEncodingException e) {
-                logger.warn("problem calculating user attribute value for group : " + group.getId() + " and user :  " + userModel.getId());
+                logger.warn(PROBLEM_CALCULATING_USER_ATTRIBUTE + group.getId() + " and user :  " + userModel.getId());
             }
-            LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(localIp), userModel, userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
+            LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(LOCAL_IP), userModel, userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
                     , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), entity.getMembershipExpiresAt());
 
             if (group.getSubGroupsStream().count() > 0) {
                 AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
-                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), userModel.getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, "SubgroupsExpirationDateCalculationTask_"+ entity.getId());
+                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), userModel.getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, CALCULATION_TASK+ entity.getId());
             }
         }
 
