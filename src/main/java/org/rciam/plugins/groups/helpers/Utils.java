@@ -228,12 +228,12 @@ public class Utils {
 
     public static boolean hasManageGroupsAccountRole(RealmModel realm, UserModel user) {
         ClientModel client = realm.getClientByClientId(Constants.ACCOUNT_MANAGEMENT_CLIENT_ID);
-        return client!= null && (user.hasRole(client.getRole(DEFAULT_GROUP_ROLE_NAME)) || user.hasRole(client.getRole(DEFAULT_GROUP_ROLE_NAME_EXTENDED)));
+        return client!= null && ((client.getRole(DEFAULT_GROUP_ROLE_NAME) != null && user.hasRole(client.getRole(DEFAULT_GROUP_ROLE_NAME))) || (client.getRole(DEFAULT_GROUP_ROLE_NAME_EXTENDED) != null && user.hasRole(client.getRole(DEFAULT_GROUP_ROLE_NAME_EXTENDED)))) ;
     }
 
     public static boolean hasManageExtendedGroupsAccountRole(RealmModel realm, UserModel user) {
         ClientModel client = realm.getClientByClientId(Constants.ACCOUNT_MANAGEMENT_CLIENT_ID);
-        return client!= null && user.hasRole(client.getRole(DEFAULT_GROUP_ROLE_NAME_EXTENDED));
+        return client!= null && client.getRole(DEFAULT_GROUP_ROLE_NAME_EXTENDED) != null && user.hasRole(client.getRole(DEFAULT_GROUP_ROLE_NAME_EXTENDED));
     }
 
     public static FederatedIdentityRepresentation getFederatedIdentityRep(RealmModel realm, String idPAlias) {
