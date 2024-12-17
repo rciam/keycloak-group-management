@@ -27,6 +27,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
 
     //must be changed to a ui ( account console url)
     private static final String enrollmentUrl = "realms/{realmName}/account/#/groups/groupenrollments?id={id}";
+    private static final String MEMBER_URL = "realms/{realmName}/account/#/groups/showgroups/{id}";
     private static final String enrollmentStartUrl = "/realms/{realmName}/account/#/enroll?groupPath={path}";
     private static final String finishGroupInvitation = "realms/{realmName}/account/#/invitation/{id}";
     private static final String adminGroupPageUrl = "realms/{realmName}/account/#/groups/admingroups/{id}?tab=admins";
@@ -196,7 +197,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("adminGroupUserRemovalSubject", Stream.of(groupPath).collect(Collectors.toList()), "expired-group-membership-admin.ftl", attributes);
     }
 
-    public void sendExpiredGroupMemberEmailToUser(String groupPath, String groupId, List<String> subgroupsPaths, String serverUrl) throws EmailException {
+    public void sendExpiredGroupMemberEmailToUser(String groupPath, List<String> subgroupsPaths, String serverUrl) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("groupPath", groupPath);
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupsPaths));
@@ -205,7 +206,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("userRemovalSubject", Stream.of(groupPath).collect(Collectors.toList()), "expired-group-membership-user.ftl", attributes);
     }
 
-    public void sendExpiredGroupMembershipNotification(String groupPath, String date, String groupId, String serverUrl) throws EmailException {
+    public void sendExpiredGroupMembershipNotification(String groupPath, String date, String serverUrl) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("groupPath", groupPath);
         attributes.put("date", date);
@@ -346,25 +347,26 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("memberUpdateUserInformSubject", Stream.of(groupPath).collect(Collectors.toList()), "member-update-user-inform.ftl", attributes);
     }
 
-    public void sendMemberCreateAdminInformEmail(String groupPath, UserModel userChanged, UserModel admin, LocalDate validFrom, LocalDate membershipExpiresAt, List<String> roles) throws EmailException {
+    public void sendMemberCreateAdminInformEmail(String groupId, String groupPath, UserModel userChanged, UserModel admin) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("groupPath", groupPath);
         attributes.put("userFullName", userChanged.getFirstName() + " " + userChanged.getLastName());
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
-        attributes.put("validFrom", validFrom.format(Utils.dateFormatter));
-        attributes.put("membershipExpiresAt",  membershipExpiresAt != null ? membershipExpiresAt.format(Utils.dateFormatter) : "N/A");
-        attributes.put("roles", roles.stream().collect(Collectors.joining(",")));
+        String groupUrl = session.getContext().getUri().getBaseUri().toString() + membersGroupPageUrl ;
+        attributes.put("groupUrl", groupUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
         attributes.put("signatureMessage", signatureMessage);
         send("memberCreateAdminInformSubject", Stream.of(groupPath).collect(Collectors.toList()),"member-create-admin-inform.ftl", attributes);
     }
 
-    public void sendMemberCreateUserInformEmail(String groupPath, UserModel admin, LocalDate validFrom, LocalDate membershipExpiresAt, List<String> roles) throws EmailException {
+    public void sendMemberCreateUserInformEmail(String groupId, String groupPath, UserModel admin, LocalDate validFrom, LocalDate membershipExpiresAt, List<String> roles) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("groupPath", groupPath);
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
         attributes.put("validFrom", validFrom.format(Utils.dateFormatter));
         attributes.put("membershipExpiresAt", membershipExpiresAt != null ? membershipExpiresAt.format(Utils.dateFormatter) : "N/A");
         attributes.put("roles", roles.stream().collect(Collectors.joining(",")));
+        String memberUrl = session.getContext().getUri().getBaseUri().toString() + MEMBER_URL ;
+        attributes.put("memberUrl", memberUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
         attributes.put("signatureMessage", signatureMessage);
         send("memberCreateUserInformSubject", Stream.of(groupPath).collect(Collectors.toList()), "member-create-user-inform.ftl", attributes);
     }

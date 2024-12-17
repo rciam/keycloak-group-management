@@ -325,7 +325,7 @@ public class GroupAdminGroup {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
                     customFreeMarkerEmailTemplateProvider.sendInvitionAdminInformationEmail(userRep.getEmail(), false, org.rciam.plugins.groups.helpers.ModelToRepresentation.buildGroupPath(group), groupAdmin, null);
                 } catch (EmailException e) {
-                    throw new RuntimeException(e);
+                    ServicesLogger.LOGGER.failedToSendEmail(e);
                 }
             });
         } catch (EmailException e) {
@@ -359,7 +359,7 @@ public class GroupAdminGroup {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
                     customFreeMarkerEmailTemplateProvider.sendAddRemoveAdminAdminInformationEmail(true, groupPath, group.getId(), userAdded, groupAdmin);
                 } catch (EmailException e) {
-                    throw new RuntimeException(e);
+                    ServicesLogger.LOGGER.failedToSendEmail(e);
                 }
             });
         } catch (EmailException e) {

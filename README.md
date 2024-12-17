@@ -21,10 +21,6 @@ A keycloak plugin to support advanced group management features:
 | 0.13.0                   | 22.0.5-1.2 +     |
 | 0.18.0                   | 22.0.10-1.4 +    |
 | 0.19.0                   | 22.0.10-1.8 +    |
-| 0.20.0                   | 22.0.10-1.8 +    |
-| 0.21.0                   | 22.0.11-1.8 +    |
-
-
 
 
 ## General configuration options 
@@ -34,7 +30,21 @@ All web services to be executed needs realm management rights role.
  - 'keycloakUrl' = Keycloak main url
  - 'userAssuranceForEnrollment' = User assurance (default 'assurance')
  - 'userIdentifierForEnrollment' = User identifier (default 'username')
-2. (optional) For general group management configuration options execute following web service (necessary during first time deployed):
+2. You could create account roles 'manage-groups' and 'manage-groups-extended' for managing groups.
+   'manage-groups' is a special role that can manage all groups in a same way as group admins. 
+   Actions that can not be done with this role are:
+     - delete group
+     - delete role
+     - invite a user
+     - add group member role
+     - delete group member role
+   Among others users with this role can also: 
+     - create top level group
+     - create group configuration
+     - can view all realm users
+   'manage-groups-extended' is a role for comanage to Keycloak migration. 
+   User with this role has the same rigths plus some rules in creating a group member does not take into account with this role.
+3. (optional) For general group management configuration options execute following web service (necessary during first time deployed):
 
 `curl --request PUT \
 --url {server_url}/realms/{realmName}/agm/admin/configuration \
@@ -50,7 +60,7 @@ Parameter explanation:
 - invitation-expiration-period = After how many hours the invitation will be expired. (default value is 72)
 - expiration-notification-period = How many days before Group Membership expiration (or aup expiration) notification email will be sent to user. Can be overridden per Group. (default value is 21)
 
-3. For configuring entitlements user attribute you must execute the following web service :
+4. For configuring entitlements user attribute you must execute the following web service :
    `curl --request POST \
    --url {server_url}/realms/{realmName}/agm/admin/member-user-attribute/configuration \
    --header 'Accept: application/json' \
@@ -64,7 +74,7 @@ Parameter explanation:
 
 Only authority is optional.
 
-4.  Configuration rules exists for group configuration options. Web service example:
+5.  Configuration rules exists for group configuration options. Web service example:
    `curl --request POST \
    --url {server_url}/realms/{realmName}/agm/admin/configuration-rules \
    --header 'Accept: application/json' \
@@ -148,6 +158,7 @@ Main url : {server_url}/realms/{realm}/agm
 | /account/group-admin/group/{groupId}/roles                         | POST   | create group role                                                             | GroupAdminGroup              |
 | /account/group-admin/group/{groupId}/role/{name}                   | DELETE | delete group role                                                             | GroupAdminGroup              |
 | /account/group-admin/group/{groupId}/members                       | GET    | get all group members pager, being able to search and get by type (fe active) | GroupAdminGroupMembers       |
+| /account/group-admin/group/{groupId}/members                       | POST   | create a user group member based on username                                  | GroupAdminGroupMembers       |
 | /account/group-admin/group/{groupId}/members/invitation            | POST   | send invitation to a user based on email                                      | GroupAdminGroupMembers       |
 | /account/group-admin/group/{groupId}/member/{memberId}             | PUT    | update specific fields of group member                                        | GroupAdminGroupMembers       |
 | /account/group-admin/group/{groupId}/member/{memberId}             | DELETE | delete group member                                                           | GroupAdminGroupMember        |

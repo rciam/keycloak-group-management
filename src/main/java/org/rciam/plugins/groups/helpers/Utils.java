@@ -72,6 +72,7 @@ public class Utils {
     public static final String GROUP_MEMBERSHIP_SUSPEND = "GROUP_MEMBERSHIP_SUSPEND";
     public static final String NO_FOUND_GROUP_CONFIGURATION = "Could not find this group configuration";
     public static final String DEFAULT_GROUP_ROLE_NAME = "manage-groups";
+    public static final String DEFAULT_GROUP_ROLE_NAME_EXTENDED = "manage-groups-extended";
     public static final String DESCRIPTION = "description";
     public static final String USER_ASSURANCE_FOR_ENROLLMENT = "userAssuranceForEnrollment";
     public static final String DEFAULT_USER_ASSURANCE_FOR_ENROLLMENT = "assurance";
@@ -227,7 +228,12 @@ public class Utils {
 
     public static boolean hasManageGroupsAccountRole(RealmModel realm, UserModel user) {
         ClientModel client = realm.getClientByClientId(Constants.ACCOUNT_MANAGEMENT_CLIENT_ID);
-        return client!= null && user.hasRole(client.getRole(DEFAULT_GROUP_ROLE_NAME));
+        return client!= null && (user.hasRole(client.getRole(DEFAULT_GROUP_ROLE_NAME)) || user.hasRole(client.getRole(DEFAULT_GROUP_ROLE_NAME_EXTENDED)));
+    }
+
+    public static boolean hasManageExtendedGroupsAccountRole(RealmModel realm, UserModel user) {
+        ClientModel client = realm.getClientByClientId(Constants.ACCOUNT_MANAGEMENT_CLIENT_ID);
+        return client!= null && user.hasRole(client.getRole(DEFAULT_GROUP_ROLE_NAME_EXTENDED));
     }
 
     public static FederatedIdentityRepresentation getFederatedIdentityRep(RealmModel realm, String idPAlias) {
