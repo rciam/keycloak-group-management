@@ -4,10 +4,11 @@ All notable changes in keycloak-group-management will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.0]
+## [1.1.0] - 2024-12-18
 
 ### Added
 - Group admin can create a user group member based on username (REST API)
+- Add group admins emails for accept/ reject enrollment request
 
 ### Fixed
 - Recalculate effective membership expires at when pending groups become active

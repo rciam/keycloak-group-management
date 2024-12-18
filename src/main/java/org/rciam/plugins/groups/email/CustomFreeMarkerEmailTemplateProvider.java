@@ -163,6 +163,25 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send(isAccepted ? "acceptEnrollmentSubject" : "rejectEnrollmentSubject", Stream.of(groupPath).collect(Collectors.toList()), "accept-reject-enrollment.ftl", attributes);
     }
 
+    public void sendAcceptRejectEnrollmentAdminInfoEmail(boolean isAccepted, UserModel admin, UserModel memberUser, String groupPath, String groupId, String justification) throws EmailException {
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("adminFullname", admin.getFirstName() + " " + admin.getLastName());
+        attributes.put("memberFullname", memberUser.getFirstName() + " " + memberUser.getLastName());
+        attributes.put("groupPath", groupPath);
+        attributes.put("action", isAccepted ? "accepted" : "rejected");
+        if (justification != null) {
+            attributes.put("justification", "Comment from reviewer: "+justification);
+            attributes.put("justificationHtml", "Comment from reviewer: <b>" +justification+"</b>");
+        } else{
+            attributes.put("justification", "");
+            attributes.put("justificationHtml", "");
+        }
+        String groupUrl = session.getContext().getUri().getBaseUri().toString() + membersGroupPageUrl;
+        attributes.put("groupUrl", groupUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
+        attributes.put("signatureMessage", signatureMessage);
+        send(isAccepted ? "acceptEnrollmentAdminInfoSubject" : "rejectEnrollmentAdminInfoSubject", Stream.of(groupPath).collect(Collectors.toList()), "accept-reject-enrollment-admin-info.ftl", attributes);
+    }
+
     public void sendGroupAdminEnrollmentCreationEmail(UserModel userRequest, String groupPath, List<String> groupRoles, String reason, String enrollmentId) throws EmailException {
         attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
         attributes.put("userName", userRequest.getFirstName() + " " + userRequest.getLastName());

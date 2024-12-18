@@ -26,6 +26,7 @@ import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
+import org.rciam.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.rciam.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;
 import org.rciam.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
@@ -47,8 +48,9 @@ public class GroupAdminEnrollementRequest {
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
+    private final GroupAdminRepository groupAdminRepository;
 
-    public GroupAdminEnrollementRequest(KeycloakSession session, RealmModel realm, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserModel groupAdmin, GroupEnrollmentRequestEntity enrollmentEntity, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository) {
+    public GroupAdminEnrollementRequest(KeycloakSession session, RealmModel realm, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserModel groupAdmin, GroupEnrollmentRequestEntity enrollmentEntity, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository) {
         this.session = session;
         this.realm = realm;
         this.groupEnrollmentRequestRepository = groupEnrollmentRequestRepository;
@@ -56,6 +58,7 @@ public class GroupAdminEnrollementRequest {
         this.enrollmentEntity = enrollmentEntity;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
+        this.groupAdminRepository = groupAdminRepository;
         this.customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session);
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
@@ -91,8 +94,19 @@ public class GroupAdminEnrollementRequest {
 
         try {
             GroupModel group= realm.getGroupById(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getId());
-            customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm, enrollmentEntity.getUser().getId()));
-            customFreeMarkerEmailTemplateProvider.sendAcceptRejectEnrollmentEmail(true, ModelToRepresentation.buildGroupPath(group), enrollmentEntity.getAdminJustification());
+            UserModel memberUser = session.users().getUserById(realm, enrollmentEntity.getUser().getId());
+            customFreeMarkerEmailTemplateProvider.setUser(memberUser);
+            String groupPath = ModelToRepresentation.buildGroupPath(group);
+            customFreeMarkerEmailTemplateProvider.sendAcceptRejectEnrollmentEmail(true, groupPath, enrollmentEntity.getAdminJustification());
+
+            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+                try {
+                    customFreeMarkerEmailTemplateProvider.setUser(admin);
+                    customFreeMarkerEmailTemplateProvider.sendAcceptRejectEnrollmentAdminInfoEmail(true, groupAdmin, memberUser, groupPath, group.getId(), enrollmentEntity.getAdminJustification());
+                } catch (EmailException e) {
+                    ServicesLogger.LOGGER.failedToSendEmail(e);
+                }
+            });
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         }
@@ -109,8 +123,20 @@ public class GroupAdminEnrollementRequest {
 
         try {
             GroupModel group= realm.getGroupById(enrollmentEntity.getGroupEnrollmentConfiguration().getGroup().getId());
-            customFreeMarkerEmailTemplateProvider.setUser(session.users().getUserById(realm, enrollmentEntity.getUser().getId()));
-            customFreeMarkerEmailTemplateProvider.sendAcceptRejectEnrollmentEmail(false, ModelToRepresentation.buildGroupPath(group), enrollmentEntity.getAdminJustification());
+            UserModel memberUser = session.users().getUserById(realm, enrollmentEntity.getUser().getId());
+            customFreeMarkerEmailTemplateProvider.setUser(memberUser);
+            String groupPath = ModelToRepresentation.buildGroupPath(group);
+            customFreeMarkerEmailTemplateProvider.sendAcceptRejectEnrollmentEmail(false, groupPath, enrollmentEntity.getAdminJustification());
+
+            groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+                try {
+                    customFreeMarkerEmailTemplateProvider.setUser(admin);
+                    customFreeMarkerEmailTemplateProvider.sendAcceptRejectEnrollmentAdminInfoEmail(false, groupAdmin, memberUser, groupPath, group.getId(), enrollmentEntity.getAdminJustification());
+                } catch (EmailException e) {
+                    ServicesLogger.LOGGER.failedToSendEmail(e);
+                }
+            });
+
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         }
