@@ -52,12 +52,10 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
 
     public void sendGroupAdminEmail(boolean isAdded, String groupPath, String groupId, UserModel groupadmin) throws EmailException {
         String title = isAdded ? "addGroupAdminSubject" : "removeGroupAdminSubject";
-        String text1 = isAdded ? "added" : "removed";
-        String text2 = isAdded ? "to" : "from";
+        String text1 = isAdded ? "added as a" : "removed from being";
         KeycloakUriInfo uriInfo = session.getContext().getUri();
         String text3 = isAdded ? "For more information about the group, please visit the following link:\n " + uriInfo.getBaseUri().toString() + adminGroupPageUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId) : "";
         attributes.put("text1", text1);
-        attributes.put("text2", text2);
         attributes.put("text3", text3);
         attributes.put("groupPath", groupPath);
         attributes.put("groupadmin", groupadmin.getFirstName() + " " + groupadmin.getLastName());
