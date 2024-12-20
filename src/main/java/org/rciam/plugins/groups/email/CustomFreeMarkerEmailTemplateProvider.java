@@ -395,7 +395,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("groupPath", groupPath);
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
         attributes.put("signatureMessage", signatureMessage);
-        send("deleteGroupAdminInformationSubject", "delete-group-admin-inform.ftl", attributes);
+        send("deleteGroupAdminInformationSubject", Stream.of(groupPath).collect(Collectors.toList()), "delete-group-admin-inform.ftl", attributes);
     }
 
     public void sendRolesChangesUserEmail(String groupPath, List<String> roles) throws EmailException {
@@ -415,7 +415,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
         attributes.put("userFullName", userChanged.getFirstName() + " " + userChanged.getLastName());
         attributes.put("signatureMessage", signatureMessage);
-        send("rolesChangesGroupAdminSubject", "roles-changes-group-admin.ftl", attributes);
+        send("rolesChangesGroupAdminSubject", Stream.of(groupPath).collect(Collectors.toList()), "roles-changes-group-admin.ftl", attributes);
     }
 
     private String subgroupsHtmlStrCalculation(List<String> subgroupsPaths) {
