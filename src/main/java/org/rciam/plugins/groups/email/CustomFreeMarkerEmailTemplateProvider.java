@@ -27,6 +27,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
 
     //must be changed to a ui ( account console url)
     private static final String enrollmentUrl = "realms/{realmName}/account/#/groups/groupenrollments?id={id}";
+    private static final String SHOW_GROUPS_URL = "realms/{realmName}/account/#/groups/showgroups";
     private static final String MEMBER_URL = "realms/{realmName}/account/#/groups/showgroups/{id}";
     private static final String enrollmentStartUrl = "/realms/{realmName}/account/#/enroll?groupPath={path}";
     private static final String finishGroupInvitation = "realms/{realmName}/account/#/invitation/{id}";
@@ -414,6 +415,27 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("userFullName", userChanged.getFirstName() + " " + userChanged.getLastName());
         attributes.put("signatureMessage", signatureMessage);
         send("rolesChangesGroupAdminSubject", Stream.of(groupPath).collect(Collectors.toList()), "roles-changes-group-admin.ftl", attributes);
+    }
+
+    public void sendRemoveMemberEmail(String groupPath, UserModel admin) throws EmailException {
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("groupPath", groupPath);
+        attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
+        String groupUrl = session.getContext().getUri().getBaseUri().toString() + SHOW_GROUPS_URL ;
+        attributes.put("groupsUrl", groupUrl.replace("{realmName}", realm.getName()));
+        attributes.put("signatureMessage", signatureMessage);
+        send("removeMemberSubject", Stream.of(groupPath).collect(Collectors.toList()),"remove-member-inform.ftl", attributes);
+    }
+
+    public void sendRemoveMemberAdminInformationEmail(String groupId, String groupPath, UserModel admin, UserModel userChanged) throws EmailException {
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("groupPath", groupPath);
+        attributes.put("userFullName", userChanged.getFirstName() + " " + userChanged.getLastName());
+        attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
+        String memberUrl = session.getContext().getUri().getBaseUri().toString() + membersGroupPageUrl ;
+        attributes.put("groupUrl", memberUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
+        attributes.put("signatureMessage", signatureMessage);
+        send("removeMemberAdminInformationSubject", Stream.of(groupPath).collect(Collectors.toList()), "remove-member-admin-inform.ftl", attributes);
     }
 
     private String subgroupsHtmlStrCalculation(List<String> subgroupsPaths) {

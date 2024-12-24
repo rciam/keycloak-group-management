@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Rules for user manage-groups-extended for update membership
 
+### Added
+- Emails when removing user from group
+
 ## [1.1.1] - 2024-12-20
 
 ### Fixed
