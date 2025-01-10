@@ -138,7 +138,7 @@ public class UserGroups {
             throw new NotFoundException("You are not member of this group");
         }
 
-        UserGroupMember service = new UserGroupMember(session, realm, user, entity, userGroupMembershipExtensionRepository);
+        UserGroupMember service = new UserGroupMember(session, realm, user, entity, userGroupMembershipExtensionRepository, groupAdminRepository, customFreeMarkerEmailTemplateProvider);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }

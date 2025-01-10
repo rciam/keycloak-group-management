@@ -438,6 +438,18 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         send("removeMemberAdminInformationSubject", Stream.of(groupPath).collect(Collectors.toList()), "remove-member-admin-inform.ftl", attributes);
     }
 
+    public void sendLeaveMemberAdminInformationEmail(String groupId, String groupPath, List<String> subgroupPaths, UserModel member) throws EmailException {
+        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("groupPath", groupPath);
+        attributes.put("userFullName", member.getFirstName() + " " + member.getLastName());
+        attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupPaths));
+        attributes.put("subgroupsStrHtml", subgroupsHtmlStrCalculation(subgroupPaths));
+        String memberUrl = session.getContext().getUri().getBaseUri().toString() + membersGroupPageUrl ;
+        attributes.put("groupUrl", memberUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
+        attributes.put("signatureMessage", signatureMessage);
+        send("removeMemberAdminInformationSubject", Stream.of(groupPath).collect(Collectors.toList()), "remove-member-admin-inform.ftl", attributes);
+    }
+
     private String subgroupsHtmlStrCalculation(List<String> subgroupsPaths) {
         if (subgroupsPaths.isEmpty())
             return "";

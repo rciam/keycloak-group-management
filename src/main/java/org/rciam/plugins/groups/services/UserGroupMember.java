@@ -6,17 +6,24 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.common.ClientConnection;
+import org.keycloak.email.EmailException;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.services.ServicesLogger;
+import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.rciam.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
+import org.rciam.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.rciam.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.rciam.plugins.groups.representations.UserGroupMembershipExtensionRepresentation;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class UserGroupMember {
 
@@ -30,15 +37,20 @@ public class UserGroupMember {
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
 
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
+    private final GroupAdminRepository groupAdminRepository;
+    private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final UserModel user;
 
-    public UserGroupMember(KeycloakSession session, RealmModel realm, UserModel user, UserGroupMembershipExtensionEntity member, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository) {
+    public UserGroupMember(KeycloakSession session, RealmModel realm, UserModel user, UserGroupMembershipExtensionEntity member, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider) {
         this.session = session;
         this.realm = realm;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
         this.user = user;
         this.member = member;
         this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
+        this.groupAdminRepository = groupAdminRepository;
+        this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
+
     }
 
     @GET
@@ -51,7 +63,19 @@ public class UserGroupMember {
     public Response leaveGroup() {
         GroupModel group = realm.getGroupById(member.getGroup().getId());
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
-        userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, user.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(user.getId()), memberUserAttribute, false);
+        List<String> subgroupPaths = userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, user.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(user.getId()), memberUserAttribute, false).stream().map(ModelToRepresentation::buildGroupPath).collect(Collectors.toList());
+
+        String groupPath = ModelToRepresentation.buildGroupPath(group);
+        groupAdminRepository.getAllAdminIdsGroupUsers(group).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
+            try {
+                customFreeMarkerEmailTemplateProvider.setUser(admin);
+                customFreeMarkerEmailTemplateProvider.sendLeaveMemberAdminInformationEmail(group.getId(), groupPath, subgroupPaths, user);
+            } catch (EmailException e) {
+                ServicesLogger.LOGGER.failedToSendEmail(e);
+            }
+        });
+
+
         return Response.noContent().build();
     }
 

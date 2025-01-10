@@ -1,2 +1,2 @@
 <#ftl output_format="plainText">
-${msg("removeMemberBody", fullname, groupPath, adminFullName, groupsUrl, signatureMessage)}
+${msg("removeMemberAdminInformationBody", fullname, adminFullName, userFullName, groupPath, groupUrl, signatureMessage)}
