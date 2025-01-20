@@ -20,6 +20,8 @@ import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/gr
 // @ts-ignore
 import { Msg } from '../../widgets/Msg';
 import { Button } from '@patternfly/react-core';
+import { Alerts } from '../../widgets/Alerts';
+import { ConfirmationModal } from '../../group-widgets/Modals';
 
 export interface GroupsPageProps {
   history: any;
@@ -50,7 +52,9 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [orderBy, setOrderBy] = useState<string>('');
   const [asc, setAsc] = useState<boolean>(true);
-  const [loading,setLoading] = useState<boolean>(false);
+  const [alert, setAlert] = useState({});
+  const [loading, setLoading] = useState<boolean>(false);
+  const [modalInfo, setModalInfo] = useState({});
 
   useEffect(() => {
     fetchGroups();
@@ -81,12 +85,12 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
   const fetchGroups = () => {
     setLoading(true);
     groupsService!.doGet<Response>("/user/groups", { params: { first: (perPage * (page - 1)), max: perPage, ...(orderBy ? { order: orderBy } : {}), asc: asc ? "true" : "false" } }).then((response: HttpResponse<Response>) => {
-        setLoading(false);
-        let count = response?.data?.count || 0;
-        setTotalItems(count as number);
-        setGroups(response?.data?.results || [] as Group[]);
-      });
-      
+      setLoading(false);
+      let count = response?.data?.count || 0;
+      setTotalItems(count as number);
+      setGroups(response?.data?.results || [] as Group[]);
+    });
+
   }
 
 
@@ -120,6 +124,8 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
 
   return (
     <ContentPage title={Msg.localize('groupLabel')}>
+      <Alerts alert={alert} close={() => { setAlert({}) }} />
+      <ConfirmationModal modalInfo={modalInfo} />
       <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact wrapModifier={"breakWord"}>
         <DataListItem id="groups-list-header" aria-labelledby="Columns names">
           <DataListItemRow className="gm_view-groups-header">
@@ -170,14 +176,14 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
             ><div className="gm_cell-placeholder"></div></DataListAction>
           </DataListItemRow>
         </DataListItem>
-        { loading?
-              <div tabIndex={0} id="modal-no-header-description" className="gm_loader-modal-container">
-                <Spinner isSVG diameter="100px" aria-label="Contents of the custom size example" />
-              </div>:groups.length === 0
-          ? emptyGroup()
-          : groups.map((group: Group, appIndex: number) => {
-            return <MembershipDatalistItem membership={group} history={props.history} currentDate={new Date(new Date().setHours(0, 0, 0, 0))} appIndex={appIndex} />
-          })
+        {loading ?
+          <div tabIndex={0} id="modal-no-header-description" className="gm_loader-modal-container">
+            <Spinner isSVG diameter="100px" aria-label="Contents of the custom size example" />
+          </div> : groups.length === 0
+            ? emptyGroup()
+            : groups.map((group: Group, appIndex: number) => {
+              return <MembershipDatalistItem membership={group} history={props.history} fetchGroups={fetchGroups} setAlert={setAlert} setLoading={setLoading} setModalInfo={setModalInfo} currentDate={new Date(new Date().setHours(0, 0, 0, 0))} appIndex={appIndex} />
+            })
 
         }
       </DataList>
@@ -218,6 +224,22 @@ const MembershipDatalistItem = (props) => {
   const onToggle = (isOpen: boolean) => {
     setIsOpen(isOpen);
   };
+
+  const leaveGroup = () => {
+    props.setLoading(true);
+    groupsService!.doDelete<any>("/user/group/" + props.membership.group.id + "/member")
+      .then((response: HttpResponse<any>) => {
+        if (response.status === 200 || response.status === 204) {
+          props.setAlert({ message: Msg.localize('leaveGroupSuccess'), variant: "success" })
+          props.fetchGroups();
+        }
+        else {
+          console.log('here');
+          props.setAlert({ message: response?.data?.error ? Msg.localize('leaveGroupError', [response.data.error]) : Msg.localize('leaveGroupErrorUnexpected'), variant: "danger" })
+        }
+        props.setLoading(false);
+      });
+  }
 
   // Fetch the group path based on the effectiveGroupId
   const fetchGroup = () => {
@@ -324,6 +346,23 @@ const MembershipDatalistItem = (props) => {
               <Link to={`/enroll?groupPath=${encodeURI(props.membership.group.path)}`}><DropdownItem key="link">
                 <Msg msgKey='enrollmentDiscoveryPageLink' />
               </DropdownItem></Link>,
+              <DropdownItem onClick={() => {
+                props.setModalInfo({
+                  title: "Confirmation",
+                  accept_message: "Leave",
+                  cancel_message: "Cancel",
+                  message: (Msg.localize('leaveGroupConfirmation')),
+                  accept: function () {
+                    leaveGroup();
+                    props.setModalInfo({})
+                  },
+                  cancel: function () {
+                    props.setModalInfo({})
+                  }
+                });
+              }}>
+                <Msg msgKey="leaveGroup" />
+              </DropdownItem>
             ]}
           />
         </DataListAction>

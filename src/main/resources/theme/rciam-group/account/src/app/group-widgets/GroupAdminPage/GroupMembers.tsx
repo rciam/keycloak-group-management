@@ -68,7 +68,7 @@ const UserActionModal: FC<any> = (props) => {
           setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "success", description: Msg.localize('updateMembershipSuccessMessage') })
         }
         else {
-          props.setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "danger", description: response?.data?.error ? Msg.localize('updateMembershipErrorMessage', [response.data.error]) : Msg.localize("updateMembershipErrorMessageUnexpected") })
+          setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "danger", description: response?.data?.error ? Msg.localize('updateMembershipErrorMessage', [response.data.error]) : Msg.localize("updateMembershipErrorMessageUnexpected") })
         }
         setLoading(false);
         close();
@@ -84,7 +84,7 @@ const UserActionModal: FC<any> = (props) => {
           setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "success", description: Msg.localize('updateMembershipSuccessMessage') })
         }
         else {
-          props.setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "danger", description: response?.data?.error ? Msg.localize('updateMembershipErrorMessage', [response.data.error]) : Msg.localize("updateMembershipErrorMessageUnexpected") })
+          setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "danger", description: response?.data?.error ? Msg.localize('updateMembershipErrorMessage', [response.data.error]) : Msg.localize("updateMembershipErrorMessageUnexpected") })
         }
         setLoading(false);
         close();
@@ -562,7 +562,7 @@ export const GroupMembers: FC<any> = (props) => {
                       <Tooltip
                         content={
                           <div>
-                            {member.user.id === props.user.userId ? Msg.localize('adminGroupMemberLeave') : Msg.localize('adminGroupMemberRemove')}
+                            {member.user.id === props.user.userId ? Msg.localize('leaveGroup') : Msg.localize('adminGroupMemberRemove')}
                           </div>
                         }
                       >

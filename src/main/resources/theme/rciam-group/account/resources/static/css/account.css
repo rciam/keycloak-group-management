@@ -949,8 +949,13 @@
 .gm_popover-expiration-button {
     margin-top:0.3rem;
 }
+.gm_view-group-action-container {
+    text-align: right;
+}
+.gm_view-group-action-container button {
+    margin-right:1rem;
+}
 
 .gm_update-membership-button {
-    text-align: right;
     margin:0 1rem;
 }

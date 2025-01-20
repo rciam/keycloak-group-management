@@ -67,6 +67,7 @@ export class GroupsServiceClient {
         return this.doRequest(endpoint, {...config, method: 'delete'});
     }
 
+
     public async doPost<T>(endpoint: string,
                           body: string | {},
                           config?: RequestInitWithParams): Promise<HttpResponse<T>> {
