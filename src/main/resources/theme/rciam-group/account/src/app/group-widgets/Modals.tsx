@@ -31,7 +31,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = (props) =>{
             isOpen={isModalOpen}
             onClose={handleModalToggle}
             actions={[
-                <Button key="confirm" variant="primary" onClick={()=>{props?.modalInfo?.accept()}}>
+                <Button key="confirm" variant={props?.modalInfo?.button_variant||"primary"} onClick={()=>{props?.modalInfo?.accept()}}>
                     {props?.modalInfo?.accept_message}
                 </Button>,
                 props?.modalInfo?.cancel_message&&

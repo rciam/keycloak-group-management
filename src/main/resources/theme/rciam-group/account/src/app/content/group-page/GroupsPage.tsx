@@ -348,7 +348,8 @@ const MembershipDatalistItem = (props) => {
               </DropdownItem></Link>,
               <DropdownItem onClick={() => {
                 props.setModalInfo({
-                  title: "Confirmation",
+                  title: (Msg.localize('leaveGroup')+"?"),
+                  button_variant: "danger",
                   accept_message: "Leave",
                   cancel_message: "Cancel",
                   message: (Msg.localize('leaveGroupConfirmation')),
