@@ -162,9 +162,10 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
             <Link to={'/enroll?groupPath=' + encodeURI(groupMembership?.group?.path)}><Button>Update Membership</Button></Link>
             <Button variant="danger" onClick={() => {
               setModalInfo({
-                title: "Confirmation",
-                accept_message: "LEAVE",
-                cancel_message: "CANCEL",
+                title: (Msg.localize('leaveGroup') + "?"),
+                button_variant: "danger",
+                accept_message: "Leave",
+                cancel_message: "Cancel",
                 message: (Msg.localize('leaveGroupConfirmation')),
                 accept: function () {
                   leaveGroup();
