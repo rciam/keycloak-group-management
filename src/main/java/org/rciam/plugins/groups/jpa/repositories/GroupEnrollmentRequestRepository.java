@@ -92,12 +92,11 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
         String previousAauthnAuthorities = userSession.getNote(IDENTITY_PROVIDER_AUTHN_AUTHORITIES);
         RealmModel realm = userSession.getRealm();
         IdentityProviderModel idp = realm.getIdentityProviderByAlias(idpAlias);
-        //add first authn autohrities
-        authnAuthorities.add(new AuthnAuthorityRepresentation(userSession.getNote(IDENTITY_PROVIDER_ID), getIdPName(idp)));
         if (previousAauthnAuthorities != null) {
                 authnAuthorities.addAll(JsonSerialization.readValue(previousAauthnAuthorities, new TypeReference<LinkedList<AuthnAuthorityRepresentation>>() {
                 }));
         }
+        authnAuthorities.add(new AuthnAuthorityRepresentation(userSession.getNote(IDENTITY_PROVIDER_ID), getIdPName(idp)));
         return JsonSerialization.writeValueAsString(authnAuthorities);
     }
 
