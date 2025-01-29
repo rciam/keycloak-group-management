@@ -199,15 +199,15 @@ public class GroupAdminGroupMembers {
             throw new BadRequestException("All roles must be existed in group");
         }
 
-        String defaultConfigurationId = group.getFirstAttribute(Utils.DEFAULT_CONFIGURATION_NAME);
-        GroupEnrollmentConfigurationEntity configurationEntity= groupEnrollmentConfigurationRepository.getEntity(defaultConfigurationId);
+        //if configuration id does not exists add default group configuration id
+        GroupEnrollmentConfigurationEntity configurationEntity = groupEnrollmentConfigurationRepository.getEntity(rep.getGroupEnrollmentConfiguration() != null && rep.getGroupEnrollmentConfiguration().getId() != null ? rep.getGroupEnrollmentConfiguration().getId() : group.getFirstAttribute(Utils.DEFAULT_CONFIGURATION_NAME));
         if (configurationEntity == null) {
             throw new BadRequestException("Group default group enrollment configuration does not exist");
-        } else  if (!extendedRole && configurationEntity.getAupEntity() != null) {
+        } else if (!extendedRole && configurationEntity.getAupEntity() != null) {
             throw new BadRequestException("Could not add group member with group enrollment configuration with aup");
         }
 
-        UserGroupMembershipExtensionEntity member = userGroupMembershipExtensionRepository.create(rep, user, groupAdmin, group, defaultConfigurationId, session, clientConnection);
+        UserGroupMembershipExtensionEntity member = userGroupMembershipExtensionRepository.create(rep, user, groupAdmin, group, configurationEntity.getId(), session, clientConnection);
         String groupPath = ModelToRepresentation.buildGroupPath(group);
 
         try {
