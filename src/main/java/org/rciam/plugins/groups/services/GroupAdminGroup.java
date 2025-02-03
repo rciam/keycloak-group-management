@@ -194,6 +194,9 @@ public class GroupAdminGroup {
         }
 
         rule = groupEnrollmentConfigurationRulesRepository.getByRealmAndTypeAndField(realm.getId(), group.getParentId() != null ? GroupTypeEnum.SUBGROUP : GroupTypeEnum.TOP_LEVEL, "aup");
+        if ( rep.getAup() != null && rep.getAup().getUrl() == null){
+            rep.setAup(null);
+        }
         if (rule != null && rule.getRequired() && rep.getAup() == null) {
             throw new BadRequestException("Aup must not be empty");
         }

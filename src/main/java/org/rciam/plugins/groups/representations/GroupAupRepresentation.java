@@ -4,7 +4,6 @@ import org.rciam.plugins.groups.enums.GroupAupTypeEnum;
 
 public class GroupAupRepresentation {
 
-    private String id;
     private GroupAupTypeEnum type;
     private String mimeType;
     private Object content;
@@ -12,14 +11,6 @@ public class GroupAupRepresentation {
     private String url;
 
     public GroupAupRepresentation(){}
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public GroupAupTypeEnum getType() {
         return type;

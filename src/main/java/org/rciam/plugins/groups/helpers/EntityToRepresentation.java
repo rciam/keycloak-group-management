@@ -58,7 +58,6 @@ public class EntityToRepresentation {
 
     private static GroupAupRepresentation toRepresentation(GroupAupEntity entity) {
         GroupAupRepresentation rep = new GroupAupRepresentation();
-        rep.setId(entity.getId());
         rep.setType(entity.getType());
         rep.setContent(entity.getContent());
         rep.setMimeType(entity.getMimeType());

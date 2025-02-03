@@ -84,7 +84,8 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         String aupDefault = configurationRulesList.stream().filter(x -> "aupEntity".equals(x.getField())).findAny().orElse(new GroupEnrollmentConfigurationRulesEntity()).getDefaultValue();
         if (aupDefault != null) {
             GroupAupEntity aup = new GroupAupEntity();
-            aup.setId(KeycloakModelUtils.generateId());
+            aup.setId(entity.getId());
+            aup.setGroupEnrollmentConfiguration(entity);
             aup.setType(GroupAupTypeEnum.URL);
             aup.setUrl(aupDefault);
             entity.setAupEntity(aup);
@@ -123,11 +124,6 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         entity.setInvitationConclusion(rep.getInvitationConclusion());
         entity.setInvitationIntroduction(rep.getInvitationIntroduction());
         entity.setMultiselectRole(rep.getMultiselectRole());
-        if (rep.getAup() != null) {
-            entity.setAupEntity(toEntity(rep.getAup(), entity.getAupEntity()));
-        } else {
-            entity.setAupEntity(null);
-        }
         if (rep.getGroupRoles() != null) {
             entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> {
                 GroupRolesEntity r = groupRolesRepository.getGroupRolesByNameAndGroup(x, groupId);
@@ -144,6 +140,11 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         } else {
             entity.setGroupRoles(null);
         }
+        if (rep.getAup() != null) {
+            entity.setAupEntity(toEntity(rep.getAup(), entity));
+        } else {
+            entity.setAupEntity(null);
+        }
         entity.setCommentsNeeded(rep.getCommentsNeeded());
         if (rep.getCommentsNeeded()){
             entity.setCommentsLabel(rep.getCommentsLabel());
@@ -155,11 +156,14 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
 
     }
 
-    private GroupAupEntity toEntity(GroupAupRepresentation rep, GroupAupEntity entity) {
-        if (entity == null)
+    private GroupAupEntity toEntity(GroupAupRepresentation rep, GroupEnrollmentConfigurationEntity configuration) {
+        GroupAupEntity entity = configuration.getAupEntity();
+        if (entity == null) {
             entity = new GroupAupEntity();
+            entity.setId(configuration.getId());
+            entity.setGroupEnrollmentConfiguration(configuration);
+        }
 
-        entity.setId(rep.getId() != null ? rep.getId() : KeycloakModelUtils.generateId());
         entity.setType(rep.getType());
         entity.setContent(rep.getContent());
         entity.setMimeType(rep.getMimeType());

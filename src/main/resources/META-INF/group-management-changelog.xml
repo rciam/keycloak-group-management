@@ -829,4 +829,27 @@
         </update>
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="update_group_aup">
+        <dropIndex indexName="KC_GROUP_CONFIG_IDX" tableName="GROUP_ENROLLMENT_CONFIGURATION"/>
+        <dropIndex indexName="KC_GROUP_CONFIG_AID_IDX" tableName="GROUP_ENROLLMENT_CONFIGURATION"/>
+        <dropForeignKeyConstraint baseTableName="GROUP_ENROLLMENT_CONFIGURATION" constraintName="fk_kc_grp_cfg_aid"/>
+        <sql>
+            UPDATE GROUP_AUP
+            SET ID = (
+            SELECT f.ID
+            FROM GROUP_ENROLLMENT_CONFIGURATION f
+            WHERE f.AUP_ID = GROUP_AUP.ID
+            LIMIT 1
+            );
+        </sql>
+        <dropColumn tableName="GROUP_ENROLLMENT_CONFIGURATION" columnName="AUP_ID"/>
+        <addForeignKeyConstraint
+            constraintName="fk_group_aup_enrollment_configuration"
+            baseTableName="GROUP_AUP"
+            baseColumnNames="ID"
+            referencedTableName="GROUP_ENROLLMENT_CONFIGURATION"
+            referencedColumnNames="ID"
+        />
+    </changeSet>
+
 </databaseChangeLog>

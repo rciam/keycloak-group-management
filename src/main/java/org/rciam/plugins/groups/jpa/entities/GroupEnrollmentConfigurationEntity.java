@@ -3,22 +3,8 @@ package org.rciam.plugins.groups.jpa.entities;
 import java.time.LocalDate;
 import java.util.List;
 
+import jakarta.persistence.*;
 import org.keycloak.models.jpa.entities.GroupEntity;
-
-import jakarta.persistence.Access;
-import jakarta.persistence.AccessType;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "GROUP_ENROLLMENT_CONFIGURATION")
@@ -45,8 +31,8 @@ public class GroupEnrollmentConfigurationEntity {
     @Column(name = "ACTIVE")
     private Boolean active;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "AUP_ID")
+    @OneToOne(mappedBy = "groupEnrollmentConfiguration", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
     private GroupAupEntity aupEntity;
 
     @Column(name = "REQUIRE_APPROVAL")
