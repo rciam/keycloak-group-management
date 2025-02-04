@@ -12,7 +12,8 @@ import org.keycloak.models.jpa.entities.GroupEntity;
         @NamedQuery(name = "getAdminGroups", query = "select g from GroupEnrollmentConfigurationEntity g, UserGroupMembershipExtensionEntity m where m.group.id = g.id and m.user.id = :userId and m.isAdmin = true"),
         @NamedQuery(name = "getByGroup", query = "select g from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId"),
         @NamedQuery(name = "getAvailableByGroup", query = "select g from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId and g.active = true and g.visibleToNotMembers = true"),
-        @NamedQuery(name = "deleteEnrollmentConfigurationByGroup", query = "delete from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId")
+        @NamedQuery(name = "deleteEnrollmentConfigurationByGroup", query = "delete from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId"),
+        @NamedQuery(name = "deleteGroupAupByEnrollmentConfiguration", query = "delete FROM GroupAupEntity g where g.id in (select ge.id FROM GroupEnrollmentConfigurationEntity ge WHERE ge.group.id = :groupId)")
 })
 public class GroupEnrollmentConfigurationEntity {
 
@@ -31,7 +32,7 @@ public class GroupEnrollmentConfigurationEntity {
     @Column(name = "ACTIVE")
     private Boolean active;
 
-    @OneToOne(mappedBy = "groupEnrollmentConfiguration", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "groupEnrollmentConfiguration", cascade = CascadeType.ALL, orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private GroupAupEntity aupEntity;
 
