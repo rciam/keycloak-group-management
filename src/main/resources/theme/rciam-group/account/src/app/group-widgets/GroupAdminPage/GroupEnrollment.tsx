@@ -6,7 +6,7 @@ import { DataList, DataListItem, DataListItemCells, DataListItemRow, DataListCel
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
 import { ConfirmationModal } from '../Modals';
-import { ExternalLinkAltIcon, EyeIcon, CopyIcon } from '@patternfly/react-icons';
+import { ExternalLinkAltIcon, EyeIcon } from '@patternfly/react-icons';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
 import { Msg } from '../../widgets/Msg';
 import { EnrollmentModal } from '../GroupEnrollment/CreateEnrollmentModal';

@@ -7,7 +7,7 @@ import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/gr
 import { ConfirmationModal } from '../Modals';
 import { TableActionBar } from './TableActionBar';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
-import { InviteMemberModal } from './InviteMemberModal';
+import { AddMemberModal } from './AddMemberModal';
 import { Msg } from '../../widgets/Msg';
 import { DatalistFilterSelect } from '../DatalistFilterSelect';
 import { HelpIcon, PencilAltIcon, TimesIcon, LockIcon, LockOpenIcon, OutlinedClockIcon, ExclamationTriangleIcon, LongArrowAltUpIcon, LongArrowAltDownIcon, AngleDownIcon } from '@patternfly/react-icons';
@@ -186,6 +186,7 @@ export const GroupMembers: FC<any> = (props) => {
   let groupsService = new GroupsServiceClient();
 
   useEffect(() => {
+   
     if (props.groupId !== groupId) {
       setDirectMembers(true);
       setGroupId(props.groupId);
@@ -327,7 +328,7 @@ export const GroupMembers: FC<any> = (props) => {
             <Checkbox className="gm_direct-member-checkbox" label={Msg.localize('adminGroupViewAllMembersButton')} checked={directMembers} onClick={() => { setDirectMembers(!directMembers); }} id="required-check" name="required-check" />
             {props.isGroupAdmin &&
               <Button className="gm_invite-member-button" onClick={() => { setInviteModalActive(true) }}>
-                <Msg msgKey='adminGroupInviteMemberButton' />
+                <Msg msgKey='addUser' />
               </Button>}
           </React.Fragment>
         }
@@ -651,7 +652,7 @@ export const GroupMembers: FC<any> = (props) => {
         widgetId="top-example"
         onPerPageSelect={onPerPageSelect}
       />
-      {props.isGroupAdmin && <InviteMemberModal active={inviteModalActive} setActive={setInviteModalActive} groupId={props.groupId} />}
+      {props.isGroupAdmin && <AddMemberModal active={inviteModalActive} setActive={setInviteModalActive} groupConfiguration={props.groupConfiguration} fetchGroupMembers={fetchGroupMembers} groupId={props.groupId} />}
     </React.Fragment>
 
   )

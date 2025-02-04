@@ -959,3 +959,15 @@
 .gm_update-membership-button {
     margin:0 1rem;
 }
+
+.gm_add-user-action-container {
+    margin-top:1rem;
+}
+
+.gm_add-user-radio-container {
+    margin-top:0.5rem;
+}
+
+.gm_add-user-radio-container div {
+    margin-bottom:0.5rem;
+}

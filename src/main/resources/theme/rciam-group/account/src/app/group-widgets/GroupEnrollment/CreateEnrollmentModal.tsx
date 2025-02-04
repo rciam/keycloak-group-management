@@ -136,6 +136,9 @@ export const EnrollmentModal: FC<any> = (props) => {
         if(enrollment.membershipExpirationDays===0){
             enrollment.membershipExpirationDays = null;
         }
+        if(!enrollment?.aup?.url){
+          delete enrollment.aup;
+        }
         groupsService!.doPost<any>("/group-admin/group/"+props.groupId+"/configuration",{...enrollment})
         .then((response: HttpResponse<any>) => {
           setLoading(false);

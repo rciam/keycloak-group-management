@@ -309,7 +309,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props) => {
           </Tab>
 
           <Tab {...membersTab} id="members" title={<TabTitleText><Msg msgKey='adminGroupMembersTab' /></TabTitleText>} aria-label="Default content - members">
-            <GroupMembers isGroupAdmin={isGroupAdmin} history={props.history} groupConfiguration={groupConfiguration} enrollmentRules={enrollmentRules} groupId={groupId} user={user} />
+            <GroupMembers isGroupAdmin={isGroupAdmin} membersTab={membersTab} history={props.history} groupConfiguration={groupConfiguration} enrollmentRules={enrollmentRules} groupId={groupId} user={user} />
           </Tab>
           <Tab {...adminsTab} id="admins" title={<TabTitleText><Msg msgKey='adminGroupAdminsTab' /></TabTitleText>} aria-label="Default content - admins">
             <GroupAdmins isGroupAdmin={isGroupAdmin} groupId={groupId} user={user} groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} />

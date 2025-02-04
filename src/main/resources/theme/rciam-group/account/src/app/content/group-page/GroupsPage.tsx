@@ -234,7 +234,6 @@ const MembershipDatalistItem = (props) => {
           props.fetchGroups();
         }
         else {
-          console.log('here');
           props.setAlert({ message: response?.data?.error ? Msg.localize('leaveGroupError', [response.data.error]) : Msg.localize('leaveGroupErrorUnexpected'), variant: "danger" })
         }
         props.setLoading(false);
