@@ -113,7 +113,7 @@ public class GroupAdminGroup {
                 customFreeMarkerEmailTemplateProvider.setUser(admin);
                 customFreeMarkerEmailTemplateProvider.sendDeleteGroupAdminInformationEmail(ModelToRepresentation.buildGroupPath(group), groupAdmin);
             } catch (EmailException e) {
-                throw new RuntimeException(e);
+                ServicesLogger.LOGGER.failedToSendEmail(e);
             }
         });
 
@@ -393,7 +393,7 @@ public class GroupAdminGroup {
                         customFreeMarkerEmailTemplateProvider.setUser(a);
                         customFreeMarkerEmailTemplateProvider.sendAddRemoveAdminAdminInformationEmail(false, groupPath, group.getId(), user, groupAdmin);
                     } catch (EmailException e) {
-                        throw new RuntimeException(e);
+                        ServicesLogger.LOGGER.failedToSendEmail(e);
                     }
                 });
             } catch (EmailException e) {
