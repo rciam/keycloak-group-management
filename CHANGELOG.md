@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added 
 - Admins can directly add new members to groups
+- Being possible to return group instead of top level group in group pager
 
 ### Fixed
 - Fix problem deleting group with aup in configuration

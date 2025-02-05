@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import jakarta.persistence.TypedQuery;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -19,6 +20,9 @@ import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentConfigurationRulesEn
 import org.rciam.plugins.groups.jpa.entities.GroupRolesEntity;
 import org.rciam.plugins.groups.representations.GroupAupRepresentation;
 import org.rciam.plugins.groups.representations.GroupEnrollmentConfigurationRepresentation;
+
+import static org.keycloak.models.jpa.PaginationUtils.paginateQuery;
+import static org.keycloak.utils.StreamsUtil.closing;
 
 public class GroupEnrollmentConfigurationRepository extends GeneralRepository<GroupEnrollmentConfigurationEntity> {
 
@@ -174,6 +178,19 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
     public void deleteByGroup(String groupId) {
         em.createNamedQuery("deleteGroupAupByEnrollmentConfiguration").setParameter("groupId", groupId).executeUpdate();
         em.createNamedQuery("deleteEnrollmentConfigurationByGroup").setParameter("groupId", groupId).executeUpdate();
+    }
+
+    public Stream<GroupModel> searchForGroupByNameStream(String search, Boolean exact, Integer first, Integer max) {
+        TypedQuery<String> query;
+        if (Boolean.TRUE.equals(exact)) {
+            query = em.createNamedQuery("getGroupIdsByName", String.class);
+        } else {
+            query = em.createNamedQuery("getGroupIdsByNameContaining", String.class);
+        }
+        query.setParameter("realm", realm.getId()).setParameter("search", search);
+        Stream<String> groups =  paginateQuery(query, first, max).getResultStream();
+
+        return closing(paginateQuery(query, first, max).getResultStream().map(id -> session.groups().getGroupById(realm, id)).distinct());
     }
 
 }

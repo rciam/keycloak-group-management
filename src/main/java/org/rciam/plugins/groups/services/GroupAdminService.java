@@ -58,6 +58,7 @@ public class GroupAdminService {
     private final UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository;
 
     private final GroupEnrollmentConfigurationRulesRepository groupEnrollmentConfigurationRulesRepository;
+    private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final GeneralJpaService generalJpaService;
 
     public GroupAdminService(KeycloakSession session, RealmModel realm, UserModel user, AdminEventBuilder adminEvent) {
@@ -69,6 +70,7 @@ public class GroupAdminService {
         this.groupEnrollmentRequestRepository =  new GroupEnrollmentRequestRepository(session, realm, new GroupRolesRepository(session, realm));
         this.userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm);
         this.groupEnrollmentConfigurationRulesRepository = new GroupEnrollmentConfigurationRulesRepository(session);
+        this.groupEnrollmentConfigurationRepository = new GroupEnrollmentConfigurationRepository(session, realm);
         this.generalJpaService = new GeneralJpaService(session, realm, new GroupEnrollmentConfigurationRepository(session, realm));
     }
 
@@ -76,19 +78,21 @@ public class GroupAdminService {
     @GET
     @Path("/groups")
     public GroupsPager getGroupAdminGroups(@QueryParam("search") String search,
+                                           @QueryParam("toplevel") @DefaultValue("true") boolean toplevel,
                                            @QueryParam("first") @DefaultValue("0") Integer first,
                                            @QueryParam("max") @DefaultValue("10") Integer max){
         if (Utils.hasManageGroupsAccountRole(realm, groupAdmin)){
-            return getAllGroups( search, first, max);
+            return getAllGroups( search, first, max, toplevel);
         } else {
             return groupAdminRepository.getAdminGroups(groupAdmin.getId(), search, first, max);
         }
     }
 
-    private GroupsPager getAllGroups( String search,Integer first,Integer max){
+    private GroupsPager getAllGroups(String search, Integer first, Integer max, boolean toplevel) {
         if (Objects.nonNull(search)) {
-            List<GroupRepresentation> results = ModelToRepresentation.searchForGroupModelByName(session, realm, false, search.trim(), false, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
-            Long count =realm.getGroupsCountByNameContaining(search);
+            Stream<GroupModel> ids = toplevel ? ModelToRepresentation.searchForGroupModelByName(session, realm, false, search.trim(), false, first, max) : groupEnrollmentConfigurationRepository.searchForGroupByNameStream(search.trim(), false, first, max);
+            List<GroupRepresentation> results = ids.map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+            Long count = realm.getGroupsCountByNameContaining(search);
             return new GroupsPager(results, count);
         } else {
             List<GroupRepresentation> results = ModelToRepresentation.toGroupModelHierarchy(realm, false, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
