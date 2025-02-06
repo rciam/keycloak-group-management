@@ -28,6 +28,8 @@ public class ModelToRepresentation extends org.keycloak.models.utils.ModelToRepr
         GroupRepresentation rep = new GroupRepresentation();
         rep.setId(group.getId());
         rep.setName(group.getName());
+        Map<String, List<String>> attributes = group.getAttributes();
+        rep.setAttributes(attributes);
         if (full)
            rep.setPath(buildGroupPath(group));
         return rep;
