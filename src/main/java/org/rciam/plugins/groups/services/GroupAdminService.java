@@ -79,25 +79,26 @@ public class GroupAdminService {
     @Path("/groups")
     public GroupsPager getGroupAdminGroups(@QueryParam("search") String search,
                                            @QueryParam("toplevel") @DefaultValue("true") boolean toplevel,
+                                           @QueryParam("exact") @DefaultValue("false") boolean exact,
                                            @QueryParam("first") @DefaultValue("0") Integer first,
                                            @QueryParam("max") @DefaultValue("10") Integer max){
         if (Utils.hasManageGroupsAccountRole(realm, groupAdmin)){
-            return getAllGroups( search, first, max, toplevel);
+            return getAllGroups( search, first, max, toplevel, exact);
         } else {
-            return groupAdminRepository.getAdminGroups(groupAdmin.getId(), search, first, max);
+            return groupAdminRepository.getAdminGroups(groupAdmin.getId(), search, first, max, exact);
         }
     }
 
-    private GroupsPager getAllGroups(String search, Integer first, Integer max, boolean toplevel) {
-        if (Objects.nonNull(search)) {
-            Stream<GroupModel> ids = toplevel ? ModelToRepresentation.searchForGroupModelByName(session, realm, false, search.trim(), false, first, max) : groupEnrollmentConfigurationRepository.searchForGroupByNameStream(search.trim(), false, first, max);
-            List<GroupRepresentation> results = ids.map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
-            Long count = realm.getGroupsCountByNameContaining(search);
+    private GroupsPager getAllGroups(String search, Integer first, Integer max, boolean toplevel, boolean exact) {
+        if (Objects.nonNull(search) && toplevel) {
+            List<GroupRepresentation> results = ModelToRepresentation.searchForGroupModelByName(session, realm, false, search.trim(), exact, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+            Long count = ModelToRepresentation.searchForGroupModelByName(session, realm, false, search.trim(), exact, null, null).count();
             return new GroupsPager(results, count);
-        } else {
+        } else if (Objects.nonNull(search)) {
+            return groupEnrollmentConfigurationRepository.searchForGroupByNameStream(search.trim(), exact, first, max);
+        }else {
             List<GroupRepresentation> results = ModelToRepresentation.toGroupModelHierarchy(realm, false, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
-            Long count = realm.getGroupsCount(true);
-            return new GroupsPager(results, count);
+            return new GroupsPager(results, realm.getGroupsCount(true));
         }
     }
 

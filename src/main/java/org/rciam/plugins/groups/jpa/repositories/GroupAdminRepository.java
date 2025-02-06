@@ -63,13 +63,13 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
         return em.createNamedQuery("getAdminByUserAndGroup", GroupAdminEntity.class).setParameter("groupId", groupId).setParameter("userId", userId).getResultStream().findAny().orElse(null);
     }
 
-    public GroupsPager getAdminGroups(String userId, String search, Integer first, Integer max) {
+    public GroupsPager getAdminGroups(String userId, String search, Integer first, Integer max, boolean exact) {
         if (search == null) {
             List<GroupRepresentation> groups = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).setFirstResult(first).setMaxResults(max).getResultStream().map(realm::getGroupById).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
             return new GroupsPager(groups, em.createNamedQuery("countGroupsForAdmin", Long.class).setParameter("userId", userId).getSingleResult());
         } else {
-            List<GroupRepresentation> groups = em.createNamedQuery("searchGroupsForAdmin", String.class).setParameter("userId", userId).setParameter("search", "%" + search.toLowerCase() + "%").setFirstResult(first).setMaxResults(max).getResultStream().map(realm::getGroupById).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
-            return new GroupsPager(groups, em.createNamedQuery("countSearchGroupsForAdmin", Long.class).setParameter("userId", userId).setParameter("search", "%" + search.toLowerCase() + "%").getSingleResult());
+            List<GroupRepresentation> groups = em.createNamedQuery("searchGroupsForAdmin", String.class).setParameter("userId", userId).setParameter("search", exact ? search.toLowerCase() : "%" + search.toLowerCase() + "%").setFirstResult(first).setMaxResults(max).getResultStream().map(realm::getGroupById).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+            return new GroupsPager(groups, em.createNamedQuery("countSearchGroupsForAdmin", Long.class).setParameter("userId", userId).setParameter("search", exact ? search.toLowerCase() : "%" + search.toLowerCase() + "%").getSingleResult());
         }
     }
 

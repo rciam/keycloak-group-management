@@ -13,7 +13,9 @@ import org.keycloak.models.jpa.entities.GroupEntity;
         @NamedQuery(name = "getByGroup", query = "select g from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId"),
         @NamedQuery(name = "getAvailableByGroup", query = "select g from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId and g.active = true and g.visibleToNotMembers = true"),
         @NamedQuery(name = "deleteEnrollmentConfigurationByGroup", query = "delete from GroupEnrollmentConfigurationEntity g where g.group.id = :groupId"),
-        @NamedQuery(name = "deleteGroupAupByEnrollmentConfiguration", query = "delete FROM GroupAupEntity g where g.id in (select ge.id FROM GroupEnrollmentConfigurationEntity ge WHERE ge.group.id = :groupId)")
+        @NamedQuery(name = "deleteGroupAupByEnrollmentConfiguration", query = "delete FROM GroupAupEntity g where g.id in (select ge.id FROM GroupEnrollmentConfigurationEntity ge WHERE ge.group.id = :groupId)"),
+        @NamedQuery(name="countGroupIdsByNameContaining", query="select count(u) from GroupEntity u where u.realm = :realm and lower(u.name) like lower(concat('%',:search,'%'))"),
+        @NamedQuery(name="countGroupIdsByName", query="select count(u) from GroupEntity u where u.realm = :realm and u.name = :search")
 })
 public class GroupEnrollmentConfigurationEntity {
 
