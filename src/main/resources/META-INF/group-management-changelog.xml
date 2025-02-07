@@ -833,15 +833,18 @@
         <dropIndex indexName="KC_GROUP_CONFIG_IDX" tableName="GROUP_ENROLLMENT_CONFIGURATION"/>
         <dropIndex indexName="KC_GROUP_CONFIG_AID_IDX" tableName="GROUP_ENROLLMENT_CONFIGURATION"/>
         <dropForeignKeyConstraint baseTableName="GROUP_ENROLLMENT_CONFIGURATION" constraintName="fk_kc_grp_cfg_aid"/>
-        <sql>
-            UPDATE GROUP_AUP
-            SET ID = (
-            SELECT f.ID
-            FROM GROUP_ENROLLMENT_CONFIGURATION f
-            WHERE f.AUP_ID = GROUP_AUP.ID
-            LIMIT 1
-            );
-        </sql>
+	<sql>
+	    DELETE FROM GROUP_AUP 
+	    WHERE ID NOT IN
+	    (SELECT g.AUP_ID FROM GROUP_ENROLLMENT_CONFIGURATION g WHERE g.AUP_ID IS NOT NULL);
+	    UPDATE GROUP_AUP
+	    SET ID = (
+	    SELECT f.ID
+	    FROM GROUP_ENROLLMENT_CONFIGURATION f
+	    WHERE f.AUP_ID = GROUP_AUP.ID
+	    LIMIT 1
+	    );
+	</sql>	
         <dropColumn tableName="GROUP_ENROLLMENT_CONFIGURATION" columnName="AUP_ID"/>
         <addForeignKeyConstraint
             constraintName="fk_group_aup_enrollment_configuration"

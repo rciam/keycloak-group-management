@@ -328,7 +328,7 @@ export const GroupMembers: FC<any> = (props) => {
             <Checkbox className="gm_direct-member-checkbox" label={Msg.localize('adminGroupViewAllMembersButton')} checked={directMembers} onClick={() => { setDirectMembers(!directMembers); }} id="required-check" name="required-check" />
             {props.isGroupAdmin &&
               <Button className="gm_invite-member-button" onClick={() => { setInviteModalActive(true) }}>
-                <Msg msgKey='addUser' />
+                <Msg msgKey='addMember' />
               </Button>}
           </React.Fragment>
         }

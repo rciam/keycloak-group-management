@@ -13,10 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fix problem deleting group with aup in configuration
-
-## [1.4.1]- 2025-02-03
-
-### Fixed
 - Fix bug when aup entity was updated/ removed from enrollment configuration entity
 
 ## [1.4.0] - 2025-01-23

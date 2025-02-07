@@ -207,7 +207,7 @@ export const AddMemberModal: React.FC<any> = (props) => {
     },
     {
       id: 'incrementallyEnabled-2',
-      name: (Msg.localize('invitationStep2')),
+      name: (Msg.localize('addOrInviteMember')),
       component:
         <AddUserStep
           groupId={props.groupId} setSelectedUser={setSelectedUser} selectedUser={selectedUser}
@@ -216,7 +216,7 @@ export const AddMemberModal: React.FC<any> = (props) => {
           selectedEnrollment={selectedEnrollment}
           setInvitationEmail={setInvitationEmail} />,
       enableNext: isStep2Complete,
-      nextButtonText: addUserDirectly ? Msg.localize('addUser') : Msg.localize('invitationSend'),
+      nextButtonText: addUserDirectly ? Msg.localize('addMemberDirectly') : Msg.localize('invitationSend'),
       canJumpTo: stepIdReached >= 2
     }
   ];
@@ -227,7 +227,7 @@ export const AddMemberModal: React.FC<any> = (props) => {
     <React.Fragment>
       <Modal
         variant={ModalVariant.medium}
-        title={Msg.localize('addUser')+ " to " + props.groupConfiguration.path }
+        title={Msg.localize('addMemberGroup')+ ' "' + props.groupConfiguration.path +'"'}
         isOpen={isModalOpen}
         onClose={() => {
           closeWizard();
@@ -240,7 +240,7 @@ export const AddMemberModal: React.FC<any> = (props) => {
         }}
       >
         <ResponseModal requestResponse={requestResponse} close={() => { closeWizard(); setRequestResponse({active:false}); }} />
-        <Loading active={loading && !requestResponse} />
+        <Loading active={loading} />
         <Wizard
           navAriaLabel={`${title} steps`}
           mainAriaLabel={`${title} content`}
