@@ -216,7 +216,7 @@ export const AddMemberModal: React.FC<any> = (props) => {
           selectedEnrollment={selectedEnrollment}
           setInvitationEmail={setInvitationEmail} />,
       enableNext: isStep2Complete,
-      nextButtonText: addUserDirectly ? Msg.localize('addMemberDirectly') : Msg.localize('invitationSend'),
+      nextButtonText: Msg.localize('confirm'),
       canJumpTo: stepIdReached >= 2
     }
   ];
@@ -539,7 +539,7 @@ const AddUserStep: React.FC<any> = (props) => {
             onClick={() => {
               props.setAddUserDirectly(false)
             }}
-            label="Send Invitation"
+            label={Msg.localize('invitationSend')}
             id="radio-invitation"
           ></Radio>
           <Tooltip distance={5} position="top-start" trigger={Object.keys(props.selectedUser).length === 0 || props.selectedEnrollment?.aup?.url ? "mouseenter" : "manual"} isVisible={false} content={<div><Msg msgKey={props.selectedEnrollment?.aup?.url ? 'addUserDisabledRadioTooltipAUP' : 'addUserDisabledRadioTooltipUser'} /></div>}>
@@ -550,7 +550,7 @@ const AddUserStep: React.FC<any> = (props) => {
               onClick={() => {
                 props.setAddUserDirectly(true)
               }}
-              label="Add User to Group"
+              label={Msg.localize('addMemberDirectly')}
               id="radio-direct-add"
             ></Radio>
           </Tooltip>
