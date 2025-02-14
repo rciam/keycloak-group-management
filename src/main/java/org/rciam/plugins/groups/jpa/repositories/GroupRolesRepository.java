@@ -3,6 +3,7 @@ package org.rciam.plugins.groups.jpa.repositories;
 import java.util.List;
 import java.util.stream.Stream;
 
+import jakarta.transaction.Transactional;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
@@ -59,6 +60,7 @@ public class GroupRolesRepository extends GeneralRepository<GroupRolesEntity> {
         em.createNamedQuery("deleteRolesByGroup").setParameter("groupId", groupId).executeUpdate();
     }
 
+    @Transactional
     public void delete(GroupRolesEntity entity){
         for (GroupEnrollmentRequestEntity request : entity.getEnrollments()) {
             request.getGroupRoles().removeIf(x -> entity.getId().equals(x.getId()));
@@ -73,7 +75,8 @@ public class GroupRolesRepository extends GeneralRepository<GroupRolesEntity> {
             x.getGroupRoles().removeIf(role -> entity.getId().equals(role.getId()));
             groupEnrollmentConfigurationRepository.update(x);
         });
-        deleteEntity(entity.getId());
+        em.remove(entity);
+        em.flush();
     }
 
 }
