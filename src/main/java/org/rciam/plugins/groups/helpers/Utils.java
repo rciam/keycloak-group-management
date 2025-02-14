@@ -30,8 +30,6 @@ import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.representations.idm.FederatedIdentityRepresentation;
 import org.keycloak.userprofile.UserProfile;
 import org.keycloak.userprofile.UserProfileProvider;
-import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
-import org.rciam.plugins.groups.jpa.entities.UserGroupMembershipExtensionEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.keycloak.representations.idm.GroupRepresentation;
@@ -175,28 +173,6 @@ public class Utils {
         return x.equals(urnNamespace + groupStr + groupName) || x.startsWith(urnNamespace + groupStr + groupName + colon + roleStr) || x.startsWith(urnNamespace + groupStr + groupName + sharp);
     }
 
-    public static void changeUserAttributeValue(UserModel user, UserGroupMembershipExtensionEntity member, String groupName, 
-            MemberUserAttributeConfigurationEntity memberUserAttribute, KeycloakSession session, boolean isUpdated, 
-            Map<String, List<String>> attributes) throws UnsupportedEncodingException {
-        List<String> memberUserAttributeValues = attributes.get(memberUserAttribute.getUserAttribute()) != null ? attributes.get(memberUserAttribute.getUserAttribute()) : new ArrayList<>();
-        memberUserAttributeValues.removeIf(x -> Utils.removeMemberUserAttributeCondition(x, memberUserAttribute.getUrnNamespace(), groupName));
-        if (member.getGroupRoles() == null || member.getGroupRoles().isEmpty()) {
-            memberUserAttributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority()));
-        } else {
-            memberUserAttributeValues.addAll(member.getGroupRoles().stream().map(role -> {
-                try {
-                    return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttribute.getUrnNamespace(), memberUserAttribute.getAuthority());
-                } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException(e);
-                }
-            }).collect(Collectors.toList()));
-        }
-        attributes.put(memberUserAttribute.getUserAttribute(), memberUserAttributeValues);
-        if (isUpdated) {
-            updateUser(session, attributes, user);
-        }
-    }
-
     public static void updateUser(KeycloakSession session, Map<String, List<String>> attributes, UserModel user){
         UserProfile profile = session.getProvider(UserProfileProvider.class).create(ACCOUNT, attributes, user);
         profile.update(true);
@@ -239,7 +215,10 @@ public class Utils {
     public static FederatedIdentityRepresentation getFederatedIdentityRep(RealmModel realm, String idPAlias) {
         FederatedIdentityRepresentation rep = new FederatedIdentityRepresentation();
         IdentityProviderModel idp = realm.getIdentityProviderByAlias(idPAlias);
-        rep.setIdentityProvider(idp.getDisplayName() != null ? idp.getDisplayName() : idPAlias);
+        if (idp == null) {
+            System.out.println(" Idp with alias " +idPAlias +" does not exist");
+        }
+        rep.setIdentityProvider(idp != null && idp.getDisplayName() != null ? idp.getDisplayName() : idPAlias);
         return rep;
     }
 

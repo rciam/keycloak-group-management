@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Being able to delete group role
+- Correct User enrollment attribute update
 
 ## [1.5.0] - 2025-02-07
 

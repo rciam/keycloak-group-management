@@ -32,37 +32,14 @@ public class MemberUserAttributeCalculatorTask implements ScheduledTask {
         RealmModel realm = session.realms().getRealm(realmId);
         MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
         UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository = new UserGroupMembershipExtensionRepository(session, realm, new GroupEnrollmentConfigurationRepository(session, realm), new GroupRolesRepository(session, realm));
-        MemberUserAttributeConfigurationEntity memberUserAttributeEntity = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
+        MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
 
-        logger.info("Strarting calculating " + memberUserAttributeEntity.getUserAttribute() + " for all " + realm.getName() + " realm users.");
+        logger.info("Strarting calculating " + memberUserAttribute.getUserAttribute() + " for all " + realm.getName() + " realm users.");
 
         session.users().searchForUserStream(realm, new HashMap<>()).forEach(user -> {
-            if (user.getGroupsCount() > 0) {
-                List<String> attributeValues = new ArrayList<>();
-                userGroupMembershipExtensionRepository.getActiveByUser(user.getId()).forEach(member -> {
-                    try {
-                        String groupName = Utils.getGroupNameForMemberUserAttribute(member.getGroup(), realm);
-                        if (member.getGroupRoles() == null || member.getGroupRoles().isEmpty()) {
-                            attributeValues.add(Utils.createMemberUserAttribute(groupName, null, memberUserAttributeEntity.getUrnNamespace(), memberUserAttributeEntity.getAuthority()));
-                        } else {
-                            attributeValues.addAll(member.getGroupRoles().stream().map(role -> {
-                                try {
-                                    return Utils.createMemberUserAttribute(groupName, role.getName(), memberUserAttributeEntity.getUrnNamespace(), memberUserAttributeEntity.getAuthority());
-                                } catch (UnsupportedEncodingException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }).collect(Collectors.toList()));
-                        }
-                    } catch (UnsupportedEncodingException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-                user.setAttribute(memberUserAttributeEntity.getUserAttribute(), attributeValues);
-            } else {
-                user.removeAttribute(memberUserAttributeEntity.getUserAttribute());
-            }
+            userGroupMembershipExtensionRepository.changeUserAttributeValue(user, memberUserAttribute);
         });
 
-        logger.info("Finish calculating " + memberUserAttributeEntity.getUserAttribute() + " for all " + realm.getName() + " realm users.");
+        logger.info("Finish calculating " + memberUserAttribute.getUserAttribute() + " for all " + realm.getName() + " realm users.");
     }
 }
