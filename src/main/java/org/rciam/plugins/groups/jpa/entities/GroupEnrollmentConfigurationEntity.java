@@ -1,7 +1,7 @@
 package org.rciam.plugins.groups.jpa.entities;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.*;
 import org.keycloak.models.jpa.entities.GroupEntity;
@@ -79,7 +79,7 @@ public class GroupEnrollmentConfigurationEntity {
 
     @ManyToMany
     @JoinTable(name = "GROUP_ENROLLMENT_CONFIGURATION_ROLES", joinColumns = @JoinColumn(name = "GROUP_ENROLLMENT_CONFIGURATION_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
-    private List<GroupRolesEntity> groupRoles;
+    private Set<GroupRolesEntity> groupRoles;
 
     public String getName() {
         return name;
@@ -193,11 +193,11 @@ public class GroupEnrollmentConfigurationEntity {
         this.visibleToNotMembers = visibleToNotMembers;
     }
 
-    public List<GroupRolesEntity> getGroupRoles() {
+    public Set<GroupRolesEntity> getGroupRoles() {
         return groupRoles;
     }
 
-    public void setGroupRoles(List<GroupRolesEntity> groupRoles) {
+    public void setGroupRoles(Set<GroupRolesEntity> groupRoles) {
         this.groupRoles = groupRoles;
     }
 

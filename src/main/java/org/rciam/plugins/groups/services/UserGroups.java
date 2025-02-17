@@ -41,8 +41,9 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -239,7 +240,7 @@ public class UserGroups {
         } else {
             groupAdminRepository.addGroupAdmin(user.getId(), invitationEntity.getGroup().getId());
         }
-        List<String> groupRoles = invitationEntity.getGroupRoles() != null ? invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()) : new ArrayList<>();
+        Set<String> groupRoles = invitationEntity.getGroupRoles() != null ? invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()) : new HashSet<>();
         GroupModel group = realm.getGroupById(invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId() : invitationEntity.getGroup().getId());
         groupAdminRepository.getAllAdminIdsGroupUsers(group.getId()).map(userId -> session.users().getUserById(realm, userId)).forEach(admin -> {
             try {
@@ -263,7 +264,7 @@ public class UserGroups {
             throw new NotFoundException(INVITATION_NOT_EXISTS);
         }
 
-        List<String> groupRoles = invitationEntity.getGroupRoles() != null ? invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()) : new ArrayList<>();
+        Set<String> groupRoles = invitationEntity.getGroupRoles() != null ? invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()) : new HashSet<>();
         groupInvitationRepository.deleteEntity(id);
         GroupModel group = realm.getGroupById(invitationEntity.getForMember() ? invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId() : invitationEntity.getGroup().getId());
         // rejection email

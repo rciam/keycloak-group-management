@@ -168,7 +168,7 @@ public class GroupAdminGroupMember {
         GroupRolesEntity role = groupRolesRepository.getGroupRolesByNameAndGroup(name, group.getId());
         if (role == null) throw new NotFoundException(" This role does not exist in this group");
         if (member.getGroupRoles() == null) {
-            member.setGroupRoles(Stream.of(role).collect(Collectors.toList()));
+            member.setGroupRoles(Stream.of(role).collect(Collectors.toSet()));
         } else if (member.getGroupRoles().stream().noneMatch(x -> role.getId().equals(x.getId()))) {
             member.getGroupRoles().add(role);
         }  else {
@@ -182,16 +182,16 @@ public class GroupAdminGroupMember {
 
         String groupPath = ModelToRepresentation.buildGroupPath(group);
         LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
-                , Utils.GROUP_MEMBERSHIP_UPDATE, groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
+                , Utils.GROUP_MEMBERSHIP_UPDATE, groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()), member.getMembershipExpiresAt());
 
         try {
             customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendRolesChangesUserEmail(groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
+            customFreeMarkerEmailTemplateProvider.sendRolesChangesUserEmail(groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()));
 
             groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
-                    customFreeMarkerEmailTemplateProvider.sendRolesChangesGroupAdminEmail(groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), groupAdmin, user);
+                    customFreeMarkerEmailTemplateProvider.sendRolesChangesGroupAdminEmail(groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()), groupAdmin, user);
                 } catch (EmailException e) {
                     ServicesLogger.LOGGER.failedToSendEmail(e);
                 }
@@ -220,16 +220,16 @@ public class GroupAdminGroupMember {
         userGroupMembershipExtensionRepository.changeUserAttributeValue(user, memberUserAttribute);
         String groupPath = ModelToRepresentation.buildGroupPath(group);
         LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
-                , Utils.GROUP_MEMBERSHIP_UPDATE, groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
+                , Utils.GROUP_MEMBERSHIP_UPDATE, groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()), member.getMembershipExpiresAt());
 
         try {
             customFreeMarkerEmailTemplateProvider.setUser(user);
-            customFreeMarkerEmailTemplateProvider.sendRolesChangesUserEmail(groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
+            customFreeMarkerEmailTemplateProvider.sendRolesChangesUserEmail(groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()));
 
             groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
                 try {
                     customFreeMarkerEmailTemplateProvider.setUser(admin);
-                    customFreeMarkerEmailTemplateProvider.sendRolesChangesGroupAdminEmail(groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), groupAdmin, user);
+                    customFreeMarkerEmailTemplateProvider.sendRolesChangesGroupAdminEmail(groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()), groupAdmin, user);
                 } catch (EmailException e) {
                     ServicesLogger.LOGGER.failedToSendEmail(e);
                 }
@@ -254,7 +254,7 @@ public class GroupAdminGroupMember {
             String groupPath = ModelToRepresentation.buildGroupPath(group);
             List<String> subgroupPaths = userGroupMembershipExtensionRepository.suspendUser(user, member, justification, group, memberUserAttributeConfigurationRepository);
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
-                    , Utils.GROUP_MEMBERSHIP_SUSPEND, groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
+                    , Utils.GROUP_MEMBERSHIP_SUSPEND, groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()), member.getMembershipExpiresAt());
 
             customFreeMarkerEmailTemplateProvider.setUser(user);
             customFreeMarkerEmailTemplateProvider.sendSuspensionEmail(groupPath, subgroupPaths, justification);
@@ -295,7 +295,7 @@ public class GroupAdminGroupMember {
             List<String> subgroupPaths = userGroupMembershipExtensionRepository.reActivateUser(user, member, justification, group, memberUserAttributeConfigurationRepository);
 
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
-                    , Utils.GROUP_MEMBERSHIP_CREATE, groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
+                    , Utils.GROUP_MEMBERSHIP_CREATE, groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()), member.getMembershipExpiresAt());
                 customFreeMarkerEmailTemplateProvider.setUser(user);
                 customFreeMarkerEmailTemplateProvider.sendActivationEmail(groupPath, subgroupPaths, justification);
 

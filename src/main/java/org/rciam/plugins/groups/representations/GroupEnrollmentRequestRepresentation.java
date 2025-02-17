@@ -29,7 +29,7 @@ public class GroupEnrollmentRequestRepresentation {
     private String userIdentifier;
     private Set<String> userAssurance;
     private String userAuthnAuthorities;
-    private List<String> groupRoles;
+    private Set<String> groupRoles;
 
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern= Utils.dateTimeToStringFormat)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
@@ -172,11 +172,11 @@ public class GroupEnrollmentRequestRepresentation {
         this.approvedDate = approvedDate;
     }
 
-    public List<String> getGroupRoles() {
+    public Set<String> getGroupRoles() {
         return groupRoles;
     }
 
-    public void setGroupRoles(List<String> groupRoles) {
+    public void setGroupRoles(Set<String> groupRoles) {
         this.groupRoles = groupRoles;
     }
 }

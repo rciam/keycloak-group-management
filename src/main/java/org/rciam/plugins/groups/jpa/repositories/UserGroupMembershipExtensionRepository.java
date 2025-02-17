@@ -163,7 +163,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                     logger.warn(PROBLEM_CALCULATING_USER_ATTRIBUTE + member.getGroup().getId() + " and user :  " + member.getUser().getId());
                 }
                 LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(LOCAL_IP), userModel, member.getChangedBy() != null ? member.getChangedBy().getId() : userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
-                        , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), member.getMembershipExpiresAt());
+                        , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()), member.getMembershipExpiresAt());
 
                 AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
                 timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), userModel.getId(), group.getId(), member.getMembershipExpiresAt()), 100),  100, CALCULATION_TASK+ member.getId());
@@ -199,7 +199,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             return new HashSet<>();
         } else {
             logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
-            List<String> roleNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
+            Set<String> roleNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet());
 
             deleteEntity(member.getId());
             user.leaveGroup(group);
@@ -211,7 +211,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             Set<GroupModel> subgroups = Utils.getAllSubgroups(group);
             if (!subgroups.isEmpty()) {
                 getByGroup(user.getId(), subgroups.stream().map(GroupModel::getId).collect(Collectors.toSet())).forEach(memberEntity -> {
-                    List<String> roleSubgroupNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList());
+                    Set<String> roleSubgroupNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet());
                     String groupId = memberEntity.getGroup().getId();
                     em.remove(memberEntity);
                     GroupModel groupChild = subgroups.stream().filter(x -> groupId.equals(x.getId())).findFirst().get();
@@ -448,7 +448,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             r.setGroup(x.getGroup());
             r.setName(x.getName());
             return r;
-        }).collect(Collectors.toList()));
+        }).collect(Collectors.toSet()));
         update(entity);
 
         //only if user keep not being member of group do not do anything
@@ -462,7 +462,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             changeUserAttributeValue(user, memberUserAttribute);
             String eventState = isNotMember  ? Utils.GROUP_MEMBERSHIP_CREATE : Utils.GROUP_MEMBERSHIP_UPDATE;
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
-                    , eventState, ModelToRepresentation.buildGroupPath(group), entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), entity.getMembershipExpiresAt());
+                    , eventState, ModelToRepresentation.buildGroupPath(group), entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()), entity.getMembershipExpiresAt());
 
             if (MemberStatusEnum.ENABLED.equals(entity.getStatus()) && group.getSubGroupsStream().count() > 0) {
                 AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
@@ -501,7 +501,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         entity.setChangedBy(null);
         entity.setJustification(null);
         entity.setGroupEnrollmentConfigurationId(configuration.getId());
-        entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, configuration.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toList()));
+        entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, configuration.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toSet()));
 
         update(entity);
 
@@ -539,7 +539,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         entity.setStatus(LocalDate.now().isBefore(entity.getValidFrom()) ? MemberStatusEnum.PENDING : MemberStatusEnum.ENABLED);
         if (rep.getGroupRoles() != null) {
-            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, entity.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toList()));
+            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, entity.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toSet()));
         } else {
             entity.setGroupRoles(null);
         }
@@ -587,7 +587,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             entity.setStatus(MemberStatusEnum.ENABLED);
             setEffectiveGroupMembershipExpiresAt(entity, group);
         }
-        entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, entity.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toList()));
+        entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, entity.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toSet()));
         UserEntity editorUser = new UserEntity();
         editorUser.setId(groupAdmin.getId());
         entity.setChangedBy(editorUser);
@@ -647,7 +647,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 r.setGroup(x.getGroup());
                 r.setName(x.getName());
                 return r;
-            }).collect(Collectors.toList()));
+            }).collect(Collectors.toSet()));
         } else {
             entity.setGroupRoles(null);
         }
@@ -663,7 +663,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 logger.warn(PROBLEM_CALCULATING_USER_ATTRIBUTE + group.getId() + " and user :  " + userModel.getId());
             }
             LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(LOCAL_IP), userModel, userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
-                    , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()), entity.getMembershipExpiresAt());
+                    , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()), entity.getMembershipExpiresAt());
 
             if (group.getSubGroupsStream().count() > 0) {
                 AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);

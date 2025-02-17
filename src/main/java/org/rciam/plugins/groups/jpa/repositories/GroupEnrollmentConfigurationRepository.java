@@ -76,7 +76,7 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
             r.setGroup(x.getGroup());
             r.setName(x.getName());
             return r;
-        }).collect(Collectors.toList()));
+        }).collect(Collectors.toSet()));
         entity.setCommentsNeeded(configurationRulesList.stream().noneMatch(x -> "commentsNeeded".equals(x.getField()) &&  "false".equals(x.getDefaultValue())) );
         if (entity.getCommentsNeeded()) {
             String label = configurationRulesList.stream().filter(x -> "commentsLabel".equals(x.getField())).findAny().orElse(new GroupEnrollmentConfigurationRulesEntity()).getDefaultValue();
@@ -142,7 +142,7 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
                 } else {
                     return null;
                 }
-            }).filter(Objects::nonNull).collect(Collectors.toList()));
+            }).filter(Objects::nonNull).collect(Collectors.toSet()));
         } else {
             entity.setGroupRoles(null);
         }

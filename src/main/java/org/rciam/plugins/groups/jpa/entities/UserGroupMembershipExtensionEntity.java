@@ -1,7 +1,7 @@
 package org.rciam.plugins.groups.jpa.entities;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
@@ -85,7 +85,7 @@ public class UserGroupMembershipExtensionEntity {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "GROUP_MEMBERSHIP_ROLES", joinColumns = @JoinColumn(name = "USER_GROUP_MEMBERSHIP_EXTENSION_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
-    private List<GroupRolesEntity> groupRoles;
+    private Set<GroupRolesEntity> groupRoles;
 
     public String getId() {
         return id;
@@ -175,11 +175,11 @@ public class UserGroupMembershipExtensionEntity {
         this.groupEnrollmentConfigurationId = groupEnrollmentConfigurationId;
     }
 
-    public List<GroupRolesEntity> getGroupRoles() {
+    public Set<GroupRolesEntity> getGroupRoles() {
         return groupRoles;
     }
 
-    public void setGroupRoles(List<GroupRolesEntity> groupRoles) {
+    public void setGroupRoles(Set<GroupRolesEntity> groupRoles) {
         this.groupRoles = groupRoles;
     }
 }

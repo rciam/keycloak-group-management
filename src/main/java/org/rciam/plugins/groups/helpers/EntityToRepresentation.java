@@ -47,7 +47,7 @@ public class EntityToRepresentation {
         if (entity.getAupEntity() != null)
             rep.setAup(toRepresentation(entity.getAupEntity()));
         if (entity.getGroupRoles() != null)
-            rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
+            rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()));
         rep.setCommentsNeeded(entity.getCommentsNeeded());
         if (rep.getCommentsNeeded()) {
             rep.setCommentsLabel(entity.getCommentsLabel());
@@ -78,7 +78,7 @@ public class EntityToRepresentation {
         rep.setValidFrom(entity.getValidFrom());
         rep.setStatus(entity.getStatus());
         if (entity.getGroupRoles() != null)
-            rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
+            rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()));
         return rep;
     }
 
@@ -116,7 +116,7 @@ public class EntityToRepresentation {
         rep.setSubmittedDate(entity.getSubmittedDate());
         rep.setApprovedDate(entity.getApprovedDate());
         if (entity.getGroupRoles() != null)
-            rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toList()));
+            rep.setGroupRoles(entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()));
         return rep;
     }
 

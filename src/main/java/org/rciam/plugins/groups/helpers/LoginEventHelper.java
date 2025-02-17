@@ -1,7 +1,7 @@
 package org.rciam.plugins.groups.helpers;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 import org.keycloak.common.ClientConnection;
 import org.keycloak.events.EventBuilder;
@@ -13,7 +13,7 @@ import org.keycloak.models.UserModel;
 
 public class LoginEventHelper {
 
-    public static void createGroupEvent(RealmModel realm, KeycloakSession session, ClientConnection clientConnection, UserModel user, String actionUserId, String eventType, String groupPath, List<String> groupRolesNames, LocalDate expirationDate){
+    public static void createGroupEvent(RealmModel realm, KeycloakSession session, ClientConnection clientConnection, UserModel user, String actionUserId, String eventType, String groupPath, Set<String> groupRolesNames, LocalDate expirationDate){
         EventBuilder event = new EventBuilder(realm, session, clientConnection)
                 .event(EventType.valueOf(eventType))
                 .user(user)

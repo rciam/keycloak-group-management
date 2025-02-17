@@ -1,7 +1,7 @@
 package org.rciam.plugins.groups.representations;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -30,7 +30,7 @@ public class GroupEnrollmentConfigurationRepresentation {
     private String invitationConclusion;
     private Boolean visibleToNotMembers;
     private Boolean multiselectRole;
-    private List<String> groupRoles;
+    private Set<String> groupRoles;
 
     private Boolean commentsNeeded;
 
@@ -164,11 +164,11 @@ public class GroupEnrollmentConfigurationRepresentation {
         this.multiselectRole = multiselectRole;
     }
 
-    public List<String> getGroupRoles() {
+    public Set<String> getGroupRoles() {
         return groupRoles;
     }
 
-    public void setGroupRoles(List<String> groupRoles) {
+    public void setGroupRoles(Set<String> groupRoles) {
         this.groupRoles = groupRoles;
     }
 

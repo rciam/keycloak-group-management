@@ -1,6 +1,6 @@
 package org.rciam.plugins.groups.representations;
 
-import java.util.List;
+import java.util.Set;
 
 public class GroupInvitationInitialRepresentation {
 
@@ -10,7 +10,7 @@ public class GroupInvitationInitialRepresentation {
     private boolean withoutAcceptance;
     private GroupEnrollmentConfigurationRepresentation groupEnrollmentConfiguration;
 
-    private List<String> groupRoles;
+    private Set<String> groupRoles;
 
     public String getEmail() {
         return email;
@@ -52,11 +52,11 @@ public class GroupInvitationInitialRepresentation {
         this.groupEnrollmentConfiguration = groupEnrollmentConfiguration;
     }
 
-    public List<String> getGroupRoles() {
+    public Set<String> getGroupRoles() {
         return groupRoles;
     }
 
-    public void setGroupRoles(List<String> groupRoles) {
+    public void setGroupRoles(Set<String> groupRoles) {
         this.groupRoles = groupRoles;
     }
 }
