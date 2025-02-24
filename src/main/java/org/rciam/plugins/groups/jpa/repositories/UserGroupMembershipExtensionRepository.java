@@ -539,9 +539,10 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
         entity.setStatus(LocalDate.now().isBefore(entity.getValidFrom()) ? MemberStatusEnum.PENDING : MemberStatusEnum.ENABLED);
         if (rep.getGroupRoles() != null) {
-            entity.setGroupRoles(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, entity.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toSet()));
+            entity.getGroupRoles().clear();
+            entity.getGroupRoles().addAll(rep.getGroupRoles().stream().map(x -> groupRolesRepository.getGroupRolesByNameAndGroup(x, entity.getGroup().getId())).filter(Objects::nonNull).collect(Collectors.toSet()));
         } else {
-            entity.setGroupRoles(null);
+            entity.getGroupRoles().clear();
         }
 
         update(entity);
