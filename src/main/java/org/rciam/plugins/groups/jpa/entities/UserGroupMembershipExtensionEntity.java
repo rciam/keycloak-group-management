@@ -3,25 +3,10 @@ package org.rciam.plugins.groups.jpa.entities;
 import java.time.LocalDate;
 import java.util.Set;
 
+import jakarta.persistence.*;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.rciam.plugins.groups.enums.MemberStatusEnum;
-
-import jakarta.persistence.Access;
-import jakarta.persistence.AccessType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.NamedQueries;
-import jakarta.persistence.NamedQuery;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "USER_GROUP_MEMBERSHIP_EXTENSION")
@@ -82,6 +67,9 @@ public class UserGroupMembershipExtensionEntity {
 
     @Column(name = "GROUP_ENROLLMENT_CONFIGURATION_ID")
     private String groupEnrollmentConfigurationId;
+
+    @Version
+    private Integer version;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "GROUP_MEMBERSHIP_ROLES", joinColumns = @JoinColumn(name = "USER_GROUP_MEMBERSHIP_EXTENSION_ID"), inverseJoinColumns = @JoinColumn(name = "GROUP_ROLES_ID"))
@@ -181,5 +169,13 @@ public class UserGroupMembershipExtensionEntity {
 
     public void setGroupRoles(Set<GroupRolesEntity> groupRoles) {
         this.groupRoles = groupRoles;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 }

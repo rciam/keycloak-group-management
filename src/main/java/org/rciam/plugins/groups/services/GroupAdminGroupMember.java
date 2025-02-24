@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import jakarta.persistence.OptimisticLockException;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -79,7 +80,7 @@ public class GroupAdminGroupMember {
 
     @PUT
     @Consumes("application/json")
-    public Response updateMember(UserGroupMembershipExtensionRepresentation rep) throws UnsupportedEncodingException {
+    public Response updateMember(UserGroupMembershipExtensionRepresentation rep) {
         //validation tasks
         //1. active member
         //2. at least one role
@@ -109,10 +110,12 @@ public class GroupAdminGroupMember {
             throw new BadRequestException("Membership can not last more than "+ configurationRule.getMax() + " days");
         }
 
-        userGroupMembershipExtensionRepository.update(rep, member, group, session, groupAdmin, clientConnection);
-        String groupPath = ModelToRepresentation.buildGroupPath(group);
 
         try {
+
+            userGroupMembershipExtensionRepository.update(rep, member, group, session, groupAdmin, clientConnection);
+            String groupPath = ModelToRepresentation.buildGroupPath(group);
+
             UserModel memberUser = session.users().getUserById(realm, member.getUser().getId());
             customFreeMarkerEmailTemplateProvider.setUser(memberUser);
             customFreeMarkerEmailTemplateProvider.sendMemberUpdateUserInformEmail(groupPath, groupAdmin, rep.getValidFrom(), rep.getMembershipExpiresAt(), rep.getGroupRoles());
@@ -127,6 +130,9 @@ public class GroupAdminGroupMember {
             });
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
+        } catch (OptimisticLockException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.CONFLICT).entity(String.format("Concurrent modification detected: conflicting group membership update for user %s in group %s.", member.getUser().getUsername(), group.getName())).build();
         }
         return Response.noContent().build();
     }
@@ -160,7 +166,7 @@ public class GroupAdminGroupMember {
 
     @POST
     @Path("/role")
-    public Response addGroupRole(@QueryParam("name") String name) throws UnsupportedEncodingException {
+    public Response addGroupRole(@QueryParam("name") String name) {
         if (!isGroupAdmin){
             throw new ForbiddenException();
         }
@@ -205,7 +211,7 @@ public class GroupAdminGroupMember {
 
     @DELETE
     @Path("/role/{name}")
-    public Response deleteGroupRole(@PathParam("name") String name) throws UnsupportedEncodingException {
+    public Response deleteGroupRole(@PathParam("name") String name) {
         if (!isGroupAdmin){
             throw new ForbiddenException();
         }

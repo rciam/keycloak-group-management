@@ -855,4 +855,12 @@
         />
     </changeSet>
 
+    <changeSet author="cgeorgilakis@grnet.gr" id="version_member">
+        <addColumn tableName="USER_GROUP_MEMBERSHIP_EXTENSION">
+            <column name="VERSION" type="INT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
