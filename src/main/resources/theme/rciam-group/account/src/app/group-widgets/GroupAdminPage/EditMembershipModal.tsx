@@ -12,6 +12,7 @@ import { GroupRolesTable } from '../GroupRolesTable';
 interface EditMembershipModalProps {
     membership: Membership;
     setMembership: any;
+    setAlert:any;
     fetchGroupMembers: any;
 };
 
@@ -36,7 +37,6 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
     const [errors, setErrors] = useState<any>({});
     const [modalInfo, setModalInfo] = useState({});
     const [loading, setLoading] = useState(false);
-    const [alert, setAlert] = useState({});
     const [membership, setMembership] = useState<Membership>({
         "validFrom": "",
         "membershipExpiresAt": "",
@@ -193,18 +193,16 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
 
     let updateMembership = () => {
         setLoading(true);
-        groupsService!.doPut<any>("/group-admin/group/" + props.membership.group.id + "/member/" + props.membership?.id, { ...membership })
+        groupsService!.doPut<any>("/group-admin/group/" + props.membership.group.id + "/member/" + props.membership?.id, { ...membership})
             .then((response: HttpResponse<any>) => {
                 props.fetchGroupMembers();
                 setLoading(false);
                 props?.setMembership({});
                 if (response.status === 200 || response.status === 204) {
-                    setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "success", description: Msg.localize('updateMembershipSuccessMessage') })
+                    props.setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "success", description: Msg.localize('updateMembershipSuccessMessage') })
                 }
                 else {
-                    if (response.data.error) {
-                        setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "danger", description: Msg.localize('updateMembershipErrorMessage', [response.data.error]) })
-                    }
+                    props.setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "danger", description: response?.data?.error?Msg.localize('updateMembershipErrorMessage', [response.data.error]):Msg.localize("updateMembershipErrorMessageNoError") })
                 }
             })
     }
@@ -247,7 +245,6 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                     </Button>
                 ]}
             >
-                <Alerts alert={alert} close={() => { setAlert({}) }} />
                 <Loading active={loading} />
                 <Form>
                 <FormGroup

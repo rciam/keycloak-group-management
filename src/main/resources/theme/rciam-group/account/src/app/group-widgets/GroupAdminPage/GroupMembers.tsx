@@ -321,7 +321,7 @@ export const GroupMembers: FC<any> = (props) => {
       <Loading active={loading} />
       <ConfirmationModal modalInfo={modalInfo} />
       <UserActionModal setAlert={setAlert} user={selectedUser} setUser={setSelectedUser} groupId={props.groupId} fetchGroupMembers={fetchGroupMembers} />
-      <EditMembershipModal membership={editMembership} setMembership={setEditMembership} fetchGroupMembers={fetchGroupMembers} />
+      <EditMembershipModal membership={editMembership} setMembership={setEditMembership} setAlert={setAlert} fetchGroupMembers={fetchGroupMembers} />
       <TableActionBar
         childComponent={
           <React.Fragment>

@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.5.5] - 2025-02-25
 
 ### Fixed
+- Alerts for update membership requests 
 - Return 409 conflict for concurrent group membership update
 
 ## [1.5.4] - 2025-02-24
