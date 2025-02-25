@@ -1,6 +1,4 @@
 package org.rciam.plugins.groups.services;
-
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +17,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 
+import org.hibernate.StaleObjectStateException;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
 import org.keycloak.models.GroupModel;
@@ -130,7 +129,7 @@ public class GroupAdminGroupMember {
             });
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
-        } catch (OptimisticLockException e) {
+        } catch (OptimisticLockException | StaleObjectStateException e) {
             e.printStackTrace();
             return Response.status(Response.Status.CONFLICT).entity(String.format("Concurrent modification detected: conflicting group membership update for user %s in group %s.", member.getUser().getUsername(), group.getName())).build();
         }
