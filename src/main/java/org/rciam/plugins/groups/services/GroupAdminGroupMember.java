@@ -22,6 +22,7 @@ import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.ModelException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.ModelToRepresentation;
@@ -129,7 +130,7 @@ public class GroupAdminGroupMember {
             });
         } catch (EmailException e) {
             ServicesLogger.LOGGER.failedToSendEmail(e);
-        } catch (OptimisticLockException | StaleObjectStateException e) {
+        } catch (ModelException | OptimisticLockException | StaleObjectStateException e) {
             e.printStackTrace();
             return Response.status(Response.Status.CONFLICT).entity(String.format("Concurrent modification detected: conflicting group membership update for user %s in group %s.", member.getUser().getUsername(), group.getName())).build();
         }
