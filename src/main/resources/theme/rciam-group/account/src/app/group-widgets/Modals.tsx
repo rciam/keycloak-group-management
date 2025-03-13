@@ -5,6 +5,7 @@ import { GroupsServiceClient, HttpResponse } from '../groups-mngnt-service/group
 import { Loading } from './LoadingModal';
 // import parse from '../../node_modules/react-html-parser';
 import { Msg } from '../widgets/Msg';
+import { getError } from '../js/utils.js';
 
 
 interface ConfirmationModalProps {
@@ -87,7 +88,18 @@ export const DeleteSubgroupModal:React.FC<any> = (props) => {
                     props.afterSuccess();
                     setModalInfo({})}
               });
-            // setGroupMembers(response.data.results);
+          }
+          else{
+            setModalInfo({
+                message:Msg.localize('deleteGroupError',[getError(response)]),
+                accept_message: Msg.localize('OK'),
+                accept: function(){
+                    props.afterSuccess();
+                    setModalInfo({})},
+                cancel: function(){
+                    props.afterSuccess();
+                    setModalInfo({})}
+              });
           }
         }).catch((err)=>{
             props.close();
@@ -148,6 +160,18 @@ export const CreateGroupModal:React.FC<any> = (props) => {
                     setModalInfo({})}
               });
             // setGroupMembers(response.data.results);
+          }
+          else{
+            setModalInfo({
+                title:(props.groupId?Msg.localize('createSubgroupError',[getError(response)]):Msg.localize('createGroupError',[getError(response)])),
+                accept_message: (Msg.localize('OK')),
+                accept: function(){
+                  props.afterSuccess();
+                  setModalInfo({})},
+                cancel: function(){
+                    props.afterSuccess();
+                    setModalInfo({})}
+              });
           }
         }).catch((err)=>{
             props.close()

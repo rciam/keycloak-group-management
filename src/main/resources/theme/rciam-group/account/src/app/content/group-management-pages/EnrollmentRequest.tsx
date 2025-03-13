@@ -7,6 +7,8 @@ import { Loading } from '../../group-widgets/LoadingModal';
 import { Msg } from '../../widgets/Msg';
 import { CopyIcon, ExternalLinkSquareAltIcon, HelpIcon } from '@patternfly/react-icons';
 import { Popover, List, ListItem } from '@patternfly/react-core';
+import { getError } from '../../js/utils.js'
+import { ContentAlert } from '../ContentAlert';
 export const EnrollmentRequest: FC<any> = (props) => {
 
   const [loading, setLoading] = useState(false);
@@ -16,7 +18,6 @@ export const EnrollmentRequest: FC<any> = (props) => {
   let groupsService = new GroupsServiceClient();
   const [reviewerComment, setReviewerComment] = useState("")
   const [expandUserDetails, setExpandUserDetails] = useState(false);
-  const [alert, setAlert] = useState({});
 
   useEffect(() => {
     if (Object.keys(props.enrollmentRequest).length !== 0) {
@@ -42,9 +43,12 @@ export const EnrollmentRequest: FC<any> = (props) => {
       .then((response: HttpResponse<any>) => {
         setLoading(false);
         if (response.status === 200 || response.status === 204) {
-
-          close();
+          ContentAlert.success(Msg.localize("reviewEnrollmentSuccess"))
         }
+        else {
+          ContentAlert.danger(Msg.localize("reviewEnrollmentError") + " " + getError(response))
+        }
+        close();
       }).catch((err) => { console.log(err) })
   }
 
@@ -74,7 +78,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                   disapearingTooltip();
                   let link = groupsService.getBaseUrl() + '/account/#/groups/groupenrollments?id=' + encodeURI(enrollmentRequest?.id);
                   navigator.clipboard.writeText(link)
-                }}><CopyIcon/> </Button>
+                }}><CopyIcon /> </Button>
               </Tooltip>}
             </h1>
 
@@ -346,11 +350,11 @@ export const EnrollmentRequest: FC<any> = (props) => {
                 <Popover
                   bodyContent={
                     <div>
-                      <Msg msgKey='membershipExpiresAtHelperText'/>
-                      {!props.managePage&&
-                      <>
-                        <Msg msgKey='membershipExpiresAtMemberHelperText'/> <a onClick={()=>{ props.history.push('/groups/showgroups');}}>My Groups</a>  page.
-                      </>}
+                      <Msg msgKey='membershipExpiresAtHelperText' />
+                      {!props.managePage &&
+                        <>
+                          <Msg msgKey='membershipExpiresAtMemberHelperText' /> <a onClick={() => { props.history.push('/groups/showgroups'); }}>My Groups</a>  page.
+                        </>}
                     </div>
                   }
                 >
@@ -404,9 +408,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
           }
         </Form>
       </Modal>
-
     </React.Fragment>
-
   )
 }
 

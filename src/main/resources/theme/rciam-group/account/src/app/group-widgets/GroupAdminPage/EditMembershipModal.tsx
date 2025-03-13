@@ -6,13 +6,14 @@ import { Msg } from '../../widgets/Msg';
 import { isPastDate, dateParse, addDays, isFirstDateBeforeSecond, dateFormat } from '../../widgets/Date';
 import { HelpIcon } from '@patternfly/react-icons';
 import { Loading } from '../LoadingModal';
-import { Alerts } from '../../widgets/Alerts';
 import { GroupRolesTable } from '../GroupRolesTable';
+import { ContentAlert } from '../../content/ContentAlert';
+import { getError } from '../../js/utils.js'
+
 
 interface EditMembershipModalProps {
     membership: Membership;
     setMembership: any;
-    setAlert:any;
     fetchGroupMembers: any;
 };
 
@@ -199,10 +200,10 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                 setLoading(false);
                 props?.setMembership({});
                 if (response.status === 200 || response.status === 204) {
-                    props.setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "success", description: Msg.localize('updateMembershipSuccessMessage') })
+                    ContentAlert.success(Msg.localize('updateMembershipSuccess'));
                 }
                 else {
-                    props.setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "danger", description: response?.data?.error?Msg.localize('updateMembershipErrorMessage', [response.data.error]):Msg.localize("updateMembershipErrorMessageNoError") })
+                    ContentAlert.success(Msg.localize('updateMembershipError',[getError(response)]));
                 }
             })
     }
@@ -277,7 +278,6 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                     >
                         <div>{props.membership?.user?.username ? props.membership.user.username : Msg.localize('notAvailable')}</div>
                     </FormGroup>
-
                     <FormGroup
                         label={Msg.localize('groupDatalistCellRoles')}
                         isRequired

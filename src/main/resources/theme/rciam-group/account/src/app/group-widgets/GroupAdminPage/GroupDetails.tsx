@@ -1,13 +1,14 @@
 import * as React from 'react';
 import { FC, useState, useRef } from 'react';
-import { DataList, DataListItem, DataListItemCells, DataListItemRow, DataListCell, Button, TextInput, InputGroup, Chip, Tooltip, ExpandableSection, ClipboardCopy, Popover } from '@patternfly/react-core';
+import { DataList, DataListItem, DataListItemCells, DataListItemRow, DataListCell, Button, TextInput, InputGroup, Tooltip, ClipboardCopy} from '@patternfly/react-core';
 // @ts-ignore
 import { ConfirmationModal } from '../Modals';
 import { GroupsServiceClient, HttpResponse } from '../../groups-mngnt-service/groups.service';
-import { MinusIcon, PlusIcon, EyeIcon, TimesIcon, CopyIcon } from '@patternfly/react-icons';
+import { MinusIcon, PlusIcon } from '@patternfly/react-icons';
 import { Msg } from '../../widgets/Msg';
-import { Alerts } from '../../widgets/Alerts';
 import { Link } from 'react-router-dom';
+import { getError } from '../../js/utils.js'
+import { ContentAlert } from '../../content/ContentAlert';
 
 
 export const GroupDetails: FC<any> = (props) => {
@@ -15,20 +16,18 @@ export const GroupDetails: FC<any> = (props) => {
     const roleRef = useRef<any>(null);
     const [roleInput, setRoleInput] = useState<string>("");
     const [modalInfo, setModalInfo] = useState({});
-    const [alert, setAlert] = useState({});
-    const [isExpanded, setIsExpanded] = useState(false);
-
-    const onToggle = (isExpanded: boolean) => {
-        setIsExpanded(isExpanded);
-    };
 
     const addGroupRole = (role) => {
         groupsService!.doPost<any>("/group-admin/group/" + props.groupId + "/roles", {}, { params: { name: role } })
             .then((response: HttpResponse<any>) => {
+                setRoleInput("");
+                setModalInfo({});
                 if (response.status === 200 || response.status === 204) {
+                    ContentAlert.success(Msg.localize("addRoleSuccess"));
                     props.fetchGroupConfiguration();
-                    setRoleInput("");
-                    setModalInfo({});
+                }
+                else{
+                    ContentAlert.danger(Msg.localize("addRoleError",[getError(response)]));
                 }
             })
     }
@@ -36,21 +35,20 @@ export const GroupDetails: FC<any> = (props) => {
     const removeGroupRole = (role) => {
         groupsService!.doDelete<any>("/group-admin/group/" + props.groupId + "/role/" + role)
             .then((response: HttpResponse<any>) => {
+                setModalInfo({});
                 if (response.status === 200 || response.status === 204) {
+                    ContentAlert.success(Msg.localize("deleteRoleSuccess"));
                     props.fetchGroupConfiguration();
                 }
-                setModalInfo({});
-            }).catch(err => {
-                setAlert({ message: Msg.localize('deleteRoleErrorTitle'), variant: "danger", description: Msg.localize('deleteRoleErrorMessage') });
-                setModalInfo({});
+                else {
+                    ContentAlert.danger(Msg.localize("deleteRoleError",[getError(response)]));
+                }
             })
-
     }
 
 
     return (
         <React.Fragment>
-            <Alerts alert={alert} close={() => { setAlert({}) }} />
             <ConfirmationModal modalInfo={modalInfo} />
             <DataList aria-label="Compact data list example" isCompact wrapModifier={"breakWord"}>
                 <DataListItem aria-labelledby="compact-item1">
@@ -87,7 +85,6 @@ export const GroupDetails: FC<any> = (props) => {
                         />
                     </DataListItemRow>
                 </DataListItem>
-
                 <DataListItem aria-labelledby="compact-item2">
                     <DataListItemRow className="gm_role_row">
                         <DataListItemCells
@@ -142,7 +139,6 @@ export const GroupDetails: FC<any> = (props) => {
                                                     Role Entitlement
                                                 </th>
                                                 <th>
-
                                                 </th>
                                             </tr>
                                         </thead>

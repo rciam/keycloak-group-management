@@ -1,3 +1,5 @@
+import { Msg } from '../widgets/Msg';
+
 export function ValidateEmail(value) {
 
     var validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
@@ -95,3 +97,9 @@ export const isFirstDateBeforeSecond = (firstDate, secondDate, errorMessage) => 
       return "";
   }
 };
+
+
+export const getError = (response)=>{
+  let error = response?.data?.error_description?response.data.error_description:response?.data?.error?response.data.error:Msg.localize('unexpectedError');
+  return error;
+}

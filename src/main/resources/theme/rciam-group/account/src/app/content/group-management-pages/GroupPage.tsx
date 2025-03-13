@@ -12,8 +12,10 @@ import { dateParse, addDays, isFirstDateBeforeSecond } from '../../widgets/Date'
 import { Link } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
 import { Loading } from '../../group-widgets/LoadingModal';
-import { Alerts } from '../../widgets/Alerts';
 import { ConfirmationModal } from '../../group-widgets/Modals';
+import { ContentAlert } from '../ContentAlert';
+import { getError } from '../../js/utils.js'
+
 
 export interface GroupsPageProps {
   history: any;
@@ -67,7 +69,6 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
   const [expirationWarning, setExpirationWarning] = useState(false);
   const [effectiveGroupPath, setEffectiveGroupPath] = useState("");
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState({});
   const [modalInfo, setModalInfo] = useState({});
 
 
@@ -108,11 +109,10 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
     groupsService!.doDelete<any>("/user/group/" + groupId + "/member")
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
-          setAlert({ message: Msg.localize('leaveGroupSuccess'), variant: "success" })
           props.history.push('/groups/showgroups');
         }
         else {
-          setAlert({ message: response?.data?.error ? Msg.localize('leaveGroupError', [response.data.error]) : Msg.localize('leaveGroupErrorUnexpected'), variant: "danger" })
+          ContentAlert.danger(Msg.localize('leaveGroupError', [getError(response)]))
         }
         setLoading(false);
       });
@@ -153,7 +153,6 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
         </Breadcrumb>
         <ConfirmationModal modalInfo={modalInfo} />
         <Loading active={loading} />
-        <Alerts alert={alert} close={() => { setAlert({}) }} />
         <ContentPage title={groupMembership?.group?.name || ""}>
           <p className="gm_group_desc">
             {(groupMembership?.group?.attributes?.description && groupMembership?.group?.attributes?.description[0]) || Msg.localize('noDescription')}

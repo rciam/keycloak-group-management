@@ -20,8 +20,8 @@ import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/gr
 // @ts-ignore
 import { Msg } from '../../widgets/Msg';
 import { Button } from '@patternfly/react-core';
-import { Alerts } from '../../widgets/Alerts';
 import { ConfirmationModal } from '../../group-widgets/Modals';
+import { ContentAlert } from '../ContentAlert';
 
 export interface GroupsPageProps {
   history: any;
@@ -52,7 +52,6 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [orderBy, setOrderBy] = useState<string>('');
   const [asc, setAsc] = useState<boolean>(true);
-  const [alert, setAlert] = useState({});
   const [loading, setLoading] = useState<boolean>(false);
   const [modalInfo, setModalInfo] = useState({});
 
@@ -124,7 +123,6 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
 
   return (
     <ContentPage title={Msg.localize('groupLabel')}>
-      <Alerts alert={alert} close={() => { setAlert({}) }} />
       <ConfirmationModal modalInfo={modalInfo} />
       <DataList id="groups-list" aria-label={Msg.localize('groupLabel')} isCompact wrapModifier={"breakWord"}>
         <DataListItem id="groups-list-header" aria-labelledby="Columns names">
@@ -182,7 +180,7 @@ export const GroupsPage: FC<GroupsPageProps> = (props) => {
           </div> : groups.length === 0
             ? emptyGroup()
             : groups.map((group: Group, appIndex: number) => {
-              return <MembershipDatalistItem membership={group} history={props.history} fetchGroups={fetchGroups} setAlert={setAlert} setLoading={setLoading} setModalInfo={setModalInfo} currentDate={new Date(new Date().setHours(0, 0, 0, 0))} appIndex={appIndex} />
+              return <MembershipDatalistItem membership={group} history={props.history} fetchGroups={fetchGroups} setLoading={setLoading} setModalInfo={setModalInfo} currentDate={new Date(new Date().setHours(0, 0, 0, 0))} appIndex={appIndex} />
             })
 
         }
@@ -230,11 +228,11 @@ const MembershipDatalistItem = (props) => {
     groupsService!.doDelete<any>("/user/group/" + props.membership.group.id + "/member")
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
-          props.setAlert({ message: Msg.localize('leaveGroupSuccess'), variant: "success" })
+          ContentAlert.success(Msg.localize('leaveGroupSuccess'));
           props.fetchGroups();
         }
         else {
-          props.setAlert({ message: response?.data?.error ? Msg.localize('leaveGroupError', [response.data.error]) : Msg.localize('leaveGroupErrorUnexpected'), variant: "danger" })
+          ContentAlert.danger(Msg.localize('leaveGroupError', [response.data.error]));
         }
         props.setLoading(false);
       });

@@ -170,7 +170,6 @@ export const CreateEnrollment: FC<any> = (props) => {
     !(enrollmentRequest?.groupRoles?.length > 0) && (errors.groupRoles = Msg.localize('groupRolesFormError'));
     (!enrollment.multiselectRole && enrollmentRequest.groupRoles.length > 1) && (errors.groupRoles = Msg.localize('groupRolesFormErrorMulitple'));
     setErrors(errors);
-    //!(enrollemtn?)
   }
 
   const touchFields = () => {

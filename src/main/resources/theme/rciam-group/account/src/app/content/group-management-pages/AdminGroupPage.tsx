@@ -6,6 +6,7 @@ import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/gr
 import { GroupMembers } from '../../group-widgets/GroupAdminPage/GroupMembers';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { GroupAttributes } from '../../group-widgets/GroupAdminPage/GroupAttributes';
+// @ts-ignore
 import { GroupDetails } from '../../group-widgets/GroupAdminPage/GroupDetails';
 import { ConfirmationModal, DeleteSubgroupModal } from '../../group-widgets/Modals';
 import { GroupAdmins } from '../../group-widgets/GroupAdminPage/GroupAdmins';
@@ -14,6 +15,9 @@ import { GroupEnrollment } from '../../group-widgets/GroupAdminPage/GroupEnrollm
 import { TrashIcon } from '@patternfly/react-icons';
 import { Msg } from '../../widgets/Msg';
 import { RoutableTabs, useRoutableTab } from '../../widgets/RoutableTabs';
+import { ContentPage } from '../ContentPage';
+import { ContentAlert } from '../ContentAlert';
+import { getError } from '../../js/utils.js'
 
 
 export interface AdminGroupPageProps {
@@ -101,6 +105,8 @@ interface GroupConfiguration {
   admins: Admin[];
   parents: any;
   extraSubGroups: Group[];
+  error_description?: any;
+  error?: any;
 }
 
 
@@ -127,6 +133,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props) => {
   const [userRoles, setUserRoles] = useState<String[]>([]);
   const [isGroupAdmin, setIsGroupAdmin] = useState<boolean>(false);
   const [enrollmentRules, setEnrollmentRules] = useState({});
+
 
   let groupsService = new GroupsServiceClient();
 
@@ -192,14 +199,16 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props) => {
       })
   }
 
-  let updateAttributes = (attributes) => {
+  let updateAttributes = (attributes, success_message = Msg.localize('updateAttributesSuccess'),error_message=Msg.localize("updateAttributesError")) => {
     groupsService!.doPost<GroupConfiguration>("/group-admin/group/" + groupId + "/attributes", attributes ? { ...attributes } : {})
       .then((response: HttpResponse<GroupConfiguration>) => {
         if (response.status === 200 || response.status === 204) {
           setGroupConfiguration({ ...groupConfiguration });
           fetchGroupConfiguration();
+          ContentAlert.success(success_message);
         }
         else {
+          ContentAlert.danger(error_message + " " + getError(response))
           fetchGroupConfiguration();
         }
       })
@@ -241,6 +250,9 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props) => {
 
   return (
     <>
+
+
+
       <div className="gm_content">
         <ConfirmationModal modalInfo={modalInfo} />
         <DeleteSubgroupModal groupId={groupId} active={deleteGroup} afterSuccess={() => { props.history.push('/groups/admingroups'); }} close={() => { setDeleteGroup(false); }} />
@@ -262,69 +274,73 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props) => {
             {groupConfiguration?.name}
           </BreadcrumbItem>
         </Breadcrumb>
-        <h1 className="pf-c-title pf-m-2xl pf-u-mb-xl gm_group-title gm_flex-center">{groupConfiguration?.name} {(isGroupAdmin || ("/" + groupConfiguration?.name) !== groupConfiguration?.path) && !(groupConfiguration?.extraSubGroups && groupConfiguration?.extraSubGroups.length > 0) && <TrashIcon onClick={() => { setDeleteGroup(true) }} />}</h1>
-        {editDescription ?
-          <div className="gm_description-input-container">
-            <TextArea value={descriptionInput} onChange={value => setDescriptionInput(value)} aria-label="text area example" />
-            <Button className={"gm_button-small"}
-              onClick={() => {
-                setModalInfo({
-                  title: Msg.localize('confirmation'),
-                  accept_message: Msg.localize('yes'),
-                  cancel_message: Msg.localize('no'),
-                  message: (Msg.localize('descriptionUpdateConfirmation')),
-                  accept: function () {
-                    if (groupConfiguration.attributes) {
-                      groupConfiguration.attributes.description = [descriptionInput];
-                      updateAttributes(groupConfiguration.attributes);
+        <ContentPage>
+          <h1 className="pf-c-title pf-m-2xl pf-u-mb-xl gm_group-title gm_flex-center">{groupConfiguration?.name} {(isGroupAdmin || ("/" + groupConfiguration?.name) !== groupConfiguration?.path) && !(groupConfiguration?.extraSubGroups && groupConfiguration?.extraSubGroups.length > 0) && <TrashIcon onClick={() => { setDeleteGroup(true) }} />}</h1>
+          {editDescription ?
+            <div className="gm_description-input-container">
+              <TextArea value={descriptionInput} onChange={value => setDescriptionInput(value)} aria-label="text area example" />
+              <Button className={"gm_button-small"}
+                onClick={() => {
+                  setModalInfo({
+                    title: Msg.localize('confirmation'),
+                    accept_message: Msg.localize('yes'),
+                    cancel_message: Msg.localize('no'),
+                    message: (Msg.localize('descriptionUpdateConfirmation')),
+                    accept: function () {
+                      if (groupConfiguration.attributes) {
+                        groupConfiguration.attributes.description = [descriptionInput];
+                        updateAttributes(groupConfiguration.attributes,"Group description was completed succesfully.","Group description could not be updated due to:");
+                        setEditDescription(false);
+                        setModalInfo({})
+                      }
+                    },
+                    cancel: function () {
                       setEditDescription(false);
                       setModalInfo({})
                     }
-                  },
-                  cancel: function () {
-                    setEditDescription(false);
-                    setModalInfo({})
-                  }
-                });
-              }}
-            >
-              <div className={"gm_check-button"}></div>
-            </Button>
-            <Button variant="tertiary" className={"gm_button-small"} onClick={() => { setEditDescription(false); }}>
-              <div className={"gm_cancel-button"}></div>
-            </Button>
-          </div>
-          : <p className="gm_group_desc">
-            {(groupConfiguration?.attributes?.description && groupConfiguration?.attributes?.description[0]) || Msg.localize('noDescription')}
-            <div className="gm_edit-icon" onClick={() => { setEditDescription(true) }}></div>
+                  });
+                }}
+              >
+                <div className={"gm_check-button"}></div>
+              </Button>
+              <Button variant="tertiary" className={"gm_button-small"} onClick={() => { setEditDescription(false); }}>
+                <div className={"gm_cancel-button"}></div>
+              </Button>
+            </div>
+            : <p className="gm_group_desc">
+              {(groupConfiguration?.attributes?.description && groupConfiguration?.attributes?.description[0]) || Msg.localize('noDescription')}
+              <div className="gm_edit-icon" onClick={() => { setEditDescription(true) }}></div>
 
-          </p>
-        }
-        <RoutableTabs className="gm_tabs"
-          isBox={false}
-          defaultTab={"details"}
-        >
-          <Tab {...detailsTab} id="details" title={<TabTitleText><Msg msgKey='adminGroupDetailsTab' /></TabTitleText>} aria-label="Default content - users">
-            <GroupDetails groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} />
-          </Tab>
+            </p>
+          }
+          <RoutableTabs className="gm_tabs"
+            isBox={false}
+            defaultTab={"details"}
+          >
+            <Tab {...detailsTab} id="details" title={<TabTitleText><Msg msgKey='adminGroupDetailsTab' /></TabTitleText>} aria-label="Default content - users">
+              <GroupDetails groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} />
+            </Tab>
 
-          <Tab {...membersTab} id="members" title={<TabTitleText><Msg msgKey='adminGroupMembersTab' /></TabTitleText>} aria-label="Default content - members">
-            <GroupMembers isGroupAdmin={isGroupAdmin} membersTab={membersTab} history={props.history} groupConfiguration={groupConfiguration} enrollmentRules={enrollmentRules} groupId={groupId} user={user} />
-          </Tab>
-          <Tab {...adminsTab} id="admins" title={<TabTitleText><Msg msgKey='adminGroupAdminsTab' /></TabTitleText>} aria-label="Default content - admins">
-            <GroupAdmins isGroupAdmin={isGroupAdmin} groupId={groupId} user={user} groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} />
-          </Tab>
-          <Tab {...enrollmentsTab} id="enrollments" title={<TabTitleText><Msg msgKey='adminGroupEnrollmentTab' /></TabTitleText>} aria-label="Default content - attributes">
-            <GroupEnrollment isGroupAdmin={isGroupAdmin} groupConfiguration={groupConfiguration} enrollmentRules={enrollmentRules} defaultConfiguration={defaultConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes} />
-          </Tab>
-          <Tab {...attributesTab} id="attributes" title={<TabTitleText><Msg msgKey='adminGroupAttributesTab' /></TabTitleText>} aria-label="Default content - attributes">
-            <GroupAttributes isGroupAdmin={isGroupAdmin} groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes} />
-          </Tab>
-          <Tab {...subgroupsTab} id="subgroups" title={<TabTitleText><Msg msgKey='adminGroupSubgroupsTab' /></TabTitleText>} aria-label="Default content - attributes">
-            <GroupSubGroups isGroupAdmin={isGroupAdmin} groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} />
-          </Tab>
-        </RoutableTabs>
+            <Tab {...membersTab} id="members" title={<TabTitleText><Msg msgKey='adminGroupMembersTab' /></TabTitleText>} aria-label="Default content - members">
+              <GroupMembers isGroupAdmin={isGroupAdmin} membersTab={membersTab} history={props.history} groupConfiguration={groupConfiguration} enrollmentRules={enrollmentRules} groupId={groupId} user={user} />
+            </Tab>
+            <Tab {...adminsTab} id="admins" title={<TabTitleText><Msg msgKey='adminGroupAdminsTab' /></TabTitleText>} aria-label="Default content - admins">
+              <GroupAdmins isGroupAdmin={isGroupAdmin} groupId={groupId} user={user} groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} />
+            </Tab>
+            <Tab {...enrollmentsTab} id="enrollments" title={<TabTitleText><Msg msgKey='adminGroupEnrollmentTab' /></TabTitleText>} aria-label="Default content - attributes">
+              <GroupEnrollment isGroupAdmin={isGroupAdmin} groupConfiguration={groupConfiguration} enrollmentRules={enrollmentRules} defaultConfiguration={defaultConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes} />
+            </Tab>
+            <Tab {...attributesTab} id="attributes" title={<TabTitleText><Msg msgKey='adminGroupAttributesTab' /></TabTitleText>} aria-label="Default content - attributes">
+              <GroupAttributes isGroupAdmin={isGroupAdmin} groupConfiguration={groupConfiguration} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} updateAttributes={updateAttributes} />
+            </Tab>
+            <Tab {...subgroupsTab} id="subgroups" title={<TabTitleText><Msg msgKey='adminGroupSubgroupsTab' /></TabTitleText>} aria-label="Default content - attributes">
+              <GroupSubGroups isGroupAdmin={isGroupAdmin} groupConfiguration={groupConfiguration} groupId={groupId} setGroupConfiguration={setGroupConfiguration} fetchGroupConfiguration={fetchGroupConfiguration} />
+            </Tab>
+          </RoutableTabs>
+        </ContentPage>
       </div>
     </>
   )
 };
+
+

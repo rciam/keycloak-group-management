@@ -14,8 +14,10 @@ import { HelpIcon, PencilAltIcon, TimesIcon, LockIcon, LockOpenIcon, OutlinedClo
 import { Loading } from '../LoadingModal';
 import { Link } from 'react-router-dom';
 import { EditMembershipModal } from './EditMembershipModal';
-import { Alerts } from '../../widgets/Alerts';
 import { dateParse, addDays, isFirstDateBeforeSecond } from '../../widgets/Date';
+import { ContentAlert } from '../../content/ContentAlert';
+import { getError } from '../../js/utils';
+
 
 interface FederatedIdentity {
   identityProvider: string;
@@ -51,7 +53,6 @@ const UserActionModal: FC<any> = (props) => {
   const [user, setUser] = useState<any>({});
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState({});
 
 
   useEffect(() => {
@@ -65,10 +66,10 @@ const UserActionModal: FC<any> = (props) => {
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
           props.fetchGroupMembers();
-          setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "success", description: Msg.localize('updateMembershipSuccessMessage') })
+          ContentAlert.success(Msg.localize('suspendMembershipSuccess'));
         }
         else {
-          setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "danger", description: response?.data?.error ? Msg.localize('updateMembershipErrorMessage', [response.data.error]) : Msg.localize("updateMembershipErrorMessageUnexpected") })
+          ContentAlert.success(Msg.localize('suspendMembershipError'),[getError(response)]);
         }
         setLoading(false);
         close();
@@ -81,10 +82,10 @@ const UserActionModal: FC<any> = (props) => {
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
           props.fetchGroupMembers();
-          setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "success", description: Msg.localize('updateMembershipSuccessMessage') })
+          ContentAlert.success(Msg.localize('activateMembershipSuccess'));
         }
         else {
-          setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "danger", description: response?.data?.error ? Msg.localize('updateMembershipErrorMessage', [response.data.error]) : Msg.localize("updateMembershipErrorMessageUnexpected") })
+          ContentAlert.success(Msg.localize('activateMembershipError'),[getError(response)]);
         }
         setLoading(false);
         close();
@@ -98,7 +99,6 @@ const UserActionModal: FC<any> = (props) => {
 
   return (
     <>
-      <Alerts alert={alert} close={() => { setAlert({}) }} />
       <Modal
         variant={ModalVariant.medium}
         title={Msg.localize('Confirmation')}
@@ -186,7 +186,7 @@ export const GroupMembers: FC<any> = (props) => {
   let groupsService = new GroupsServiceClient();
 
   useEffect(() => {
-   
+
     if (props.groupId !== groupId) {
       setDirectMembers(true);
       setGroupId(props.groupId);
@@ -210,7 +210,7 @@ export const GroupMembers: FC<any> = (props) => {
 
   useEffect(() => {
     fetchGroupMembers(searchString);
-  }, [statusSelection, roleSelection, page, perPage, groupId, directMembers, searchString,orderBy,asc]);
+  }, [statusSelection, roleSelection, page, perPage, groupId, directMembers, searchString, orderBy, asc]);
 
   const orderResults = (type) => {
     if (orderBy !== type) {
@@ -256,7 +256,7 @@ export const GroupMembers: FC<any> = (props) => {
   }
 
   let fetchGroupMembers = (searchString: string | undefined = undefined) => {
-    groupsService!.doGet<any>("/group-admin/group/" + props.groupId + "/members?first=" + (perPage * (page - 1)) + "&max=" + perPage + (searchString ? "&search=" + searchString : "") + (orderBy!=="default"?"&order="+ orderBy:"") + "&asc=" + asc, {
+    groupsService!.doGet<any>("/group-admin/group/" + props.groupId + "/members?first=" + (perPage * (page - 1)) + "&max=" + perPage + (searchString ? "&search=" + searchString : "") + (orderBy !== "default" ? "&order=" + orderBy : "") + "&asc=" + asc, {
       params: { ...(statusSelection ? { status: statusSelection } : {}), ...(roleSelection ? { role: roleSelection } : {}), ...(!directMembers ? { direct: 'false' } : {}) }
     })
       .then((response: HttpResponse<any>) => {
@@ -273,7 +273,11 @@ export const GroupMembers: FC<any> = (props) => {
     groupsService!.doDelete<any>("/group-admin/group/" + groupId + "/member/" + memberId)
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
+          ContentAlert.success(Msg.localize('deleteMemberSuccess'));
           fetchGroupMembers();
+        }
+        else{
+          ContentAlert.danger(Msg.localize('deleteMemberError'),[getError(response)]);
         }
       })
   }
@@ -287,13 +291,12 @@ export const GroupMembers: FC<any> = (props) => {
       .then((response: HttpResponse<any>) => {
         fetchGroupMembers();
         setLoading(false);
+        close();
         if (response.status === 200 || response.status === 204) {
-          setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "success", description: Msg.localize('updateMembershipSuccessMessage') })
-          close();
-          // setGroupMembers(response.data.results);
+          ContentAlert.success(Msg.localize('activateMembershipSuccess'));          
         }
         else {
-          props.setAlert({ message: Msg.localize('updateMembershipMessage'), variant: "danger", description: response?.data?.error ? Msg.localize('updateMembershipErrorMessage', [response.data.error]) : Msg.localize("updateMembershipErrorMessageUnexpected") })
+          ContentAlert.danger(Msg.localize('activateMembershipError'),[getError(response)]);
         }
       }).catch(err => {
         console.log(err);
@@ -317,15 +320,23 @@ export const GroupMembers: FC<any> = (props) => {
 
   return (
     <React.Fragment>
-      <Alerts alert={alert} close={() => { setAlert({}) }} />
       <Loading active={loading} />
       <ConfirmationModal modalInfo={modalInfo} />
       <UserActionModal setAlert={setAlert} user={selectedUser} setUser={setSelectedUser} groupId={props.groupId} fetchGroupMembers={fetchGroupMembers} />
-      <EditMembershipModal membership={editMembership} setMembership={setEditMembership} setAlert={setAlert} fetchGroupMembers={fetchGroupMembers} />
+      <EditMembershipModal membership={editMembership} setMembership={setEditMembership} fetchGroupMembers={fetchGroupMembers} />
       <TableActionBar
         childComponent={
           <React.Fragment>
-            <Checkbox className="gm_direct-member-checkbox" label={Msg.localize('adminGroupViewAllMembersButton')} checked={directMembers} onClick={() => { setDirectMembers(!directMembers); }} id="required-check" name="required-check" />
+            <Tooltip
+              position="right"
+              content={
+                <div>
+                  {directMembers ? Msg.localize('directMembersTooltip') : Msg.localize('indirectMembersTooltip')}
+                </div>
+              }
+            >
+              <Checkbox className="gm_direct-member-checkbox" label={Msg.localize('adminGroupViewAllMembersButton')} checked={directMembers} onClick={() => { setDirectMembers(!directMembers); }} id="required-check" name="required-check" />
+            </Tooltip>
             {props.isGroupAdmin &&
               <Button className="gm_invite-member-button" onClick={() => { setInviteModalActive(true) }}>
                 <Msg msgKey='addMember' />
@@ -369,22 +380,22 @@ export const GroupMembers: FC<any> = (props) => {
                   {orderBy !== 'f.effectiveMembershipExpiresAt' ? <AngleDownIcon /> : asc ? <LongArrowAltDownIcon /> : <LongArrowAltUpIcon />}
                 </div>
                 <Popover
-                    bodyContent={
-                      <div>
-                        <Msg msgKey='membershipExpiresAtPopoverDatalist' />
-                      </div>
-                    }
+                  bodyContent={
+                    <div>
+                      <Msg msgKey='membershipExpiresAtPopoverDatalist' />
+                    </div>
+                  }
+                >
+                  <button
+                    type="button"
+                    aria-label="More info for name field"
+                    onClick={e => e.preventDefault()}
+                    aria-describedby="simple-form-name-01"
+                    className="pf-c-form__group-label-help gm_popover-info"
                   >
-                    <button
-                      type="button"
-                      aria-label="More info for name field"
-                      onClick={e => e.preventDefault()}
-                      aria-describedby="simple-form-name-01"
-                      className="pf-c-form__group-label-help gm_popover-info"
-                    >
-                      <HelpIcon noVerticalAlign />
-                    </button>
-                  </Popover>
+                    <HelpIcon noVerticalAlign />
+                  </button>
+                </Popover>
 
 
               </DataListCell>,
@@ -457,16 +468,16 @@ export const GroupMembers: FC<any> = (props) => {
                                 <Msg msgKey='membershipExpirationEffectiveNotification' />
                                 <Button className="gm_popover-expiration-button" isSmall onClick={() => {
                                   if (member.effectiveGroupId === groupId) {
-                                    if(member.group.id!==groupId){
+                                    if (member.group.id !== groupId) {
                                       const searchParams = new URLSearchParams(location.hash.split('?')[1]);
-                                      searchParams.set("membership",member?.id ||"");
+                                      searchParams.set("membership", member?.id || "");
                                       props.history.push({
-                                          search: searchParams.toString() ? `?${searchParams.toString()}` : '',
+                                        search: searchParams.toString() ? `?${searchParams.toString()}` : '',
                                       });
                                       setDirectMembers(true);
-                                      setSearchString(member.user.username);                                      
+                                      setSearchString(member.user.username);
                                     }
-                                    else{
+                                    else {
                                       setEditMembership(member);
                                     }
                                     hide();
@@ -594,7 +605,7 @@ export const GroupMembers: FC<any> = (props) => {
                       >
                         <div>
                           <Button isSmall variant="tertiary" isDisabled={member.status === "SUSPENDED"} className="gm_small_icon_button" onClick={() => {
-                            if (member.direct) { setEditMembership(member); } else { 
+                            if (member.direct) { setEditMembership(member); } else {
                               setEditMembership(member);
                             }
                           }}>

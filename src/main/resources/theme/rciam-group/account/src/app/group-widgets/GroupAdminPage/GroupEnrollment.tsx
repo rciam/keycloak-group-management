@@ -165,7 +165,7 @@ export const GroupEnrollment: FC<any> = (props) => {
 interface GroupEnrollmentItemProps {
   enrollment: any; // Replace 'any' with the actual type of 'enrollment'
   index: number;
-  updateAttributes: (any) => void;
+  updateAttributes: any;
   defaultConfiguration: any;
   groupConfiguration: any;
   groupId: string;
@@ -214,7 +214,7 @@ const GroupEnrollmentItem: FC<GroupEnrollmentItemProps> = ({
     else {
       groupConfiguration.attributes.defaultConfiguration = [enrollment?.id]
     }
-    updateAttributes({ ...groupConfiguration.attributes });
+    updateAttributes({ ...groupConfiguration.attributes },Msg.localize("updateDefaultEnrollmentSuccess"),Msg.localize("updateDefaultEnrollmentError"));
   }
 
   const onCopyLink = () => {
@@ -222,7 +222,6 @@ const GroupEnrollmentItem: FC<GroupEnrollmentItemProps> = ({
     let link = groupsService.getBaseUrl() + '/account/#/enroll?id=' + encodeURI(enrollment.id);
     navigator.clipboard.writeText(link)
   }
-
 
 
   const dropdownItems = [

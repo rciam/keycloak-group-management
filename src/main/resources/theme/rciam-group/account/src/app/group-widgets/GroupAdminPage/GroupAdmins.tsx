@@ -5,14 +5,10 @@ import { DataList, DataListItem, DataListItemCells, DataListItemRow, DataListCel
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
 import { ConfirmationModal } from '../Modals';
-import { ValidateEmail } from '../../js/utils.js'
+import { ValidateEmail, getError } from '../../js/utils.js'
 import { Loading } from '../LoadingModal';
 import { Msg } from '../../widgets/Msg';
-
-interface disapearingMessageRepresentation {
-  message?: string;
-  type?: "success" | "danger";
-}
+import { ContentAlert } from '../../content/ContentAlert';
 
 export const GroupAdmins: FC<any> = (props) => {
 
@@ -26,7 +22,6 @@ export const GroupAdmins: FC<any> = (props) => {
   const [inviteAddress, setInviteAddress] = useState<string>("");
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [modalInfo, setModalInfo] = useState({});
-  const [disapearingMessage, setDisapearingMessage] = useState<disapearingMessageRepresentation>({});
   const [loading, setLoading] = useState(false);
   const [groupIds, setGroupIds] = useState([]);
   const [groupAdminIds, setGroupAdminIds] = useState<any>([]);
@@ -76,32 +71,21 @@ export const GroupAdmins: FC<any> = (props) => {
     )
   }
 
-  const disapearingMessageHandler = (message, type) => {
 
-    setDisapearingMessage({ message, type });
-    setTimeout(() => {
-      setDisapearingMessage({});
-    }, 2000);
-
-  }
 
 
   const makeAdmin = (userId) => {
     setLoading(true);
     groupsService!.doPost<any>("/group-admin/group/" + props.groupId + "/admin",{}, {params: {"userId":userId}})
       .then((response: HttpResponse<any>) => {
+        setLoading(false);
         if (response.status === 200 || response.status === 204) {
           props.fetchGroupConfiguration();
-          disapearingMessageHandler(Msg.localize('adminGroupAdded'), 'success')
-          setLoading(false);
+          ContentAlert.success(Msg.localize('addAdminSuccess'));
         }
         else {
-          throw new Error('Unexpected response status');
+          ContentAlert.danger(Msg.localize('addAdminError',[getError(response)]))
         }
-      }).catch((err) => {
-        disapearingMessageHandler(Msg.localize('adminGroupError'), 'danger')
-        setLoading(false);
-        console.log(err)
       })
   }
 
@@ -110,12 +94,13 @@ export const GroupAdmins: FC<any> = (props) => {
     groupsService!.doDelete<any>("/group-admin/group/" + props.groupId + "/admin", {params: {"userId":userId}})
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
+          ContentAlert.success(Msg.localize('removeAdminSuccess'));
           props.fetchGroupConfiguration();
         }
+        else{
+          ContentAlert.danger(Msg.localize('removeAdminError',[getError(response)]))
+        }
         setLoading(false);
-      }).catch((err) => {
-        setLoading(false);
-        console.log(err)
       })
   }
 
@@ -125,16 +110,12 @@ export const GroupAdmins: FC<any> = (props) => {
       .then((response: HttpResponse<any>) => {
         setLoading(false);
         if (response.status === 200 || response.status === 204) {
-          disapearingMessageHandler(Msg.localize('adminGroupInvitationSent'), 'success');
+          ContentAlert.success(Msg.localize('adminInvitationSuccess'))
           props.fetchGroupConfiguration();
         }
         else {
-          throw new Error('Unexpected response status');
+          ContentAlert.danger(Msg.localize('adminInvitationError',[getError(response)]))          
         }
-      }).catch((err) => {
-        disapearingMessageHandler(Msg.localize('adminGroupInvitationError'), 'danger')
-        setLoading(false);
-        console.log(err)
       })
   }
 
@@ -352,10 +333,6 @@ export const GroupAdmins: FC<any> = (props) => {
                 />
               ))}
             </Select>
-            {Object.keys(disapearingMessage).length ? <FormAlert>
-              <Alert variant={disapearingMessage?.type} title={disapearingMessage?.message} aria-live="polite" isInline />
-            </FormAlert> : null}
-
             {emailError ? <FormAlert>
               <Alert variant="danger" title={Msg.localize('adminGroupInvalidEmail')} aria-live="polite" isInline />
             </FormAlert> : null}

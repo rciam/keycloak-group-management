@@ -116,6 +116,7 @@ export const AddMemberModal: React.FC<any> = (props) => {
     groupsService!.doPost<any>("/group-admin/group/" + props.groupId + "/members",requestBody)
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
+          
           setRequestResponse(
             {
               title:"User was succesfully added to the group",
