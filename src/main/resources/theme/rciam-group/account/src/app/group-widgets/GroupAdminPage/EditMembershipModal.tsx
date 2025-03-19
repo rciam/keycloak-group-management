@@ -5,10 +5,10 @@ import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/gr
 import { Msg } from '../../widgets/Msg';
 import { isPastDate, dateParse, addDays, isFirstDateBeforeSecond, dateFormat } from '../../widgets/Date';
 import { HelpIcon } from '@patternfly/react-icons';
-import { Loading } from '../LoadingModal';
 import { GroupRolesTable } from '../GroupRolesTable';
 import { ContentAlert } from '../../content/ContentAlert';
 import { getError } from '../../js/utils.js'
+import { useLoader } from '../LoaderContext';
 
 
 interface EditMembershipModalProps {
@@ -37,7 +37,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
     let groupsService = new GroupsServiceClient();
     const [errors, setErrors] = useState<any>({});
     const [modalInfo, setModalInfo] = useState({});
-    const [loading, setLoading] = useState(false);
+    const { startLoader, stopLoader } = useLoader();    
     const [membership, setMembership] = useState<Membership>({
         "validFrom": "",
         "membershipExpiresAt": "",
@@ -193,11 +193,11 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
     };
 
     let updateMembership = () => {
-        setLoading(true);
+        startLoader();
         groupsService!.doPut<any>("/group-admin/group/" + props.membership.group.id + "/member/" + props.membership?.id, { ...membership})
             .then((response: HttpResponse<any>) => {
                 props.fetchGroupMembers();
-                setLoading(false);
+                stopLoader();
                 props?.setMembership({});
                 if (response.status === 200 || response.status === 204) {
                     ContentAlert.success(Msg.localize('updateMembershipSuccess'));
@@ -246,7 +246,6 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                     </Button>
                 ]}
             >
-                <Loading active={loading} />
                 <Form>
                 <FormGroup
                         label={Msg.localize('groupPath')+":"}

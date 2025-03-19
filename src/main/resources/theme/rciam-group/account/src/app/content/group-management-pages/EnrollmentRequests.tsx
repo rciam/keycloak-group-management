@@ -10,6 +10,7 @@ import { Msg } from '../../widgets/Msg';
 import { DatalistFilterSelect } from '../../group-widgets/DatalistFilterSelect';
 import { AngleDownIcon, CaretDownIcon, CaretUpIcon, FilterIcon, LongArrowAltDownIcon, LongArrowAltUpIcon } from '@patternfly/react-icons';
 import { TableActionBar } from '../../group-widgets/GroupAdminPage/TableActionBar';
+import { useLoader } from '../../group-widgets/LoaderContext';
 
 export const EnrollmentRequests: FC<any> = (props) => {
 
@@ -29,6 +30,7 @@ export const EnrollmentRequests: FC<any> = (props) => {
     const [searchStringUser,setSearchStringUser] = useState("");
     const [isExpanded, setIsExpanded] = useState(false);
     const [requestId,setRequestId] = useState(0);    
+    const {startLoader, stopLoader} = useLoader();
 
     const onSetPage = (_event: React.MouseEvent | React.KeyboardEvent | MouseEvent, newPage: number) => {
       setPage(newPage);
@@ -84,6 +86,7 @@ export const EnrollmentRequests: FC<any> = (props) => {
 
     
     let fetchEnrollmentRequests = (searchStringUser = "",searchStringGroupOverwrite= "") => {
+      startLoader();
       groupsService!.doGet<any>(props.manage?"/group-admin/enroll-requests":"/user/enroll-requests",{params:{first:(perPage*(page-1)),max:perPage,
           ...(statusSelection?{status:statusSelection}:{}),
           ...((searchStringGroup||searchStringGroupOverwrite)?{groupName:(searchStringGroup||searchStringGroupOverwrite)}:{}),
@@ -92,11 +95,11 @@ export const EnrollmentRequests: FC<any> = (props) => {
           asc:asc?"true":"false"
         }})
         .then((response: HttpResponse<any>) => {
+          stopLoader();          
           if(response.status===200&&response.data){
             let count = response?.data?.count||0;
             setTotalItems(count as number);
             setEnrollmentRequests(response.data.results);
-            // setGroupMembers(response.data.results);
           }
           else{
             fetchEnrollmentRequests();
@@ -107,13 +110,14 @@ export const EnrollmentRequests: FC<any> = (props) => {
 
         
     let fetchEnrollmentRequest = (id) => {
+      startLoader();
       groupsService!.doGet<any>((props.manage?"/group-admin/enroll-request/":"/user/enroll-request/")+id)
       .then((response: HttpResponse<any>) => {
+        stopLoader();
         if(response.status===200&&response.data){
           let count = 1;
           setTotalItems(count as number);
           setSelectedRequest(response.data);
-          // setGroupMembers(response.data.results);
         }
       }).catch((err)=>{console.log(err)})
     

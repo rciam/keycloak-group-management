@@ -9,6 +9,7 @@ import { Alert, Button, Checkbox, DataList, Radio, DataListCell, DataListItem, D
 import { Msg } from '../../widgets/Msg';
 import { HelpIcon, ExternalLinkAltIcon } from '@patternfly/react-icons';
 import { Tooltip } from '@patternfly/react-core';
+import { useLoader } from '../LoaderContext';
 
 
 
@@ -23,15 +24,15 @@ export const AddMemberModal: React.FC<any> = (props) => {
   const [adminGroupIds, setAdminGroupIds] = useState<String[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<String[]>([]);
   const [requestResponse, setRequestResponse] = useState<any>({
-    active:false
+    active: false
   });
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<any>({});
   const [addUserDirectly, setAddUserDirectly] = useState<Boolean>(false);
   const [selectedEnrollment, setSelectedEnrollment] = useState<any>({});
   const [enrollmentConfigurations, setEnrollmentConfigurations] = useState<any>([]);
   const [invitationEmail, setInvitationEmail] = useState<String>("");
+  const { startLoader, stopLoader } = useLoader();
 
   useEffect(() => {
     setIsModalOpen(props.active);
@@ -101,26 +102,27 @@ export const AddMemberModal: React.FC<any> = (props) => {
   }
 
   const addNewMember = () => {
+   
+
     const requestBody: any = {
       user: selectedUser,
       groupEnrollmentConfiguration: selectedEnrollment,
       groupRoles: selectedRoles,
     };
-    
+
     // Add membershipExpiresAt only if selectedEnrollment.membershipExpirationDays is defined
     if (selectedEnrollment?.membershipExpirationDays) {
       requestBody.membershipExpiresAt = getExpirationDate(selectedEnrollment.membershipExpirationDays);
     }
-    setLoading(true);
-    
-    groupsService!.doPost<any>("/group-admin/group/" + props.groupId + "/members",requestBody)
+    startLoader();
+    groupsService!.doPost<any>("/group-admin/group/" + props.groupId + "/members", requestBody)
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
-          
+
           setRequestResponse(
             {
-              title:"User was succesfully added to the group",
-              active:true
+              title: "User was succesfully added to the group",
+              active: true
             });
           props.fetchGroupMembers();
           // setGroupMembers(response.data.results);
@@ -128,17 +130,17 @@ export const AddMemberModal: React.FC<any> = (props) => {
         else {
           setRequestResponse(
             {
-              title:"User could not be added to the group",
-              active:true,
-              ...(response?.data?.error?{error:response.data.error}:{})
+              title: "User could not be added to the group",
+              active: true,
+              ...(response?.data?.error ? { error: response.data.error } : {})
             });
         }
-        setLoading(false);
+        stopLoader();
       }).catch((err) => { console.log(err) })
   }
 
   const sendInvitation = () => {
-    setLoading(true);
+    startLoader();
     groupsService!.doPost<any>("/group-admin/group/" + props.groupId + "/members/invitation", {
       email: invitationEmail,
       groupEnrollmentConfiguration: {
@@ -148,21 +150,21 @@ export const AddMemberModal: React.FC<any> = (props) => {
       withoutAcceptance: true
     })
       .then((response: HttpResponse<any>) => {
+        stopLoader();
         if (response.status === 200 || response.status === 204) {
-          setRequestResponse(            {
-            title:Msg.localize('Invitation') + " " + Msg.localize('invitationSuccess'),
-            active:true
+          setRequestResponse({
+            title: Msg.localize('Invitation') + " " + Msg.localize('invitationSuccess'),
+            active: true
           });
           // setGroupMembers(response.data.results);
         }
         else {
-          setRequestResponse(            {
-            title:Msg.localize('Invitation') + " " + Msg.localize('invitationFailed'),
-            active:true
+          setRequestResponse({
+            title: Msg.localize('Invitation') + " " + Msg.localize('invitationFailed'),
+            active: true
           });
         }
-        setLoading(false);
-      }).catch((err) => { console.log(err) })
+      }).catch((err) => { stopLoader(); console.log(err) })
   }
 
   let fetchGroupEnrollments = () => {
@@ -200,9 +202,9 @@ export const AddMemberModal: React.FC<any> = (props) => {
     {
       id: 'incrementallyEnabled-1',
       name: (Msg.localize('invitationStep1')),
-      component: <EnrollmentStep 
-        setIsStep1Complete={setIsStep1Complete} setSelectedEnrollment={setSelectedEnrollment} 
-        setStepIdReached={setStepIdReached} selectedEnrollment={selectedEnrollment} selectedRoles={selectedRoles} 
+      component: <EnrollmentStep
+        setIsStep1Complete={setIsStep1Complete} setSelectedEnrollment={setSelectedEnrollment}
+        setStepIdReached={setStepIdReached} selectedEnrollment={selectedEnrollment} selectedRoles={selectedRoles}
         setSelectedRoles={setSelectedRoles} enrollmentConfigurations={enrollmentConfigurations} />,
       enableNext: isStep1Complete
     },
@@ -228,20 +230,19 @@ export const AddMemberModal: React.FC<any> = (props) => {
     <React.Fragment>
       <Modal
         variant={ModalVariant.medium}
-        title={Msg.localize('addMemberGroup')+ ' "' + props.groupConfiguration.path +'"'}
+        title={Msg.localize('addMemberGroup') + ' "' + props.groupConfiguration.path + '"'}
         isOpen={isModalOpen}
         onClose={() => {
           closeWizard();
         }}
         actions={[]}
         onEscapePress={() => {
-          if (!(loading && !requestResponse.active)) {
+          if (requestResponse.active) {
             props.setActive(false);
           }
         }}
       >
-        <ResponseModal requestResponse={requestResponse} close={() => { closeWizard(); setRequestResponse({active:false}); }} />
-        <Loading active={loading} />
+        <ResponseModal requestResponse={requestResponse} close={() => { closeWizard(); setRequestResponse({ active: false }); }} />
         <Wizard
           navAriaLabel={`${title} steps`}
           mainAriaLabel={`${title} content`}
@@ -580,31 +581,5 @@ const ResponseModal: React.FC<any> = (props) => {
         OK
       </Button>]}
     ><></></Modal>
-  )
-}
-
-
-const Loading: React.FC<any> = (props) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  useEffect(() => {
-    setIsModalOpen(props.active)
-  }, [props.active])
-
-  return (
-    <Modal
-      variant={ModalVariant.large}
-      width="19rem"
-      isOpen={isModalOpen}
-      header=""
-      showClose={false}
-      onEscapePress={() => { }}
-      aria-labelledby="modal-custom-header-label"
-      aria-describedby="modal-custom-header-description"
-      footer=""
-    >
-      <div tabIndex={0} id="modal-no-header-description" className="gm_loader-modal-container">
-        <Spinner isSVG diameter="100px" aria-label="Contents of the custom size example" />
-      </div>
-    </Modal>
   )
 }

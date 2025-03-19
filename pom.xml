@@ -25,7 +25,7 @@
         <quarkus.version>3.2.7.Final</quarkus.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <agm-version>1.5.6</agm-version>
+        <agm-version>1.5.7</agm-version>
     </properties>
 
     <dependencies>

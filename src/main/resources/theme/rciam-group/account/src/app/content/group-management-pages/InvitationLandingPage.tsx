@@ -3,12 +3,12 @@ import { FC, useState, useEffect } from 'react';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 import { Button, Checkbox, HelperText, HelperTextItem, Hint, HintBody, Modal, ModalVariant, Tooltip } from '@patternfly/react-core';
-import { Loading } from '../../group-widgets/LoadingModal';
 import { isPastDate, dateParse } from '../../widgets/Date';
 
 //import { ContentPage } from '../ContentPage';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { Msg } from '../../widgets/Msg';
+import { useLoader } from '../../group-widgets/LoaderContext';
 
 
 
@@ -30,11 +30,10 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props) => 
 
   const [invitationId] = useState(props.match.params.invitation_id);
   const [invitationData, setInvitationData] = useState<any>({});
-  const [loading, setLoading] = useState(false);
   const [acceptAup, setAcceptAup] = useState(false);
   const [actionBlocked, setActionBlocked] = useState(false);
   const [isParentGroup,setIsParentGroup] = useState(false);
-
+  const { startLoader, stopLoader } = useLoader();
 
   useEffect(() => {
     getInvitation();
@@ -43,10 +42,10 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props) => 
 
 
   let getInvitation = () => {
-    setLoading(true);
+    startLoader();
     groupsService!.doGet<any>("/user/invitation/" + invitationId)
       .then((response: HttpResponse<any>) => {
-        setLoading(false);
+        stopLoader();
         if (response.status === 200 && response.data) {
           setInvitationData(response.data);
           // Check if group is a parent group
@@ -58,16 +57,16 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props) => 
 
       }).catch((err) => {
         console.log(err);
-        setLoading(false);
+        stopLoader();
       })
   }
 
 
   const acceptInvitation = () => {
-    setLoading(true);
+    startLoader();
     groupsService!.doPost<any>("/user/invitation/" + invitationId + "/accept", {})
       .then((response: HttpResponse<any>) => {
-        setLoading(false);
+        stopLoader();
         if (response.status === 200 || response.status === 204) {
           if (invitationData?.forMember) {
             props.history.push('/groups/showgroups');
@@ -81,15 +80,15 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props) => 
         }
       }).catch((err) => {
         setActionBlocked(true);
-        setLoading(false);
+        stopLoader();
       })
   }
 
   const rejectInvitation = () => {
-    setLoading(true);
+    startLoader();
     groupsService!.doPost<any>("/user/invitation/" + invitationId + "/reject", {})
       .then((response: HttpResponse<any>) => {
-        setLoading(false);
+        stopLoader();
         if (response.status === 200 || response.status === 204) {
           if (invitationData?.forMember) {
             props.history.push('/groups/showgroups');
@@ -104,7 +103,7 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props) => 
       }).catch((err) => {
         setActionBlocked(true);
 
-        setLoading(false);
+        stopLoader();
       })
   }
 
@@ -114,7 +113,6 @@ export const InvitationLandingPage: FC<InvitationLandingPageProps> = (props) => 
     <>
       <div className="gm_invitation-container">
 
-        <Loading active={loading} />
         <ResponseModal type={invitationData?.forMember} close={() => {
           setActionBlocked(false);
           if (invitationData?.forMember) {

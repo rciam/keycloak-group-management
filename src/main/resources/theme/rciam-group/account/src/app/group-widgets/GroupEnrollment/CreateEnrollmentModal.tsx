@@ -6,9 +6,9 @@ import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/gr
 // @ts-ignore
 import { ConfirmationModal } from '../Modals';
 import {isIntegerOrNumericString,getCurrentDate} from '../../js/utils.js'
-import { Loading } from '../LoadingModal';
 import { Msg } from '../../widgets/Msg';
 import { HelpIcon, TrashIcon } from '@patternfly/react-icons';
+import { useLoader } from '../LoaderContext';
 
 
 const reg_url = /^(https?|chrome):\/\/[^\s$.?#].[^\s]*$/
@@ -45,12 +45,12 @@ export const EnrollmentModal: FC<any> = (props) => {
 
 
     let groupsService = new GroupsServiceClient();
-    const [loading,setLoading] = useState(false);
     const [modalInfo,setModalInfo] = useState({});
     const [enrollment,setEnrollment] = useState<any>({});
     const [isModalOpen,setIsModalOpen] = useState<boolean>(false)
     const [errors,setErrors] = useState<any>({});
     const [touched,setTouched] = useState<any>(touchDefault);
+    const { startLoader, stopLoader } = useLoader();
 
     useEffect(()=>{
       if(Object.keys(props.enrollment).length !== 0) {
@@ -132,7 +132,7 @@ export const EnrollmentModal: FC<any> = (props) => {
       }
 
       const createEnrollment = () => {
-        setLoading(true);
+        startLoader();
         if(enrollment.membershipExpirationDays===0){
             enrollment.membershipExpirationDays = null;
         }
@@ -141,31 +141,31 @@ export const EnrollmentModal: FC<any> = (props) => {
         }
         groupsService!.doPost<any>("/group-admin/group/"+props.groupId+"/configuration",{...enrollment})
         .then((response: HttpResponse<any>) => {
-          setLoading(false);
           if(response.status===200||response.status===204){
             close();
             // setGroupMembers(response.data.results);
           }
         }).catch((err)=>{
-          setLoading(false);
           close();
-          console.log(err)})
+          console.log(err)}).finally(()=>{
+            stopLoader();
+          })
       }
 
 
       const deleteEnrollment = (id) => {
-        setLoading(true);
+        startLoader();
         groupsService!.doDelete<any>("/group-admin/group/"+props.groupId+"/configuration/"+ id)
         .then((response: HttpResponse<any>) => {
-          setLoading(false);
           if(response.status===200||response.status===204){
             close();
             // setGroupMembers(response.data.results);
           }
         }).catch((err)=>{
-          setLoading(false);
           close();
-          console.log(err)})
+          console.log(err)}).finally(()=>{          
+            stopLoader();
+          })
       }
 
       const onMinus = () => {
@@ -209,7 +209,6 @@ export const EnrollmentModal: FC<any> = (props) => {
     const validators: ((date: Date) => string)[] = [isPastDate];
     return (
       <React.Fragment>
-        <Loading active={loading}/>
         <Modal
                 variant={ModalVariant.large}
                 header={

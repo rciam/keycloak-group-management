@@ -27,6 +27,7 @@ import { AdminGroupPage } from "./content/group-management-pages/AdminGroupPage.
 import { InvitationLandingPage } from "./content/group-management-pages/InvitationLandingPage.js";
 import { CreateEnrollment } from "./group-widgets/GroupEnrollment/CreateEnrollment.js";
 import { EnrollmentRequests } from "./content/group-management-pages/EnrollmentRequests.js";
+import { LoaderProvider } from "./group-widgets/LoaderContext.js";
 ;
 let customPages = [{
   path: "/groups/showgroups/:id",

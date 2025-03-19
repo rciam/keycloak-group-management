@@ -15,19 +15,21 @@
  */
 
 import * as React from 'react';
-import {Route, Switch,matchPath} from 'react-router-dom';
-import {NavItem, NavExpandable} from '@patternfly/react-core';
+import { Route, Switch, matchPath } from 'react-router-dom';
 // @ts-ignore
-import {Msg} from './widgets/Msg';
+import { NavItem, NavExpandable } from '@patternfly/react-core';
 // @ts-ignore
-import {PageNotFound} from './content/page-not-found/PageNotFound';
+import { Msg } from './widgets/Msg';
+// @ts-ignore
+import { PageNotFound } from './content/page-not-found/PageNotFound';
 // @ts-ignore
 import { ForbiddenPage } from './content/forbidden-page/ForbiddenPage';
-import {GroupPage} from './content/group-management-pages/GroupPage';
-import {AdminGroupPage} from './content/group-management-pages/AdminGroupPage';
+import { GroupPage } from './content/group-management-pages/GroupPage';
+import { AdminGroupPage } from './content/group-management-pages/AdminGroupPage';
 import { InvitationLandingPage } from './content/group-management-pages/InvitationLandingPage';
 import { CreateEnrollment } from './group-widgets/GroupEnrollment/CreateEnrollment';
 import { EnrollmentRequests } from './content/group-management-pages/EnrollmentRequests';
+import { LoaderProvider } from './group-widgets/LoaderContext';
 
 
 export interface ContentItem {
@@ -38,7 +40,7 @@ export interface ContentItem {
     groupId: string; // computed value
     itemId: string; // computed value
 };
-let customPages =[ 
+let customPages = [
     {
         path: "/groups/showgroups/:id",
         expandId: "groups",
@@ -113,59 +115,59 @@ function isChildOf(parent: Expansion, child: PageDef): boolean {
 function removeQueryParamsFromString(inputString) {
     // Check if the input string contains a query parameter
     if (inputString.includes('?')) {
-      // Split the string at the '?' character and take the part before it
-      const parts = inputString.split('?');
-      const newPath = parts[0];
-  
-      // Return the path without query parameters
-      return newPath;
+        // Split the string at the '?' character and take the part before it
+        const parts = inputString.split('?');
+        const newPath = parts[0];
+
+        // Return the path without query parameters
+        return newPath;
     }
-  
+
     // If there are no query parameters, return the original string
     return inputString;
-  }
-  
+}
+
 function createNavItems(activePage: PageDef, contentParam: ContentItem[], groupNum: number): React.ReactNode {
-    if (typeof content === 'undefined') return (<React.Fragment/>);
-        let current_path = window.location.hash.substring(1);
-        let customPage = {
-            path:"",
-            parentId:"",
-            expandId:"",
-            componentName:""
+    if (typeof content === 'undefined') return (<React.Fragment />);
+    let current_path = window.location.hash.substring(1);
+    let customPage = {
+        path: "",
+        parentId: "",
+        expandId: "",
+        componentName: ""
+    }
+    customPages.forEach(page => {
+
+        matchPath(removeQueryParamsFromString(current_path), {
+            path: page.path,
+            exact: true,
+            strict: false
+        }) && (customPage = page) && (activePage = { path: "", label: "", groupId: "", itemId: "" });
+    })
+
+    const links: React.ReactElement[] = contentParam.map((item: ContentItem) => {
+        const navLinkId = `nav-link-${item.id}`;
+        if (isExpansion(item)) {
+            return <NavExpandable id={navLinkId}
+                groupId={item.groupId}
+                key={item.groupId}
+                title={Msg.localize(item.label, item.labelParams)}
+                isExpanded={isChildOf(item, activePage) || customPage.expandId === item.id}
+            >
+                {createNavItems(activePage, item.content, groupNum + 1)}
+            </NavExpandable>
+        } else {
+            const page: PageDef = item as PageDef;
+            return <NavItem id={navLinkId}
+                groupId={item.groupId}
+                itemId={item.itemId}
+                key={item.itemId}
+                to={'#/' + page.path}
+                isActive={activePage.itemId === item.itemId || customPage.parentId === item.id}
+                type="button">
+                {Msg.localize(page.label, page.labelParams)}
+            </NavItem>
         }
-        customPages.forEach(page=>{
-
-            matchPath(removeQueryParamsFromString(current_path), {
-                path: page.path,
-                exact: true,
-                strict: false
-              })&&(customPage=page)&&(activePage={path:"",label:"",groupId:"",itemId:""});
-        })
-
-        const links: React.ReactElement[] = contentParam.map((item: ContentItem) => {
-            const navLinkId = `nav-link-${item.id}`;
-            if (isExpansion(item)) {
-                return <NavExpandable id={navLinkId}
-                                        groupId={item.groupId}
-                                        key={item.groupId}
-                                        title={Msg.localize(item.label, item.labelParams)}
-                                        isExpanded={isChildOf(item, activePage)||customPage.expandId===item.id}
-                                        >
-                            {createNavItems(activePage, item.content, groupNum + 1)}
-                        </NavExpandable>
-            } else {
-                const page: PageDef = item as PageDef;
-                return <NavItem id={navLinkId}
-                                groupId={item.groupId}
-                                itemId={item.itemId}
-                                key={item.itemId}
-                                to={'#/' + page.path}
-                                isActive={activePage.itemId === item.itemId||customPage.parentId===item.id}
-                                type="button">
-                            {Msg.localize(page.label, page.labelParams)}
-                        </NavItem>
-            }
     });
 
     return (<React.Fragment>{links}</React.Fragment>);
@@ -215,34 +217,38 @@ export function flattenContent(pageDefs: ContentItem[]): PageDef[] {
 }
 
 export function makeRoutes(): React.ReactNode {
-    if (typeof content === 'undefined') return (<span/>);
+    if (typeof content === 'undefined') return (<span />);
     const customComponents = {
-        GroupPage:GroupPage,
-        AdminGroupPage:AdminGroupPage,
-        CreateEnrollment:CreateEnrollment,
-        EnrollmentRequests:EnrollmentRequests,
-        InvitationLandingPage:InvitationLandingPage
+        GroupPage: GroupPage,
+        AdminGroupPage: AdminGroupPage,
+        CreateEnrollment: CreateEnrollment,
+        EnrollmentRequests: EnrollmentRequests,
+        InvitationLandingPage: InvitationLandingPage
     }
     const pageDefs: PageDef[] = flattenContent(content);
 
     const routes: React.ReactElement<Route>[] = pageDefs.map((page: PageDef) => {
         if (isModulePageDef(page)) {
-            const node: React.ReactNode = React.createElement(page.module[page.componentName], {'pageDef': page});
+            const node: React.ReactNode = React.createElement(page.module[page.componentName], { 'pageDef': page });
             return <Route key={page.itemId} path={'/' + page.path} exact render={() => node} />;
         } else {
             const pageDef: ComponentPageDef = page as ComponentPageDef;
-            return <Route key={page.itemId} path={'/' + page.path} exact component={pageDef.component}/>;
+            return <Route key={page.itemId} path={'/' + page.path} exact component={pageDef.component} />;
         }
     });
 
-    return (<Switch>
+    return (
+        <LoaderProvider>
+            <Switch>
                 <Route path="/groups/groupenrollments" render={(props) => <EnrollmentRequests {...props} manage={true} />} />
-                <Route path="/groups/mygroupenrollments" render={(props) => <EnrollmentRequests {...props}/>} />
+                <Route path="/groups/mygroupenrollments" render={(props) => <EnrollmentRequests {...props} />} />
                 {routes}
-                {customPages.map((item,index)=>{
-                    return <Route path={item.path} component={customComponents[item.componentName]}/>
+                {customPages.map((item, index) => {
+                    return <Route path={item.path} component={customComponents[item.componentName]} />
                 })}
-                <Route path="/forbidden" component={ForbiddenPage}/>
-                <Route component={PageNotFound}/>
-            </Switch>);
+                <Route path="/forbidden" component={ForbiddenPage} />
+                <Route component={PageNotFound} />
+            </Switch>
+        </LoaderProvider>
+    );
 }

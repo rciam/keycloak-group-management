@@ -6,9 +6,9 @@ import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/gr
 // @ts-ignore
 import { ConfirmationModal } from '../Modals';
 import { ValidateEmail, getError } from '../../js/utils.js'
-import { Loading } from '../LoadingModal';
 import { Msg } from '../../widgets/Msg';
 import { ContentAlert } from '../../content/ContentAlert';
+import { useLoader } from '../LoaderContext';
 
 export const GroupAdmins: FC<any> = (props) => {
 
@@ -22,7 +22,7 @@ export const GroupAdmins: FC<any> = (props) => {
   const [inviteAddress, setInviteAddress] = useState<string>("");
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [modalInfo, setModalInfo] = useState({});
-  const [loading, setLoading] = useState(false);
+  const { startLoader, stopLoader } = useLoader();
   const [groupIds, setGroupIds] = useState([]);
   const [groupAdminIds, setGroupAdminIds] = useState<any>([]);
   const [initialRender, setInitialRender] = useState(true);
@@ -75,10 +75,10 @@ export const GroupAdmins: FC<any> = (props) => {
 
 
   const makeAdmin = (userId) => {
-    setLoading(true);
+    startLoader();
     groupsService!.doPost<any>("/group-admin/group/" + props.groupId + "/admin",{}, {params: {"userId":userId}})
       .then((response: HttpResponse<any>) => {
-        setLoading(false);
+        stopLoader();
         if (response.status === 200 || response.status === 204) {
           props.fetchGroupConfiguration();
           ContentAlert.success(Msg.localize('addAdminSuccess'));
@@ -90,7 +90,7 @@ export const GroupAdmins: FC<any> = (props) => {
   }
 
   const removeAdmin = (userId) => {
-    setLoading(true);
+    startLoader();
     groupsService!.doDelete<any>("/group-admin/group/" + props.groupId + "/admin", {params: {"userId":userId}})
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
@@ -100,15 +100,15 @@ export const GroupAdmins: FC<any> = (props) => {
         else{
           ContentAlert.danger(Msg.localize('removeAdminError',[getError(response)]))
         }
-        setLoading(false);
+        stopLoader();
       })
   }
 
   const sendInvitation = (email) => {
-    setLoading(true);
+    startLoader();
     groupsService!.doPost<any>("/group-admin/group/" + props.groupId + "/admin/invite", { "email": email })
       .then((response: HttpResponse<any>) => {
-        setLoading(false);
+        stopLoader();
         if (response.status === 200 || response.status === 204) {
           ContentAlert.success(Msg.localize('adminInvitationSuccess'))
           props.fetchGroupConfiguration();
@@ -163,7 +163,6 @@ export const GroupAdmins: FC<any> = (props) => {
 
   return (
     <React.Fragment>
-      <Loading active={loading} />
       <ConfirmationModal modalInfo={modalInfo} />
       <DataList aria-label="Group Member Datalist" isCompact wrapModifier={"breakWord"}>
         <DataListItem aria-labelledby="compact-item1">

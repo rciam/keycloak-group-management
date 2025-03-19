@@ -41,10 +41,13 @@ export const SSHKeysPage: FC<SSHKeysPageProps> = () => {
     const [key, setKey] = useState(0);
     const refresh = () => setKey(key + 1);
     const [deleteSSHKeyIndex, setDeleteSSHKeyIndex] = useState(-1);
+    const [loading, setLoading] = useState(false);  
 
     let getSSHKeys = () => {
+        setLoading(true);
         groupsService!.doGet<Response>("/ssh-public-keys", { target: "sshKeys" })
             .then((response: HttpResponse<Response>) => {
+                setLoading(false);
                 if (response.status === 200 && response?.data) {
                     setSshKeys(response.data);
                 }
@@ -59,10 +62,13 @@ export const SSHKeysPage: FC<SSHKeysPageProps> = () => {
     }
 
     const saveSSHKeys = async (sshKeys: string[], type: string) => {
+        setLoading(true);
         try {
             await updateSHHKeys(sshKeys);
+            setLoading(false);
             ContentAlert.success(Msg.localize(type === "add" ? "sshKeyAddSuccess" : "sshKeyDeleteSuccess"));
         } catch (error) {
+            setLoading(false);
             console.log(error);
             ContentAlert.danger(Msg.localize(type === "add" ? "sshKeyAddError" : "sshKeyAddSuccess"));
         }
@@ -70,8 +76,10 @@ export const SSHKeysPage: FC<SSHKeysPageProps> = () => {
 
 
     let updateSHHKeys = (sshKeys: string[]) => {
+        setLoading(true);
         groupsService!.doPut<Response>("/ssh-public-keys", sshKeys, { target: "sshKeys" })
             .then((response: HttpResponse<Response>) => {
+                setLoading(false);
                 refresh();
             });
     }
@@ -121,39 +129,43 @@ export const SSHKeysPage: FC<SSHKeysPageProps> = () => {
                     aria-label={Msg.localize("signedInDevices")}
                 >
                     <DataListItem className="test-classname">
-                        {sshKeys.map((key, index) => (
-                            <DataListItemRow key={key}>
-                                <DataListContent
-                                    aria-label="device-sessions-content"
-                                    className="pf-u-flex-grow-1"
-                                >
-                                    <Grid hasGutter>
-                                        <GridItem span={1}>
-                                            <KeyIcon />
-                                            <Badge isRead>SSH</Badge>
-                                        </GridItem>
-                                        <GridItem sm={8} md={9} span={10}>
-                                            <span className="pf-u-mr-md session-title">{key}</span>
-                                        </GridItem>
-                                        <GridItem
-                                            className="pf-u-text-align-right gm_padding-right"
-                                            sm={3}
-                                            md={2}
-                                            span={1}
-                                        >
-                                            <Button
-                                                variant="danger"
-                                                onClick={() => {
-                                                    setDeleteSSHKeyIndex(index);
-                                                }}
+                        {loading ?
+                            <div tabIndex={0} id="modal-no-header-description" className="gm_loader-modal-container">
+                                <Spinner isSVG diameter="100px" aria-label="Contents of the custom size example" />
+                            </div>
+                            : sshKeys.map((key, index) => (
+                                <DataListItemRow key={key}>
+                                    <DataListContent
+                                        aria-label="device-sessions-content"
+                                        className="pf-u-flex-grow-1"
+                                    >
+                                        <Grid hasGutter>
+                                            <GridItem span={1}>
+                                                <KeyIcon />
+                                                <Badge isRead>SSH</Badge>
+                                            </GridItem>
+                                            <GridItem sm={8} md={9} span={10}>
+                                                <span className="pf-u-mr-md session-title">{key}</span>
+                                            </GridItem>
+                                            <GridItem
+                                                className="pf-u-text-align-right gm_padding-right"
+                                                sm={3}
+                                                md={2}
+                                                span={1}
                                             >
-                                                Delete
-                                            </Button>
-                                        </GridItem>
-                                    </Grid>
-                                </DataListContent>
-                            </DataListItemRow>
-                        ))}
+                                                <Button
+                                                    variant="danger"
+                                                    onClick={() => {
+                                                        setDeleteSSHKeyIndex(index);
+                                                    }}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </GridItem>
+                                        </Grid>
+                                    </DataListContent>
+                                </DataListItemRow>
+                            ))}
                     </DataListItem>
                 </DataList>
             </ContentPage>

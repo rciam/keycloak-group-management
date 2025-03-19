@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { FC, useState, useEffect } from 'react';
-import { DataList, DataListItem, DataListItemCells, DataListItemRow, DataListCell, Button, Tooltip, ModalVariant, DataListAction, Pagination, Badge, Modal, Checkbox, Form, FormGroup, Popover, TextArea } from '@patternfly/react-core';
+import { DataList, DataListItem, DataListItemCells, DataListItemRow, DataListCell, Button, Tooltip, ModalVariant, DataListAction, Pagination, Badge, Modal, Checkbox, Form, FormGroup, Popover, TextArea, Spinner } from '@patternfly/react-core';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
 // @ts-ignore
@@ -11,12 +11,12 @@ import { AddMemberModal } from './AddMemberModal';
 import { Msg } from '../../widgets/Msg';
 import { DatalistFilterSelect } from '../DatalistFilterSelect';
 import { HelpIcon, PencilAltIcon, TimesIcon, LockIcon, LockOpenIcon, OutlinedClockIcon, ExclamationTriangleIcon, LongArrowAltUpIcon, LongArrowAltDownIcon, AngleDownIcon } from '@patternfly/react-icons';
-import { Loading } from '../LoadingModal';
 import { Link } from 'react-router-dom';
 import { EditMembershipModal } from './EditMembershipModal';
 import { dateParse, addDays, isFirstDateBeforeSecond } from '../../widgets/Date';
 import { ContentAlert } from '../../content/ContentAlert';
 import { getError } from '../../js/utils';
+import { useLoader } from '../LoaderContext';
 
 
 interface FederatedIdentity {
@@ -52,8 +52,7 @@ const UserActionModal: FC<any> = (props) => {
   let groupsService = new GroupsServiceClient();
   const [user, setUser] = useState<any>({});
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-
+  const { startLoader, stopLoader } = useLoader();
 
   useEffect(() => {
     setUser(props.user);
@@ -61,34 +60,36 @@ const UserActionModal: FC<any> = (props) => {
   }, [props.user])
 
   let suspendGroupMember = () => {
-    setLoading(true);
+    startLoader();
     groupsService!.doPost<any>("/group-admin/group/" + user.group.id + "/member/" + user.id + "/suspend" + (justification ? "?justification=" + justification : ""), {})
       .then((response: HttpResponse<any>) => {
+        close();
+        stopLoader();
         if (response.status === 200 || response.status === 204) {
           props.fetchGroupMembers();
           ContentAlert.success(Msg.localize('suspendMembershipSuccess'));
         }
         else {
-          ContentAlert.success(Msg.localize('suspendMembershipError'),[getError(response)]);
+          ContentAlert.success(Msg.localize('suspendMembershipError'), [getError(response)]);
         }
-        setLoading(false);
-        close();
+
       })
   }
 
   let activateGroupMember = () => {
-    setLoading(true);
+    startLoader();
     groupsService!.doPost<any>("/group-admin/group/" + user.group.id + "/member/" + user.id + "/activate" + (justification ? "?justification=" + justification : ""), {})
       .then((response: HttpResponse<any>) => {
+        close();
+        stopLoader();
         if (response.status === 200 || response.status === 204) {
           props.fetchGroupMembers();
           ContentAlert.success(Msg.localize('activateMembershipSuccess'));
         }
         else {
-          ContentAlert.success(Msg.localize('activateMembershipError'),[getError(response)]);
+          props.setLoading(false);
+          ContentAlert.success(Msg.localize('activateMembershipError'), [getError(response)]);
         }
-        setLoading(false);
-        close();
       })
   }
 
@@ -122,7 +123,6 @@ const UserActionModal: FC<any> = (props) => {
         ]}
       >
         <div>
-          <Loading active={loading} />
           <p>{user.status === "ENABLED" ? Msg.localize('adminGroupMemberSuspendConfirmation') : Msg.localize('adminGroupMemberRevokeSuspendConfirmation')}</p>
           <Form>
             <FormGroup
@@ -241,7 +241,8 @@ export const GroupMembers: FC<any> = (props) => {
     const searchParams = new URLSearchParams(location.hash.split('?')[1]);
     let preselectedMembership = searchParams.get('membership');
     if (preselectedMembership) {
-      memberships.forEach((membership) => {
+      memberships.forEach((membership) =>
+         {
         if (membership.id = preselectedMembership) {
           setEditMembership(membership)
         }
@@ -256,11 +257,13 @@ export const GroupMembers: FC<any> = (props) => {
   }
 
   let fetchGroupMembers = (searchString: string | undefined = undefined) => {
+    setLoading(true);
     groupsService!.doGet<any>("/group-admin/group/" + props.groupId + "/members?first=" + (perPage * (page - 1)) + "&max=" + perPage + (searchString ? "&search=" + searchString : "") + (orderBy !== "default" ? "&order=" + orderBy : "") + "&asc=" + asc, {
       params: { ...(statusSelection ? { status: statusSelection } : {}), ...(roleSelection ? { role: roleSelection } : {}), ...(!directMembers ? { direct: 'false' } : {}) }
     })
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 && response.data) {
+          setLoading(false);
           setTotalItems(response.data.count);
           setGroupMembers(response.data.results);
           preselectedMembershipHandler(response.data.results);
@@ -270,14 +273,16 @@ export const GroupMembers: FC<any> = (props) => {
 
 
   let deleteGroupMember = (memberId, groupId) => {
+    setLoading(true)
     groupsService!.doDelete<any>("/group-admin/group/" + groupId + "/member/" + memberId)
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
           ContentAlert.success(Msg.localize('deleteMemberSuccess'));
           fetchGroupMembers();
         }
-        else{
-          ContentAlert.danger(Msg.localize('deleteMemberError'),[getError(response)]);
+        else {
+          setLoading(false);
+          ContentAlert.danger(Msg.localize('deleteMemberError'), [getError(response)]);
         }
       })
   }
@@ -290,15 +295,17 @@ export const GroupMembers: FC<any> = (props) => {
     groupsService!.doPut<any>("/group-admin/group/" + props.groupId + "/member/" + membership?.id, { ...membership })
       .then((response: HttpResponse<any>) => {
         fetchGroupMembers();
-        setLoading(false);
         close();
         if (response.status === 200 || response.status === 204) {
-          ContentAlert.success(Msg.localize('activateMembershipSuccess'));          
+          ContentAlert.success(Msg.localize('activateMembershipSuccess'));
         }
         else {
-          ContentAlert.danger(Msg.localize('activateMembershipError'),[getError(response)]);
+          setLoading(false);
+
+          ContentAlert.danger(Msg.localize('activateMembershipError'), [getError(response)]);
         }
       }).catch(err => {
+        setLoading(false);
         console.log(err);
       })
   }
@@ -320,7 +327,6 @@ export const GroupMembers: FC<any> = (props) => {
 
   return (
     <React.Fragment>
-      <Loading active={loading} />
       <ConfirmationModal modalInfo={modalInfo} />
       <UserActionModal setAlert={setAlert} user={selectedUser} setUser={setSelectedUser} groupId={props.groupId} fetchGroupMembers={fetchGroupMembers} />
       <EditMembershipModal membership={editMembership} setMembership={setEditMembership} fetchGroupMembers={fetchGroupMembers} />
@@ -424,236 +430,240 @@ export const GroupMembers: FC<any> = (props) => {
             ><div className="gm_cell-placeholder"></div></DataListAction>
           </DataListItemRow>
         </DataListItem>
-        {groupMembers.length > 0 ? groupMembers.map((member, index) => {
-          let notificationWarningEffective = member.effectiveMembershipExpiresAt && member?.group?.attributes['expiration-notification-period'][0] && isFirstDateBeforeSecond(
-            dateParse(member.effectiveMembershipExpiresAt),
-            addDays(new Date(new Date().setHours(0, 0, 0, 0)), parseInt(member?.group?.attributes['expiration-notification-period'][0])),
-            'warning'
-          );
+        {loading ?
+          <div tabIndex={0} id="modal-no-header-description" className="gm_loader-modal-container">
+            <Spinner isSVG diameter="100px" aria-label="Contents of the custom size example" />
+          </div> :
+          groupMembers.length > 0 ? groupMembers.map((member, index) => {
+            let notificationWarningEffective = member.effectiveMembershipExpiresAt && member?.group?.attributes['expiration-notification-period'][0] && isFirstDateBeforeSecond(
+              dateParse(member.effectiveMembershipExpiresAt),
+              addDays(new Date(new Date().setHours(0, 0, 0, 0)), parseInt(member?.group?.attributes['expiration-notification-period'][0])),
+              'warning'
+            );
 
-          let notificationWarningDirect = member.membershipExpiresAt && member?.group?.attributes['expiration-notification-period'][0] && isFirstDateBeforeSecond(
-            dateParse(member.membershipExpiresAt),
-            addDays(new Date(new Date().setHours(0, 0, 0, 0)), parseInt(member?.group?.attributes['expiration-notification-period'][0])),
-            'warning'
-          );
+            let notificationWarningDirect = member.membershipExpiresAt && member?.group?.attributes['expiration-notification-period'][0] && isFirstDateBeforeSecond(
+              dateParse(member.membershipExpiresAt),
+              addDays(new Date(new Date().setHours(0, 0, 0, 0)), parseInt(member?.group?.attributes['expiration-notification-period'][0])),
+              'warning'
+            );
 
-          return <DataListItem aria-labelledby={"member-" + index}>
-            <DataListItemRow>
-              <DataListItemCells
-                dataListCells={[
-                  <DataListCell width={3} key="primary content">
-                    {member.user?.attributes?.voPersonID || member.user.username}
-                  </DataListCell>,
-                  <DataListCell width={3} key="secondary content1">
-                    <span className="gm_fullname_datalist pf-c-select__menu-item-main">{member.user.firstName && member.user.lastName ? member.user.firstName + " " + member.user.lastName : Msg.localize('notAvailable')}</span>
-                    <span className="gm_email_datalist pf-c-select__menu-item-description">{member.user.email}</span>
-                  </DataListCell>,
-                  <DataListCell width={3} key="secondary content2">
-                    {member.groupRoles.map((role, index) => {
-                      return <Badge key={index} className="gm_role_badge" isRead>{role}</Badge>
-                    })}
-                  </DataListCell>,
-                  <DataListCell width={3}>
-                    {member.validFrom}
-                  </DataListCell>,
-                  <DataListCell width={3}>
-                    {
-                      member.effectiveGroupId &&
+            return <DataListItem aria-labelledby={"member-" + index}>
+              <DataListItemRow>
+                <DataListItemCells
+                  dataListCells={[
+                    <DataListCell width={3} key="primary content">
+                      {member.user?.attributes?.voPersonID || member.user.username}
+                    </DataListCell>,
+                    <DataListCell width={3} key="secondary content1">
+                      <span className="gm_fullname_datalist pf-c-select__menu-item-main">{member.user.firstName && member.user.lastName ? member.user.firstName + " " + member.user.lastName : Msg.localize('notAvailable')}</span>
+                      <span className="gm_email_datalist pf-c-select__menu-item-description">{member.user.email}</span>
+                    </DataListCell>,
+                    <DataListCell width={3} key="secondary content2">
+                      {member.groupRoles.map((role, index) => {
+                        return <Badge key={index} className="gm_role_badge" isRead>{role}</Badge>
+                      })}
+                    </DataListCell>,
+                    <DataListCell width={3}>
+                      {member.validFrom}
+                    </DataListCell>,
+                    <DataListCell width={3}>
+                      {
+                        member.effectiveGroupId &&
+                        <div>
+                          <strong>Effective: </strong>
+                          {notificationWarningEffective ?
+                            <Popover
+                              bodyContent={hide =>
+                                <div>
+                                  <Msg msgKey='membershipExpirationEffectiveNotification' />
+                                  <Button className="gm_popover-expiration-button" isSmall onClick={() => {
+                                    if (member.effectiveGroupId === groupId) {
+                                      if (member.group.id !== groupId) {
+                                        const searchParams = new URLSearchParams(location.hash.split('?')[1]);
+                                        searchParams.set("membership", member?.id || "");
+                                        props.history.push({
+                                          search: searchParams.toString() ? `?${searchParams.toString()}` : '',
+                                        });
+                                        setDirectMembers(true);
+                                        setSearchString(member.user.username);
+                                      }
+                                      else {
+                                        setEditMembership(member);
+                                      }
+                                      hide();
+                                    }
+                                    else {
+                                      props.history.push({ pathname: "/groups/admingroups/" + member.effectiveGroupId, search: '?tab=members&memberId=' + member.user.username + '&membership=' + member.id })
+                                    }
+                                  }}>Extend</Button>
+                                </div>
+                              }
+                            >
+                              <span className="gm_effective-expiration-popover-trigger">
+                                <div style={{ display: 'inline-block' }} className={'gm_warning-text'}>
+                                  {member.effectiveMembershipExpiresAt || <Msg msgKey='Never' />}
+                                </div>
+                                <div className="gm_effective-helper-warning">
+                                  <ExclamationTriangleIcon />
+                                </div>
+                              </span>
+                            </Popover>
+                            : member.effectiveGroupId === groupId ?
+                              member.effectiveMembershipExpiresAt
+                              :
+                              <a onClick={() => { props.history.push({ pathname: '/groups/admingroups/' + member.effectiveGroupId, search: '?tab=members&memberId=' + member.user.username }) }}>{member.effectiveMembershipExpiresAt}</a>
+                          }
+                        </div>
+                      }
                       <div>
-                        <strong>Effective: </strong>
-                        {notificationWarningEffective ?
+                        <strong>Direct: </strong>
+                        {notificationWarningDirect ?
                           <Popover
                             bodyContent={hide =>
                               <div>
-                                <Msg msgKey='membershipExpirationEffectiveNotification' />
+                                <Msg msgKey='membershipExpirationNotification' />
                                 <Button className="gm_popover-expiration-button" isSmall onClick={() => {
-                                  if (member.effectiveGroupId === groupId) {
-                                    if (member.group.id !== groupId) {
-                                      const searchParams = new URLSearchParams(location.hash.split('?')[1]);
-                                      searchParams.set("membership", member?.id || "");
-                                      props.history.push({
-                                        search: searchParams.toString() ? `?${searchParams.toString()}` : '',
-                                      });
-                                      setDirectMembers(true);
-                                      setSearchString(member.user.username);
-                                    }
-                                    else {
-                                      setEditMembership(member);
-                                    }
-                                    hide();
-                                  }
-                                  else {
-                                    props.history.push({ pathname: "/groups/admingroups/" + member.effectiveGroupId, search: '?tab=members&memberId=' + member.user.username + '&membership=' + member.id })
-                                  }
+                                  setEditMembership(member);
+                                  hide();
                                 }}>Extend</Button>
                               </div>
                             }
                           >
                             <span className="gm_effective-expiration-popover-trigger">
                               <div style={{ display: 'inline-block' }} className={'gm_warning-text'}>
-                                {member.effectiveMembershipExpiresAt || <Msg msgKey='Never' />}
+                                {member.membershipExpiresAt || <Msg msgKey='Never' />}
                               </div>
                               <div className="gm_effective-helper-warning">
                                 <ExclamationTriangleIcon />
                               </div>
                             </span>
                           </Popover>
-                          : member.effectiveGroupId === groupId ?
-                            member.effectiveMembershipExpiresAt
-                            :
-                            <a onClick={() => { props.history.push({ pathname: '/groups/admingroups/' + member.effectiveGroupId, search: '?tab=members&memberId=' + member.user.username }) }}>{member.effectiveMembershipExpiresAt}</a>
-                        }
+                          : member.membershipExpiresAt ? <>{member.membershipExpiresAt}</>
+                            : <Msg msgKey='Never' />}
                       </div>
-                    }
-                    <div>
-                      <strong>Direct: </strong>
-                      {notificationWarningDirect ?
-                        <Popover
-                          bodyContent={hide =>
+                    </DataListCell>,
+                    <DataListCell width={2}>
+                      <Tooltip
+                        content={
+                          <div>
+                            {member.status === 'ENABLED' ? Msg.localize('adminGroupMemberUserActiveTooltip') : member.status === "SUSPENDED" ? Msg.localize('adminGroupMemberUserSuspendedTooltip') : member.status === "PENDING" ? Msg.localize('adminGroupMemberUserPendingTooltip') : ""}
+                          </div>
+                        }
+                      >
+                        <div className="gm_user-status-container">
+                          <div className={member.status === 'ENABLED' ? "gm_icon gm_icon-active-user" : member.status === "SUSPENDED" ? "gm_icon gm_icon-suspended-user" : member.status === "PENDING" ? "gm_icon gm_icon-pending-user" : ""}></div>
+                        </div>
+                      </Tooltip>
+                    </DataListCell>,
+                    ...(!directMembers ? [
+                      <DataListCell width={3} key="secondary content5">
+                        <Link to={{ pathname: "/groups/admingroups/" + member.group.id, search: "?tab=members" }}>
+                          {member.group.path}
+                        </Link>
+                      </DataListCell>,
+                      <DataListCell width={2} key="secondary content6">
+                        <Tooltip content={<div>{member.direct ? Msg.localize('adminGroupIsDirect') : Msg.localize('adminGroupIsNotDirect')}</div>}>
+                          <Checkbox id="disabled-check-1" className="gm_direct-checkbox" checked={member.direct ? true : false} isDisabled />
+                        </Tooltip>
+                      </DataListCell>
+                    ] : [])
+                  ]}
+                />
+                <DataListAction
+                  className="gm_cell-center"
+                  aria-labelledby="check-action-item1 check-action-action1"
+                  id="check-action-action1"
+                  aria-label="Actions"
+                  isPlainButtonAction
+                >
+                  <div className="gm_actions_container">
+
+                    {props.isGroupAdmin &&
+                      <React.Fragment>
+
+                        <Tooltip
+                          content={
                             <div>
-                              <Msg msgKey='membershipExpirationNotification' />
-                              <Button className="gm_popover-expiration-button" isSmall onClick={() => {
-                                setEditMembership(member);
-                                hide();
-                              }}>Extend</Button>
+                              {member.user.id === props.user.userId ? Msg.localize('leaveGroup') : Msg.localize('adminGroupMemberRemove')}
                             </div>
                           }
                         >
-                          <span className="gm_effective-expiration-popover-trigger">
-                            <div style={{ display: 'inline-block' }} className={'gm_warning-text'}>
-                              {member.membershipExpiresAt || <Msg msgKey='Never' />}
+                          <Button isSmall variant="secondary" ouiaId="DangerSecondary" isDanger className="gm_small_icon_button" onClick={() => {
+                            setModalInfo({
+                              title: (Msg.localize('Confirmation')),
+                              accept_message: (Msg.localize('YES')),
+                              cancel_message: (Msg.localize('NO')),
+                              message: (Msg.localize('adminGroupMemberRemoveConfirmation')),
+                              accept: function () {
+                                deleteGroupMember(member.id, member.group.id);
+                                setModalInfo({})
+                              },
+                              cancel: function () {
+                                setModalInfo({})
+                              }
+                            });
+                          }}>
+                            <TimesIcon />
+                          </Button>
+                        </Tooltip>
+                        <Tooltip
+                          content={
+                            <div>
+                              {member.status === "SUSPENDED" ? Msg.localize('editMembershipDisabled') : Msg.localize('editMembership')}
                             </div>
-                            <div className="gm_effective-helper-warning">
-                              <ExclamationTriangleIcon />
-                            </div>
-                          </span>
-                        </Popover>
-                        : member.membershipExpiresAt ? <>{member.membershipExpiresAt}</>
-                          : <Msg msgKey='Never' />}
-                    </div>
-                  </DataListCell>,
-                  <DataListCell width={2}>
-                    <Tooltip
-                      content={
-                        <div>
-                          {member.status === 'ENABLED' ? Msg.localize('adminGroupMemberUserActiveTooltip') : member.status === "SUSPENDED" ? Msg.localize('adminGroupMemberUserSuspendedTooltip') : member.status === "PENDING" ? Msg.localize('adminGroupMemberUserPendingTooltip') : ""}
-                        </div>
-                      }
-                    >
-                      <div className="gm_user-status-container">
-                        <div className={member.status === 'ENABLED' ? "gm_icon gm_icon-active-user" : member.status === "SUSPENDED" ? "gm_icon gm_icon-suspended-user" : member.status === "PENDING" ? "gm_icon gm_icon-pending-user" : ""}></div>
-                      </div>
-                    </Tooltip>
-                  </DataListCell>,
-                  ...(!directMembers ? [
-                    <DataListCell width={3} key="secondary content5">
-                      <Link to={{ pathname: "/groups/admingroups/" + member.group.id, search: "?tab=members" }}>
-                        {member.group.path}
-                      </Link>
-                    </DataListCell>,
-                    <DataListCell width={2} key="secondary content6">
-                      <Tooltip content={<div>{member.direct ? Msg.localize('adminGroupIsDirect') : Msg.localize('adminGroupIsNotDirect')}</div>}>
-                        <Checkbox id="disabled-check-1" className="gm_direct-checkbox" checked={member.direct ? true : false} isDisabled />
-                      </Tooltip>
-                    </DataListCell>
-                  ] : [])
-                ]}
-              />
-              <DataListAction
-                className="gm_cell-center"
-                aria-labelledby="check-action-item1 check-action-action1"
-                id="check-action-action1"
-                aria-label="Actions"
-                isPlainButtonAction
-              >
-                <div className="gm_actions_container">
-
-                  {props.isGroupAdmin &&
-                    <React.Fragment>
-
+                          }
+                        >
+                          <div>
+                            <Button isSmall variant="tertiary" isDisabled={member.status === "SUSPENDED"} className="gm_small_icon_button" onClick={() => {
+                              if (member.direct) { setEditMembership(member); } else {
+                                setEditMembership(member);
+                              }
+                            }}>
+                              <PencilAltIcon />
+                            </Button>
+                          </div>
+                        </Tooltip>
+                      </React.Fragment>
+                    }
+                    {props.isGroupAdmin ?
                       <Tooltip
                         content={
                           <div>
-                            {member.user.id === props.user.userId ? Msg.localize('leaveGroup') : Msg.localize('adminGroupMemberRemove')}
+                            {member.status === 'ENABLED' ? Msg.localize('adminGroupMemberSuspendTooltip') : member.status === "SUSPENDED" ? Msg.localize('adminGroupMemberActivateTooltip') : Msg.localize("adminGroupMemberActivatePendingTooltip")}
                           </div>
                         }
                       >
-                        <Button isSmall variant="secondary" ouiaId="DangerSecondary" isDanger className="gm_small_icon_button" onClick={() => {
-                          setModalInfo({
-                            title: (Msg.localize('Confirmation')),
-                            accept_message: (Msg.localize('YES')),
-                            cancel_message: (Msg.localize('NO')),
-                            message: (Msg.localize('adminGroupMemberRemoveConfirmation')),
-                            accept: function () {
-                              deleteGroupMember(member.id, member.group.id);
-                              setModalInfo({})
-                            },
-                            cancel: function () {
-                              setModalInfo({})
-                            }
-                          });
+                        <Button isSmall variant={member.status === "ENABLED" ? "danger" : "warning"} className={"gm_small_icon_button"} onClick={() => {
+                          if (member.status === "PENDING") {
+                            setModalInfo({
+                              title: (Msg.localize('Confirmation')),
+                              accept_message: (Msg.localize('YES')),
+                              cancel_message: (Msg.localize('NO')),
+                              message: (Msg.localize("Do you want to activate this membership?")),
+                              accept: function () {
+                                activatePendingMembership(member);
+                                setModalInfo({})
+                              },
+                              cancel: function () {
+                                setModalInfo({})
+                              }
+                            });
+                          }
+                          else {
+                            setSelectedUser(member);
+                          }
                         }}>
-                          <TimesIcon />
+                          {member.status === "ENABLED" ? <LockIcon /> : member.status === 'SUSPENDED' ? <LockOpenIcon /> : <OutlinedClockIcon />}
                         </Button>
                       </Tooltip>
-                      <Tooltip
-                        content={
-                          <div>
-                            {member.status === "SUSPENDED" ? Msg.localize('editMembershipDisabled') : Msg.localize('editMembership')}
-                          </div>
-                        }
-                      >
-                        <div>
-                          <Button isSmall variant="tertiary" isDisabled={member.status === "SUSPENDED"} className="gm_small_icon_button" onClick={() => {
-                            if (member.direct) { setEditMembership(member); } else {
-                              setEditMembership(member);
-                            }
-                          }}>
-                            <PencilAltIcon />
-                          </Button>
-                        </div>
-                      </Tooltip>
-                    </React.Fragment>
-                  }
-                  {props.isGroupAdmin ?
-                    <Tooltip
-                      content={
-                        <div>
-                          {member.status === 'ENABLED' ? Msg.localize('adminGroupMemberSuspendTooltip') : member.status === "SUSPENDED" ? Msg.localize('adminGroupMemberActivateTooltip') : Msg.localize("adminGroupMemberActivatePendingTooltip")}
-                        </div>
-                      }
-                    >
-                      <Button isSmall variant={member.status === "ENABLED" ? "danger" : "warning"} className={"gm_small_icon_button"} onClick={() => {
-                        if (member.status === "PENDING") {
-                          setModalInfo({
-                            title: (Msg.localize('Confirmation')),
-                            accept_message: (Msg.localize('YES')),
-                            cancel_message: (Msg.localize('NO')),
-                            message: (Msg.localize("Do you want to activate this membership?")),
-                            accept: function () {
-                              activatePendingMembership(member);
-                              setModalInfo({})
-                            },
-                            cancel: function () {
-                              setModalInfo({})
-                            }
-                          });
-                        }
-                        else {
-                          setSelectedUser(member);
-                        }
-                      }}>
-                        {member.status === "ENABLED" ? <LockIcon /> : member.status === 'SUSPENDED' ? <LockOpenIcon /> : <OutlinedClockIcon />}
-                      </Button>
-                    </Tooltip>
-                    : <div className="gm_placeholder_membership_action"></div>
+                      : <div className="gm_placeholder_membership_action"></div>
 
-                  }
-                </div>
-              </DataListAction>
-            </DataListItemRow>
-          </DataListItem>
-        }) : noMembers()}
+                    }
+                  </div>
+                </DataListAction>
+              </DataListItemRow>
+            </DataListItem>
+          }) : noMembers()}
       </DataList>
       <Pagination
         itemCount={totalItems}

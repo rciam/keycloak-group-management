@@ -11,11 +11,10 @@ import { HelpIcon, ExclamationTriangleIcon, InfoCircleIcon } from '@patternfly/r
 import { dateParse, addDays, isFirstDateBeforeSecond } from '../../widgets/Date';
 import { Link } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
-import { Loading } from '../../group-widgets/LoadingModal';
 import { ConfirmationModal } from '../../group-widgets/Modals';
 import { ContentAlert } from '../ContentAlert';
 import { getError } from '../../js/utils.js'
-
+import { useLoader } from '../../group-widgets/LoaderContext';
 
 export interface GroupsPageProps {
   history: any;
@@ -68,9 +67,8 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
   const [activeTabKey, setActiveTabKey] = React.useState<string | number>(0);
   const [expirationWarning, setExpirationWarning] = useState(false);
   const [effectiveGroupPath, setEffectiveGroupPath] = useState("");
-  const [loading, setLoading] = useState(false);
   const [modalInfo, setModalInfo] = useState({});
-
+  const { startLoader, stopLoader } = useLoader();
 
   let groupsService = new GroupsServiceClient();
   useEffect(() => {
@@ -105,8 +103,8 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
 
 
   const leaveGroup = () => {
-    setLoading(true);
-    groupsService!.doDelete<any>("/user/group/" + groupId + "/member")
+    startLoader();
+      groupsService!.doDelete<any>("/user/group/" + groupId + "/member")
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
           props.history.push('/groups/showgroups');
@@ -114,7 +112,7 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
         else {
           ContentAlert.danger(Msg.localize('leaveGroupError', [getError(response)]))
         }
-        setLoading(false);
+        stopLoader();
       });
   }
 
@@ -128,8 +126,10 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
       })
   }
   let fetchGroups = () => {
+    startLoader();
     groupsService!.doGet<GroupMembership>("/user/group/" + groupId + "/member")
       .then((response: HttpResponse<GroupMembership>) => {
+        stopLoader();
         if (response.status === 200 && response.data) {
           setGroupMembership(response.data);
         }
@@ -152,7 +152,6 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
           })}
         </Breadcrumb>
         <ConfirmationModal modalInfo={modalInfo} />
-        <Loading active={loading} />
         <ContentPage title={groupMembership?.group?.name || ""}>
           <p className="gm_group_desc">
             {(groupMembership?.group?.attributes?.description && groupMembership?.group?.attributes?.description[0]) || Msg.localize('noDescription')}

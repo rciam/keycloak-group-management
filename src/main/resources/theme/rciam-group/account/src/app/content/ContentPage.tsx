@@ -15,17 +15,17 @@
  */
 
 import * as React from 'react';
-import {Button, Grid, GridItem, Text, Title, Tooltip, Card, CardBody, Stack, StackItem, PageSection, TextContent, PageSectionVariants, SplitItem, Split} from '@patternfly/react-core';
-import {RedoIcon, SyncAltIcon} from '@patternfly/react-icons';
-
-import {Msg} from '../widgets/Msg';
-import {ContentAlert} from './ContentAlert';
+import { Button, Grid, GridItem, Text, Title, Tooltip, Card, CardBody, Stack, StackItem, PageSection, TextContent, PageSectionVariants, SplitItem, Split } from '@patternfly/react-core';
+import { RedoIcon, SyncAltIcon } from '@patternfly/react-icons';
+import { LoaderProvider } from '../group-widgets/LoaderContext';
+import { Msg } from '../widgets/Msg';
+import { ContentAlert } from './ContentAlert';
 
 interface ContentPageProps {
-    title?: string; // Literal title or key into message bundle
-    introMessage?: string; // Literal message or key into message bundle
-    onRefresh?: () => void;
-    children: React.ReactNode;
+  title?: string; // Literal title or key into message bundle
+  introMessage?: string; // Literal message or key into message bundle
+  onRefresh?: () => void;
+  children: React.ReactNode;
 }
 
 /**
@@ -33,18 +33,18 @@ interface ContentPageProps {
  */
 export class ContentPage extends React.Component<ContentPageProps> {
 
-    public constructor(props: ContentPageProps) {
-        super(props);
-    }
+  public constructor(props: ContentPageProps) {
+    super(props);
+  }
 
-    public render(): React.ReactNode {
-        return (
-            <React.Fragment>
-            <ContentAlert />
-            <PageSection variant={PageSectionVariants.light} className="pf-u-pb-xs">
-              <Split>
-              {this.props.title&&
-                <SplitItem isFilled>
+  public render(): React.ReactNode {
+    return (
+      <React.Fragment>
+        <ContentAlert />
+        <PageSection variant={PageSectionVariants.light} className="pf-u-pb-xs">
+          <Split>
+            {this.props.title &&
+              <SplitItem isFilled>
                 <TextContent>
                   <Title headingLevel="h1" size="2xl" className="pf-u-mb-xl">
                     <Msg msgKey={this.props.title} />
@@ -56,26 +56,26 @@ export class ContentPage extends React.Component<ContentPageProps> {
                   )}
                 </TextContent>
               </SplitItem>
-              }
-                {this.props.onRefresh && (
-                  <SplitItem>
-                    <Tooltip content={<Msg msgKey="refreshPage" />}>
-                      <Button
-                        aria-label={Msg.localize('refreshPage')}
-                        id="refresh-page"
-                        variant="link"
-                        onClick={this.props.onRefresh}
-                        icon={<SyncAltIcon />}
-                      >
-                        <Msg msgKey="refresh" />
-                      </Button>
-                    </Tooltip>
-                  </SplitItem>
-                )}
-              </Split>
-            </PageSection>
-            {this.props.children}
-          </React.Fragment>
-        );
-    }
+            }
+            {this.props.onRefresh && (
+              <SplitItem>
+                <Tooltip content={<Msg msgKey="refreshPage" />}>
+                  <Button
+                    aria-label={Msg.localize('refreshPage')}
+                    id="refresh-page"
+                    variant="link"
+                    onClick={this.props.onRefresh}
+                    icon={<SyncAltIcon />}
+                  >
+                    <Msg msgKey="refresh" />
+                  </Button>
+                </Tooltip>
+              </SplitItem>
+            )}
+          </Split>
+        </PageSection>
+          {this.props.children}
+      </React.Fragment>
+    );
+  }
 };

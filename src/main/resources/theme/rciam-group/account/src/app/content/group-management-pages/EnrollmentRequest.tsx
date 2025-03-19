@@ -3,15 +3,15 @@ import { FC, useState, useEffect } from 'react';
 import { Button, Tooltip, Alert, Form, FormGroup, Modal, ModalVariant, FormFieldGroupHeader, FormFieldGroup, TextArea, Badge, ExpandableSection, DataList, DataListItem, DataListItemRow, DataListItemCells, DataListCell } from '@patternfly/react-core';
 // @ts-ignore
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
-import { Loading } from '../../group-widgets/LoadingModal';
 import { Msg } from '../../widgets/Msg';
 import { CopyIcon, ExternalLinkSquareAltIcon, HelpIcon } from '@patternfly/react-icons';
 import { Popover, List, ListItem } from '@patternfly/react-core';
 import { getError } from '../../js/utils.js'
 import { ContentAlert } from '../ContentAlert';
-export const EnrollmentRequest: FC<any> = (props) => {
+import { useLoader } from '../../group-widgets/LoaderContext';
 
-  const [loading, setLoading] = useState(false);
+export const EnrollmentRequest: FC<any> = (props) => {
+  const { startLoader, stopLoader } = useLoader();
   const [enrollmentRequest, setEnrollmentRequest] = useState<any>({});
   const [copyTooltip, setCopyTooltip] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
@@ -38,10 +38,10 @@ export const EnrollmentRequest: FC<any> = (props) => {
   }
 
   let reviewEnrollmentRequest = (action) => {
-    setLoading(true);
+    startLoader();
     groupsService!.doPost<any>("/group-admin/enroll-request/" + enrollmentRequest.id + "/" + action, {}, { params: { ...(reviewerComment ? { adminJustification: reviewerComment } : {}) } })
       .then((response: HttpResponse<any>) => {
-        setLoading(false);
+        stopLoader();
         if (response.status === 200 || response.status === 204) {
           ContentAlert.success(Msg.localize("reviewEnrollmentSuccess"))
         }
@@ -122,7 +122,6 @@ export const EnrollmentRequest: FC<any> = (props) => {
           )
         ]}
       >
-        <Loading active={loading} />
 
         <Alert variant={enrollmentRequest?.status === 'ACCEPTED' ? "success" : enrollmentRequest?.status === 'REJECTED' ? "danger" : "info"} title={
           <React.Fragment>

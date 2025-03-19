@@ -9,6 +9,7 @@ import { Msg } from '../../widgets/Msg';
 import { Link } from 'react-router-dom';
 import { getError } from '../../js/utils.js'
 import { ContentAlert } from '../../content/ContentAlert';
+import { useLoader } from '../LoaderContext';
 
 
 export const GroupDetails: FC<any> = (props) => {
@@ -16,10 +17,13 @@ export const GroupDetails: FC<any> = (props) => {
     const roleRef = useRef<any>(null);
     const [roleInput, setRoleInput] = useState<string>("");
     const [modalInfo, setModalInfo] = useState({});
-
+    const { startLoader, stopLoader } = useLoader();
+    
     const addGroupRole = (role) => {
+        startLoader();
         groupsService!.doPost<any>("/group-admin/group/" + props.groupId + "/roles", {}, { params: { name: role } })
             .then((response: HttpResponse<any>) => {
+                stopLoader();
                 setRoleInput("");
                 setModalInfo({});
                 if (response.status === 200 || response.status === 204) {
@@ -33,9 +37,11 @@ export const GroupDetails: FC<any> = (props) => {
     }
 
     const removeGroupRole = (role) => {
+        startLoader();
         groupsService!.doDelete<any>("/group-admin/group/" + props.groupId + "/role/" + role)
             .then((response: HttpResponse<any>) => {
                 setModalInfo({});
+                stopLoader();
                 if (response.status === 200 || response.status === 204) {
                     ContentAlert.success(Msg.localize("deleteRoleSuccess"));
                     props.fetchGroupConfiguration();

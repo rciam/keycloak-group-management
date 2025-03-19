@@ -13,6 +13,7 @@ import { EnrollmentModal } from '../GroupEnrollment/CreateEnrollmentModal';
 import { Link } from 'react-router-dom';
 import { isIntegerOrNumericString } from '../../js/utils.js'
 import { TableActionBar } from './TableActionBar';
+import { useLoader } from '../LoaderContext';
 
 
 
@@ -39,6 +40,7 @@ export const GroupEnrollment: FC<any> = (props) => {
   const [groupEnrollments, setGroupEnrollments] = useState<any>([]);
   const [enrollmentModal, setEnrollmentModal] = useState({});
   const [tooltip, setTooltip] = useState(false);
+  const { startLoader, stopLoader } = useLoader();
 
   const staticDefaultEnrollmentConfiguration = {
     group: { id: "" },
@@ -70,8 +72,10 @@ export const GroupEnrollment: FC<any> = (props) => {
   }, [props.groupId]);
 
   let fetchGroupEnrollments = () => {
+    startLoader();
     groupsService!.doGet<any>("/group-admin/group/" + props.groupId + "/configuration/all")
       .then((response: HttpResponse<any>) => {
+        stopLoader();
         if (response.status === 200 && response.data) {
           setGroupEnrollments(response.data);
         }

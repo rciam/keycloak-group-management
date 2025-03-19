@@ -6,7 +6,6 @@ import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/gr
 // @ts-ignore
 import { ConfirmationModal } from '../Modals';
 import {dateParse,formatDateToString,isFutureDate} from '../js/utils.js'
-import { Loading } from './LoadingModal';
 import { Msg } from '../widgets/Msg';
 import { HelpIcon } from '@patternfly/react-icons';
 // @ts-ignore
