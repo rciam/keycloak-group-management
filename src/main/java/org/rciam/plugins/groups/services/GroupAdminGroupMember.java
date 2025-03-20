@@ -144,6 +144,8 @@ public class GroupAdminGroupMember {
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
         String groupPath = ModelToRepresentation.buildGroupPath(group);
         userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId()), memberUserAttribute, false);
+        LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
+                , Utils.GROUP_MEMBERSHIP_DELETE, groupPath, member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()), member.getMembershipExpiresAt());
 
         try {
             customFreeMarkerEmailTemplateProvider.setUser(user);

@@ -1,5 +1,5 @@
 <html>
 <body>
-${kcSanitize(msg("addRemoveGroupAdminAdminInformationBodyHtml", adminAdded, text, adminAction, text2, groupPath, groupUrl, signatureMessage))?no_esc}
+${kcSanitize(msg("addRemoveGroupAdminAdminInformationBodyHtml", adminAdded, text, groupPath, adminAction, groupUrl, signatureMessage))?no_esc}
 </body>
 </html>

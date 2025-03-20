@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Set;
 
 import org.keycloak.common.ClientConnection;
+import org.keycloak.events.Details;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.events.EventType;
 import org.keycloak.models.KeycloakSession;
@@ -19,9 +20,15 @@ public class LoginEventHelper {
                 .user(user)
                 .detail(Utils.EVENT_GROUP, groupPath)
                 .detail(Utils.EVENT_ACTION_USER, actionUserId )
-                .detail(Utils.EVENT_ROLES, groupRolesNames);
-        if (expirationDate != null)
+                .detail(Utils.EVENT_ROLES, groupRolesNames)
+                .detail(Details.USERNAME, user.getUsername());
+        if (expirationDate != null) {
             event.detail(Utils.EVENT_MEMBERSHIP_EXPIRATION, expirationDate.format(Utils.dateFormatter));
+        }
+        String voPersonId = user.getFirstAttribute(Utils.VO_PERSON_ID);
+        if (voPersonId != null) {
+            event.detail(Utils.VO_PERSON_ID, voPersonId);
+        }
         event.success();
     }
 }
