@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.6.0] - 2025-03-20
 
+### Changed
+- Update group admin notification subject for member removed
+
+## [1.6.0] - 2025-03-20
+
 ### Added
 - Return username and optionally voPersonId in group event details
 
