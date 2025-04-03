@@ -102,9 +102,9 @@ public class GroupAdminGroup {
     @DELETE
     public void deleteGroup() {
         if (!isGroupAdmin)
-            throw new ForbiddenException();
+            throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
         if (group.getSubGroupsStream().count() > 0)
-            throw new BadRequestException("You need firstly to delete child groups.");
+            throw new ErrorResponseException("You need firstly to delete child groups.", "You need firstly to delete child groups.", Response.Status.BAD_REQUEST);
 
         List<String> groupAdminsIds = groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).collect(Collectors.toList());
         generalService.removeGroup(group, groupAdmin, clientConnection, false);
@@ -171,7 +171,7 @@ public class GroupAdminGroup {
         GroupEnrollmentConfigurationEntity groupConfiguration = groupEnrollmentConfigurationRepository.getEntity(id);
         //if not exist, group have only created from main Keycloak
         if (groupConfiguration == null) {
-            throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
+            throw new ErrorResponseException(Utils.NO_FOUND_GROUP_CONFIGURATION, Utils.NO_FOUND_GROUP_CONFIGURATION, Response.Status.NOT_FOUND);
         } else {
             return EntityToRepresentation.toRepresentation(groupConfiguration, false, realm);
         }
@@ -183,14 +183,14 @@ public class GroupAdminGroup {
     public Response saveGroupEnrollmentConfiguration(GroupEnrollmentConfigurationRepresentation rep) {
         GroupEnrollmentConfigurationRulesEntity rule = groupEnrollmentConfigurationRulesRepository.getByRealmAndTypeAndField(realm.getId(), group.getParentId() != null ? GroupTypeEnum.SUBGROUP : GroupTypeEnum.TOP_LEVEL, "membershipExpirationDays");
         if (rule != null && rule.getRequired() && rep.getMembershipExpirationDays() == null) {
-            throw new BadRequestException("Expiration date must not be empty");
+            throw new ErrorResponseException("Expiration date must not be empty", "Expiration date must not be empty", Response.Status.BAD_REQUEST);
         } else if (rule != null && rule.getMax() != null && (rep.getMembershipExpirationDays() == null || (rep.getMembershipExpirationDays() > Long.valueOf(rule.getMax())))) {
-            throw new BadRequestException("Membership can not last more than "+ rule.getMax() + " days");
+            throw new ErrorResponseException("Membership can not last more than "+ rule.getMax() + " days", "Membership can not last more than "+ rule.getMax() + " days", Response.Status.BAD_REQUEST);
         }
 
         rule = groupEnrollmentConfigurationRulesRepository.getByRealmAndTypeAndField(realm.getId(), group.getParentId() != null ? GroupTypeEnum.SUBGROUP : GroupTypeEnum.TOP_LEVEL, "validFrom");
         if (rule != null && rule.getRequired() && rep.getValidFrom() == null) {
-            throw new BadRequestException("Valid from must not be empty");
+            throw new ErrorResponseException("Valid from must not be empty", "Valid from must not be empty", Response.Status.BAD_REQUEST);
         }
 
         rule = groupEnrollmentConfigurationRulesRepository.getByRealmAndTypeAndField(realm.getId(), group.getParentId() != null ? GroupTypeEnum.SUBGROUP : GroupTypeEnum.TOP_LEVEL, "aup");
@@ -198,7 +198,7 @@ public class GroupAdminGroup {
             rep.setAup(null);
         }
         if (rule != null && rule.getRequired() && rep.getAup() == null) {
-            throw new BadRequestException("Aup must not be empty");
+            throw new ErrorResponseException("Aup must not be empty", "Aup must not be empty", Response.Status.BAD_REQUEST);
         }
 
         Response.ResponseBuilder builder = Response.noContent();
@@ -214,7 +214,7 @@ public class GroupAdminGroup {
                 });
                 groupEnrollmentConfigurationRepository.update(entity, rep);
             } else {
-                throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
+                throw new ErrorResponseException(Utils.NO_FOUND_GROUP_CONFIGURATION, Utils.NO_FOUND_GROUP_CONFIGURATION, Response.Status.NOT_FOUND);
             }
         }
         //aup change action
@@ -230,9 +230,9 @@ public class GroupAdminGroup {
             groupEnrollmentRequestRepository.getRequestsByConfiguration(entity.getId()).forEach(request -> groupEnrollmentRequestRepository.deleteEntity(request));
             groupEnrollmentConfigurationRepository.deleteEntity(id);
         } else if (entity == null) {
-            throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
+            throw new ErrorResponseException(Utils.NO_FOUND_GROUP_CONFIGURATION, Utils.NO_FOUND_GROUP_CONFIGURATION, Response.Status.NOT_FOUND);
         } else  {
-            throw new BadRequestException("Could not delete default group configuration");
+            throw new ErrorResponseException("Could not delete default group configuration", "Could not delete default group configuration", Response.Status.BAD_REQUEST);
         }
         return Response.noContent().build();
     }
@@ -255,7 +255,7 @@ public class GroupAdminGroup {
     @Path("/default-configuration")
     public Response changeDefaultConfiguration(@QueryParam("configurationId") String configurationId) {
         if (groupEnrollmentConfigurationRepository.getEntity(configurationId) == null)
-            throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
+            throw new ErrorResponseException(Utils.NO_FOUND_GROUP_CONFIGURATION, Utils.NO_FOUND_GROUP_CONFIGURATION, Response.Status.NOT_FOUND);
         group.setAttribute(Utils.DEFAULT_CONFIGURATION_NAME, Stream.of(configurationId).collect(Collectors.toList()));
         return Response.noContent().build();
     }
@@ -269,7 +269,8 @@ public class GroupAdminGroup {
 
         GroupRolesEntity entity = groupRolesRepository.getGroupRolesByNameAndGroup(name, group.getId());
         if (entity.getGroupExtensions() != null && entity.getGroupExtensions().size() > 0)
-            throw new BadRequestException("You can not delete this role because it is assigned in a group membership");
+            throw new ErrorResponseException("You can not delete this role because it is assigned in a group membership", "You can not delete this role because it is assigned in a group membership", Response.Status.BAD_REQUEST);
+
         groupRolesRepository.delete(entity);
         return Response.noContent().build();
     }
@@ -279,7 +280,7 @@ public class GroupAdminGroup {
     public Response renameGroupRole(@PathParam("id") String id, @QueryParam("name") String name) {
         GroupRolesEntity entity = groupRolesRepository.getEntity(id);
         if (entity == null) {
-            throw new NotFoundException("Could not find this group role");
+            throw new ErrorResponseException("Could not find this group role", "Could not find this group role", Response.Status.NOT_FOUND);
         }
         entity.setName(name);
         groupRolesRepository.update(entity);
@@ -298,7 +299,7 @@ public class GroupAdminGroup {
     public GroupAdminGroupMember groupMember(@PathParam("memberId") String memberId) {
         UserGroupMembershipExtensionEntity member = userGroupMembershipExtensionRepository.getEntity(memberId);
         if (member == null) {
-            throw new NotFoundException("Could not find this group member");
+            throw new ErrorResponseException("Could not find this group member", "Could not find this group member", Response.Status.NOT_FOUND);
         }
         GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository, isGroupAdmin);
         ResteasyProviderFactory.getInstance().injectProperties(service);
@@ -345,11 +346,11 @@ public class GroupAdminGroup {
     public Response addAsGroupAdmin(@QueryParam("userId") String userId, @QueryParam("username") String username) {
         UserModel userAdded = userId != null ? session.users().getUserById(realm, userId) : session.users().getUserByUsername(realm, username);
         if (userAdded == null) {
-            throw new NotFoundException("Could not find this User");
+            throw new ErrorResponseException(Utils.NO_USER_FOUND, Utils.NO_USER_FOUND, Response.Status.NOT_FOUND);
         }
 
         if (groupAdminRepository.getGroupAdminByUserAndGroup(userAdded.getId(), group.getId()) != null) {
-            throw new BadRequestException("This user is already group admin of this group");
+            throw new ErrorResponseException("This user is already group admin of this group", "This user is already group admin of this group", Response.Status.BAD_REQUEST);
         }
         groupAdminRepository.addGroupAdmin(userAdded.getId(), group.getId());
         String groupPath = ModelToRepresentation.buildGroupPath(group);
@@ -378,7 +379,7 @@ public class GroupAdminGroup {
     public Response removeGroupAdmin(@QueryParam("userId") String userId, @QueryParam("username") String username) {
         UserModel user = userId != null ? session.users().getUserById(realm, userId) : session.users().getUserByUsername(realm, username);
         if (user == null) {
-            throw new NotFoundException("Could not find this User");
+            throw new ErrorResponseException(Utils.NO_USER_FOUND, Utils.NO_USER_FOUND, Response.Status.NOT_FOUND);
         }
 
         GroupAdminEntity admin = groupAdminRepository.getGroupAdminByUserAndGroup(user.getId(), group.getId());
@@ -400,7 +401,7 @@ public class GroupAdminGroup {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
             }
         } else {
-            throw new NotFoundException("This admin does not exist");
+            throw new ErrorResponseException("This admin does not exist", "This admin does not exist", Response.Status.NOT_FOUND);
         }
         return Response.noContent().build();
     }

@@ -93,7 +93,7 @@ public class AdminService {
 
         //Keycloak code for realm remove
         if (!new RealmManager(session).removeRealm(realm)) {
-            throw new NotFoundException("Realm doesn't exist");
+            throw new ErrorResponseException("Realm doesn't exist", "Realm doesn't exist", Response.Status.NOT_FOUND);
         }
 
         // The delete event is associated with the realm of the user executing the operation,
@@ -162,7 +162,7 @@ public class AdminService {
     public AdminGroups adminGroups(@PathParam("groupId") String groupId) {
         GroupModel group = realm.getGroupById(groupId);
         if (group == null) {
-            throw new NotFoundException("Could not find group by id");
+            throw new ErrorResponseException("Could not find group by id", "Could not find group by id", Response.Status.NOT_FOUND);
         }
         realmAuth.groups().requireView(group);
         AdminGroups service = new AdminGroups(session, realmAuth, group, realm, generalJpaService, adminEvent, groupEnrollmentConfigurationRepository, groupRolesRepository);

@@ -26,6 +26,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.representations.idm.GroupRepresentation;
+import org.keycloak.services.ErrorResponseException;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.enums.GroupTypeEnum;
 import org.rciam.plugins.groups.enums.MemberStatusEnum;
@@ -117,10 +118,10 @@ public class GroupAdminService {
         GroupModel group = realm.getGroupById(groupId);
         boolean isGroupAdmin = groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group);
         if (!isGroupAdmin && !Utils.hasManageGroupsAccountRole(realm, groupAdmin)){
-            throw new ForbiddenException();
+            throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
         if (group == null) {
-            throw new NotFoundException("Could not find group by id");
+            throw new ErrorResponseException("Could not find group by id", "Could not find group by id", Response.Status.NOT_FOUND);
         }
 
 
@@ -140,7 +141,7 @@ public class GroupAdminService {
     @Produces("application/json")
     public  List<GroupEnrollmentConfigurationRulesRepresentation> getEnrollmentConfigurationRules(@QueryParam("type") @DefaultValue("TOP_LEVEL") GroupTypeEnum type) {
         if (!Utils.hasManageGroupsAccountRole(realm, groupAdmin) && !groupAdminRepository.hasAdminRights(groupAdmin.getId())){
-            throw new ForbiddenException();
+            throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
         return groupEnrollmentConfigurationRulesRepository.getByRealmAndType(realm.getId(), type).map(EntityToRepresentation::toRepresentation).collect(Collectors.toList());
     }
@@ -194,14 +195,14 @@ public class GroupAdminService {
     public GroupAdminEnrollementRequest enrollment(@PathParam("enrollId") String enrollId) {
         GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.getEntity(enrollId);
         if (entity == null) {
-            throw new NotFoundException("Could not find Group Enrollment Request by id");
+            throw new ErrorResponseException("Could not find Group Enrollment Request by id", "Could not find Group Enrollment Request by id", Response.Status.NOT_FOUND);
         }
         GroupModel group = realm.getGroupById(entity.getGroupEnrollmentConfiguration().getGroup().getId());
         if (group == null) {
-            throw new NotFoundException("Could not find the group of Group Enrollment Request by id");
+            throw new ErrorResponseException("Could not find the group of Group Enrollment Request by id", "Could not find the group of Group Enrollment Request by id", Response.Status.NOT_FOUND);
         }
         if (!groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group)){
-            throw new ForbiddenException();
+            throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
 
         GroupAdminEnrollementRequest service = new GroupAdminEnrollementRequest(session, realm, groupEnrollmentRequestRepository, groupAdmin, entity, userGroupMembershipExtensionRepository, groupAdminRepository);

@@ -11,6 +11,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.services.ErrorResponseException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
@@ -102,7 +103,7 @@ public class UserGroups {
     public UserGroup userGroup(@PathParam("groupId") String groupId) {
         GroupModel group = realm.getGroupById(groupId);
         if (group == null) {
-            throw new NotFoundException("Could not find group by id");
+            throw new ErrorResponseException("Could not find group by id", "Could not find group by id", Response.Status.NOT_FOUND);
         }
 
         UserGroup service = new UserGroup(session, realm, groupEnrollmentConfigurationRepository, user, group);
@@ -127,7 +128,7 @@ public class UserGroups {
         }
 
         if (groupId == null) {
-            throw new NotFoundException("This group does not exist");
+            throw new ErrorResponseException("This group does not exist", "This group does not exist", Response.Status.NOT_FOUND);
         }
         return groupEnrollmentConfigurationRepository.getAvailableByGroup(groupId).map(x -> EntityToRepresentation.toRepresentation(x, true, realm)).collect(Collectors.toList());
     }
@@ -136,7 +137,7 @@ public class UserGroups {
     public UserGroupMember userGroupMember(@PathParam("groupId") String groupId) {
         UserGroupMembershipExtensionEntity entity = userGroupMembershipExtensionRepository.getByUserAndGroup(groupId, user.getId());
         if (entity == null) {
-            throw new NotFoundException("You are not member of this group");
+            throw new ErrorResponseException("You are not member of this group", "You are not member of this group", Response.Status.NOT_FOUND);
         }
 
         UserGroupMember service = new UserGroupMember(session, realm, user, entity, userGroupMembershipExtensionRepository, groupAdminRepository, customFreeMarkerEmailTemplateProvider);
@@ -164,9 +165,9 @@ public class UserGroups {
     public Response createEnrollmentRequest(GroupEnrollmentRequestRepresentation rep) throws UnsupportedEncodingException {
         GroupEnrollmentConfigurationEntity configuration = groupEnrollmentConfigurationRepository.getEntity(rep.getGroupEnrollmentConfiguration().getId());
         if (configuration == null)
-            throw new NotFoundException("Could not find this group enrollment configuration");
+            throw new ErrorResponseException("Could not find this group enrollment configuration", "Could not find this group enrollment configuration", Response.Status.NOT_FOUND);
         if (groupEnrollmentRequestRepository.countOngoingByUserAndGroup(user.getId(), configuration.getGroup().getId()) > 0)
-            throw new BadRequestException("You have an ongoing request to become member of this group");
+            throw new ErrorResponseException("You have an ongoing request to become member of this group", "You have an ongoing request to become member of this group", Response.Status.BAD_REQUEST);
 
         if (configuration.getRequireApproval()) {
             GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.create(rep, user, configuration, true, realm, userSession);
@@ -198,9 +199,9 @@ public class UserGroups {
 
         GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.getEntity(id);
         if (entity == null)
-            throw new NotFoundException("Could not find this group enrollment configuration");
+            throw new ErrorResponseException("Could not find this group enrollment configuration", "Could not find this group enrollment configuration", Response.Status.NOT_FOUND);
         if (!entity.getUser().getId().equals(user.getId()))
-            throw new ForbiddenException("You do not have access to this group enrollment");
+            throw new ErrorResponseException("You do not have access to this group enrollment", "You do not have access to this group enrollment", Response.Status.FORBIDDEN);
 
         UserGroupEnrollmentRequestAction service = new UserGroupEnrollmentRequestAction(session, realm, groupEnrollmentConfigurationRepository, groupEnrollmentRequestRepository, user, entity);
         ResteasyProviderFactory.getInstance().injectProperties(service);
@@ -213,7 +214,7 @@ public class UserGroups {
     public GroupInvitationRepresentation getInvitation(@PathParam("id") String id) {
         GroupInvitationEntity entity = groupInvitationRepository.getEntity(id);
         if (entity == null) {
-            throw new NotFoundException(INVITATION_NOT_EXISTS);
+            throw new ErrorResponseException(INVITATION_NOT_EXISTS, INVITATION_NOT_EXISTS, Response.Status.NOT_FOUND);
         }
         return EntityToRepresentation.toRepresentation(entity, realm);
     }
@@ -225,14 +226,13 @@ public class UserGroups {
     public Response acceptInvitation(@PathParam("id") String id) {
         GroupInvitationEntity invitationEntity = groupInvitationRepository.getEntity(id);
         if (invitationEntity == null) {
-            throw new NotFoundException(INVITATION_NOT_EXISTS);
+            throw new ErrorResponseException(INVITATION_NOT_EXISTS, INVITATION_NOT_EXISTS, Response.Status.NOT_FOUND);
         }
         if (invitationEntity.getForMember() && userGroupMembershipExtensionRepository.getByUserAndGroup(invitationEntity.getGroupEnrollmentConfiguration().getGroup().getId(), user.getId()) != null) {
-            throw new BadRequestException("You are already member of this group");
+            throw new ErrorResponseException("You are already member of this group", "You are already member of this group", Response.Status.BAD_REQUEST);
         }
         if (!invitationEntity.getForMember() && groupAdminRepository.getGroupAdminByUserAndGroup(user.getId(), invitationEntity.getGroup().getId()) != null) {
-            throw new BadRequestException("You are already group admin for this group");
-        }
+            throw new ErrorResponseException("You are already group admin for this group", "You are already group admin for this group", Response.Status.BAD_REQUEST);        }
 
         if (invitationEntity.getForMember()) {
             MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
@@ -261,7 +261,7 @@ public class UserGroups {
     public Response rejectInvitation(@PathParam("id") String id) {
         GroupInvitationEntity invitationEntity = groupInvitationRepository.getEntity(id);
         if (invitationEntity == null) {
-            throw new NotFoundException(INVITATION_NOT_EXISTS);
+            throw new ErrorResponseException(INVITATION_NOT_EXISTS, INVITATION_NOT_EXISTS, Response.Status.NOT_FOUND);
         }
 
         Set<String> groupRoles = invitationEntity.getGroupRoles() != null ? invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()) : new HashSet<>();
@@ -285,7 +285,7 @@ public class UserGroups {
     public GroupEnrollmentConfigurationRepresentation geGroupEnrollmentConfiguration(@PathParam("id") String id) {
         GroupEnrollmentConfigurationEntity entity = groupEnrollmentConfigurationRepository.getEntity(id);
         if (entity == null || !entity.isActive())
-            throw new NotFoundException("This configuration does not exists or is disabled");
+            throw new ErrorResponseException("This configuration does not exists or is disabled", "This configuration does not exists or is disabled", Response.Status.NOT_FOUND);
         return EntityToRepresentation.toRepresentation(entity, true, realm);
     }
 

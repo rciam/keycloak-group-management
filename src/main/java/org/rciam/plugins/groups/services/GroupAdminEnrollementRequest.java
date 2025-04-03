@@ -21,6 +21,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.UserEntity;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.services.ErrorResponseException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
@@ -74,8 +75,9 @@ public class GroupAdminEnrollementRequest {
     @POST
     @Path("/extra-info")
     public Response askForExtraInformation(@NotNull @QueryParam("comment") String comment) {
-        if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
-            throw new BadRequestException(statusErrorMessage);
+        if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus())) {
+            throw new ErrorResponseException(statusErrorMessage, statusErrorMessage, Response.Status.BAD_REQUEST);
+        }
         enrollmentEntity.setStatus(EnrollmentRequestStatusEnum.WAITING_FOR_REPLY);
         enrollmentEntity.setComment(comment);
         groupEnrollmentRequestRepository.update(enrollmentEntity);
@@ -85,8 +87,9 @@ public class GroupAdminEnrollementRequest {
     @POST
     @Path("/accept")
     public Response acceptEnrollment(@QueryParam("adminJustification") String adminJustification) throws UnsupportedEncodingException {
-        if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
-            throw new BadRequestException(statusErrorMessage);
+        if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus())) {
+            throw new ErrorResponseException(statusErrorMessage, statusErrorMessage, Response.Status.BAD_REQUEST);
+        }
 
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
         userGroupMembershipExtensionRepository.createOrUpdate(enrollmentEntity, session, groupAdmin, memberUserAttribute, clientConnection);
@@ -117,8 +120,9 @@ public class GroupAdminEnrollementRequest {
     @POST
     @Path("/reject")
     public Response rejectEnrollment(@QueryParam("adminJustification") String adminJustification) {
-        if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus()))
-            throw new BadRequestException(statusErrorMessage);
+        if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus())){
+            throw new ErrorResponseException(statusErrorMessage, statusErrorMessage, Response.Status.BAD_REQUEST);
+        }
         updateEnrollmentRequest(enrollmentEntity, EnrollmentRequestStatusEnum.REJECTED, adminJustification);
 
         try {

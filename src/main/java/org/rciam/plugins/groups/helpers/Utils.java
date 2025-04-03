@@ -76,6 +76,8 @@ public class Utils {
     public static final String DEFAULT_USER_ASSURANCE_FOR_ENROLLMENT = "assurance";
     public static final String USER_IDENTIFIER_FOR_ENROLLMENT = "userIdentifierForEnrollment";
     public static final String DEFAULT_USER_IDENTIFIER_FOR_ENROLLMENT = "username";
+    public static final String NOT_ALLOWED = "Not allowed";
+    public static final String NO_USER_FOUND = "Could not find this User";
 
     public static UserAdapter getDummyUser(String email, String firstName, String lastName) {
         UserEntity userEntity = new UserEntity();

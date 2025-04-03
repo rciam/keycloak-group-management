@@ -25,6 +25,7 @@ import org.keycloak.models.ModelDuplicateException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.services.ErrorResponseException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.Utils;
@@ -80,8 +81,9 @@ public class AdminGroups {
     @DELETE
     public void deleteGroup() {
         this.realmAuth.groups().requireManage(group);
-        if (group.getSubGroupsStream().count()>0)
-            throw new BadRequestException("You need firstly to delete child groups.");
+        if (group.getSubGroupsStream().count()>0) {
+            throw new ErrorResponseException("You need firstly to delete child groups.", "You need firstly to delete child groups.", Response.Status.BAD_REQUEST);
+        }
 
         generalJpaService.removeGroup(group, realmAuth.adminAuth().getUser(),clientConnection, false);
 
@@ -95,7 +97,7 @@ public class AdminGroups {
         GroupEnrollmentConfigurationEntity groupConfiguration = groupEnrollmentConfigurationRepository.getEntity(id);
         //if not exist, group have only created from main Keycloak
         if (groupConfiguration == null) {
-            throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
+            throw new ErrorResponseException(Utils.NO_FOUND_GROUP_CONFIGURATION, Utils.NO_FOUND_GROUP_CONFIGURATION, Response.Status.NOT_FOUND);
         } else {
             return EntityToRepresentation.toRepresentation(groupConfiguration, false, realm);
         }
@@ -113,7 +115,7 @@ public class AdminGroups {
             if (entity != null) {
                 groupEnrollmentConfigurationRepository.update(entity, rep);
             } else {
-                throw new NotFoundException(Utils.NO_FOUND_GROUP_CONFIGURATION);
+                throw new ErrorResponseException(Utils.NO_FOUND_GROUP_CONFIGURATION, Utils.NO_FOUND_GROUP_CONFIGURATION, Response.Status.NOT_FOUND);
             }
         }
         //aup change action
@@ -125,7 +127,7 @@ public class AdminGroups {
     public Response addGroupAdmin(@PathParam("userId") String userId) {
         UserModel user = session.users().getUserById(realm, userId);
         if (user == null) {
-            throw new NotFoundException("Could not find this User");
+            throw new ErrorResponseException(Utils.NO_USER_FOUND, Utils.NO_USER_FOUND, Response.Status.NOT_FOUND);
         }
         realmAuth.users().requireManageGroupMembership(user);
         try {
@@ -152,7 +154,7 @@ public class AdminGroups {
     public Response removeGroupAdmin(@PathParam("userId") String userId) {
         UserModel user = session.users().getUserById(realm, userId);
         if (user == null) {
-            throw new NotFoundException("Could not find this User");
+            throw new ErrorResponseException(Utils.NO_USER_FOUND, Utils.NO_USER_FOUND, Response.Status.NOT_FOUND);
         }
         realmAuth.users().requireManageGroupMembership(user);
         GroupAdminEntity admin = groupAdminRepository.getGroupAdminByUserAndGroup(userId, group.getId());
@@ -165,7 +167,7 @@ public class AdminGroups {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
             }
         } else {
-            throw new NotFoundException("This admin does not exist");
+            throw new ErrorResponseException("This admin does not exist", "This admin does not exist", Response.Status.NOT_FOUND);
         }
         return Response.noContent().build();
     }

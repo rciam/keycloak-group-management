@@ -93,7 +93,7 @@ public class GroupAdminGroupMembers {
     public Response inviteUser(GroupInvitationInitialRepresentation groupInvitationInitialRep) {
 
         if (!isGroupAdmin) {
-            throw new ForbiddenException();
+            throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
 
         if (groupInvitationInitialRep.getEmail() == null || (groupInvitationInitialRep.isWithoutAcceptance() && groupInvitationInitialRep.getGroupEnrollmentConfiguration() == null))
@@ -166,22 +166,22 @@ public class GroupAdminGroupMembers {
         //3. Expiration date: date cannot be in the past
         //4. username not empty and user exist
         if (rep.getGroupRoles() == null || rep.getGroupRoles().isEmpty()) {
-            throw new BadRequestException("At least one role must be existed");
+            throw new ErrorResponseException("At least one role must be existed", "At least one role must be existed", Response.Status.BAD_REQUEST);
         }  else if (!extendedRole && rep.getValidFrom() != null && LocalDate.now().isAfter(rep.getValidFrom())) {
-            throw new BadRequestException("Valid from must not be in the past");
+            throw new ErrorResponseException("Valid from must not be in the past", "Valid from must not be in the past", Response.Status.BAD_REQUEST);
         } else if (rep.getMembershipExpiresAt() != null && LocalDate.now().isAfter(rep.getMembershipExpiresAt())) {
-            throw new BadRequestException("Expiration date must not be in the past");
+            throw new ErrorResponseException("Expiration date must not be in the past", "Expiration date must not be in the past", Response.Status.BAD_REQUEST);
         } else  if (rep.getUser() == null || rep.getUser().getUsername() == null) {
-            throw new BadRequestException("User is required");
+            throw new ErrorResponseException("User is required", "User is required", Response.Status.BAD_REQUEST);
         }
 
         UserModel user = session.users().getUserByUsername(realm, rep.getUser().getUsername());
         if (user == null) {
-            throw new BadRequestException("User with provider username does not exist");
+            throw new ErrorResponseException("User with provider username does not exist", "User with provider username does not exist", Response.Status.BAD_REQUEST);
         }
         UserGroupMembershipExtensionEntity oldMember = userGroupMembershipExtensionRepository.getByUserAndGroup(group.getId(), user.getId());
         if (oldMember != null) {
-            throw new BadRequestException("User is already member of this group");
+            throw new ErrorResponseException("User is already member of this group", "User is already member of this group", Response.Status.BAD_REQUEST);
         }
 
         if (rep.getValidFrom() == null) {
@@ -189,22 +189,22 @@ public class GroupAdminGroupMembers {
         }
         GroupEnrollmentConfigurationRulesEntity configurationRule = groupEnrollmentConfigurationRulesRepository.getByRealmAndTypeAndField(realm.getId(), group.getParentId() == null ? GroupTypeEnum.TOP_LEVEL : GroupTypeEnum.SUBGROUP, "membershipExpirationDays");
         if (configurationRule != null && configurationRule.getRequired() && rep.getMembershipExpiresAt() == null) {
-            throw new BadRequestException("Expiration date must not be empty");
+            throw new ErrorResponseException("Expiration date must not be empty", "Expiration date must not be empty", Response.Status.BAD_REQUEST);
         } else if (!extendedRole && configurationRule != null && configurationRule.getMax() != null && rep.getMembershipExpiresAt().isAfter(rep.getValidFrom().plusDays(Long.valueOf(configurationRule.getMax())))) {
-            throw new BadRequestException("Group membership can not be more than {} days"+configurationRule.getMax()+" days");
+            throw new ErrorResponseException("Group membership can not be more than {} days"+configurationRule.getMax()+" days", "Group membership can not be more than {} days"+configurationRule.getMax()+" days", Response.Status.BAD_REQUEST);
         }
 
         List<String> groupRoles = groupRolesRepository.getGroupRolesByGroup(group.getId()).map(x -> x.getName()).collect(Collectors.toList());
         if (!rep.getGroupRoles().stream().allMatch(groupRoles::contains)) {
-            throw new BadRequestException("All roles must be existed in group");
+            throw new ErrorResponseException("All roles must be existed in group", "All roles must be existed in group", Response.Status.BAD_REQUEST);
         }
 
         //if configuration id does not exists add default group configuration id
         GroupEnrollmentConfigurationEntity configurationEntity = groupEnrollmentConfigurationRepository.getEntity(rep.getGroupEnrollmentConfiguration() != null && rep.getGroupEnrollmentConfiguration().getId() != null ? rep.getGroupEnrollmentConfiguration().getId() : group.getFirstAttribute(Utils.DEFAULT_CONFIGURATION_NAME));
         if (configurationEntity == null) {
-            throw new BadRequestException("Group default group enrollment configuration does not exist");
+            throw new ErrorResponseException("Group default group enrollment configuration does not exist", "Group default group enrollment configuration does not exist", Response.Status.BAD_REQUEST);
         } else if (!extendedRole && configurationEntity.getAupEntity() != null) {
-            throw new BadRequestException("Could not add group member with group enrollment configuration with aup");
+            throw new ErrorResponseException("Could not add group member with group enrollment configuration with aup", "Could not add group member with group enrollment configuration with aup", Response.Status.BAD_REQUEST);
         }
 
         UserGroupMembershipExtensionEntity member = userGroupMembershipExtensionRepository.create(rep, user, groupAdmin, group, configurationEntity.getId(), session, clientConnection);

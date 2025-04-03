@@ -26,6 +26,7 @@ import org.keycloak.models.ModelException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.ModelToRepresentation;
+import org.keycloak.services.ErrorResponseException;
 import org.keycloak.services.ForbiddenException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.enums.GroupTypeEnum;
@@ -88,26 +89,26 @@ public class GroupAdminGroupMember {
         //4. Expiration date: date cannot be in the past
         boolean extendedRole = Utils.hasManageExtendedGroupsAccountRole(realm, groupAdmin);
         if (!extendedRole && MemberStatusEnum.SUSPENDED.equals(member.getStatus())) {
-            throw new BadRequestException("Suspended members can not be updated");
+            throw new ErrorResponseException("Suspended members can not be updated", "Suspended members can not be updated", Response.Status.BAD_REQUEST);
         } else if (rep.getGroupRoles() == null || rep.getGroupRoles().isEmpty()) {
-            throw new BadRequestException("At least one role must be existed");
+            throw new ErrorResponseException("At least one role must be existed", "At least one role must be existed", Response.Status.BAD_REQUEST);
         } else if (rep.getMembershipExpiresAt() != null && LocalDate.now().isAfter(rep.getMembershipExpiresAt())) {
-            throw new BadRequestException("Expiration date must not be in the past");
+            throw new ErrorResponseException("Expiration date must not be in the past", "Expiration date must not be in the past", Response.Status.BAD_REQUEST);
         } else if (MemberStatusEnum.PENDING.equals(member.getStatus()) && ( rep.getValidFrom() == null || LocalDate.now().isBefore(rep.getValidFrom()) || (rep.getMembershipExpiresAt() != null && rep.getMembershipExpiresAt().isBefore(rep.getValidFrom())))) {
-            throw new BadRequestException("Member since must not be in the past or after expiration date");
+            throw new ErrorResponseException("Member since must not be in the past or after expiration date", "Member since must not be in the past or after expiration date", Response.Status.BAD_REQUEST);
         } else if (!extendedRole && MemberStatusEnum.ENABLED.equals(member.getStatus())) {
             //For enabled member do to change valid from
             rep.setValidFrom(member.getValidFrom());
         }
         GroupEnrollmentConfigurationRulesEntity configurationRule = groupEnrollmentConfigurationRulesRepository.getByRealmAndTypeAndField(realm.getId(), member.getGroup().getParentId().trim().isEmpty() ? GroupTypeEnum.TOP_LEVEL : GroupTypeEnum.SUBGROUP, "membershipExpirationDays");
         if (!extendedRole && configurationRule != null && configurationRule.getRequired() && rep.getMembershipExpiresAt() == null) {
-            throw new BadRequestException("Expiration date must not be empty");
+            throw new ErrorResponseException("Expiration date must not be empty", "Expiration date must not be empty", Response.Status.BAD_REQUEST);
         } else if (configurationRule != null && configurationRule.getMax() != null && MemberStatusEnum.PENDING.equals(member.getStatus()) && rep.getValidFrom().plusDays(Long.valueOf(configurationRule.getMax())).isBefore(rep.getMembershipExpiresAt())) {
-            throw new BadRequestException("Membership can not last more than "+ configurationRule.getMax() + " days");
+            throw new ErrorResponseException("Membership can not last more than "+ configurationRule.getMax() + " days", "Membership can not last more than "+ configurationRule.getMax() + " days", Response.Status.BAD_REQUEST);
         }
 
         if (!extendedRole && configurationRule != null && configurationRule.getMax() != null && MemberStatusEnum.ENABLED.equals(member.getStatus()) && LocalDate.now().plusDays(Long.valueOf(configurationRule.getMax())).isBefore(rep.getMembershipExpiresAt())) {
-            throw new BadRequestException("Membership can not last more than "+ configurationRule.getMax() + " days");
+            throw new ErrorResponseException("Membership can not last more than "+ configurationRule.getMax() + " days", "Membership can not last more than "+ configurationRule.getMax() + " days", Response.Status.BAD_REQUEST);
         }
 
 
@@ -170,17 +171,19 @@ public class GroupAdminGroupMember {
     @Path("/role")
     public Response addGroupRole(@QueryParam("name") String name) {
         if (!isGroupAdmin){
-            throw new ForbiddenException();
+            throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
 
         GroupRolesEntity role = groupRolesRepository.getGroupRolesByNameAndGroup(name, group.getId());
-        if (role == null) throw new NotFoundException(" This role does not exist in this group");
+        if (role == null) {
+            throw new ErrorResponseException("This role does not exist in this group", "This role does not exist in this group", Response.Status.NOT_FOUND);
+        }
         if (member.getGroupRoles() == null) {
             member.setGroupRoles(Stream.of(role).collect(Collectors.toSet()));
         } else if (member.getGroupRoles().stream().noneMatch(x -> role.getId().equals(x.getId()))) {
             member.getGroupRoles().add(role);
         }  else {
-            throw new BadRequestException("This role already exists.");
+            throw new ErrorResponseException("This role already exists.", "This role already exists.", Response.Status.BAD_REQUEST);
         }
 
         userGroupMembershipExtensionRepository.update(member);
@@ -215,11 +218,11 @@ public class GroupAdminGroupMember {
     @Path("/role/{name}")
     public Response deleteGroupRole(@PathParam("name") String name) {
         if (!isGroupAdmin){
-            throw new ForbiddenException();
+            throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
 
         if (member.getGroupRoles() == null || member.getGroupRoles().stream().noneMatch(x -> name.equals(x.getName())))
-            throw new NotFoundException("Could not find this user group member role");
+            throw new ErrorResponseException("Could not find this user group member role", "Could not find this user group member role", Response.Status.NOT_FOUND);
 
         member.getGroupRoles().removeIf(x -> name.equals(x.getName()));
         userGroupMembershipExtensionRepository.update(member);
@@ -254,9 +257,9 @@ public class GroupAdminGroupMember {
     public Response suspendUser(@QueryParam("justification") String justification) {
         UserModel user = session.users().getUserById(realm, member.getUser().getId());
         if (user == null) {
-            throw new NotFoundException("Could not find this User");
+            throw new ErrorResponseException(Utils.NO_USER_FOUND, Utils.NO_USER_FOUND, Response.Status.NOT_FOUND);
         } else if (!MemberStatusEnum.ENABLED.equals(member.getStatus())) {
-            throw new BadRequestException("Only enabled users can be suspended.");
+            throw new ErrorResponseException("Only enabled users can be suspended.", "Only enabled users can be suspended.", Response.Status.NOT_FOUND);
         }
         try {
             String groupPath = ModelToRepresentation.buildGroupPath(group);
@@ -279,7 +282,7 @@ public class GroupAdminGroupMember {
             ServicesLogger.LOGGER.failedToSendEmail(e);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new BadRequestException("problem suspended group member");
+            throw new ErrorResponseException("problem suspended group member", "problem suspended group member", Response.Status.BAD_REQUEST);
         }
         return Response.noContent().build();
     }
@@ -289,13 +292,13 @@ public class GroupAdminGroupMember {
     public Response activateUser(@QueryParam("justification") String justification) {
         UserModel user = session.users().getUserById(realm, member.getUser().getId());
         if (user == null) {
-            throw new NotFoundException("Could not find this User");
+            throw new ErrorResponseException(Utils.NO_USER_FOUND, Utils.NO_USER_FOUND, Response.Status.NOT_FOUND);
         } else if (!MemberStatusEnum.SUSPENDED.equals(member.getStatus())) {
-            throw new BadRequestException("Only suspended users can be reactivated.");
+            throw new ErrorResponseException("Only suspended users can be reactivated.", "Only suspended users can be reactivated.", Response.Status.BAD_REQUEST);
         }
         List<String> parentGroupIds = Utils.findParentGroupIds(group);
         if (!parentGroupIds.isEmpty() && userGroupMembershipExtensionRepository.countByUserAndGroupsAndSuspended(user.getId(),parentGroupIds) > 0) {
-            throw new BadRequestException("Unable to reactivate membership because it's suspended in a higher-level group.");
+            throw new ErrorResponseException("Unable to reactivate membership because it's suspended in a higher-level group.", "Unable to reactivate membership because it's suspended in a higher-level group.", Response.Status.BAD_REQUEST);
         }
 
         try {
@@ -319,7 +322,7 @@ public class GroupAdminGroupMember {
                 ServicesLogger.LOGGER.failedToSendEmail(e);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new BadRequestException("problem activate group member");
+            throw new ErrorResponseException("problem activate group member", "problem activate group member", Response.Status.BAD_REQUEST);
         }
 
         return Response.noContent().build();

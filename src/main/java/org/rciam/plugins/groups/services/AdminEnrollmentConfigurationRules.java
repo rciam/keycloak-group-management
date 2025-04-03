@@ -19,6 +19,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
+import org.keycloak.services.ErrorResponseException;
 import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentConfigurationRulesEntity;
@@ -72,7 +73,7 @@ public class AdminEnrollmentConfigurationRules {
         realmAuth.realm().requireManageRealm();
         GroupEnrollmentConfigurationRulesEntity entity = groupEnrollmentConfigurationRulesRepository.getEntity(id);
         if (entity == null) {
-            throw new NotFoundException("Could not find GroupEnrollmentConfigurationRules by id");
+            throw new ErrorResponseException("Could not find GroupEnrollmentConfigurationRules by id", "Could not find GroupEnrollmentConfigurationRules by id", Response.Status.NOT_FOUND);
         }
         entity.setType(rep.getType());
         entity.setField(rep.getField());
@@ -90,7 +91,7 @@ public class AdminEnrollmentConfigurationRules {
         realmAuth.realm().requireViewRealm();
         GroupEnrollmentConfigurationRulesEntity entity = groupEnrollmentConfigurationRulesRepository.getEntity(id);
         if (entity == null) {
-            throw new NotFoundException("Could not find GroupEnrollmentConfigurationRules by id");
+            throw new ErrorResponseException("Could not find GroupEnrollmentConfigurationRules by id", "Could not find GroupEnrollmentConfigurationRules by id", Response.Status.NOT_FOUND);
         }
         return EntityToRepresentation.toRepresentation(entity);
     }
