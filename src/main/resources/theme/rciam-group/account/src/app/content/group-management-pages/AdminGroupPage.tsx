@@ -210,6 +210,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props) => {
           fetchGroupConfiguration();
           ContentAlert.success(success_message);
         } else {
+          fetchGroupConfiguration();
           ContentAlert.danger(error_message + " " + getError(response));
         }
       });

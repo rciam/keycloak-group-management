@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Correct error return in REST API
+- Group Description Update Bug Fix
 
 ### Changed
 - Update group admin notification subject for member removed
