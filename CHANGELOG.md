@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Group invitation email template fix
+- Response loader for requests in Modals
 
 ## [1.6.1] - 2025-04-03
 

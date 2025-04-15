@@ -38,17 +38,18 @@ export const EnrollmentRequest: FC<any> = (props) => {
   }
 
   let reviewEnrollmentRequest = (action) => {
+    close();
     startLoader();
     groupsService!.doPost<any>("/group-admin/enroll-request/" + enrollmentRequest.id + "/" + action, {}, { params: { ...(reviewerComment ? { adminJustification: reviewerComment } : {}) } })
       .then((response: HttpResponse<any>) => {
         stopLoader();
         if (response.status === 200 || response.status === 204) {
+          props.refresh();
           ContentAlert.success(Msg.localize("reviewEnrollmentSuccess"))
         }
         else {
           ContentAlert.danger(Msg.localize("reviewEnrollmentError") + " " + getError(response))
         }
-        close();
       }).catch((err) => { console.log(err) })
   }
 

@@ -193,20 +193,35 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
     };
 
     let updateMembership = () => {
+        setIsModalOpen(false);
         startLoader();
-        groupsService!.doPut<any>("/group-admin/group/" + props.membership.group.id + "/member/" + props.membership?.id, { ...membership})
+        groupsService!.doPut<any>(
+            "/group-admin/group/" + props.membership.group.id + "/member/" + props.membership?.id,
+            { ...membership }
+        )
             .then((response: HttpResponse<any>) => {
+                // Fetch updated group members after the request
                 props.fetchGroupMembers();
+                // Stop the loader
                 stopLoader();
-                props?.setMembership({});
+                // Show success or error alert based on the response
                 if (response.status === 200 || response.status === 204) {
                     ContentAlert.success(Msg.localize('updateMembershipSuccess'));
+                } else {
+                    ContentAlert.danger(Msg.localize('updateMembershipError', [getError(response)]));
                 }
-                else {
-                    ContentAlert.success(Msg.localize('updateMembershipError',[getError(response)]));
-                }
+                // Clear the membership only after the request is completed
+                props?.setMembership({});
             })
-    }
+            .catch((error) => {
+                // Handle errors
+                stopLoader();
+                ContentAlert.danger(Msg.localize('updateMembershipError', [getError(error)]));
+
+                // Clear the membership even if there is an error
+                props?.setMembership({});
+            });
+    };
 
     const validateMembership = () => {
         let errors: Record<string, string> = {};
@@ -245,7 +260,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                         Cancel
                     </Button>
                 ]}
-            >
+            >  
                 <Form>
                 <FormGroup
                         label={Msg.localize('groupPath')+":"}

@@ -1,52 +1,71 @@
-import * as React from 'react';
-import { useState, useEffect, useRef } from 'react';
+import * as React from "react";
+import { useState, useEffect, useRef } from "react";
 // @ts-ignore
-import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
+import {
+  HttpResponse,
+  GroupsServiceClient,
+} from "../../groups-mngnt-service/groups.service";
 // @ts-ignore
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '
-import { ValidateEmail } from '../../js/utils.js'
-import { Alert, Button, Checkbox, DataList, Radio, DataListCell, DataListItem, DataListItemCells, DataListItemRow, FormAlert, Modal, ModalVariant, Select, SelectOption, SelectVariant, Spinner, Wizard, WizardStep, Popover, TextArea } from '@patternfly/react-core';
-import { Msg } from '../../widgets/Msg';
-import { HelpIcon, ExternalLinkAltIcon } from '@patternfly/react-icons';
-import { Tooltip } from '@patternfly/react-core';
-import { useLoader } from '../LoaderContext';
-
-
-
-
+import { ValidateEmail } from "../../js/utils.js";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  DataList,
+  Radio,
+  DataListCell,
+  DataListItem,
+  DataListItemCells,
+  DataListItemRow,
+  FormAlert,
+  Modal,
+  ModalVariant,
+  Select,
+  SelectOption,
+  SelectVariant,
+  Spinner,
+  Wizard,
+  WizardStep,
+  Popover,
+  TextArea,
+} from "@patternfly/react-core";
+import { Msg } from "../../widgets/Msg";
+import { HelpIcon, ExternalLinkAltIcon } from "@patternfly/react-icons";
+import { Tooltip } from "@patternfly/react-core";
+import { useLoader } from "../LoaderContext";
+import { ContentAlert } from "../../content/ContentAlert";
+import { getError } from "../../js/utils";
 
 export const AddMemberModal: React.FC<any> = (props) => {
-
   let groupsService = new GroupsServiceClient();
   const [stepIdReached, setStepIdReached] = useState(1);
   const [isStep1Complete, setIsStep1Complete] = useState<boolean>(false);
   const [isStep2Complete, setIsStep2Complete] = useState<boolean>(false);
   const [adminGroupIds, setAdminGroupIds] = useState<String[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<String[]>([]);
-  const [requestResponse, setRequestResponse] = useState<any>({
-    active: false
-  });
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<any>({});
   const [addUserDirectly, setAddUserDirectly] = useState<Boolean>(false);
   const [selectedEnrollment, setSelectedEnrollment] = useState<any>({});
-  const [enrollmentConfigurations, setEnrollmentConfigurations] = useState<any>([]);
+  const [enrollmentConfigurations, setEnrollmentConfigurations] = useState<any>(
+    []
+  );
   const [invitationEmail, setInvitationEmail] = useState<String>("");
   const { startLoader, stopLoader } = useLoader();
 
   useEffect(() => {
     setIsModalOpen(props.active);
-  }, [props.active])
+  }, [props.active]);
 
   useEffect(() => {
     fetchAdminGroupIds();
   }, []);
 
-
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.hash.split('?')[1]);
-    const activeTab = searchParams.get('tab');
-    if (activeTab === 'members') {
+    const searchParams = new URLSearchParams(location.hash.split("?")[1]);
+    const activeTab = searchParams.get("tab");
+    if (activeTab === "members") {
       fetchGroupEnrollments();
     }
   }, [location.hash]);
@@ -55,13 +74,16 @@ export const AddMemberModal: React.FC<any> = (props) => {
     setIsStep1Complete(!!(selectedEnrollment?.id && selectedRoles.length > 0));
   }, [selectedRoles, selectedEnrollment]);
 
-
   useEffect(() => {
-    setIsStep2Complete(!!(
-      !addUserDirectly &&
-      invitationEmail && ValidateEmail(invitationEmail)) || !!(selectedUser?.id && addUserDirectly && !selectedEnrollment?.aup?.url));
+    setIsStep2Complete(
+      !!(
+        !addUserDirectly &&
+        invitationEmail &&
+        ValidateEmail(invitationEmail)
+      ) ||
+        !!(selectedUser?.id && addUserDirectly && !selectedEnrollment?.aup?.url)
+    );
   }, [invitationEmail, selectedUser, addUserDirectly, selectedEnrollment]);
-
 
   useEffect(() => {
     if (!isStep1Complete) {
@@ -69,12 +91,12 @@ export const AddMemberModal: React.FC<any> = (props) => {
       setInvitationEmail("");
       setAddUserDirectly(false);
     }
-  }, [isStep1Complete])
+  }, [isStep1Complete]);
 
   const onNext = ({ id }: WizardStep) => {
     if (id) {
-      if (typeof id === 'string') {
-        const [, orderIndex] = id.split('-');
+      if (typeof id === "string") {
+        const [, orderIndex] = id.split("-");
         id = parseInt(orderIndex);
       }
       setStepIdReached(stepIdReached < id ? id : stepIdReached);
@@ -84,11 +106,10 @@ export const AddMemberModal: React.FC<any> = (props) => {
   const onSave = () => {
     if (addUserDirectly) {
       addNewMember();
-    }
-    else {
+    } else {
       sendInvitation();
     }
-  }
+  };
 
   function getExpirationDate(days) {
     const today = new Date(); // Get the current date
@@ -96,14 +117,12 @@ export const AddMemberModal: React.FC<any> = (props) => {
     futureDate.setDate(today.getDate() + days); // Add the number of days
     // Format the date as YYYY-MM-DD
     const year = futureDate.getFullYear();
-    const month = String(futureDate.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    const day = String(futureDate.getDate()).padStart(2, '0');
+    const month = String(futureDate.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+    const day = String(futureDate.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   }
 
   const addNewMember = () => {
-   
-
     const requestBody: any = {
       user: selectedUser,
       groupEnrollmentConfiguration: selectedEnrollment,
@@ -112,78 +131,95 @@ export const AddMemberModal: React.FC<any> = (props) => {
 
     // Add membershipExpiresAt only if selectedEnrollment.membershipExpirationDays is defined
     if (selectedEnrollment?.membershipExpirationDays) {
-      requestBody.membershipExpiresAt = getExpirationDate(selectedEnrollment.membershipExpirationDays);
+      requestBody.membershipExpiresAt = getExpirationDate(
+        selectedEnrollment.membershipExpirationDays
+      );
     }
     startLoader();
-    groupsService!.doPost<any>("/group-admin/group/" + props.groupId + "/members", requestBody)
+    closeWizard();
+    groupsService!
+      .doPost<any>(
+        "/group-admin/group/" + props.groupId + "/members",
+        requestBody
+      )
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
-
-          setRequestResponse(
-            {
-              title: "User was succesfully added to the group",
-              active: true
-            });
+          ContentAlert.success(Msg.localize("addUserSuccess"));
           props.fetchGroupMembers();
           // setGroupMembers(response.data.results);
-        }
-        else {
-          setRequestResponse(
-            {
-              title: "User could not be added to the group",
-              active: true,
-              ...(response?.data?.error ? { error: response.data.error } : {})
-            });
+        } else {
+          ContentAlert.danger(Msg.localize("addUserError"), [
+            getError(response),
+          ]);
         }
         stopLoader();
-      }).catch((err) => { console.log(err) })
-  }
+      })
+      .catch((err) => {
+        stopLoader();
+        ContentAlert.danger(Msg.localize("addUserError"), [
+          Msg.localize("unexpectedError"),
+        ]);
+      });
+  };
 
   const sendInvitation = () => {
     startLoader();
-    groupsService!.doPost<any>("/group-admin/group/" + props.groupId + "/members/invitation", {
+    let requestBody= {
       email: invitationEmail,
       groupEnrollmentConfiguration: {
-        id: selectedEnrollment?.id
+        id: selectedEnrollment?.id,
       },
       groupRoles: selectedRoles,
-      withoutAcceptance: true
-    })
+      withoutAcceptance: true,
+    }
+    closeWizard();
+    groupsService!
+      .doPost<any>(
+        "/group-admin/group/" + props.groupId + "/members/invitation",
+        requestBody
+      )
       .then((response: HttpResponse<any>) => {
         stopLoader();
         if (response.status === 200 || response.status === 204) {
-          setRequestResponse({
-            title: Msg.localize('Invitation') + " " + Msg.localize('invitationSuccess'),
-            active: true
-          });
+          ContentAlert.success(Msg.localize("userInvitationSuccess"));
           // setGroupMembers(response.data.results);
+        } else {
+          ContentAlert.danger(Msg.localize("userInvitationError"), [
+            getError(response),
+          ]);
         }
-        else {
-          setRequestResponse({
-            title: Msg.localize('Invitation') + " " + Msg.localize('invitationFailed'),
-            active: true
-          });
-        }
-      }).catch((err) => { stopLoader(); console.log(err) })
-  }
+      })
+      .catch((err) => {
+        stopLoader();
+        ContentAlert.danger(Msg.localize("userInvitationError"), [
+          Msg.localize("unexpectedError"),
+        ]);
+        console.log(err);
+      });
+  };
 
   let fetchGroupEnrollments = () => {
-    groupsService!.doGet<any>("/group-admin/group/" + props.groupId + "/configuration/all")
+    groupsService!
+      .doGet<any>("/group-admin/group/" + props.groupId + "/configuration/all")
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 && response.data) {
           setEnrollmentConfigurations(response.data);
         }
-      })
-  }
+      });
+  };
 
   let fetchAdminGroupIds = () => {
-    groupsService!.doGet<any>("/group-admin/groupids/all")
+    groupsService!
+      .doGet<any>("/group-admin/groupids/all")
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 && response.data) {
-          setAdminGroupIds(response.data)
+          setAdminGroupIds(response.data);
         }
-      }).catch((err) => { console.log(err) })
-  }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   const closeWizard = () => {
     // eslint-disable-next-line no-console
@@ -197,52 +233,68 @@ export const AddMemberModal: React.FC<any> = (props) => {
     setSelectedRoles([]);
   };
 
-
   let steps = [
     {
-      id: 'incrementallyEnabled-1',
-      name: (Msg.localize('invitationStep1')),
-      component: <EnrollmentStep
-        setIsStep1Complete={setIsStep1Complete} setSelectedEnrollment={setSelectedEnrollment}
-        setStepIdReached={setStepIdReached} selectedEnrollment={selectedEnrollment} selectedRoles={selectedRoles}
-        setSelectedRoles={setSelectedRoles} enrollmentConfigurations={enrollmentConfigurations} />,
-      enableNext: isStep1Complete
+      id: "incrementallyEnabled-1",
+      name: Msg.localize("invitationStep1"),
+      component: (
+        <EnrollmentStep
+          setIsStep1Complete={setIsStep1Complete}
+          setSelectedEnrollment={setSelectedEnrollment}
+          setStepIdReached={setStepIdReached}
+          selectedEnrollment={selectedEnrollment}
+          selectedRoles={selectedRoles}
+          setSelectedRoles={setSelectedRoles}
+          enrollmentConfigurations={enrollmentConfigurations}
+        />
+      ),
+      enableNext: isStep1Complete,
     },
     {
-      id: 'incrementallyEnabled-2',
-      name: (Msg.localize('addOrInviteMember')),
-      component:
+      id: "incrementallyEnabled-2",
+      name: Msg.localize("addOrInviteMember"),
+      component: (
         <AddUserStep
-          groupId={props.groupId} setSelectedUser={setSelectedUser} selectedUser={selectedUser}
-          setAddUserDirectly={setAddUserDirectly} addUserDirectly={addUserDirectly} isStep2Complete={isStep2Complete}
-          setIsStep2Complete={setIsStep2Complete} adminGroupIds={adminGroupIds} invitationEmail={invitationEmail}
+          groupId={props.groupId}
+          setSelectedUser={setSelectedUser}
+          selectedUser={selectedUser}
+          setAddUserDirectly={setAddUserDirectly}
+          addUserDirectly={addUserDirectly}
+          isStep2Complete={isStep2Complete}
+          setIsStep2Complete={setIsStep2Complete}
+          adminGroupIds={adminGroupIds}
+          invitationEmail={invitationEmail}
           selectedEnrollment={selectedEnrollment}
-          setInvitationEmail={setInvitationEmail} />,
+          setInvitationEmail={setInvitationEmail}
+        />
+      ),
       enableNext: isStep2Complete,
-      nextButtonText: Msg.localize('confirm'),
-      canJumpTo: stepIdReached >= 2
-    }
+      nextButtonText: Msg.localize("confirm"),
+      canJumpTo: stepIdReached >= 2,
+    },
   ];
 
-  const title = Msg.localize('invitationSend');
+  const title = Msg.localize("invitationSend");
 
   return (
     <React.Fragment>
       <Modal
         variant={ModalVariant.medium}
-        title={Msg.localize('addMemberGroup') + ' "' + props.groupConfiguration.path + '"'}
+        title={
+          Msg.localize("addMemberGroup") +
+          ' "' +
+          props.groupConfiguration.path +
+          '"'
+        }
         isOpen={isModalOpen}
         onClose={() => {
           closeWizard();
         }}
         actions={[]}
         onEscapePress={() => {
-          if (requestResponse.active) {
-            props.setActive(false);
-          }
+          props.setActive(false);
         }}
       >
-        <ResponseModal requestResponse={requestResponse} close={() => { closeWizard(); setRequestResponse({ active: false }); }} />
         <Wizard
           navAriaLabel={`${title} steps`}
           mainAriaLabel={`${title} content`}
@@ -255,15 +307,16 @@ export const AddMemberModal: React.FC<any> = (props) => {
       </Modal>
     </React.Fragment>
   );
-}
-
+};
 
 const EnrollmentStep: React.FC<any> = (props) => {
   // const toggleRef = useRef<any>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [selections, setSelections] = useState(props.selectedEnrollment?.name ? props.selectedEnrollment.name : "");
+  const [selections, setSelections] = useState(
+    props.selectedEnrollment?.name ? props.selectedEnrollment.name : ""
+  );
 
-  const onToggle = isOpen => {
+  const onToggle = (isOpen) => {
     setIsOpen(isOpen);
   };
 
@@ -285,18 +338,18 @@ const EnrollmentStep: React.FC<any> = (props) => {
   };
 
   const roleHandler = (role) => {
-    let roles = [...props.selectedRoles]
+    let roles = [...props.selectedRoles];
     if (roles.includes(role)) {
       const index = roles.indexOf(role);
-      if (index > -1) { // only splice array when item is found
+      if (index > -1) {
+        // only splice array when item is found
         roles.splice(index, 1); // 2nd parameter means remove one item only
       }
-    }
-    else {
+    } else {
       roles.push(role);
     }
     props.setSelectedRoles([...roles]);
-  }
+  };
 
   return (
     <React.Fragment>
@@ -308,35 +361,54 @@ const EnrollmentStep: React.FC<any> = (props) => {
         selections={selections}
         isOpen={isOpen}
       >
-        <SelectOption key="placeholder" value={Msg.localize('invitationEnrollmentSelectPlaceholder')} isPlaceholder />
-        {props.enrollmentConfigurations ? props.enrollmentConfigurations.map((enrollment, index) => {
-          return <SelectOption key={index} value={enrollment?.name} isDisabled={!enrollment.active} onClick={() => {
-            props.setSelectedRoles([]);
-            props.setSelectedEnrollment(enrollment);
-          }} />
-        }) : []}
+        <SelectOption
+          key="placeholder"
+          value={Msg.localize("invitationEnrollmentSelectPlaceholder")}
+          isPlaceholder
+        />
+        {props.enrollmentConfigurations
+          ? props.enrollmentConfigurations.map((enrollment, index) => {
+              return (
+                <SelectOption
+                  key={index}
+                  value={enrollment?.name}
+                  isDisabled={!enrollment.active}
+                  onClick={() => {
+                    props.setSelectedRoles([]);
+                    props.setSelectedEnrollment(enrollment);
+                  }}
+                />
+              );
+            })
+          : []}
       </Select>
-      {props.selectedEnrollment?.id &&
+      {props.selectedEnrollment?.id && (
         <React.Fragment>
-          <DataList aria-label="Compact data list example" isCompact wrapModifier={"breakWord"}>
+          <DataList
+            aria-label="Compact data list example"
+            isCompact
+            wrapModifier={"breakWord"}
+          >
             <DataListItem aria-labelledby="compact-item1">
               <DataListItemRow>
                 <DataListItemCells
                   dataListCells={[
                     <DataListCell key="primary content">
                       <span id="compact-item1">
-                        <strong><Msg msgKey='invitationMemberhipDuration' /></strong>
+                        <strong>
+                          <Msg msgKey="invitationMemberhipDuration" />
+                        </strong>
                         <Popover
                           bodyContent={
                             <div>
-                              <Msg msgKey='helpTextInvitationExpiration' />
+                              <Msg msgKey="helpTextInvitationExpiration" />
                             </div>
                           }
                         >
                           <button
                             type="button"
                             aria-label="More info for name field"
-                            onClick={e => e.preventDefault()}
+                            onClick={(e) => e.preventDefault()}
                             aria-describedby="simple-form-name-01"
                             className="pf-c-form__group-label-help gm_popover-info"
                           >
@@ -346,8 +418,14 @@ const EnrollmentStep: React.FC<any> = (props) => {
                       </span>
                     </DataListCell>,
                     <DataListCell width={3} key="secondary content ">
-                      <span>{props.selectedEnrollment?.membershipExpirationDays ? props.selectedEnrollment?.membershipExpirationDays + " " + Msg.localize('Days') : Msg.localize('Permanent')} </span>
-                    </DataListCell>
+                      <span>
+                        {props.selectedEnrollment?.membershipExpirationDays
+                          ? props.selectedEnrollment?.membershipExpirationDays +
+                            " " +
+                            Msg.localize("Days")
+                          : Msg.localize("Permanent")}{" "}
+                      </span>
+                    </DataListCell>,
                   ]}
                 />
               </DataListItemRow>
@@ -357,53 +435,80 @@ const EnrollmentStep: React.FC<any> = (props) => {
                 <DataListItemCells
                   dataListCells={[
                     <DataListCell key="primary content">
-                      <span id="compact-item1"><strong><Msg msgKey='invitationRoleSelection' /></strong></span>
+                      <span id="compact-item1">
+                        <strong>
+                          <Msg msgKey="invitationRoleSelection" />
+                        </strong>
+                      </span>
                     </DataListCell>,
                     <DataListCell width={3} key="roles">
                       <table className="gm_roles-table">
                         <tbody>
-                          {props.selectedEnrollment && props.selectedEnrollment?.groupRoles?.map((role, index) => {
-                            return <tr onClick={() => { roleHandler(role); }}>
-                              <td>
-                                {role}
-                              </td>
-                              <td>
-                                <Checkbox id="standalone-check" name="standlone-check" checked={props.selectedRoles.includes(role)} aria-label="Standalone input" />
-                              </td>
-                            </tr>
-                          })}
+                          {props.selectedEnrollment &&
+                            props.selectedEnrollment?.groupRoles?.map(
+                              (role, index) => {
+                                return (
+                                  <tr
+                                    onClick={() => {
+                                      roleHandler(role);
+                                    }}
+                                  >
+                                    <td>{role}</td>
+                                    <td>
+                                      <Checkbox
+                                        id="standalone-check"
+                                        name="standlone-check"
+                                        checked={props.selectedRoles.includes(
+                                          role
+                                        )}
+                                        aria-label="Standalone input"
+                                      />
+                                    </td>
+                                  </tr>
+                                );
+                              }
+                            )}
                         </tbody>
                       </table>
-                    </DataListCell>
+                    </DataListCell>,
                   ]}
                 />
               </DataListItemRow>
             </DataListItem>
-            {props.selectedEnrollment?.aup?.url &&
+            {props.selectedEnrollment?.aup?.url && (
               <DataListItem aria-labelledby="aup-item">
                 <DataListItemRow>
                   <DataListItemCells
                     dataListCells={[
                       <DataListCell key="primary content">
                         <span id="aup-item">
-                          <strong><Msg msgKey='enrollmentConfigurationAupTitle' /></strong>
+                          <strong>
+                            <Msg msgKey="enrollmentConfigurationAupTitle" />
+                          </strong>
                         </span>
                       </DataListCell>,
                       <DataListCell width={3} key="secondary content ">
-                        <span><a href={props.selectedEnrollment?.aup?.url} target="_blank" rel="noreferrer">link <ExternalLinkAltIcon /> </a></span>
-                      </DataListCell>
+                        <span>
+                          <a
+                            href={props.selectedEnrollment?.aup?.url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            link <ExternalLinkAltIcon />{" "}
+                          </a>
+                        </span>
+                      </DataListCell>,
                     ]}
                   />
                 </DataListItemRow>
               </DataListItem>
-            }
+            )}
           </DataList>
         </React.Fragment>
-      }
+      )}
     </React.Fragment>
-  )
-}
-
+  );
+};
 
 const AddUserStep: React.FC<any> = (props) => {
   let groupsService = new GroupsServiceClient();
@@ -418,8 +523,14 @@ const AddUserStep: React.FC<any> = (props) => {
     if (props.adminGroupIds.length > 0) {
       fetchGroupMembers();
     }
-    setSelected(props.selectedUser?.email ? props.selectedUser.email : props.invitationEmail ? props.invitationEmail : null);
-  }, [props.adminGroupIds])
+    setSelected(
+      props.selectedUser?.email
+        ? props.selectedUser.email
+        : props.invitationEmail
+        ? props.invitationEmail
+        : null
+    );
+  }, [props.adminGroupIds]);
 
   const clearSelection = () => {
     props.setInvitationEmail("");
@@ -436,21 +547,44 @@ const AddUserStep: React.FC<any> = (props) => {
   };
 
   let fetchGroupMembers = async (searchString = "") => {
-    groupsService!.doGet<any>("/group-admin/groups/members", { params: { max: 20, search: searchString, groups: props.adminGroupIds.join(',') } })
+    groupsService!
+      .doGet<any>("/group-admin/groups/members", {
+        params: {
+          max: 20,
+          search: searchString,
+          groups: props.adminGroupIds.join(","),
+        },
+      })
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 && response.data) {
           let users: any = [];
           response.data.results.forEach((user) => {
-            users.push({ value: getUserIdentifier(user), description: user.email, id: user.id, user: user });
-          })
+            users.push({
+              value: getUserIdentifier(user),
+              description: user.email,
+              id: user.id,
+              user: user,
+            });
+          });
           setOptions(users);
         }
-      }).catch((err) => { console.log(err) })
-  }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   let getUserIdentifier = (user) => {
-    return (user.firstName || user.lastName ? (user.firstName && user.firstName + " ") + user.lastName : user.username ? user.username : user.email ? user.email : user.id ? user.id : "Info Not Available")
-  }
+    return user.firstName || user.lastName
+      ? (user.firstName && user.firstName + " ") + user.lastName
+      : user.username
+      ? user.username
+      : user.email
+      ? user.email
+      : user.id
+      ? user.id
+      : "Info Not Available";
+  };
 
   return (
     <React.Fragment>
@@ -460,10 +594,10 @@ const AddUserStep: React.FC<any> = (props) => {
           variant={SelectVariant.typeahead}
           typeAheadAriaLabel="Select a state"
           onToggle={onToggle}
-          onSelect={() => { }}
+          onSelect={() => {}}
           onClear={clearSelection}
           selections={selected}
-          createText={Msg.localize('invitationEmailInputTypeahead')}
+          createText={Msg.localize("invitationEmailInputTypeahead")}
           onCreateOption={(value) => {
             props.setInvitationEmail(value);
             setEmailError(!ValidateEmail(value));
@@ -481,7 +615,7 @@ const AddUserStep: React.FC<any> = (props) => {
               setShowEmailError(false);
               let filterOptions: any = [];
               fetchGroupMembers(searchString);
-              options.forEach((option, index) => (
+              options.forEach((option, index) =>
                 filterOptions.push(
                   <SelectOption
                     isDisabled={option.disabled}
@@ -496,10 +630,12 @@ const AddUserStep: React.FC<any> = (props) => {
                       }
                       setIsOpen(false);
                     }}
-
-                    {...(option.description && { description: option.description })}
-                  />)
-              ))
+                    {...(option.description && {
+                      description: option.description,
+                    })}
+                  />
+                )
+              );
               return filterOptions;
             }
             setIsFirstLoad(false);
@@ -528,9 +664,20 @@ const AddUserStep: React.FC<any> = (props) => {
             />
           ))}
         </Select>
-        {emailError && showEmailError ? <FormAlert>
-          <Alert variant="danger" title={!props.invitationEmail ? Msg.localize('invitationEmailRequired') : Msg.localize('invitationEmailError')} aria-live="polite" isInline />
-        </FormAlert> : null}
+        {emailError && showEmailError ? (
+          <FormAlert>
+            <Alert
+              variant="danger"
+              title={
+                !props.invitationEmail
+                  ? Msg.localize("invitationEmailRequired")
+                  : Msg.localize("invitationEmailError")
+              }
+              aria-live="polite"
+              isInline
+            />
+          </FormAlert>
+        ) : null}
       </div>
       <div className="gm_add-user-action-container">
         <strong>Choose Action</strong>
@@ -539,47 +686,51 @@ const AddUserStep: React.FC<any> = (props) => {
             isChecked={!props.addUserDirectly}
             name="radio-1"
             onClick={() => {
-              props.setAddUserDirectly(false)
+              props.setAddUserDirectly(false);
             }}
-            label={Msg.localize('invitationSend')}
+            label={Msg.localize("invitationSend")}
             id="radio-invitation"
           ></Radio>
-          <Tooltip distance={5} position="top-start" trigger={Object.keys(props.selectedUser).length === 0 || props.selectedEnrollment?.aup?.url ? "mouseenter" : "manual"} isVisible={false} content={<div><Msg msgKey={props.selectedEnrollment?.aup?.url ? 'addUserDisabledRadioTooltipAUP' : 'addUserDisabledRadioTooltipUser'} /></div>}>
+          <Tooltip
+            distance={5}
+            position="top-start"
+            trigger={
+              Object.keys(props.selectedUser).length === 0 ||
+              props.selectedEnrollment?.aup?.url
+                ? "mouseenter"
+                : "manual"
+            }
+            isVisible={false}
+            content={
+              <div>
+                <Msg
+                  msgKey={
+                    props.selectedEnrollment?.aup?.url
+                      ? "addUserDisabledRadioTooltipAUP"
+                      : "addUserDisabledRadioTooltipUser"
+                  }
+                />
+              </div>
+            }
+          >
             <Radio
               isChecked={props.addUserDirectly}
               name="radio-1"
-              isDisabled={Object.keys(props.selectedUser).length === 0 || props.selectedEnrollment?.aup?.url}
+              isDisabled={
+                Object.keys(props.selectedUser).length === 0 ||
+                props.selectedEnrollment?.aup?.url
+              }
               onClick={() => {
-                props.setAddUserDirectly(true)
+                props.setAddUserDirectly(true);
               }}
-              label={Msg.localize('addMemberDirectly')}
+              label={Msg.localize("addMemberDirectly")}
               id="radio-direct-add"
             ></Radio>
           </Tooltip>
         </div>
       </div>
     </React.Fragment>
-  )
-}
+  );
+};
 
 
-
-const ResponseModal: React.FC<any> = (props) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  useEffect(() => {
-    setIsModalOpen(!!props.requestResponse?.active)
-  }, [props.requestResponse.active])
-
-  return (
-    <Modal
-      variant={ModalVariant.small}
-      title={props.requestResponse?.title}
-      description={props.requestResponse?.error}
-      isOpen={isModalOpen}
-      onClose={() => { props.close() }}
-      actions={[<Button key="confirm" variant="primary" onClick={() => { props.close() }}>
-        OK
-      </Button>]}
-    ><></></Modal>
-  )
-}

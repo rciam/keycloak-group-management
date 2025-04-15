@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { BadgeToggle, Dropdown, DropdownItem, Modal, ModalVariant, Spinner } from "@patternfly/react-core";
+import { BadgeToggle, Dropdown, DropdownItem } from "@patternfly/react-core";
 import { useEffect, useState } from "react";
 import { Msg } from '../widgets/Msg';
 import { CheckIcon } from '@patternfly/react-icons';
