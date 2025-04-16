@@ -10,6 +10,9 @@ export const DatalistFilterSelect: React.FC<any> = (props) => {
     const [initialRender,setInitialRender] = useState(true);
     const [options,setOptions] = useState(props.options)
 
+    useEffect(()=>{
+      setOptions(props.options);
+    },[props.options])
 
     useEffect(()=>{
         if(initialRender){
