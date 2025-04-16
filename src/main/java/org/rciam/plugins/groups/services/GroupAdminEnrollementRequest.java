@@ -36,7 +36,7 @@ import org.keycloak.services.ServicesLogger;
 
 public class GroupAdminEnrollementRequest {
 
-    private static final String statusErrorMessage = "Enrollment is not in status Pending approval";
+    private static final String statusErrorMessage = "Enrolment is not in status Pending approval";
 
     @Context
     private ClientConnection clientConnection;
