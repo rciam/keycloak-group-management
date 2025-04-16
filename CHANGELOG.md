@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Validation for Membership Expiration in Enrollment configuration to match Backend validation
 - Changed enrollment to enrolment in messages
 - Fixed Typos
+- Use Keycloak.username in Group Management UI
 
 ## [1.6.1] - 2025-04-03
 

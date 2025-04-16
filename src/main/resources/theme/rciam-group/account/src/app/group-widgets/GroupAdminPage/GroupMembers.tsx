@@ -452,7 +452,7 @@ export const GroupMembers: FC<any> = (props) => {
                 <DataListItemCells
                   dataListCells={[
                     <DataListCell width={3} key="primary content">
-                      {member.user?.attributes?.voPersonID || member.user.username}
+                      {member.user.username}
                     </DataListCell>,
                     <DataListCell width={3} key="secondary content1">
                       <span className="gm_fullname_datalist pf-c-select__menu-item-main">{member.user.firstName && member.user.lastName ? member.user.firstName + " " + member.user.lastName : Msg.localize('notAvailable')}</span>
