@@ -141,7 +141,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
               User Details
               <Popover
                 headerContent={<div>
-                  The User Details at the time the enrollment request was created
+                  <Msg msgKey='enrollmentUserDetails' />
                 </div>} bodyContent={undefined}              >
                 <button
                   type="button"

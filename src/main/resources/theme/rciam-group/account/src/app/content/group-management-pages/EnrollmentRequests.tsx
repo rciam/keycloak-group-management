@@ -249,7 +249,7 @@ export const EnrollmentRequests: FC<any> = (props) => {
                       <strong><Msg msgKey='Group Path' /></strong>
                       </DataListCell>,
                       <DataListCell className="gm_vertical_center_cell" width={1} key="enrollment-hd">
-                      <strong><Msg msgKey='Enrollment Name' /></strong>
+                      <strong><Msg msgKey='enrollmentName' /></strong>
                       </DataListCell> ,
                       ...(props.manage?[<DataListCell className="gm_vertical_center_cell" width={1} key="state-hd">
                         <strong>

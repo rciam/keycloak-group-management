@@ -120,7 +120,7 @@ export const EnrollmentModal: FC<any> = (props) => {
     !(enrollment?.groupRoles?.length > 0) &&
       (errors.groupRoles = Msg.localize("groupRolesFormError"));
     enrollment?.membershipExpirationDays === 0 &&
-      props.validationRules?.membershipExpirationDays?.required === true &&
+      props.validationRules?.membershipExpirationDays?.max &&
       (errors.membershipExpirationDays = Msg.localize("fieldMaxZeroFormError"));
     enrollment?.membershipExpirationDays &&
       !(enrollment?.membershipExpirationDays > 0) &&
@@ -467,7 +467,7 @@ export const EnrollmentModal: FC<any> = (props) => {
               // helperText=""
             >
               <Tooltip
-                {...(!props.validationRules?.membershipExpirationDays?.required
+                {...(! props.validationRules?.membershipExpirationDays?.max
                   ? { trigger: "manual", isVisible: false }
                   : { trigger: "mouseenter" })}
                 content={
@@ -480,7 +480,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                   id="simple-switch-membershipExpirationDays"
                   aria-label="simple-switch-membershipExpirationDays"
                   isDisabled={
-                    props.validationRules?.membershipExpirationDays?.required &&
+                    props.validationRules?.membershipExpirationDays?.max &&
                     isIntegerOrNumericString(
                       enrollment?.membershipExpirationDays
                     ) &&

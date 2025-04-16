@@ -259,7 +259,7 @@ export const CreateEnrollment: FC<any> = (props) => {
                   {enrollments && enrollments.length > 0 ?
                     <React.Fragment>
                       <FormGroup
-                        label={Msg.localize('Group Enrollment')}
+                        label={Msg.localize('groupEnrollment')}
                         isRequired
                         fieldId="simple-form-name-01"
                       >
@@ -400,7 +400,7 @@ export const CreateEnrollment: FC<any> = (props) => {
                 <Alert className='gm_content-width' variant="warning" title={Msg.localize('enrollmentRequestExistsTitle')}>
                   <p>
                     <Msg msgKey='enrollmentRequestExistsMessage' />{' '}
-                    <Link to={"/groups/mygroupenrollments"}>"View My Enrollment Requests”</Link>
+                    <Link to={"/groups/mygroupenrollments"}>"<Msg msgKey='viewMyEnrollmentRequests'/>”</Link>
                   </p>
                 </Alert>
               }
