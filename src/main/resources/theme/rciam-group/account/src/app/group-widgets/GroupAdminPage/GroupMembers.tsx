@@ -363,7 +363,7 @@ export const GroupMembers: FC<any> = (props) => {
           <DataListItemRow>
             <DataListItemCells dataListCells={[
               <DataListCell className="gm_vertical_center_cell" width={3} key="id-hd">
-                <strong><Msg msgKey='UniqueIdentifier' /></strong>
+                <strong><Msg msgKey='username' /></strong>
               </DataListCell>,
               <DataListCell className="gm_vertical_center_cell" width={3} key="email-hd">
                 <div className="gm_order_by_container" onClick={() => { orderResults('default') }}>

@@ -171,7 +171,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
               <div>{enrollmentRequest?.userEmail ? enrollmentRequest?.userEmail : Msg.localize('notAvailable')}</div>
             </FormGroup>
             <FormGroup
-              label={Msg.localize('UniqueIdentifier')+""}
+              label={Msg.localize('username')+""}
               fieldId="simple-form-name-02"
             >
               <div>{enrollmentRequest?.userIdentifier ? enrollmentRequest?.userIdentifier : Msg.localize('notAvailable')}</div>

@@ -691,29 +691,45 @@ const AddUserStep: React.FC<any> = (props) => {
             label={Msg.localize("invitationSend")}
             id="radio-invitation"
           ></Radio>
-          <Tooltip
-            distance={5}
-            position="top-start"
-            trigger={
-              Object.keys(props.selectedUser).length === 0 ||
-              props.selectedEnrollment?.aup?.url
-                ? "mouseenter"
-                : "manual"
-            }
-            isVisible={false}
-            content={
-              <div>
-                <Msg
-                  msgKey={
-                    props.selectedEnrollment?.aup?.url
-                      ? "addUserDisabledRadioTooltipAUP"
-                      : "addUserDisabledRadioTooltipUser"
-                  }
-                />
-              </div>
-            }
-          >
-            <Radio
+          {Object.keys(props.selectedUser).length === 0 ||
+              props.selectedEnrollment?.aup?.url?
+              <Tooltip
+              distance={5}
+              position="top-start"
+              trigger={
+                Object.keys(props.selectedUser).length === 0 ||
+                props.selectedEnrollment?.aup?.url
+                  ? "mouseenter"
+                  : "manual"
+              }
+              isVisible={false}
+              content={
+                <div>
+                  <Msg
+                    msgKey={
+                      props.selectedEnrollment?.aup?.url
+                        ? "addUserDisabledRadioTooltipAUP"
+                        : "addUserDisabledRadioTooltipUser"
+                    }
+                  />
+                </div>
+              }
+            >
+              <Radio
+                isChecked={props.addUserDirectly}
+                name="radio-1"
+                isDisabled={
+                  Object.keys(props.selectedUser).length === 0 ||
+                  props.selectedEnrollment?.aup?.url
+                }
+                onClick={() => {
+                  props.setAddUserDirectly(true);
+                }}
+                label={Msg.localize("addMemberDirectly")}
+                id="radio-direct-add"
+              ></Radio>
+            </Tooltip>:
+              <Radio
               isChecked={props.addUserDirectly}
               name="radio-1"
               isDisabled={
@@ -726,7 +742,8 @@ const AddUserStep: React.FC<any> = (props) => {
               label={Msg.localize("addMemberDirectly")}
               id="radio-direct-add"
             ></Radio>
-          </Tooltip>
+            }
+          
         </div>
       </div>
     </React.Fragment>

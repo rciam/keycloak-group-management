@@ -169,7 +169,7 @@ export const GroupAdmins: FC<any> = (props) => {
           <DataListItemRow>
             <DataListItemCells dataListCells={[
               <DataListCell width={1} key="username-hd">
-                <strong><Msg msgKey='UniqueIdentifier' /></strong>
+                <strong><Msg msgKey='username' /></strong>
               </DataListCell>,
               <DataListCell width={1} key="name-email-hd">
                 <strong><Msg msgKey='adminGroupMemberCellNameEmail' /></strong>
