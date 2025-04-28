@@ -295,7 +295,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                   </div>
                 </FormGroup> */}
                 <FormGroup
-                  label={Msg.localize('enrollmentIdentityProvidersLabel')}
+                  label={Msg.localize('enrollmentIdentityProvidersLabel')+":"}
                   fieldId="simple-form-name-04"
                 >
                   <div>{enrollmentRequest?.user?.federatedIdentities && enrollmentRequest?.user?.federatedIdentities.length > 0 ? enrollmentRequest?.user?.federatedIdentities.map((federatedIdentity, index) => {

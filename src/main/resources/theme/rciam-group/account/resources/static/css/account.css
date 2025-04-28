@@ -557,12 +557,24 @@
     padding: 0;
 }
 
-.gm_actions_container {
-    flex-wrap: wrap;
+.gm_actions_container { 
     gap: 0.5rem;
     display: flex;
 }
 
+.gm_actions_container .pf-c-dropdown {
+    display: none;
+}
+
+@media (max-width: 768px) {
+  .gm_actions_container .pf-c-dropdown {
+    display: block;
+  }
+
+  .gm_actions_container .gm_small_icon_button {
+    display: none;
+  }
+}
 
 .gm_view-groups-header svg {
     margin-bottom: -0.1rem;
@@ -970,3 +982,9 @@
 .gm_add-user-radio-container div {
     margin-bottom:0.5rem;
 }
+
+.gm_modal-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
