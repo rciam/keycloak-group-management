@@ -400,6 +400,11 @@
     margin-right: 0.5rem !important;
 }
 
+.gm_dark_badge {
+    background-color: #212529!important;
+    color: #ffffff !important;
+}
+
 .gm_email_datalist {
     color: rgb(106, 110, 115) !important;
     font-size: 0.8rem !important;

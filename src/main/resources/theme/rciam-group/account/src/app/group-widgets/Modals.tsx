@@ -324,10 +324,10 @@ export const CreateGroupModal: React.FC<any> = (props) => {
   );
 };
 
-export const UserInfoModal: React.FC<{ membership: any; onClose: () => void }> = ({
-  membership,
-  onClose,
-}) => {
+export const UserInfoModal: React.FC<{
+  membership: any;
+  onClose: () => void;
+}> = ({ membership, onClose }) => {
   if (!membership) return null; // Don't render the modal if no user or membership is selected
 
   const notificationWarningDirect =
@@ -337,7 +337,9 @@ export const UserInfoModal: React.FC<{ membership: any; onClose: () => void }> =
       dateParse(membership.membershipExpiresAt),
       addDays(
         new Date(new Date().setHours(0, 0, 0, 0)),
-        parseInt(membership?.group?.attributes["expiration-notification-period"]?.[0])
+        parseInt(
+          membership?.group?.attributes["expiration-notification-period"]?.[0]
+        )
       ),
       "warning"
     );
@@ -355,23 +357,32 @@ export const UserInfoModal: React.FC<{ membership: any; onClose: () => void }> =
     >
       <Form>
         {/* User Information Section */}
-        <h2 className="gm_modal-title"><Msg msgKey="userDetails"/></h2>
-        <FormGroup label="Full Name" fieldId="user-fullname">
-          <div>
-            {membership.user.firstName && membership.user.lastName
-              ? `${membership.user.firstName} ${membership.user.lastName}`
-              : <Msg msgKey="notAvailable" />}
-          </div>
-        </FormGroup>
+        <h2 className="gm_modal-title">
+          <Msg msgKey="userDetails" />
+        </h2>
         <FormGroup label={Msg.localize("username")} fieldId="user-username">
           <div>{membership.user.username || <Msg msgKey="notAvailable" />}</div>
         </FormGroup>
         <FormGroup label={Msg.localize("email")} fieldId="user-email">
           <div>{membership.user.email || <Msg msgKey="notAvailable" />}</div>
         </FormGroup>
-        <FormGroup label={Msg.localize("preferredUsername")} fieldId="user-preferred-username">
+        <FormGroup label="Full Name" fieldId="user-fullname">
           <div>
-            {membership.user.attributes?.preferred_username?.[0] || <Msg msgKey="notAvailable" />}
+            {membership.user.firstName && membership.user.lastName ? (
+              `${membership.user.firstName} ${membership.user.lastName}`
+            ) : (
+              <Msg msgKey="notAvailable" />
+            )}
+          </div>
+        </FormGroup>
+        <FormGroup
+          label={Msg.localize("uid")}
+          fieldId="user-preferred-username"
+        >
+          <div>
+            {membership.user.attributes?.uid?.[0] || (
+              <Msg msgKey="notAvailable" />
+            )}
           </div>
         </FormGroup>
         <FormGroup
@@ -381,13 +392,15 @@ export const UserInfoModal: React.FC<{ membership: any; onClose: () => void }> =
           <div>
             {membership.user.federatedIdentities &&
             membership.user.federatedIdentities.length > 0 ? (
-              <List>
-                {membership.user.federatedIdentities.map((identity, index) => (
-                  <ListItem key={index} style={{ marginLeft: `${index}rem` }}>
-                    {identity.identityProvider}
-                  </ListItem>
-                ))}
-              </List>
+              membership.user.federatedIdentities.map((identity, index) => (
+                <Badge
+                  key={"single"}
+                  className="gm_role_badge gm_dark_badge"
+                  isRead
+                >
+                  {identity.identityProvider}
+                </Badge>
+              ))
             ) : (
               <Msg msgKey="notAvailable" />
             )}
@@ -395,8 +408,13 @@ export const UserInfoModal: React.FC<{ membership: any; onClose: () => void }> =
         </FormGroup>
 
         {/* Membership Information Section */}
-        <h2 className="gm_modal-title"><Msg msgKey="membershipDetails"/></h2>
-        <FormGroup label="Membership Expiration" fieldId="membership-expiration">
+        <h2 className="gm_modal-title">
+          <Msg msgKey="membershipDetails" />
+        </h2>
+        <FormGroup
+          label="Membership Expiration"
+          fieldId="membership-expiration"
+        >
           <div>
             {notificationWarningDirect ? (
               <Popover
