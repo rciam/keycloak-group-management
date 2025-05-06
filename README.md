@@ -22,7 +22,7 @@ A keycloak plugin to support advanced group management features:
 | 0.18.0                   | 22.0.10-1.4 +    |
 | 0.19.0                   | 22.0.10-1.8 +    |
 | 0.19.0                   | 22.0.10-1.8 +    |
-| 1.6.3                    | 22.0.13-1.17 +   |
+| 1.7.0                    | 22.0.13-1.17 +   |
 
 
 ## General configuration options 
