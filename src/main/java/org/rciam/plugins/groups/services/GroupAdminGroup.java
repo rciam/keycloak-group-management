@@ -29,6 +29,7 @@ import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
 import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -107,6 +108,7 @@ public class GroupAdminGroup {
             throw new ErrorResponseException("You need firstly to delete child groups.", "You need firstly to delete child groups.", Response.Status.BAD_REQUEST);
 
         List<String> groupAdminsIds = groupAdminRepository.getAllAdminIdsGroupUsers(group).filter(x -> !groupAdmin.getId().equals(x)).collect(Collectors.toList());
+        String groupId = group.getId();
         generalService.removeGroup(group, groupAdmin, clientConnection, false);
         groupAdminsIds.stream().map(id -> session.users().getUserById(realm, id)).forEach(admin -> {
             try {
@@ -117,7 +119,7 @@ public class GroupAdminGroup {
             }
         });
 
-        adminEvent.operation(OperationType.DELETE).representation(group.getName()).resourcePath(session.getContext().getUri()).success();
+        adminEvent.resource(ResourceType.GROUP).operation(OperationType.DELETE).representation(group.getName()).resourcePath(groupId).success();
     }
 
     @GET

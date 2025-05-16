@@ -9,19 +9,18 @@ import java.util.stream.Stream;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.common.util.ObjectUtil;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.events.admin.OperationType;
+import org.keycloak.events.admin.ResourceType;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ModelDuplicateException;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.GroupEntity;
-import org.keycloak.models.jpa.entities.UserGroupMembershipEntity;
 import org.keycloak.services.ErrorResponse;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.resources.admin.GroupResource;
@@ -176,7 +175,8 @@ public class GeneralJpaService {
             throw ErrorResponse.exists("Top level group named '" + groupName + "' already exists.");
         }
 
-        adminEvent.representation(rep).success();
+        adminEvent.resource(ResourceType.GROUP).operation(OperationType.CREATE).representation(rep).resourcePath(rep.getId()).success();
         return builder.build();
     }
+
 }

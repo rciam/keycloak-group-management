@@ -4,6 +4,16 @@ All notable changes in keycloak-group-management will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2025-05-16
+
+### Fixed
+- Save appropriate admin event for group crud actions
+
+## [1.7.1] - 2025-05-12
+
+### Fixed
+- Fix group admin pager
+
 ## [1.7.0] - 2025-05-05
 
 ### Added

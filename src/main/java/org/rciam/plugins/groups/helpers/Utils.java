@@ -160,7 +160,7 @@ public class Utils {
             rep.setId(child.getId());
             adminEvent.operation(OperationType.CREATE);
         }
-        adminEvent.resourcePath(session.getContext().getUri()).representation(rep).success();
+        adminEvent.resourcePath(rep.getId()).representation(rep).success();
 
         //custom agm implementation
         if (groupEnrollmentConfigurationRepository.getByGroup(rep.getId()).collect(Collectors.toList()).isEmpty()) {
