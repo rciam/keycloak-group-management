@@ -516,7 +516,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
               label={Msg.localize("enrollmentGroupRolesLabel")}
               fieldId="simple-form-name-07"
             >
-              {enrollmentRequest?.groupEnrollmentConfiguration?.groupRoles.map(
+              {enrollmentRequest?.groupRoles?.map(
                 (role, index) => {
                   return (
                     <Badge key={index} className="gm_role_badge" isRead>
