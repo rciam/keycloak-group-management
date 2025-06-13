@@ -192,7 +192,6 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
 
     }
 
-    @Transactional
     public Set<GroupModel> deleteMember(UserGroupMembershipExtensionEntity member, GroupModel group, UserModel user, ClientConnection clientConnection, String actionUserId, MemberUserAttributeConfigurationEntity memberUserAttribute, boolean isRealmRemove) {
         if (isRealmRemove) {
             deleteEntity(member);
@@ -231,7 +230,6 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         }
     }
 
-    @Transactional
     public List<String> suspendUser(UserModel user, UserGroupMembershipExtensionEntity member, String justification, GroupModel group, MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository) {
         member.setStatus(MemberStatusEnum.SUSPENDED);
         member.setJustification(justification);
@@ -384,7 +382,6 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         return new UserRepresentationPager(results.map(x -> EntityToRepresentation.toBriefRepresentation(x, realm)).collect(Collectors.toList()), count);
     }
 
-    @Transactional
     public List<String> reActivateUser(UserModel user, UserGroupMembershipExtensionEntity member, String justification, GroupModel group, MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository) {
         member.setStatus(MemberStatusEnum.ENABLED);
         member.setJustification(justification);

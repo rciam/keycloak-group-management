@@ -65,8 +65,13 @@ public class GeneralJpaService {
 
     }
 
-    @Transactional
     public void removeGroup(GroupModel group, UserModel groupAdmin, ClientConnection clientConnection, boolean isRealmRemove) {
+        deleteRelatedToGroupTables(group, groupAdmin, clientConnection, isRealmRemove);
+        realm.removeGroup(group);
+    }
+
+   @Transactional
+    private void deleteRelatedToGroupTables(GroupModel group, UserModel groupAdmin, ClientConnection clientConnection, boolean isRealmRemove){
         //extra delete UserGroupMembershipExtensionEntity, GroupEnrollmentConfigurationEntity, GroupAdminEntity, GroupEnrollmentRequestEntity
         groupEnrollmentRequestRepository.deleteByGroup(group.getId());
         groupInvitationRepository.deleteByGroup(group.getId());
@@ -79,11 +84,8 @@ public class GeneralJpaService {
         groupEnrollmentConfigurationRepository.deleteByGroup(group.getId());
         groupAdminRepository.deleteByGroup(group.getId());
         groupRolesRepository.deleteByGroup(group.getId());
-
-        realm.removeGroup(group);
     }
 
-    @Transactional
     public boolean removeUser(UserModel user) {
 
         try {
