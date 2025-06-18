@@ -33,13 +33,12 @@ export class GroupsServiceClient {
     private kcSvc: KeycloakService;
     private groupsUrl: string;
     private baseUrl: string;
-    private sshKeysUrl: string;
+    private baseAccountUrl: string;
     //TODO: UPDATE the groupsUrl value in the constructor to match the base path of the extension's REST endpoints!!!
     public constructor() {
         this.kcSvc = keycloakService;
         this.groupsUrl = this.kcSvc.authServerUrl() + 'realms/' + this.kcSvc.realm() + '/agm/account';
-        this.sshKeysUrl= this.kcSvc.authServerUrl() + 'realms/' + this.kcSvc.realm() + '/account';
-        this.baseUrl = this.kcSvc.authServerUrl() + 'admin/' + this.kcSvc.realm() + '/console';
+        this.baseAccountUrl= this.kcSvc.authServerUrl() + 'realms/' + this.kcSvc.realm() + '/account';
     }
 
     public getUserRoles = ()=> {
@@ -125,7 +124,7 @@ export class GroupsServiceClient {
 
     private makeUrl(endpoint: string, config?: RequestInitWithParams): URL {
         if (endpoint.startsWith('http')) return new URL(endpoint);
-        const url = new URL((config?.target==='base'?this.baseUrl:config?.target==='sshKeys'?this.sshKeysUrl:this.groupsUrl) + endpoint);
+        const url = new URL((config?.target==='base_account'?this.baseAccountUrl:this.groupsUrl) + endpoint);
         // add request params
         if (config && config.hasOwnProperty('params')) {
             const params: {[name: string]: string} = config.params as {} || {};

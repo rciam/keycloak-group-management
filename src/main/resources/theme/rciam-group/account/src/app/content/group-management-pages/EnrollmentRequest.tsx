@@ -1,5 +1,5 @@
 import * as React from "react";
-import { FC, useState, useEffect } from "react";
+import { FC, useState, useEffect, useRef } from "react";
 import {
   Button,
   Tooltip,
@@ -18,6 +18,8 @@ import {
   DataListItemRow,
   DataListItemCells,
   DataListCell,
+  HelperText,
+  HelperTextItem,
 } from "@patternfly/react-core";
 // @ts-ignore
 import {
@@ -31,6 +33,7 @@ import {
   HelpIcon,
 } from "@patternfly/react-icons";
 import { Popover, List, ListItem } from "@patternfly/react-core";
+import { dateParse, formatDateToString, isFutureDate } from "../../js/utils.js";
 import { getError } from "../../js/utils.js";
 import { ContentAlert } from "../ContentAlert";
 import { useLoader } from "../../group-widgets/LoaderContext";
@@ -38,6 +41,7 @@ import { useLoader } from "../../group-widgets/LoaderContext";
 export const EnrollmentRequest: FC<any> = (props) => {
   const { startLoader, stopLoader } = useLoader();
   const [enrollmentRequest, setEnrollmentRequest] = useState<any>({});
+  const [membership, setMembership] = useState<any>(null); // <-- Add this line
   const [copyTooltip, setCopyTooltip] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   let groupsService = new GroupsServiceClient();
@@ -48,9 +52,38 @@ export const EnrollmentRequest: FC<any> = (props) => {
     if (Object.keys(props.enrollmentRequest).length !== 0) {
       setIsModalOpen(true);
       setEnrollmentRequest({ ...props.enrollmentRequest });
+      // Fetch membership if username and groupId are available
+      const username = props.enrollmentRequest?.userIdentifier;
+      const groupId =
+        props.enrollmentRequest?.groupEnrollmentConfiguration?.group?.id;
+      if (username && groupId) {
+        groupsService
+          .doGet<any>(`/group-admin/group/${groupId}/members`, {
+            params: { search: username },
+          })
+          .then((response: HttpResponse<any>) => {
+            // Handle response with results array
+            if (
+              response.status === 200 &&
+              response.data &&
+              Array.isArray(response.data.results) &&
+              response.data.results.length > 0
+            ) {
+              setMembership(response.data.results[0]);
+            } else {
+              setMembership(null);
+            }
+          })
+          .catch((err) => {
+            setMembership(null);
+          });
+      } else {
+        setMembership(null);
+      }
     } else {
       setIsModalOpen(false);
       setEnrollmentRequest({});
+      setMembership(null);
     }
   }, [props.enrollmentRequest]);
 
@@ -95,6 +128,53 @@ export const EnrollmentRequest: FC<any> = (props) => {
     props.close();
   };
 
+  // Helper to format date as string
+  const formatDate = (date: Date) => formatDateToString(date);
+
+  let newExpirationDate: string | null = null;
+  let expirationChangeType:
+    | "extend"
+    | "reduce"
+    | "same"
+    | "infinite"
+    | "tofinite"
+    | "toinfinite"
+    | null = null;
+  let daysDiff: number | null = null;
+
+  const membershipExpirationDays =
+    enrollmentRequest?.groupEnrollmentConfiguration?.membershipExpirationDays;
+  const currentExpiration = membership?.membershipExpiresAt
+    ? dateParse(membership.membershipExpiresAt)
+    : null;
+
+  if (membership && membershipExpirationDays) {
+    // Existing member: new expiration is now + configured duration
+    const today = new Date();
+    const newExp = new Date(today);
+    newExp.setDate(today.getDate() + parseInt(membershipExpirationDays));
+    newExpirationDate = formatDateToString(newExp);
+
+    if (currentExpiration) {
+      daysDiff = Math.ceil(
+        (newExp.getTime() - currentExpiration.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      if (daysDiff > 0) expirationChangeType = "extend";
+      else if (daysDiff < 0) expirationChangeType = "reduce";
+      else expirationChangeType = "same";
+    } else {
+      expirationChangeType = "tofinite"; // Was infinite, now will expire
+    }
+  } else if (membership && !membershipExpirationDays) {
+    // Infinite membership
+    newExpirationDate = Msg.localize("never");
+    if (currentExpiration) {
+      expirationChangeType = "toinfinite"; // Was finite, now infinite
+    } else {
+      expirationChangeType = "infinite";
+    }
+  }
+
   return (
     <React.Fragment>
       <Modal
@@ -104,9 +184,15 @@ export const EnrollmentRequest: FC<any> = (props) => {
             <h1 className="pf-c-modal-box__title gm_flex-center">
               {enrollmentRequest?.status === "PENDING_APPROVAL" &&
               props.managePage ? (
-                <Msg msgKey="reviewRequestTitle" />
+                membership ? (
+                  <Msg msgKey="reviewUpdateMembershipRequestTitle" />
+                ) : (
+                  <Msg msgKey="reviewEnrollmentRequestTitle" />
+                )
+              ) : membership && enrollmentRequest?.status === "PENDING_APPROVAL" ? (
+                <Msg msgKey="viewUpdateMembershipRequestTitle" />
               ) : (
-                <Msg msgKey="viewRequestTitle" />
+                <Msg msgKey="viewEnrollmentRequestTitle" />
               )}
               {props.managePage && (
                 <Tooltip
@@ -306,7 +392,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
               </div>
             </FormGroup>
             <FormGroup
-              label={Msg.localize("userAuthnAuthorityLabel")+":"}
+              label={Msg.localize("userAuthnAuthorityLabel") + ":"}
               fieldId="simple-form-name-03"
             >
               {enrollmentRequest?.userAuthnAuthorities &&
@@ -338,7 +424,10 @@ export const EnrollmentRequest: FC<any> = (props) => {
                 <Msg msgKey="notAvailable" />
               )}
             </FormGroup>
-            <FormGroup label={Msg.localize("enrollmentAssuranceLabel")} fieldId="simple-form-name-03">
+            <FormGroup
+              label={Msg.localize("enrollmentAssuranceLabel")}
+              fieldId="simple-form-name-03"
+            >
               <DataList
                 id="groups-list"
                 aria-label={Msg.localize("groupLabel")}
@@ -451,7 +540,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                   </div>
                 </FormGroup>
                 <FormGroup
-                  label={Msg.localize("uid")+""}
+                  label={Msg.localize("uid") + ""}
                   fieldId="user-preferred-username"
                 >
                   <div>
@@ -506,6 +595,16 @@ export const EnrollmentRequest: FC<any> = (props) => {
                 {enrollmentRequest?.groupEnrollmentConfiguration?.group?.name}
               </div>
             </FormGroup>
+
+            {membership?.validFrom && enrollmentRequest.status === "PENDING_APPROVAL" && (
+              <FormGroup
+                label={Msg.localize("memberSince")}
+                fieldId="simple-form-member-since"
+              >
+                <div>{formatDate(dateParse(membership.validFrom))}</div>
+              </FormGroup>
+            )}
+
             <FormGroup
               label={Msg.localize("enrollmentEnrollmentNameLabel")}
               fieldId="simple-form-name-06"
@@ -516,15 +615,45 @@ export const EnrollmentRequest: FC<any> = (props) => {
               label={Msg.localize("enrollmentGroupRolesLabel")}
               fieldId="simple-form-name-07"
             >
-              {enrollmentRequest?.groupRoles?.map(
-                (role, index) => {
-                  return (
+              {/* Roles the user will have after the request */}
+              <div style={{ marginBottom: 8 }}>
+                {enrollmentRequest?.groupRoles?.length > 0 ? (
+                  enrollmentRequest.groupRoles.map((role, index) => (
                     <Badge key={index} className="gm_role_badge" isRead>
                       {role}
                     </Badge>
+                  ))
+                ) : (
+                  <span>
+                    <Msg msgKey="noGroupRolesRequested" />
+                  </span>
+                )}
+              </div>
+
+              {/* Roles the user will lose */}
+              {membership?.groupRoles && enrollmentRequest.status === "PENDING_APPROVAL"&&
+                Array.isArray(membership.groupRoles) &&
+                (() => {
+                  const rolesToBeLost = membership.groupRoles.filter(
+                    (role) => !enrollmentRequest?.groupRoles?.includes(role)
                   );
-                }
-              )}
+                  return rolesToBeLost.length > 0 ? (
+                    <HelperText className="gm_enrollment-lost-roles-warning">
+                      <HelperTextItem variant="warning" hasIcon>
+                        <Msg msgKey="groupRolesWillBeLostWarningRequest" />{" "}
+                        {rolesToBeLost.map((role, idx) => (
+                          <span
+                            key={role}
+                            className="pf-c-badge pf-m-read"
+                            style={{ marginRight: 4 }}
+                          >
+                            {role}
+                          </span>
+                        ))}
+                      </HelperTextItem>
+                    </HelperText>
+                  ) : null;
+                })()}
             </FormGroup>
             <FormGroup
               label={Msg.localize("enrollmentAUPLabel")}
@@ -554,50 +683,102 @@ export const EnrollmentRequest: FC<any> = (props) => {
                 )}{" "}
               </div>
             </FormGroup>
-            <FormGroup
-              label={Msg.localize("enrollmentExpirationLabel")}
-              fieldId="simple-form-name-09"
-              labelIcon={
-                <Popover
-                  bodyContent={
-                    <div>
-                      <Msg msgKey="membershipExpiresAtHelperText" />
-                      {!props.managePage && (
-                        <>
-                          <Msg msgKey="membershipExpiresAtMemberHelperText" />{" "}
-                          <a
-                            onClick={() => {
-                              props.history.push("/groups/showgroups");
-                            }}
-                          >
-                            My Groups
-                          </a>{" "}
-                          page.
-                        </>
-                      )}
-                    </div>
-                  }
-                >
-                  <button
-                    type="button"
-                    aria-label="More info for name field"
-                    onClick={(e) => e.preventDefault()}
-                    aria-describedby="simple-form-name-01"
-                    className="pf-c-form__group-label-help"
+            {!membership || enrollmentRequest.status !== "PENDING_APPROVAL" ? (
+              <FormGroup
+                label={Msg.localize("enrollmentExpirationLabel")}
+                fieldId="simple-form-name-09"
+                labelIcon={
+                  <Popover
+                    bodyContent={
+                      <div>
+                        <Msg msgKey="membershipExpiresAtHelperText" />
+                        {!props.managePage && (
+                          <>
+                            <Msg msgKey="membershipExpiresAtMemberHelperText" />{" "}
+                            <a
+                              onClick={() => {
+                                props.history.push("/groups/showgroups");
+                              }}
+                            >
+                              My Groups
+                            </a>{" "}
+                            page.
+                          </>
+                        )}
+                      </div>
+                    }
                   >
-                    <HelpIcon noVerticalAlign />
-                  </button>
-                </Popover>
-              }
-            >
-              <div>
-                {enrollmentRequest?.groupEnrollmentConfiguration
-                  ?.membershipExpirationDays
-                  ? enrollmentRequest?.groupEnrollmentConfiguration
-                      ?.membershipExpirationDays
-                  : Msg.localize("reviewEnrollmentMembershipNoExpiration")}
-              </div>
-            </FormGroup>
+                    <button
+                      type="button"
+                      aria-label="More info for name field"
+                      onClick={(e) => e.preventDefault()}
+                      aria-describedby="simple-form-name-01"
+                      className="pf-c-form__group-label-help"
+                    >
+                      <HelpIcon noVerticalAlign />
+                    </button>
+                  </Popover>
+                }
+              >
+                <div>
+                  {enrollmentRequest?.groupEnrollmentConfiguration
+                    ?.membershipExpirationDays
+                    ? enrollmentRequest?.groupEnrollmentConfiguration
+                        ?.membershipExpirationDays
+                    : Msg.localize("reviewEnrollmentMembershipNoExpiration")}
+                </div>
+              </FormGroup>
+            ) : (
+              <FormGroup
+                label={Msg.localize("newMembershipExpirationRequest")}
+                fieldId="simple-form-name-09"
+              >
+                <div>
+                  <strong>{newExpirationDate || Msg.localize("never")}</strong>
+                  <br />
+                  <HelperText>
+                    {expirationChangeType === "extend" && (
+                      <HelperTextItem variant="success" hasIcon={false}>
+                        <Msg msgKey="membershipExpirationExtendedMsgRequest" />{" "}
+                        <strong>
+                          {daysDiff !== null ? daysDiff : 0}{" "}
+                          {Msg.localize("days")}
+                        </strong>
+                      </HelperTextItem>
+                    )}
+                    {expirationChangeType === "reduce" && (
+                      <HelperTextItem variant="warning" hasIcon>
+                        <Msg msgKey="membershipExpirationReducedMsgRequest" />{" "}
+                        <strong>
+                          {daysDiff !== null ? Math.abs(daysDiff) : 0}{" "}
+                          {Msg.localize("days")}
+                        </strong>
+                      </HelperTextItem>
+                    )}
+                    {expirationChangeType === "same" && (
+                      <HelperTextItem>
+                        <Msg msgKey="membershipExpirationUnchangedMsgRequest" />
+                      </HelperTextItem>
+                    )}
+                    {expirationChangeType === "tofinite" && (
+                      <HelperTextItem variant="warning" hasIcon>
+                        <Msg msgKey="membershipExpirationNowFiniteMsgRequest" />
+                      </HelperTextItem>
+                    )}
+                    {expirationChangeType === "toinfinite" && (
+                      <HelperTextItem variant="success" hasIcon={false}>
+                        <Msg msgKey="membershipExpirationNowInfiniteMsgRequest" />
+                      </HelperTextItem>
+                    )}
+                    {expirationChangeType === "infinite" && (
+                      <HelperTextItem>
+                        <Msg msgKey="membershipExpirationInfiniteMsgRequest" />
+                      </HelperTextItem>
+                    )}
+                  </HelperText>
+                </div>
+              </FormGroup>
+            )}
             {enrollmentRequest?.groupEnrollmentConfiguration
               ?.commentsNeeded && (
               <FormGroup

@@ -215,6 +215,7 @@ export const EnrollmentModal: FC<any> = (props) => {
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
           ContentAlert.success(Msg.localize(enrollment?.id?"updateDefaultEnrollmentSuccess":"createEnrollmentSuccess"));
+          props.refresh();
         }
         else{
           ContentAlert.danger(Msg.localize(enrollment?.id?"updateDefaultEnrollmentError":"createEnrollmentError"), [
@@ -243,6 +244,7 @@ export const EnrollmentModal: FC<any> = (props) => {
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
           ContentAlert.success(Msg.localize("deleteEnrollmentSuccess"));
+          props.refresh();
           // setGroupMembers(response.data.results);
         }
         else{

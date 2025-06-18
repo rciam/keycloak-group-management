@@ -671,7 +671,7 @@ export const GroupMembers: FC<any> = (props) => {
                   key="valid-from-hd"
                 >
                   <strong>
-                    <Msg msgKey="groupDatalistCellMembershipSince" />
+                    <Msg msgKey="memberSince" />
                   </strong>
                 </DataListCell>,
                 <DataListCell

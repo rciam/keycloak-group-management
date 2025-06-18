@@ -45,7 +45,7 @@ export const SSHKeysPage: FC<SSHKeysPageProps> = () => {
 
     let getSSHKeys = () => {
         setLoading(true);
-        groupsService!.doGet<Response>("/ssh-public-keys", { target: "sshKeys" })
+        groupsService!.doGet<Response>("/ssh-public-keys", { target: "base_account" })
             .then((response: HttpResponse<Response>) => {
                 setLoading(false);
                 if (response.status === 200 && response?.data) {
@@ -77,7 +77,7 @@ export const SSHKeysPage: FC<SSHKeysPageProps> = () => {
 
     let updateSHHKeys = (sshKeys: string[]) => {
         setLoading(true);
-        groupsService!.doPut<Response>("/ssh-public-keys", sshKeys, { target: "sshKeys" })
+        groupsService!.doPut<Response>("/ssh-public-keys", sshKeys, { target: "base_account" })
             .then((response: HttpResponse<Response>) => {
                 setLoading(false);
                 refresh();

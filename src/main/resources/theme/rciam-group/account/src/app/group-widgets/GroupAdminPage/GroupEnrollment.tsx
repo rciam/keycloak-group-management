@@ -117,7 +117,7 @@ export const GroupEnrollment: FC<any> = (props) => {
   return (
     <React.Fragment>
       <ConfirmationModal modalInfo={modalInfo} />
-      <EnrollmentModal enrollment={enrollmentModal} validationRules={props.enrollmentRules} groupRoles={props.groupConfiguration.groupRoles} close={() => { fetchGroupEnrollments(); setEnrollmentModal({}); }} groupId={props.groupId} />
+      <EnrollmentModal enrollment={enrollmentModal} validationRules={props.enrollmentRules} groupRoles={props.groupConfiguration.groupRoles} close={() => {setEnrollmentModal({}); }} refresh={()=>{fetchGroupEnrollments();}} groupId={props.groupId} />
       <DataList aria-label="Group Member Datalist" isCompact wrapModifier={"breakWord"}>
         <DataListItem aria-labelledby="compact-item1">
           <DataListItemRow>

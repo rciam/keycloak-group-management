@@ -20,6 +20,10 @@ export const GroupRolesTable: FC<any> = (props) => {
        props.setSelectedRoles(selectedRoles); 
     },[selectedRoles])
 
+    useEffect(()=>{
+      setSelectedRoles(props.selectedRoles);
+    },[props.selectedRoles]);
+
     let roleHandler = (role)=>{
       if(selectedRoles.includes(role)){
         const index = selectedRoles.indexOf(role);

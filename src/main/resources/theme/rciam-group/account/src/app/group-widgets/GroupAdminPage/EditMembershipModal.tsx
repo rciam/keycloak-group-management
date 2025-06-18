@@ -309,7 +309,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (props) =
                         }} />
                     </FormGroup>
                     <FormGroup
-                        label={Msg.localize('groupDatalistCellMembershipSince')}
+                        label={Msg.localize('memberSince')}
                         isRequired
                         fieldId="simple-form-name-01"
                         helperTextInvalid={touched.validFrom && errors.validFrom}

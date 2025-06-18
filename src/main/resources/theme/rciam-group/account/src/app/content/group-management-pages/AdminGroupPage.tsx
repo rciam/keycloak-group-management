@@ -69,7 +69,7 @@ interface FederatedIdentity {
 }
 
 interface User {
-  userId?: string;
+  id?: string;
   username: string;
   emailVerified: boolean;
   email: string;
@@ -126,7 +126,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props) => {
 
   useEffect(() => {
     startLoader();
-    Promise.all([fetchUser(), fetchGroupConfiguration()])
+    Promise.all([fetchAccountInfo(), fetchGroupConfiguration()])
       .then(() => {
         stopLoader();
       })
@@ -165,7 +165,8 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props) => {
     let isAdmin = false;
     if (groupConfiguration?.admins?.length > 0) {
       groupConfiguration.admins.forEach((admin) => {
-        if (admin.user.id === user.userId) {
+        console.log(user);
+        if (admin.user.id === user.id) {
           isAdmin = true;
         }
       });
@@ -216,17 +217,19 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = (props) => {
       });
   };
 
-  const fetchUser = () => {
-    return groupsService!.doGet<User>("/whoami", { target: "base" })
-      .then((response: HttpResponse<User>) => {
-        if (response.status === 200 && response.data) {
-          let user = response.data;
-          setUser(user);
-        }
-      }).catch(err => {
-        console.log(err);
-      });
-  };
+    const fetchAccountInfo = () => {
+      return groupsService!.doGet<any>("/", { target: "base_account" })
+        .then((response: HttpResponse<any>) => {
+          if (response.status === 200 && response.data) {
+            setUser(response.data);
+            return response.data;
+          }
+        }).catch(err => {
+          console.log(err);
+          return null;
+        });
+    };
+
 
   const fetchGroupEnrollmentRules = (type) => {
     return groupsService!.doGet<any>("/group-admin/configuration-rules", { params: { type: type } })
