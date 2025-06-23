@@ -103,3 +103,25 @@ export const getError = (response)=>{
   let error = response?.data?.error_description?response.data.error_description:response?.data?.error?response.data.error:Msg.localize('unexpectedError');
   return error;
 }
+
+export function calculateNewMembershipExpiresAt(oldValidFrom, oldMembershipExpiresAt) {
+  const validFromDate = dateParse(oldValidFrom);
+  const expiresAtDate = dateParse(oldMembershipExpiresAt);
+
+  // Calculate duration in days
+  const durationMs = expiresAtDate - validFromDate;
+  const durationDays = Math.round(durationMs / (1000 * 60 * 60 * 24));
+
+  // Get today's date as a Date object
+  const today = dateParse(getCurrentDate());
+
+  // Add duration to today
+  const newExpiresAt = new Date(today);
+  newExpiresAt.setDate(today.getDate() + durationDays);
+
+  // Format as YYYY-MM-DD
+  const yyyy = newExpiresAt.getFullYear();
+  const mm = String(newExpiresAt.getMonth() + 1).padStart(2, '0');
+  const dd = String(newExpiresAt.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}

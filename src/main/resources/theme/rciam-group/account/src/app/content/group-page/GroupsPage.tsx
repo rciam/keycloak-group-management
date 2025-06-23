@@ -13,7 +13,7 @@ import {
   Popover, KebabToggle, Dropdown, DropdownItem,
   Spinner
 } from '@patternfly/react-core';
-import { dateParse, addDays, isFirstDateBeforeSecond } from '../../widgets/Date';
+import { dateParse, addDays, isFirstDateBeforeSecond,formatDateToString } from '../../widgets/Date';
 // @ts-ignore
 import { ContentPage } from '../ContentPage';
 import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
@@ -304,7 +304,9 @@ const MembershipDatalistItem = (props) => {
                 {expirationWarning ? (
                   <span className="gm_effective-expiration-popover-trigger">
                     <div style={{ display: 'inline-block' }} className={expirationWarning ? 'gm_warning-text' : ""}>
-                      {props.membership.effectiveMembershipExpiresAt || <Msg msgKey='Never' />}
+                      {props.membership.effectiveMembershipExpiresAt
+                        ? formatDateToString(dateParse(props.membership.effectiveMembershipExpiresAt))
+                        : <Msg msgKey='Never' />}
                     </div>
                     <div className="gm_effective-helper-warning">
                       <ExclamationTriangleIcon />
@@ -313,14 +315,22 @@ const MembershipDatalistItem = (props) => {
                 ) : props.membership?.effectiveGroupId ? (
                   <span className="gm_effective-expiration-popover-trigger">
                     <div style={{ display: 'inline-block' }} className={expirationWarning ? 'gm_warning-text' : ""}>
-                      {props.membership.effectiveMembershipExpiresAt || <Msg msgKey='Never' />}
+                      {props.membership.effectiveMembershipExpiresAt
+                        ? formatDateToString(dateParse(props.membership.effectiveMembershipExpiresAt))
+                        : <Msg msgKey='Never' />}
                     </div>
                     <div className="gm_effective-helper-info">
                       <InfoCircleIcon />
                     </div>
                   </span>
                 ) : (
-                  props.membership.effectiveMembershipExpiresAt || <Msg msgKey='Never' />
+                  <span className="gm_effective-expiration-popover-trigger">
+                    <div style={{ display: 'inline-block' }}>
+                      {props.membership.effectiveMembershipExpiresAt
+                        ? formatDateToString(dateParse(props.membership.effectiveMembershipExpiresAt))
+                        : <Msg msgKey='Never' />}
+                    </div>
+                  </span>
                 )}
               </Popover>
             </DataListCell>

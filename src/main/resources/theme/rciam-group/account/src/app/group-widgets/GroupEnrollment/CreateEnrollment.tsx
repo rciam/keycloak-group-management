@@ -64,6 +64,10 @@ export const CreateEnrollment: FC<any> = (props) => {
   const [membership, setMembership] = useState<any>(null);
   const { startLoader, stopLoader } = useLoader();
   const activeRequests = useRef(0); // Tracks the number of active requests
+  const [newExpirationDate, setNewExpirationDate] = useState<string | null>();
+  const [expirationChangeType, setExpirationChangeType] = useState<
+    "extend" | "reduce" | "same" | "infinite" | "tofinite" | null
+  >(null);
 
   const startLoaderWithTracking = () => {
     if (activeRequests.current === 0) {
@@ -95,7 +99,8 @@ export const CreateEnrollment: FC<any> = (props) => {
       .catch((err) => {
         console.log(err);
         return null;
-      }).finally(() => {
+      })
+      .finally(() => {
         stopLoaderWithTracking();
       });
   };
@@ -121,7 +126,8 @@ export const CreateEnrollment: FC<any> = (props) => {
       })
       .catch((err) => {
         setMembership(null);
-      }).finally(() => {
+      })
+      .finally(() => {
         stopLoaderWithTracking();
       });
   };
@@ -223,7 +229,7 @@ export const CreateEnrollment: FC<any> = (props) => {
         }
       }
     };
-     if (group?.id) {
+    if (group?.id) {
       fetchAccountInfo().then((userData) => {
         if (userData && userData.username) {
           fetchMembership(group.id, userData.username);
@@ -235,8 +241,6 @@ export const CreateEnrollment: FC<any> = (props) => {
 
     fetchRequests();
   }, [group]);
-
-
 
   useEffect(() => {
     if (
@@ -262,7 +266,8 @@ export const CreateEnrollment: FC<any> = (props) => {
         ) || [],
     }));
     setEnrollment(preselectedEnrollment);
-  }, [enrollments, defaultId, membership,activeRequests.current]);
+    calclulateMembershipExpirationAndType();
+  }, [enrollments, defaultId, membership, activeRequests.current]);
 
   // useEffect(() => {
   //   if (enrollments.length === 1) {
@@ -282,8 +287,6 @@ export const CreateEnrollment: FC<any> = (props) => {
   useEffect(() => {
     validateEnrollmentRequest();
   }, [enrollmentRequest]);
-
-
 
   const createEnrollmentRequest = (requiresApproval) => {
     startLoader();
@@ -344,57 +347,72 @@ export const CreateEnrollment: FC<any> = (props) => {
 
   // Helper to format date as string
   const formatDate = (date: Date) => formatDateToString(date);
-
-  // Calculate new expiration date for existing members
-  let newExpirationDate: string | null = null;
-  let expirationChangeType:
-    | "extend"
-    | "reduce"
-    | "same"
-    | "infinite"
-    | "tofinite"
-    | null = null;
-  let daysDiff: number | null = null;
-
-  if (membership && enrollment && enrollment.membershipExpirationDays) {
-    // Existing member: new expiration is today + configured duration
-    const today = new Date();
-    const newExp = new Date(today);
-    newExp.setDate(
-      today.getDate() + parseInt(enrollment.membershipExpirationDays)
-    );
-    newExpirationDate = formatDate(newExp);
-
-    if (membership.membershipExpiresAt) {
-      const currentExp = new Date(membership.membershipExpiresAt);
-      daysDiff = Math.ceil(
-        (newExp.getTime() - currentExp.getTime()) / (1000 * 60 * 60 * 24)
+  const calclulateMembershipExpirationAndType = () => {
+    if (
+      membership &&
+      isFutureDate(dateParse(membership.validFrom)) &&
+      enrollment &&
+      (!enrollment.validFrom ||
+        !isFutureDate(dateParse(enrollment.validFrom))) &&
+      enrollment.membershipExpirationDays
+    ) {
+      // Scheduled membership, user selects enrollment with no future start
+      const today = new Date();
+      const newExp = new Date(today);
+      newExp.setDate(
+        today.getDate() + parseInt(enrollment.membershipExpirationDays)
       );
-      if (daysDiff > 0) expirationChangeType = "extend";
-      else if (daysDiff < 0) expirationChangeType = "reduce";
-      else expirationChangeType = "same";
-    } else {
-      // Was infinite, now will expire
-      expirationChangeType = "tofinite";
+      setNewExpirationDate(formatDate(newExp));
+    } else if (
+      membership &&
+      enrollment &&
+      enrollment.membershipExpirationDays
+    ) {
+      // Existing member: new expiration is today + configured duration
+      const today = new Date();
+      const newExp = new Date(today);
+      newExp.setDate(
+        today.getDate() + parseInt(enrollment.membershipExpirationDays)
+      );
+      setNewExpirationDate(formatDate(newExp));
+
+      if (membership.membershipExpiresAt) {
+        const currentExp = new Date(membership.membershipExpiresAt);
+        daysDiff = Math.ceil(
+          (newExp.getTime() - currentExp.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        if (daysDiff > 0) setExpirationChangeType("extend");
+        else if (daysDiff < 0) setExpirationChangeType("reduce");
+        else setExpirationChangeType("same");
+      } else {
+        // Was infinite, now will expire
+        setExpirationChangeType("tofinite");
+      }
+    } else if (
+      membership &&
+      enrollment &&
+      !enrollment.membershipExpirationDays
+    ) {
+      // Infinite membership
+      setNewExpirationDate(Msg.localize("never"));
+      // If current is also infinite, mark as 'same'
+      if (!membership.membershipExpiresAt) {
+        setExpirationChangeType("same");
+      } else {
+        setExpirationChangeType("infinite");
+      }
+    } else if (
+      !membership &&
+      enrollment &&
+      enrollment.validFrom &&
+      isFutureDate(dateParse(enrollment.validFrom))
+    ) {
+      // New membership with future validFrom
+      setNewExpirationDate(null); // Will be handled in the alert below
     }
-  } else if (membership && enrollment && !enrollment.membershipExpirationDays) {
-    // Infinite membership
-    newExpirationDate = Msg.localize("never");
-    // If current is also infinite, mark as 'same'
-    if (!membership.membershipExpiresAt) {
-      expirationChangeType = "same";
-    } else {
-      expirationChangeType = "infinite";
-    }
-  } else if (
-    !membership &&
-    enrollment &&
-    enrollment.validFrom &&
-    isFutureDate(dateParse(enrollment.validFrom))
-  ) {
-    // New membership with future validFrom
-    newExpirationDate = null; // Will be handled in the alert below
-  }
+  };
+
+  let daysDiff: number | null = null;
 
   const rolesToBeLost = (membership?.groupRoles || []).filter(
     (role) => !enrollmentRequest.groupRoles.includes(role)
@@ -426,7 +444,9 @@ export const CreateEnrollment: FC<any> = (props) => {
                 return (
                   <BreadcrumbItem
                     key={part}
-                    to={`#/enroll?groupPath=${encodeURIComponent(accumulatedPath)}`}
+                    to={`#/enroll?groupPath=${encodeURIComponent(
+                      accumulatedPath
+                    )}`}
                   >
                     {part}
                   </BreadcrumbItem>
@@ -437,9 +457,11 @@ export const CreateEnrollment: FC<any> = (props) => {
         <ConfirmationModal modalInfo={modalInfo} />
         <ContentPage
           title={
-            membership
-              ? "Update your membership at: " + group?.name
-              : "Request membership at: " + group?.name
+            !group?.name
+              ? ""
+              : membership
+              ? Msg.localize("updateMembershipTo") + " " + group?.name
+              : Msg.localize("requestMembershipTo") + " " + group?.name
           }
         >
           {group?.name && (
@@ -451,7 +473,15 @@ export const CreateEnrollment: FC<any> = (props) => {
           )}
           <div className="gm_enrollment_container">
             <Form>
-              {!openRequest ? (
+              {membership && isFutureDate(dateParse(membership.validFrom)) ? (
+                <Alert
+                  className="gm_content-width"
+                  variant="warning"
+                  title={Msg.localize("pendingMembershipExistsTitle")}
+                >
+                  <Msg msgKey="pendingMembershipExistsMessage" />
+                </Alert>
+              ) : !openRequest ? (
                 <React.Fragment>
                   {enrollments && enrollments.length > 0 ? (
                     <React.Fragment>
@@ -526,7 +556,12 @@ export const CreateEnrollment: FC<any> = (props) => {
                       {membership ? (
                         <React.Fragment>
                           <FormGroup
-                            label={Msg.localize("memberSince")}
+                            label={
+                              membership.validFrom &&
+                              isFutureDate(dateParse(membership.validFrom))
+                                ? Msg.localize("membershipStartingDate")
+                                : Msg.localize("memberSince")
+                            }
                             fieldId="simple-form-name-01"
                           >
                             {formatDate(dateParse(membership.validFrom))}
@@ -564,8 +599,11 @@ export const CreateEnrollment: FC<any> = (props) => {
                             <div>
                               <Msg msgKey="currentMembershipExpiration" />{" "}
                               <strong>
-                                {membership.membershipExpiresAt?formatDate(dateParse(membership.membershipExpiresAt)) :
-                                  Msg.localize("never")}
+                                {membership.membershipExpiresAt
+                                  ? formatDate(
+                                      dateParse(membership.membershipExpiresAt)
+                                    )
+                                  : Msg.localize("never")}
                               </strong>
                               <br />
                               <Msg msgKey="newMembershipExpiration" />{" "}

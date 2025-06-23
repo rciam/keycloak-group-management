@@ -8,7 +8,7 @@ import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/gr
 import { Msg } from '../../widgets/Msg';
 //import { TableComposable, Caption, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { HelpIcon, ExclamationTriangleIcon, InfoCircleIcon } from '@patternfly/react-icons';
-import { dateParse, addDays, isFirstDateBeforeSecond } from '../../widgets/Date';
+import { dateParse, addDays, isFirstDateBeforeSecond, formatDateToString } from '../../widgets/Date';
 import { Link } from 'react-router-dom';
 import { Button } from '@patternfly/react-core';
 import { ConfirmationModal } from '../../group-widgets/Modals';
@@ -256,7 +256,7 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
                               {expirationWarning ?
                                 <span className="gm_effective-expiration-popover-trigger">
                                   <div style={{ display: 'inline-block' }} className={expirationWarning ? 'gm_warning-text' : ""}>
-                                    {groupMembership?.effectiveMembershipExpiresAt || <Msg msgKey='Never' />}
+                                    {groupMembership?.effectiveMembershipExpiresAt?formatDateToString(dateParse(groupMembership?.effectiveMembershipExpiresAt)) : <Msg msgKey='Never' />}
                                   </div>
                                   <div className="gm_effective-helper-warning">
                                     <ExclamationTriangleIcon />
@@ -265,7 +265,7 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
                                 :
                                 <span className="gm_effective-expiration-popover-trigger">
                                   <div style={{ display: 'inline-block' }} className={expirationWarning ? 'gm_warning-text' : ""}>
-                                    {groupMembership?.effectiveMembershipExpiresAt || <Msg msgKey='Never' />}
+                                    {groupMembership?.effectiveMembershipExpiresAt?formatDateToString(dateParse(groupMembership?.effectiveMembershipExpiresAt)) : <Msg msgKey='Never' />}
                                   </div>
                                   <div className="gm_effective-helper-info">
                                     <InfoCircleIcon />
@@ -274,7 +274,7 @@ export const GroupPage: FC<GroupsPageProps> = (props) => {
                               }
                             </Popover>
                             : <div>
-                              {groupMembership?.effectiveMembershipExpiresAt || <Msg msgKey='Never' />}
+                                    {groupMembership?.effectiveMembershipExpiresAt?formatDateToString(dateParse(groupMembership?.effectiveMembershipExpiresAt)) : <Msg msgKey='Never' />}
                             </div>}
 
                         </DataListCell>
