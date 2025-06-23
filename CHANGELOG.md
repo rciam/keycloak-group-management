@@ -4,6 +4,21 @@ All notable changes in keycloak-group-management will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.1] - 2025-06-23
+
+### Fixed
+- Fix New Exp Date Bug
+
+## [1.9.0] - 2025-06-18
+
+### Added
+- Show current state of user during enrollment request from existing group member
+
+### Update
+- Friendly Dates for end user
+- Update Labels
+- lock Pending Users from creating enrollment requests
+
 ## [1.8.3] - 2025-06-13
 
 ### Fixed
