@@ -25,6 +25,7 @@ import org.keycloak.services.ErrorResponseException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
+import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupAdminRepository;
@@ -50,8 +51,9 @@ public class GroupAdminEnrollementRequest {
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
     private final GroupAdminRepository groupAdminRepository;
+    private final GroupModel group;
 
-    public GroupAdminEnrollementRequest(KeycloakSession session, RealmModel realm, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserModel groupAdmin, GroupEnrollmentRequestEntity enrollmentEntity, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository) {
+    public GroupAdminEnrollementRequest(KeycloakSession session, RealmModel realm, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserModel groupAdmin, GroupEnrollmentRequestEntity enrollmentEntity, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, GroupModel group) {
         this.session = session;
         this.realm = realm;
         this.groupEnrollmentRequestRepository = groupEnrollmentRequestRepository;
@@ -64,6 +66,7 @@ public class GroupAdminEnrollementRequest {
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
         this.customFreeMarkerEmailTemplateProvider.setSignatureMessage(memberUserAttribute.getSignatureMessage());
+        this.group = group;
     }
 
     @GET
@@ -75,6 +78,10 @@ public class GroupAdminEnrollementRequest {
     @POST
     @Path("/extra-info")
     public Response askForExtraInformation(@NotNull @QueryParam("comment") String comment) {
+        if (!groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group)){
+            throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
+        }
+
         if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus())) {
             throw new ErrorResponseException(statusErrorMessage, statusErrorMessage, Response.Status.BAD_REQUEST);
         }
@@ -87,6 +94,10 @@ public class GroupAdminEnrollementRequest {
     @POST
     @Path("/accept")
     public Response acceptEnrollment(@QueryParam("adminJustification") String adminJustification) throws UnsupportedEncodingException {
+        if (!groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group)){
+            throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
+        }
+
         if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus())) {
             throw new ErrorResponseException(statusErrorMessage, statusErrorMessage, Response.Status.BAD_REQUEST);
         }
@@ -120,6 +131,10 @@ public class GroupAdminEnrollementRequest {
     @POST
     @Path("/reject")
     public Response rejectEnrollment(@QueryParam("adminJustification") String adminJustification) {
+        if (!groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group)){
+            throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
+        }
+
         if (!EnrollmentRequestStatusEnum.PENDING_APPROVAL.equals(enrollmentEntity.getStatus())){
             throw new ErrorResponseException(statusErrorMessage, statusErrorMessage, Response.Status.BAD_REQUEST);
         }
