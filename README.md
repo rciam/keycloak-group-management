@@ -137,8 +137,8 @@ Main url : {server_url}/realms/{realm}/agm
 | /account/user/group/{groupId}/member         | DELETE | leave user group membership                                                          | UserGroupMember                 |             
 | /account/user/enroll-requests                | GET    | get all user ongoing enrollment requests                                             | UserGroups                      |            
 | /account/user/enroll-request                 | POST   | create new enrollment request                                                        | UserGroups                      |           
-| /account/user/enroll-request/{id}            | GET    | get enrollment request by id                                                         | UserGroupEnrollmentRequestAction | 
-| /account/user/enroll-request/{id}/respond    | POST   | respond t enrollment request by id                                                   | UserGroupEnrollmentRequestAction |
+| /account/user/enroll-request/{id}            | GET    | get enrollment request by id                                                         | UserGroupEnrollmentRequestAction| 
+| /account/user/enroll-request/{id}/respond    | POST   | respond t enrollment request by id                                                   | UserGroupEnrollmentRequestAction|
 
 **Group admin web services ( for group specific web services user must have admin rights to this group)**
 

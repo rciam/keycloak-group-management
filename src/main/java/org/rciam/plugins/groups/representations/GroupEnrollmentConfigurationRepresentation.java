@@ -8,8 +8,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.rciam.plugins.groups.helpers.Utils;
 
+@Schema
 public class GroupEnrollmentConfigurationRepresentation {
 
     private String id;

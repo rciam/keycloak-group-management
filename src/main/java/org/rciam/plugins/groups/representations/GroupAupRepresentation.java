@@ -1,7 +1,9 @@
 package org.rciam.plugins.groups.representations;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.rciam.plugins.groups.enums.GroupAupTypeEnum;
 
+@Schema
 public class GroupAupRepresentation {
 
     private GroupAupTypeEnum type;

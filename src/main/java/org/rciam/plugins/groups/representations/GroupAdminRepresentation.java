@@ -1,7 +1,9 @@
 package org.rciam.plugins.groups.representations;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.keycloak.representations.idm.UserRepresentation;
 
+@Schema
 public class GroupAdminRepresentation {
 
     private UserRepresentation user;

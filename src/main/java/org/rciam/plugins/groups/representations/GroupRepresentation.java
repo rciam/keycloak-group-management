@@ -1,9 +1,12 @@
 package org.rciam.plugins.groups.representations;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+@Schema
 public class GroupRepresentation extends org.keycloak.representations.idm.GroupRepresentation {
 
     private List<GroupRepresentation> subGroups;

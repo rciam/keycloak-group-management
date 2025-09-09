@@ -1,7 +1,10 @@
 package org.rciam.plugins.groups.representations;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import java.util.Set;
 
+@Schema
 public class GroupInvitationInitialRepresentation {
 
     private String email;

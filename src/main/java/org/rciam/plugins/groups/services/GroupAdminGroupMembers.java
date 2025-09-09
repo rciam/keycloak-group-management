@@ -11,6 +11,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
 import org.keycloak.models.GroupModel;
@@ -52,6 +53,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+//@Path("")
 public class GroupAdminGroupMembers {
 
     @Context
@@ -90,6 +92,7 @@ public class GroupAdminGroupMembers {
     @Path("/invitation")
     @Produces("application/json")
     @Consumes("application/json")
+    @Operation( summary = "Invite user to the group")
     public Response inviteUser(GroupInvitationInitialRepresentation groupInvitationInitialRep) {
 
         if (!isGroupAdmin) {
@@ -141,6 +144,7 @@ public class GroupAdminGroupMembers {
      */
     @GET
     @Produces("application/json")
+    @Operation( summary = "Get group members")
     public UserGroupMembershipExtensionRepresentationPager memberhipPager(@QueryParam("first") @DefaultValue("0") Integer first,
                                                                           @QueryParam("max") @DefaultValue("10") Integer max,
                                                                           @QueryParam("search") String search,
@@ -158,6 +162,7 @@ public class GroupAdminGroupMembers {
 
     @POST
     @Consumes("application/json")
+    @Operation(summary = "Create a new group member")
     public Response createMember(UserGroupMembershipExtensionRepresentation rep) throws UnsupportedEncodingException {
         boolean extendedRole = Utils.hasManageExtendedGroupsAccountRole(realm, groupAdmin);
         //validation tasks

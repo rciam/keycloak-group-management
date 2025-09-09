@@ -1,7 +1,10 @@
 package org.rciam.plugins.groups.representations;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import java.util.List;
 
+@Schema
 public class GroupEnrollmentRequestPager {
 
     private List<GroupEnrollmentRequestRepresentation> results;

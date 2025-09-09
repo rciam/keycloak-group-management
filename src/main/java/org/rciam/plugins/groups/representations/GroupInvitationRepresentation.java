@@ -6,10 +6,12 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
+@Schema
 public class GroupInvitationRepresentation {
 
     private String id;

@@ -1,5 +1,8 @@
 package org.rciam.plugins.groups.representations;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
+@Schema
 public class MemberUserAttributeConfigurationRepresentation {
 
     private String id;

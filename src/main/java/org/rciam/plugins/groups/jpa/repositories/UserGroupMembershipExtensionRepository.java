@@ -294,10 +294,10 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         Map<String, Object> params = new HashMap<>();
         params.put("userId", userId);
         if (search != null) {
-            sqlQuery += "join GroupEntity g on f.group.id = g.id where f.user.id = :userId and f.status = 'ENABLED' and g.name like :search";
+            sqlQuery += "join GroupEntity g on f.group.id = g.id where f.user.id = :userId and g.name like :search";
             params.put("search", "%" + search + "%");
         } else {
-            sqlQuery += "where f.user.id = :userId and f.status = 'ENABLED'";
+            sqlQuery += "where f.user.id = :userId";
         }
 
         Query queryList = em.createQuery("select f " + sqlQuery + " order by f." + pagerParameters.getOrder().get(0) + " " + pagerParameters.getOrderType()).setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax());

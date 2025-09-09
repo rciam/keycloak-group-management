@@ -2,8 +2,10 @@ package org.rciam.plugins.groups.representations;
 
 import java.util.List;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.keycloak.representations.idm.GroupRepresentation;
 
+@Schema
 public class GroupsPager {
     private List<GroupRepresentation> results;
     private long count;

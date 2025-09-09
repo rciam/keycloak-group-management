@@ -2,8 +2,10 @@ package org.rciam.plugins.groups.representations;
 
 import java.util.List;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.keycloak.representations.idm.UserRepresentation;
 
+@Schema
 public class UserRepresentationPager {
 
     private List<UserRepresentation> results;
