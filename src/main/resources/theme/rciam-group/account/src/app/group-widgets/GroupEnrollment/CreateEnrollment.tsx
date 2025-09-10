@@ -110,17 +110,10 @@ export const CreateEnrollment: FC<any> = (props) => {
   const fetchMembership = (groupId: string, username: string) => {
     startLoaderWithTracking();
     return groupsService!
-      .doGet<any>(`/group-admin/group/${groupId}/members`, {
-        params: { search: username },
-      })
+      .doGet<any>(`/user/group/${groupId}/member`)
       .then((response: HttpResponse<any>) => {
-        if (
-          response.status === 200 &&
-          response.data &&
-          Array.isArray(response.data.results) &&
-          response.data.results.length > 0
-        ) {
-          setMembership(response.data.results[0]);
+        if (response.status === 200 && response.data) {
+          setMembership(response.data);
         } else {
           setMembership(null);
         }
@@ -133,7 +126,6 @@ export const CreateEnrollment: FC<any> = (props) => {
       });
   };
 
-  // Consolidate API calls into a separate service file
   const fetchGroupEnrollment = async (id) => {
     try {
       startLoaderWithTracking();
@@ -352,57 +344,57 @@ export const CreateEnrollment: FC<any> = (props) => {
   const formatDate = (date: Date) => formatDateToString(date);
   const calclulateMembershipExpirationAndType = () => {
     try {
-      if (
-        membership &&
-        isFutureDate(dateParse(membership.validFrom)) &&
-        enrollment &&
-        (!enrollment.validFrom ||
-          !isFutureDate(dateParse(enrollment.validFrom))) &&
-        enrollment.membershipExpirationDays
-      )
-      if (membership && enrollment && enrollment.membershipExpirationDays && !isFutureDate(dateParse(membership.validFrom))) {
-        // Existing member: new expiration is today + configured duration
-        const today = new Date();
-        const newExp = new Date(today);
-        newExp.setDate(
-          today.getDate() + parseInt(enrollment.membershipExpirationDays)
-        );
-        setNewExpirationDate(formatDate(newExp));
-        if (membership.membershipExpiresAt) {
-          const currentExp = new Date(membership.membershipExpiresAt);
-          let days = Math.ceil(
-            (newExp.getTime() - currentExp.getTime()) / (1000 * 60 * 60 * 24)
+        // If existing membership and enrollment is finite
+        if (
+          membership &&
+          enrollment?.membershipExpirationDays &&
+          !isFutureDate(dateParse(membership.validFrom))
+        ) {
+          // Existing member: new expiration is today + configured duration
+          const today = new Date();
+          const newExp = new Date(today);
+          newExp.setDate(
+            today.getDate() + parseInt(enrollment.membershipExpirationDays)
           );
-          setDaysDiff(days);
-          if (days > 0) setExpirationChangeType("extend");
-          else if (days < 0) setExpirationChangeType("reduce");
-          else setExpirationChangeType("same");
-        } else {
-          // Was infinite, now will expire
-          setExpirationChangeType("tofinite");
+          setNewExpirationDate(formatDate(newExp));
+          if (membership.membershipExpiresAt) {
+            const currentExp = new Date(membership.membershipExpiresAt);
+            let days = Math.floor(
+              (newExp.getTime() - currentExp.getTime()) / (1000 * 60 * 60 * 24)
+            );
+            setDaysDiff(days);
+            if (days > 0) setExpirationChangeType("extend");
+            else if (days < 0) setExpirationChangeType("reduce");
+            else setExpirationChangeType("same");
+          } else {
+            // Was infinite, now will expire
+            console.log('was infinite, now finite');
+            setExpirationChangeType("tofinite");
+          }
         }
-      } else if (
-        membership &&
-        enrollment &&
-        !enrollment.membershipExpirationDays
-      ) {
-        // Infinite membership
-        setNewExpirationDate(Msg.localize("never"));
-        // If current is also infinite, mark as 'same'
-        if (!membership.membershipExpiresAt) {
-          setExpirationChangeType("same");
-        } else {
-          setExpirationChangeType("infinite");
+        // Existing member, new enrollment is infinite 
+        else if (
+          membership &&
+          enrollment &&
+          !enrollment.membershipExpirationDays
+        ) {
+          // Infinite membership
+          setNewExpirationDate(Msg.localize("never"));
+          // If current is also infinite, mark as 'same'
+          if (!membership.membershipExpiresAt) {
+            setExpirationChangeType("same");
+          } else {
+            setExpirationChangeType("infinite");
+          }
+        } else if (
+          !membership &&
+          enrollment &&
+          enrollment.validFrom &&
+          isFutureDate(dateParse(enrollment.validFrom))
+        ) {
+          // New membership with future validFrom
+          setNewExpirationDate(null); // Will be handled in the alert below
         }
-      } else if (
-        !membership &&
-        enrollment &&
-        enrollment.validFrom &&
-        isFutureDate(dateParse(enrollment.validFrom))
-      ) {
-        // New membership with future validFrom
-        setNewExpirationDate(null); // Will be handled in the alert below
-      }
     } catch (error) {
       console.error("Error calculating membership expiration:", error);
     }

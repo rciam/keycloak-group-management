@@ -156,7 +156,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
     newExpirationDate = formatDateToString(newExp);
 
     if (currentExpiration) {
-      daysDiff = Math.ceil(
+      daysDiff = Math.floor(
         (newExp.getTime() - currentExpiration.getTime()) / (1000 * 60 * 60 * 24)
       );
       if (daysDiff > 0) expirationChangeType = "extend";

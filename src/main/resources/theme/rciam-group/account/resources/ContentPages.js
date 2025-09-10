@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 import * as React from "../../common/keycloak/web_modules/react.js";
-import { Route, Switch, matchPath } from "../../common/keycloak/web_modules/react-router-dom.js";
+import { Route, Switch, matchPath } from "../../common/keycloak/web_modules/react-router-dom.js"; // @ts-ignore
+
 import { NavItem, NavExpandable } from "../../common/keycloak/web_modules/@patternfly/react-core.js"; // @ts-ignore
 
 import { Msg } from "./widgets/Msg.js"; // @ts-ignore
