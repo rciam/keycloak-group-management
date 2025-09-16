@@ -72,9 +72,9 @@ public class Utils {
     public static final String DEFAULT_GROUP_ROLE_NAME = "manage-groups";
     public static final String DEFAULT_GROUP_ROLE_NAME_EXTENDED = "manage-groups-extended";
     public static final String DESCRIPTION = "description";
-    public static final String USER_ASSURANCE_FOR_ENROLLMENT = "userAssuranceForEnrollment";
+    public static final String USER_ASSURANCE_FOR_ENROLLMENT = "AgmUserAssuranceForEnrollment";
     public static final String DEFAULT_USER_ASSURANCE_FOR_ENROLLMENT = "assurance";
-    public static final String USER_IDENTIFIER_FOR_ENROLLMENT = "userIdentifierForEnrollment";
+    public static final String USER_IDENTIFIER_FOR_ENROLLMENT = "AgmUserIdentifierForEnrollment";
     public static final String DEFAULT_USER_IDENTIFIER_FOR_ENROLLMENT = "username";
     public static final String NOT_ALLOWED = "Not allowed";
     public static final String NO_USER_FOUND = "Could not find this User";

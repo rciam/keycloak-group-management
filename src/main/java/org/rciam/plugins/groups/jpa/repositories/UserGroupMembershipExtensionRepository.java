@@ -36,6 +36,7 @@ import org.rciam.plugins.groups.representations.UserGroupMembershipExtensionRepr
 import org.rciam.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
 import org.rciam.plugins.groups.representations.UserRepresentationPager;
 import org.rciam.plugins.groups.scheduled.AgmTimerProvider;
+import org.rciam.plugins.groups.scheduled.GroupManagementTasks;
 import org.rciam.plugins.groups.scheduled.SubgroupsExpirationDateCalculationTask;
 
 import java.io.UnsupportedEncodingException;
@@ -56,6 +57,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     private static final String LOCAL_IP = "127.0.0.1";
     private static final String PROBLEM_CALCULATING_USER_ATTRIBUTE = "problem calculating user attribute value for group : ";
     private static final String CALCULATION_TASK = "SubgroupsExpirationDateCalculationTask_";
+    private static final String AGM_MAX_EXPIRED_MEMBERS_TO_DELETE = "AgmMaxExpiredMembersToDelete";
     private final GroupManagementEventRepository eventRepository;
     private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private GroupRolesRepository groupRolesRepository;
@@ -113,8 +115,9 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider = new CustomFreeMarkerEmailTemplateProvider(session);
         if (eventEntity == null || LocalDate.now().isAfter(eventEntity.getDate())) {
             logger.info("group management daily action is executing ...");
-            Stream<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getExpiredMemberships").setParameter("date", LocalDate.now()).getResultStream();
-            results.forEach(entity -> {
+            AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
+            List<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getExpiredMemberships").setParameter("date", LocalDate.now()).setMaxResults(realm.getAttribute(AGM_MAX_EXPIRED_MEMBERS_TO_DELETE, 100)).getResultList();
+            results.stream().forEach(entity -> {
                 setRealm(session.realms().getRealm(entity.getUser().getRealmId()));
                 session.getContext().setRealm(this.realm);
                 MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
@@ -123,7 +126,6 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 GroupAdminRepository groupAdminRepository = new GroupAdminRepository(session, realm);
                 UserModel user = session.users().getUserById(realm, entity.getUser().getId());
                 GroupModel group = realm.getGroupById(entity.getGroup().getId());
-                logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
                 List<String> subgroupsPaths = deleteMember(entity, group, user, new DummyClientConnection(LOCAL_IP), null, memberUserAttribute, false).stream().map(ModelToRepresentation::buildGroupPath).collect(Collectors.toList());
 
                 customFreeMarkerEmailTemplateProvider.setRealm(realm);
@@ -165,7 +167,6 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(LOCAL_IP), userModel, member.getChangedBy() != null ? member.getChangedBy().getId() : userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
                         , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()), member.getMembershipExpiresAt());
 
-                AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
                 timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), userModel.getId(), group.getId(), member.getMembershipExpiresAt()), 100),  100, CALCULATION_TASK+ member.getId());
             });
 
@@ -178,8 +179,13 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 eventEntity.setDateForWeekTasks(LocalDate.now());
                 eventRepository.create(eventEntity);
             } else {
-                eventEntity.setDate(LocalDate.now());
-                eventRepository.update(eventEntity);
+                if (results.size() < 100) {
+                    eventEntity.setDate(LocalDate.now());
+                    eventRepository.update(eventEntity);
+                } else {
+                    //reexecuter once task until all members are deleted
+                    timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new GroupManagementTasks(), 100),  100, "GroupManagementActionsAgain"+Math.random());
+                }
 
                 if (LocalDate.now().isAfter(eventEntity.getDateForWeekTasks().plusDays(6))) {
                     //weekly tasks execution
@@ -197,7 +203,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             deleteEntity(member);
             return new HashSet<>();
         } else {
-            logger.info(user.getFirstName() + " " + user.getFirstName() + " is removing from being member of group " + group.getName());
+            logger.info(user.getFirstName() + " " + user.getLastName() + " is removing from being member of group " + group.getName());
             Set<String> roleNames = member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet());
 
             deleteEntity(member.getId());

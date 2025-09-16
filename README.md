@@ -30,8 +30,9 @@ All web services to be executed needs realm management rights role.
 
 1. You should define realm attributes :
  - 'keycloakUrl' = Keycloak main url
- - 'userAssuranceForEnrollment' = User assurance (default 'assurance')
- - 'userIdentifierForEnrollment' = User identifier (default 'username')
+ - 'AgmUserAssuranceForEnrollment' = User assurance (default 'assurance'), from version 1.9.4
+ - 'AgmUserIdentifierForEnrollment' = User identifier (default 'username'), from version 1.9.4
+ - 'AgmMaxExpiredMembersToDelete' = Max memberships to be deleted daily (default 100), from version 1.9.4
 2. You could create account roles 'manage-groups' and 'manage-groups-extended' for managing groups.
    'manage-groups' is a special role that can manage all groups in a same way as group admins. 
    Actions that can not be done with this role are:
