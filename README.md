@@ -32,7 +32,7 @@ All web services to be executed needs realm management rights role.
  - 'keycloakUrl' = Keycloak main url
  - 'AgmUserAssuranceForEnrollment' = User assurance (default 'assurance'), from version 1.9.4
  - 'AgmUserIdentifierForEnrollment' = User identifier (default 'username'), from version 1.9.4
- - 'AgmMaxExpiredMembersToDelete' = Max memberships to be deleted daily (default 100), from version 1.9.4
+ - 'AgmMaxExpiredMembersToDelete' = Max memberships to be deleted daily (default 100), from version 1.9.4 in master realm
 2. You could create account roles 'manage-groups' and 'manage-groups-extended' for managing groups.
    'manage-groups' is a special role that can manage all groups in a same way as group admins. 
    Actions that can not be done with this role are:

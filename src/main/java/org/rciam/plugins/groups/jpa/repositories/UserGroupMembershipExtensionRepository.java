@@ -116,7 +116,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         if (eventEntity == null || LocalDate.now().isAfter(eventEntity.getDate())) {
             logger.info("group management daily action is executing ...");
             AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
-            List<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getExpiredMemberships").setParameter("date", LocalDate.now()).setMaxResults(realm.getAttribute(AGM_MAX_EXPIRED_MEMBERS_TO_DELETE, 100)).getResultList();
+            List<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getExpiredMemberships").setParameter("date", LocalDate.now()).setMaxResults(session.realms().getRealmByName("master").getAttribute(AGM_MAX_EXPIRED_MEMBERS_TO_DELETE, 100)).getResultList();
             results.stream().forEach(entity -> {
                 setRealm(session.realms().getRealm(entity.getUser().getRealmId()));
                 session.getContext().setRealm(this.realm);
