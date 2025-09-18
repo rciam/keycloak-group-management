@@ -58,9 +58,11 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     private static final String PROBLEM_CALCULATING_USER_ATTRIBUTE = "problem calculating user attribute value for group : ";
     private static final String CALCULATION_TASK = "SubgroupsExpirationDateCalculationTask_";
     private static final String AGM_MAX_EXPIRED_MEMBERS_TO_DELETE = "AgmMaxExpiredMembersToDelete";
+    private static final Integer DEFAULT_MAX_MEMBERS_TO_BE_DELETED = 100;
     private final GroupManagementEventRepository eventRepository;
     private GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private GroupRolesRepository groupRolesRepository;
+
 
     public UserGroupMembershipExtensionRepository(KeycloakSession session, RealmModel realm) {
         super(session, realm);
@@ -116,7 +118,8 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         if (eventEntity == null || LocalDate.now().isAfter(eventEntity.getDate())) {
             logger.info("group management daily action is executing ...");
             AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
-            List<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getExpiredMemberships").setParameter("date", LocalDate.now()).setMaxResults(session.realms().getRealmByName("master").getAttribute(AGM_MAX_EXPIRED_MEMBERS_TO_DELETE, 100)).getResultList();
+            int maxResults = session.realms().getRealmByName("master").getAttribute(AGM_MAX_EXPIRED_MEMBERS_TO_DELETE, DEFAULT_MAX_MEMBERS_TO_BE_DELETED);
+            List<UserGroupMembershipExtensionEntity> results = em.createNamedQuery("getExpiredMemberships").setParameter("date", LocalDate.now()).setMaxResults(maxResults).getResultList();
             results.stream().forEach(entity -> {
                 setRealm(session.realms().getRealm(entity.getUser().getRealmId()));
                 session.getContext().setRealm(this.realm);
@@ -179,11 +182,13 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 eventEntity.setDateForWeekTasks(LocalDate.now());
                 eventRepository.create(eventEntity);
             } else {
-                if (results.size() < 100) {
+                if (results.size() < maxResults) {
+                    logger.info("group management daily action is finished successfully");
                     eventEntity.setDate(LocalDate.now());
                     eventRepository.update(eventEntity);
                 } else {
                     //reexecuter once task until all members are deleted
+                    logger.info("group management daily action will be execute again");
                     timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new GroupManagementTasks(), 100),  100, "GroupManagementActionsAgain"+Math.random());
                 }
 

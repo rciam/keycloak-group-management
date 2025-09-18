@@ -11,7 +11,6 @@ import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.entities.MemberUserAttributeConfigurationEntity;
 import org.rciam.plugins.groups.jpa.repositories.MemberUserAttributeConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupInvitationRepository;
-import org.rciam.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 import org.keycloak.timer.ScheduledTask;
 
@@ -23,8 +22,8 @@ public class StartUpTasks implements ScheduledTask {
     public void run(KeycloakSession session) {
         logger.info("Starting tasks ...");
         //same as daily task (only if not executed before this day)
-        UserGroupMembershipExtensionRepository repository = new UserGroupMembershipExtensionRepository(session, null);
-        repository.dailyExecutedActions();
+        AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
+        timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new GroupManagementTasks(), 100),  100, "GroupManagementActionsAgain"+Math.random());
         session.realms().getRealmsStream().forEach(realm -> {
             MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
             //create default eduPersonEntitlement configuration entity if not exist
@@ -42,7 +41,6 @@ public class StartUpTasks implements ScheduledTask {
 
             GroupInvitationRepository groupInvitationRepository = new GroupInvitationRepository(session, realm);
             groupInvitationRepository.getAllByRealm().forEach(entity -> {
-                AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
                 long invitationExpirationHour = realm.getAttribute(Utils.invitationExpirationPeriod) != null ? Long.valueOf(realm.getAttribute(Utils.invitationExpirationPeriod)) : 72;
                 long interval = entity.getCreationDate().atZone(ZoneId.systemDefault()).toEpochSecond() + (invitationExpirationHour * 3600 ) - LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
                 if (interval <=  60)
