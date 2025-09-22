@@ -113,6 +113,7 @@ export const CreateEnrollment: FC<any> = (props) => {
       .doGet<any>(`/user/group/${groupId}/member`)
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 && response.data) {
+          
           setMembership(response.data);
         } else {
           setMembership(null);
@@ -263,7 +264,7 @@ export const CreateEnrollment: FC<any> = (props) => {
 
   useEffect(() => {
     calclulateMembershipExpirationAndType();
-  }, [enrollment]);
+  }, [enrollment,user,membership,group]);
   // useEffect(() => {
   //   if (enrollments.length === 1) {
   //     const singleEnrollment = enrollments[0];
@@ -368,7 +369,6 @@ export const CreateEnrollment: FC<any> = (props) => {
             else setExpirationChangeType("same");
           } else {
             // Was infinite, now will expire
-            console.log('was infinite, now finite');
             setExpirationChangeType("tofinite");
           }
         }
