@@ -63,32 +63,18 @@ export const CreateEnrollment: FC<any> = (props) => {
   const [user, setUser] = useState<any>(null);
   const [membership, setMembership] = useState<any>(null);
   const { startLoader, stopLoader } = useLoader();
-  const activeRequests = useRef(0); // Tracks the number of active requests
   const [newExpirationDate, setNewExpirationDate] = useState<string | null>();
   const [expirationChangeType, setExpirationChangeType] = useState<
     "extend" | "reduce" | "same" | "infinite" | "tofinite" | null
   >(null);
   const [daysDiff, setDaysDiff] = useState<number | null>(null);
 
-  const startLoaderWithTracking = () => {
-    if (activeRequests.current === 0) {
-      startLoader();
-    }
-    activeRequests.current++;
-  };
 
-  const stopLoaderWithTracking = () => {
-    activeRequests.current--;
-    if (activeRequests.current === 0) {
-      stopLoader();
-    }
-  };
 
   let groupsService = new GroupsServiceClient();
 
   // Add this function to fetch user info (including username)
-  const fetchAccountInfo = () => {
-    startLoaderWithTracking();
+  const fetchAccountInfo = async () => {
     return groupsService!
       .doGet<any>("/", { target: "base_account" })
       .then((response: HttpResponse<any>) => {
@@ -100,36 +86,27 @@ export const CreateEnrollment: FC<any> = (props) => {
       .catch((err) => {
         console.log(err);
         return null;
-      })
-      .finally(() => {
-        stopLoaderWithTracking();
       });
   };
 
   // Fetch group membership for the user
-  const fetchMembership = (groupId: string, username: string) => {
-    startLoaderWithTracking();
+  const fetchMembership = async (groupId: string, username: string) => {
     return groupsService!
       .doGet<any>(`/user/group/${groupId}/member`)
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 && response.data) {
-          
-          setMembership(response.data);
+          return response.data;
         } else {
-          setMembership(null);
+          return null;
         }
       })
       .catch((err) => {
-        setMembership(null);
-      })
-      .finally(() => {
-        stopLoaderWithTracking();
+        return null;
       });
   };
 
   const fetchGroupEnrollment = async (id) => {
     try {
-      startLoaderWithTracking();
       const response = await groupsService!.doGet<any>(
         `/user/configuration/${id}`
       );
@@ -138,14 +115,11 @@ export const CreateEnrollment: FC<any> = (props) => {
       }
     } catch (error) {
       console.error("Error fetching group enrollment:", error);
-    } finally {
-      stopLoaderWithTracking();
     }
   };
 
   const fetchGroupEnrollments = async (groupPath) => {
     try {
-      startLoaderWithTracking();
       const response = await groupsService!.doGet<any>(
         "/user/groups/configurations",
         { params: { groupPath } }
@@ -155,116 +129,107 @@ export const CreateEnrollment: FC<any> = (props) => {
       }
     } catch (error) {
       console.error("Error fetching group enrollments:", error);
-    } finally {
-      stopLoaderWithTracking();
     }
   };
 
   const fetchGroupEnrollmentRequests = async (groupId) => {
     try {
-      startLoaderWithTracking();
       const response = await groupsService!.doGet<any>(
         "/user/enroll-requests",
         { params: { groupId } }
       );
       if (response.status === 200 && response.data) {
-        return response.data.results;
+        setOpenRequest(
+          response?.data?.results?.some(
+            (request) =>
+              request.status === "PENDING_APPROVAL" ||
+              request.status === "WAITING_FOR_REPLY"
+          )
+        );
       }
     } catch (error) {
       console.error("Error fetching group enrollment requests:", error);
-    } finally {
-      stopLoaderWithTracking();
     }
   };
 
   // Consolidate useEffect hooks
   useEffect(() => {
     const initializeEnrollment = async () => {
+      startLoader();
       const query = new URLSearchParams(props.location.search);
       const groupPath = decodeURI(query.get("groupPath") || "");
       const id = decodeURI(query.get("id") || "");
-
+      let groupId;
+      let defaultId;
+      let enrollmentData: any = {};
       if (id) {
-        const enrollmentData = await fetchGroupEnrollment(id);
+        enrollmentData = await fetchGroupEnrollment(id);
         if (enrollmentData) {
+          groupId = enrollmentData.group?.id;
           setGroup(enrollmentData.group);
           setEnrollments([enrollmentData]);
           setIsParentGroup(enrollmentData.group?.path?.split("/").length === 2);
         }
       } else if (groupPath) {
-        const enrollmentsData = await fetchGroupEnrollments(groupPath);
-        if (enrollmentsData?.length > 0) {
-          const defaultConfig =
-            enrollmentsData[0].group?.attributes?.defaultConfiguration?.[0];
-          setDefaultId(defaultConfig || "");
-          setGroup(enrollmentsData[0].group);
-          setEnrollments(enrollmentsData);
+        enrollmentData = await fetchGroupEnrollments(groupPath);
+        if (enrollmentData?.length > 0) {
+          groupId = enrollmentData[0].group?.id;
+          defaultId = enrollmentData[0].group?.attributes?.defaultConfiguration?.[0];
+          setDefaultId(defaultId || "");
+          setGroup(enrollmentData[0].group);
+          setEnrollments(enrollmentData);
           setIsParentGroup(
-            enrollmentsData[0].group?.path?.split("/").length === 2
+            enrollmentData[0].group?.path?.split("/").length === 2
           );
         }
       }
+      if (groupId) {
+        fetchGroupEnrollmentRequests(groupId);
+        fetchAccountInfo().then((userData) => {
+          if (userData && userData.username) {
+            fetchMembership(groupId, userData.username).then(
+              (membershipData) => {
+                const preselectedEnrollment = enrollmentData.find(
+                  (enrollment) => enrollment.id === defaultId
+                )
+                  ? enrollmentData.find(
+                      (enrollment) => enrollment.id === defaultId
+                    )
+                  : enrollmentData[0];
+                setSelected(preselectedEnrollment.name);
+                // Set the enrollment request with the default enrollment configuration
+                setEnrollmentRequest((prev) => ({
+                  ...prev,
+                  groupEnrollmentConfiguration: {
+                    id: preselectedEnrollment.id,
+                  },
+                  groupRoles:
+                    preselectedEnrollment?.groupRoles.filter((role) =>
+                      membershipData?.groupRoles.includes(role)
+                    ) || [],
+                }));
+                setEnrollment(preselectedEnrollment);
+                setMembership(membershipData);
+                stopLoader();
+
+              }
+            );
+          }
+        });
+      }else{
+        stopLoader();
+      }
+
     };
 
     initializeEnrollment();
   }, [props.location.search]);
 
-  useEffect(() => {
-    const fetchRequests = async () => {
-      if (group.id) {
-        const requests = await fetchGroupEnrollmentRequests(group.id);
-        if (requests) {
-          const hasOpenRequest = requests.some(
-            (request) =>
-              request.status === "PENDING_APPROVAL" ||
-              request.status === "WAITING_FOR_REPLY"
-          );
-          setOpenRequest(hasOpenRequest);
-        }
-      }
-    };
-    if (group?.id) {
-      fetchAccountInfo().then((userData) => {
-        if (userData && userData.username) {
-          fetchMembership(group.id, userData.username);
-        }
-      });
-    } else {
-      setMembership(null);
-    }
 
-    fetchRequests();
-  }, [group]);
-
-  useEffect(() => {
-    if (
-      !enrollments ||
-      enrollments.length === 0 ||
-      Object.keys(enrollment).length !== 0 ||
-      activeRequests.current !== 0
-    )
-      return;
-    const preselectedEnrollment = enrollments.find(
-      (enrollment) => enrollment.id === defaultId
-    )
-      ? enrollments.find((enrollment) => enrollment.id === defaultId)
-      : enrollments[0];
-    setSelected(preselectedEnrollment.name);
-    // Set the enrollment request with the default enrollment configuration
-    setEnrollmentRequest((prev) => ({
-      ...prev,
-      groupEnrollmentConfiguration: { id: preselectedEnrollment.id },
-      groupRoles:
-        preselectedEnrollment?.groupRoles.filter((role) =>
-          membership?.groupRoles.includes(role)
-        ) || [],
-    }));
-    setEnrollment(preselectedEnrollment);
-  }, [enrollments, defaultId, membership, activeRequests.current]);
 
   useEffect(() => {
     calclulateMembershipExpirationAndType();
-  }, [enrollment,user,membership,group]);
+  }, [enrollment, user, membership, group]);
   // useEffect(() => {
   //   if (enrollments.length === 1) {
   //     const singleEnrollment = enrollments[0];
@@ -345,56 +310,56 @@ export const CreateEnrollment: FC<any> = (props) => {
   const formatDate = (date: Date) => formatDateToString(date);
   const calclulateMembershipExpirationAndType = () => {
     try {
-        // If existing membership and enrollment is finite
-        if (
-          membership &&
-          enrollment?.membershipExpirationDays &&
-          !isFutureDate(dateParse(membership.validFrom))
-        ) {
-          // Existing member: new expiration is today + configured duration
-          const today = new Date();
-          const newExp = new Date(today);
-          newExp.setDate(
-            today.getDate() + parseInt(enrollment.membershipExpirationDays)
+      // If existing membership and enrollment is finite
+      if (
+        membership &&
+        enrollment?.membershipExpirationDays &&
+        !isFutureDate(dateParse(membership.validFrom))
+      ) {
+        // Existing member: new expiration is today + configured duration
+        const today = new Date();
+        const newExp = new Date(today);
+        newExp.setDate(
+          today.getDate() + parseInt(enrollment.membershipExpirationDays)
+        );
+        setNewExpirationDate(formatDate(newExp));
+        if (membership.membershipExpiresAt) {
+          const currentExp = new Date(membership.membershipExpiresAt);
+          let days = Math.floor(
+            (newExp.getTime() - currentExp.getTime()) / (1000 * 60 * 60 * 24)
           );
-          setNewExpirationDate(formatDate(newExp));
-          if (membership.membershipExpiresAt) {
-            const currentExp = new Date(membership.membershipExpiresAt);
-            let days = Math.floor(
-              (newExp.getTime() - currentExp.getTime()) / (1000 * 60 * 60 * 24)
-            );
-            setDaysDiff(days);
-            if (days > 0) setExpirationChangeType("extend");
-            else if (days < 0) setExpirationChangeType("reduce");
-            else setExpirationChangeType("same");
-          } else {
-            // Was infinite, now will expire
-            setExpirationChangeType("tofinite");
-          }
+          setDaysDiff(days);
+          if (days > 0) setExpirationChangeType("extend");
+          else if (days < 0) setExpirationChangeType("reduce");
+          else setExpirationChangeType("same");
+        } else {
+          // Was infinite, now will expire
+          setExpirationChangeType("tofinite");
         }
-        // Existing member, new enrollment is infinite 
-        else if (
-          membership &&
-          enrollment &&
-          !enrollment.membershipExpirationDays
-        ) {
-          // Infinite membership
-          setNewExpirationDate(Msg.localize("never"));
-          // If current is also infinite, mark as 'same'
-          if (!membership.membershipExpiresAt) {
-            setExpirationChangeType("same");
-          } else {
-            setExpirationChangeType("infinite");
-          }
-        } else if (
-          !membership &&
-          enrollment &&
-          enrollment.validFrom &&
-          isFutureDate(dateParse(enrollment.validFrom))
-        ) {
-          // New membership with future validFrom
-          setNewExpirationDate(null); // Will be handled in the alert below
+      }
+      // Existing member, new enrollment is infinite
+      else if (
+        membership &&
+        enrollment &&
+        !enrollment.membershipExpirationDays
+      ) {
+        // Infinite membership
+        setNewExpirationDate(Msg.localize("never"));
+        // If current is also infinite, mark as 'same'
+        if (!membership.membershipExpiresAt) {
+          setExpirationChangeType("same");
+        } else {
+          setExpirationChangeType("infinite");
         }
+      } else if (
+        !membership &&
+        enrollment &&
+        enrollment.validFrom &&
+        isFutureDate(dateParse(enrollment.validFrom))
+      ) {
+        // New membership with future validFrom
+        setNewExpirationDate(null); // Will be handled in the alert below
+      }
     } catch (error) {
       console.error("Error calculating membership expiration:", error);
     }
@@ -471,7 +436,7 @@ export const CreateEnrollment: FC<any> = (props) => {
                 </Alert>
               ) : !openRequest ? (
                 <React.Fragment>
-                  {enrollments && enrollments.length > 0 ? (
+                  { enrollments?.length > 0 ? (
                     <React.Fragment>
                       <FormGroup
                         label={Msg.localize("groupEnrollment")}
@@ -708,23 +673,20 @@ export const CreateEnrollment: FC<any> = (props) => {
                         }
                       >
                         {/* Current roles display */}
-                        {membership &&
-                          membership.groupRoles &&
-                          membership.groupRoles.length > 0 && (
-                            <div style={{ marginBottom: 8 }}>
-                              <Msg msgKey="currentGroupRolesLabel" />{" "}
-                              {membership.groupRoles.map((role) => (
-                                <span
-                                  key={role}
-                                  className="pf-c-badge pf-m-read"
-                                  style={{ marginRight: 4 }}
-                                >
-                                  {role}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-
+                        {membership?.grouprRoles?.length > 0 && (
+                          <div style={{ marginBottom: 8 }}>
+                            <Msg msgKey="currentGroupRolesLabel" />{" "}
+                            {membership.groupRoles.map((role) => (
+                              <span
+                                key={role}
+                                className="pf-c-badge pf-m-read"
+                                style={{ marginRight: 4 }}
+                              >
+                                {role}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         {/* GroupRolesTable for selectable roles */}
                         <GroupRolesTable
                           groupRoles={enrollment.groupRoles}
