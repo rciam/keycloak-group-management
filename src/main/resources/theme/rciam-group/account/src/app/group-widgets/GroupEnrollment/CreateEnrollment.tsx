@@ -170,6 +170,7 @@ export const CreateEnrollment: FC<any> = (props) => {
           setEnrollments([enrollmentData]);
           setIsParentGroup(enrollmentData.group?.path?.split("/").length === 2);
         }
+        enrollmentData = [enrollmentData];
       } else if (groupPath) {
         enrollmentData = await fetchGroupEnrollments(groupPath);
         if (enrollmentData?.length > 0) {
