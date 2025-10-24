@@ -1,2 +1,2 @@
 <#ftl output_format="plainText">
-${msg("groupadminEnrollmentCreationBody",fullname, userName, groupPath, subgroupsStr, signatureMessage)}
+${msg("adminGroupUserRemovalBody",fullname, userName, groupPath, subgroupsStr, signatureMessage)}
