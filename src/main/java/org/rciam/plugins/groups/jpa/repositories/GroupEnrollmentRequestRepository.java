@@ -168,6 +168,33 @@ public class GroupEnrollmentRequestRepository extends GeneralRepository<GroupEnr
 
     }
 
+    public GroupEnrollmentRequestPager manageGroupsEnrollmentPager(String userSearch, EnrollmentRequestStatusEnum status, PagerParameters pagerParameters) {
+        StringBuilder sqlQueryMain = new StringBuilder("from GroupEnrollmentRequestEntity f join f.groupEnrollmentConfiguration c ");
+        Map<String, Object> parameters = new HashMap<>();
+        if (userSearch != null) {
+            sqlQueryMain.append(" join f.user u where (lower(u.firstName) like :userSearch or lower(u.lastName) like :userSearch) ");
+            parameters.put("userSearch", "%" + userSearch.toLowerCase() + "%");
+            if (status != null) {
+                sqlQueryMain.append(" and f.status = :status");
+                parameters.put("status", status);
+            }
+        } else if (status != null) {
+            sqlQueryMain.append(" where f.status = :status");
+            parameters.put("status", status);
+        }
+
+
+        TypedQuery<GroupEnrollmentRequestEntity> query = em.createQuery("select f " + sqlQueryMain.toString()+ " order by f." + pagerParameters.getOrder().get(0) + " " + pagerParameters.getOrderType(), GroupEnrollmentRequestEntity.class);
+        TypedQuery<Long> queryCount = em.createQuery("select count(f) " + sqlQueryMain.toString(), Long.class);
+        for (Map.Entry<String, Object> e : parameters.entrySet()) {
+            query.setParameter(e.getKey(), e.getValue());
+            queryCount.setParameter(e.getKey(), e.getValue());
+        }
+        List<GroupEnrollmentRequestRepresentation> enrollments = query.setFirstResult(pagerParameters.getFirst()).setMaxResults(pagerParameters.getMax()).getResultStream().map(x -> EntityToRepresentation.toRepresentation(x, realm)).collect(Collectors.toList());
+        return new GroupEnrollmentRequestPager(enrollments, queryCount.getSingleResult());
+
+    }
+
     public void deleteByGroup(String groupId) {
         em.createNamedQuery("deleteEnrollmentByGroup").setParameter("groupId", groupId).executeUpdate();
     }

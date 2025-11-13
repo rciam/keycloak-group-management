@@ -187,8 +187,12 @@ public class GroupAdminService {
                                                            @QueryParam("status") EnrollmentRequestStatusEnum status,
                                                            @QueryParam("order") @DefaultValue("submittedDate") String order,
                                                            @QueryParam("asc") @DefaultValue("false") boolean asc) {
-        List<String> groupIds = groupAdminRepository.getAdminGroupIdsByName(groupAdmin.getId(), groupName);
-        return groupEnrollmentRequestRepository.groupAdminEnrollmentPager(groupIds, userSearch, status, new PagerParameters(first, max, Stream.of(order).collect(Collectors.toList()), asc ? "asc" : "desc"));
+        if (groupName == null && Utils.hasManageGroupsAccountRole(realm, groupAdmin)) {
+            return groupEnrollmentRequestRepository.manageGroupsEnrollmentPager(userSearch, status, new PagerParameters(first, max, Stream.of(order).collect(Collectors.toList()), asc ? "asc" : "desc"));
+        } else {
+            List<String> groupIds = Utils.hasManageGroupsAccountRole(realm, groupAdmin) ? session.groups().searchForGroupByNameStream(realm, groupName, false, 0, Integer.MAX_VALUE).flatMap(Utils::getGroupIdsWithSubgroups).distinct().collect(Collectors.toList()): groupAdminRepository.getAdminGroupIdsByName(groupAdmin.getId(), groupName);
+            return groupEnrollmentRequestRepository.groupAdminEnrollmentPager(groupIds, userSearch, status, new PagerParameters(first, max, Stream.of(order).collect(Collectors.toList()), asc ? "asc" : "desc"));
+        }
     }
 
     @Path("/enroll-request/{enrollId}")
@@ -201,11 +205,11 @@ public class GroupAdminService {
         if (group == null) {
             throw new ErrorResponseException("Could not find the group of Group Enrollment Request by id", "Could not find the group of Group Enrollment Request by id", Response.Status.NOT_FOUND);
         }
-        if (!groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group)){
+        if (!Utils.hasManageGroupsAccountRole(realm, groupAdmin) || !groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group)){
             throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
 
-        GroupAdminEnrollementRequest service = new GroupAdminEnrollementRequest(session, realm, groupEnrollmentRequestRepository, groupAdmin, entity, userGroupMembershipExtensionRepository, groupAdminRepository);
+        GroupAdminEnrollementRequest service = new GroupAdminEnrollementRequest(session, realm, groupEnrollmentRequestRepository, groupAdmin, entity, userGroupMembershipExtensionRepository, groupAdminRepository, group);
         ResteasyProviderFactory.getInstance().injectProperties(service);
         return service;
     }
