@@ -4,9 +4,10 @@ All notable changes in keycloak-group-management will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.9.11] - 2025-11-13
 
-## Fixed
+### Fixed
+- Fix QuarkusKeycloakSession kept in memory for each timer [keycloak-43761](https://github.com/keycloak/keycloak/issues/43761)
 - Remove whitespaces in line starting (text emails)
 
 ## [1.9.10] - 2025-10-24
