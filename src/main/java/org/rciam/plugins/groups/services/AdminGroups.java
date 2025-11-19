@@ -1,11 +1,9 @@
 package org.rciam.plugins.groups.services;
 
 
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -26,6 +24,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.services.ErrorResponseException;
+import org.keycloak.services.resources.admin.fgap.AdminPermissionEvaluator;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.Utils;
@@ -41,7 +40,6 @@ import org.rciam.plugins.groups.representations.GroupEnrollmentConfigurationRepr
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
-import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 
 public class AdminGroups {
 

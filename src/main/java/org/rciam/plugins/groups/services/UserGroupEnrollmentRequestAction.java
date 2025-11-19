@@ -1,7 +1,6 @@
 package org.rciam.plugins.groups.services;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -16,7 +15,6 @@ import org.keycloak.models.UserModel;
 import org.keycloak.services.ErrorResponseException;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
-import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentRequestRepository;

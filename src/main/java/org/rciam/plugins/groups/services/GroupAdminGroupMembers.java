@@ -1,6 +1,5 @@
 package org.rciam.plugins.groups.services;
 
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
@@ -18,7 +17,6 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
-import org.keycloak.services.ForbiddenException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.enums.GroupTypeEnum;
 import org.rciam.plugins.groups.enums.MemberStatusEnum;

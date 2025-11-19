@@ -20,7 +20,7 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.ErrorResponseException;
-import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
+import org.keycloak.services.resources.admin.fgap.AdminPermissionEvaluator;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentConfigurationRulesEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRulesRepository;

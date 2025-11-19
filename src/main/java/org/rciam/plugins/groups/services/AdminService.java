@@ -18,7 +18,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.events.admin.OperationType;
 import org.keycloak.events.admin.ResourceType;
@@ -29,6 +28,7 @@ import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.entities.RealmEntity;
 import org.keycloak.models.utils.KeycloakModelUtils;
 import org.keycloak.services.managers.RealmManager;
+import org.keycloak.services.resources.admin.fgap.AdminPermissionEvaluator;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.GeneralJpaService;
@@ -44,7 +44,6 @@ import org.rciam.plugins.groups.scheduled.MemberUserAttributeCalculatorTask;
 import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ErrorResponseException;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
-import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 
 public class AdminService {
@@ -99,7 +98,7 @@ public class AdminService {
         // The delete event is associated with the realm of the user executing the operation,
         // instead of the realm being deleted.
        adminEvent.operation(OperationType.DELETE).resource(ResourceType.REALM)
-                .realm(realmAuth.adminAuth().getRealm().getId()).resourcePath(realm.getName()).success();
+                .realm(realmAuth.adminAuth().getRealm()).resourcePath(realm.getName()).success();
     }
 
     @PUT
@@ -154,9 +153,7 @@ public class AdminService {
 
     @Path("/configuration-rules")
     public AdminEnrollmentConfigurationRules adminEnrollmentConfigurationRules() {
-        AdminEnrollmentConfigurationRules service = new AdminEnrollmentConfigurationRules(realm, session, adminEvent, realmAuth);
-        ResteasyProviderFactory.getInstance().injectProperties(service);
-        return service;
+        return new AdminEnrollmentConfigurationRules(realm, session, adminEvent, realmAuth);
     }
     @Path("/group/{groupId}")
     public AdminGroups adminGroups(@PathParam("groupId") String groupId) {
@@ -165,9 +162,7 @@ public class AdminService {
             throw new ErrorResponseException("Could not find group by id", "Could not find group by id", Response.Status.NOT_FOUND);
         }
         realmAuth.groups().requireView(group);
-        AdminGroups service = new AdminGroups(session, realmAuth, group, realm, generalJpaService, adminEvent, groupEnrollmentConfigurationRepository, groupRolesRepository);
-        ResteasyProviderFactory.getInstance().injectProperties(service);
-        return service;
+        return new AdminGroups(session, realmAuth, group, realm, generalJpaService, adminEvent, groupEnrollmentConfigurationRepository, groupRolesRepository);
     }
 
     @POST
