@@ -37,7 +37,6 @@ import org.rciam.plugins.groups.representations.UserGroupMembershipExtensionRepr
 import org.rciam.plugins.groups.representations.UserRepresentationPager;
 import org.rciam.plugins.groups.scheduled.AgmTimerProvider;
 import org.rciam.plugins.groups.scheduled.GroupManagementTasks;
-import org.rciam.plugins.groups.scheduled.SubgroupsExpirationDateCalculationTask;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
@@ -56,7 +55,6 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     private static final Logger logger = Logger.getLogger(UserGroupMembershipExtensionRepository.class);
     private static final String LOCAL_IP = "127.0.0.1";
     private static final String PROBLEM_CALCULATING_USER_ATTRIBUTE = "problem calculating user attribute value for group : ";
-    private static final String CALCULATION_TASK = "SubgroupsExpirationDateCalculationTask_";
     private static final String AGM_MAX_EXPIRED_MEMBERS_TO_DELETE = "AgmMaxExpiredMembersToDelete";
     private static final Integer DEFAULT_MAX_MEMBERS_TO_BE_DELETED = 100;
     private final GroupManagementEventRepository eventRepository;
@@ -170,7 +168,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                 LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(LOCAL_IP), userModel, member.getChangedBy() != null ? member.getChangedBy().getId() : userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
                         , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), member.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()), member.getMembershipExpiresAt());
 
-                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), userModel.getId(), group.getId(), member.getMembershipExpiresAt()), 100),  100, CALCULATION_TASK+ member.getId());
+                setEffectiveGroupMembershipExpiresAtForSubgroups(group, userModel.getId());
             });
 
             if (eventEntity == null) {
@@ -473,9 +471,8 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
                     , eventState, ModelToRepresentation.buildGroupPath(group), entity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()), entity.getMembershipExpiresAt());
 
-            if (MemberStatusEnum.ENABLED.equals(entity.getStatus()) && group.getSubGroupsStream().count() > 0) {
-                AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
-                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), user.getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, CALCULATION_TASK+ entity.getId());
+            if (MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
+                setEffectiveGroupMembershipExpiresAtForSubgroups(group, user.getId());
             }
         }
 
@@ -528,9 +525,8 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, user.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(user.getId())
                     , eventState, ModelToRepresentation.buildGroupPath(group), rep.getGroupRoles(), entity.getMembershipExpiresAt());
 
-            if (MemberStatusEnum.ENABLED.equals(entity.getStatus()) && group.getSubGroupsStream().count() > 0) {
-                AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
-                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), user.getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, CALCULATION_TASK+ entity.getId());
+            if (MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
+                setEffectiveGroupMembershipExpiresAtForSubgroups(group, user.getId());
             }
         }
 
@@ -573,9 +569,8 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
                     , eventState, ModelToRepresentation.buildGroupPath(group), rep.getGroupRoles(), entity.getMembershipExpiresAt());
         }
 
-        if (isMembershipExpiresAtChanges && MemberStatusEnum.ENABLED.equals(entity.getStatus()) && group.getSubGroupsStream().count() > 0) {
-            AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
-            timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), entity.getUser().getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, CALCULATION_TASK+ entity.getId());
+        if (isMembershipExpiresAtChanges && MemberStatusEnum.ENABLED.equals(entity.getStatus())) {
+            setEffectiveGroupMembershipExpiresAtForSubgroups(group, entity.getUser().getId());
         }
     }
 
@@ -611,10 +606,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
             changeUserAttributeValue(user, memberUserAttribute);
 
-            if (group.getSubGroupsStream().count() > 0) {
-                AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
-                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), entity.getUser().getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, CALCULATION_TASK+ entity.getId());
-            }
+            setEffectiveGroupMembershipExpiresAtForSubgroups(group, entity.getUser().getId());
             LoginEventHelper.createGroupEvent(realm, session, clientConnection, user, groupAdmin.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(groupAdmin.getId())
                     , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), rep.getGroupRoles(), entity.getMembershipExpiresAt());
         }
@@ -675,10 +667,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
             LoginEventHelper.createGroupEvent(realm, session, new DummyClientConnection(LOCAL_IP), userModel, userModel.getAttributeStream(Utils.VO_PERSON_ID).findAny().orElse(userModel.getId())
                     , Utils.GROUP_MEMBERSHIP_CREATE, ModelToRepresentation.buildGroupPath(group), invitationEntity.getGroupRoles().stream().map(GroupRolesEntity::getName).collect(Collectors.toSet()), entity.getMembershipExpiresAt());
 
-            if (group.getSubGroupsStream().count() > 0) {
-                AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
-                timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new SubgroupsExpirationDateCalculationTask(realm.getId(), userModel.getId(), group.getId(), entity.getMembershipExpiresAt()), 100),  100, CALCULATION_TASK+ entity.getId());
-            }
+            setEffectiveGroupMembershipExpiresAtForSubgroups(group, userModel.getId());
         }
 
         return entity;
@@ -696,34 +685,36 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
         em.createNamedQuery("deleteMembershipExtensionByUser").setParameter("userId", userId).executeUpdate();
     }
 
+    private void setEffectiveGroupMembershipExpiresAtForSubgroups(GroupModel group, String userId) {
+        long startTime = System.currentTimeMillis();
+        Set<String> subgroupIds = Utils.getAllSubgroupsIds(group);
+        getByGroup(userId, subgroupIds).forEach(member -> setEffectiveGroupMembershipExpiresAtWithParent(member, session.groups().getGroupById(realm, member.getGroup().getId())));
+        logger.debugf("Effective membership expiresAt calculation for group with id %s and user with id %s run in %d ms", group.getId(), userId, System.currentTimeMillis()-startTime);
+    }
+
     private void setEffectiveGroupMembershipExpiresAt(UserGroupMembershipExtensionEntity member) {
         if (! member.getGroup().getParentId().trim().isEmpty()) {
-            GroupModel group = session.groups().getGroupById(realm, member.getGroup().getId());
-            List<String> parentsIds = Utils.findParentGroupIds(group);
-            UserGroupMembershipExtensionEntity effectiveMember = getMinExpirationDateForUserAndGroups(member.getUser().getId(), parentsIds, member.getMembershipExpiresAt());
-            if (effectiveMember != null) {
-                member.setEffectiveMembershipExpiresAt(effectiveMember.getMembershipExpiresAt());
-                member.setEffectiveGroupId(effectiveMember.getGroup().getId());
-            } else {
-                member.setEffectiveMembershipExpiresAt(member.getMembershipExpiresAt());
-                member.setEffectiveGroupId(null);
-            }
+            setEffectiveGroupMembershipExpiresAtWithParent(member,session.groups().getGroupById(realm, member.getGroup().getId()));
         } else {
             member.setEffectiveMembershipExpiresAt(member.getMembershipExpiresAt());
         }
     }
 
+    private void setEffectiveGroupMembershipExpiresAtWithParent(UserGroupMembershipExtensionEntity member, GroupModel group) {
+        List<String> parentsIds = Utils.findParentGroupIds(group);
+        UserGroupMembershipExtensionEntity effectiveMember = getMinExpirationDateForUserAndGroups(member.getUser().getId(), parentsIds, member.getMembershipExpiresAt());
+        if (effectiveMember != null) {
+            member.setEffectiveMembershipExpiresAt(effectiveMember.getMembershipExpiresAt());
+            member.setEffectiveGroupId(effectiveMember.getGroup().getId());
+        } else {
+            member.setEffectiveMembershipExpiresAt(member.getMembershipExpiresAt());
+            member.setEffectiveGroupId(null);
+        }
+    }
+
     private void setEffectiveGroupMembershipExpiresAt(UserGroupMembershipExtensionEntity member, GroupModel group) {
         if (group.getParent() != null) {
-            List<String> parentsIds = Utils.findParentGroupIds(group);
-            UserGroupMembershipExtensionEntity effectiveMember = getMinExpirationDateForUserAndGroups(member.getUser().getId(), parentsIds, member.getMembershipExpiresAt());
-            if (effectiveMember != null) {
-                member.setEffectiveMembershipExpiresAt(effectiveMember.getMembershipExpiresAt());
-                member.setEffectiveGroupId(effectiveMember.getGroup().getId());
-            } else {
-                member.setEffectiveMembershipExpiresAt(member.getMembershipExpiresAt());
-                member.setEffectiveGroupId(null);
-            }
+            setEffectiveGroupMembershipExpiresAtWithParent(member,group);
         } else {
             member.setEffectiveMembershipExpiresAt(member.getMembershipExpiresAt());
         }
@@ -732,15 +723,7 @@ public class UserGroupMembershipExtensionRepository extends GeneralRepository<Us
     private void setEffectiveGroupMembershipExpiresAtForMigration(UserGroupMembershipExtensionEntity member) {
         if (! member.getGroup().getParentId().trim().isEmpty()) {
             RealmModel realmModel = session.realms().getRealm(member.getGroup().getRealm());
-            GroupModel group = session.groups().getGroupById(realmModel, member.getGroup().getId());
-            List<String> parentsIds = Utils.findParentGroupIds(group);
-            UserGroupMembershipExtensionEntity effectiveMember = getMinExpirationDateForUserAndGroups(member.getUser().getId(), parentsIds, member.getMembershipExpiresAt());
-            if (effectiveMember != null) {
-                member.setEffectiveMembershipExpiresAt(effectiveMember.getMembershipExpiresAt());
-                member.setEffectiveGroupId(effectiveMember.getGroup().getId());
-            } else {
-                member.setEffectiveMembershipExpiresAt(member.getMembershipExpiresAt());
-            }
+            setEffectiveGroupMembershipExpiresAtWithParent(member,session.groups().getGroupById(realmModel, member.getGroup().getId()));
         } else {
             member.setEffectiveMembershipExpiresAt(member.getMembershipExpiresAt());
         }
