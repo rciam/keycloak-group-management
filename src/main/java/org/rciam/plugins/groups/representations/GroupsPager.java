@@ -5,15 +5,15 @@ import java.util.List;
 import org.keycloak.representations.idm.GroupRepresentation;
 
 public class GroupsPager {
-    private List<GroupRepresentation> results;
+    private List<? extends GroupRepresentation> results;
     private long count;
 
-    public GroupsPager(List<GroupRepresentation> results, long count){
+    public GroupsPager(List<? extends GroupRepresentation> results, long count){
         this.results = results;
         this.count = count;
     }
 
-    public List<GroupRepresentation> getResults() {
+    public List<? extends GroupRepresentation> getResults() {
         return results;
     }
 

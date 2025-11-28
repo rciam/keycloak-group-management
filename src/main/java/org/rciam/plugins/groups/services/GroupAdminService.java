@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -18,7 +18,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 
 import jakarta.ws.rs.core.Response;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.glassfish.jaxb.core.v2.TODO;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -29,12 +29,10 @@ import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ErrorResponseException;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.enums.GroupTypeEnum;
-import org.rciam.plugins.groups.enums.MemberStatusEnum;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.PagerParameters;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.GeneralJpaService;
-import org.rciam.plugins.groups.jpa.entities.GroupEnrollmentRequestEntity;
 import org.rciam.plugins.groups.jpa.repositories.GroupAdminRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRepository;
 import org.rciam.plugins.groups.jpa.repositories.GroupEnrollmentConfigurationRulesRepository;
@@ -45,7 +43,6 @@ import org.rciam.plugins.groups.representations.GroupEnrollmentConfigurationRule
 import org.rciam.plugins.groups.representations.GroupEnrollmentRequestPager;
 import org.rciam.plugins.groups.representations.GroupsPager;
 import org.rciam.plugins.groups.representations.UserRepresentationPager;
-import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
 
 public class GroupAdminService {
@@ -90,22 +87,57 @@ public class GroupAdminService {
         }
     }
 
+    /**
+     * Flatten a group tree into a stream of all sub-groups (recursive)
+     */
+    private static Stream<GroupModel> flattenGroupTree(GroupModel group) {
+        return Stream.concat(
+                Stream.of(group),
+                group.getSubGroupsStream().flatMap(GroupAdminService::flattenGroupTree)
+        );
+    }
+
     private GroupsPager getAllGroups(String search, Integer first, Integer max, boolean toplevel, boolean exact) {
-        if (Objects.nonNull(search) && toplevel) {
-            List<GroupRepresentation> results = ModelToRepresentation.searchForGroupModelByName(session, realm, false, search.trim(), exact, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
-            Long count = ModelToRepresentation.searchForGroupModelByName(session, realm, false, search.trim(), exact, null, null).count();
-            return new GroupsPager(results, count);
-        } else if (Objects.nonNull(search)) {
-            return groupEnrollmentConfigurationRepository.searchForGroupByNameStream(search.trim(), exact, first, max);
-        }else {
-            List<GroupRepresentation> results = ModelToRepresentation.toGroupModelHierarchy(realm, false, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
-            return new GroupsPager(results, realm.getGroupsCount(true));
-        }
+
+        //TODO You have to fix this method
+
+//        if (Objects.nonNull(search) && toplevel) {
+//
+//            var topGroups = session.groups().getTopLevelGroupsStream(realm, first, max);
+//
+//            var allGroups = topGroups.flatMap(GroupAdminService::flattenGroupTree);
+//
+//            var matched = allGroups
+//                    .filter(g -> g.getName() != null && g.getName().toLowerCase().contains(search.toLowerCase()))
+//                    .toList();
+//
+//            var count = matched.size();
+//
+//            var results =  matched
+//                    .stream()
+//                    .skip(first)
+//                    .limit(max)
+//                    .map(m->org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(m, true))
+//                    .toList();
+//
+//            return new GroupsPager(results, count);
+//        } else if (Objects.nonNull(search)) {
+//
+//            return groupEnrollmentConfigurationRepository.searchForGroupByNameStream(search.trim(), exact, first, max);
+//        } else {
+//
+//            var topGroups = session.groups().getTopLevelGroupsStream(realm, first, max);
+//            List<GroupRepresentation> results = ModelToRepresentation.toGroupModelHierarchy(realm, false, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+//            return new GroupsPager(results, realm.getGroupsCount(true));
+//        }
+
+        return new GroupsPager(null, 0);
     }
 
     @POST
     @Path("/group")
     public Response createTopLevelGroup(GroupRepresentation rep) {
+
         if (!Utils.hasManageGroupsAccountRole(realm, groupAdmin)){
             throw new ForbiddenException("You could not create a top-level group");
         }
@@ -115,7 +147,8 @@ public class GroupAdminService {
 
     @Path("/group/{groupId}")
     public GroupAdminGroup group(@PathParam("groupId") String groupId) {
-        GroupModel group = realm.getGroupById(groupId);
+
+        var group = realm.getGroupById(groupId);
         boolean isGroupAdmin = groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group);
         if (!isGroupAdmin && !Utils.hasManageGroupsAccountRole(realm, groupAdmin)){
             throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
@@ -124,10 +157,7 @@ public class GroupAdminService {
             throw new ErrorResponseException("Could not find group by id", "Could not find group by id", Response.Status.NOT_FOUND);
         }
 
-
-        GroupAdminGroup service = new GroupAdminGroup(session, realm, groupAdmin, group, userGroupMembershipExtensionRepository, groupAdminRepository, groupEnrollmentRequestRepository, groupEnrollmentConfigurationRulesRepository, adminEvent, isGroupAdmin);
-        ResteasyProviderFactory.getInstance().injectProperties(service);
-        return service;
+        return new GroupAdminGroup(session, realm, groupAdmin, group, userGroupMembershipExtensionRepository, groupAdminRepository, groupEnrollmentRequestRepository, groupEnrollmentConfigurationRulesRepository, adminEvent, isGroupAdmin);
     }
 
     @GET
@@ -193,11 +223,12 @@ public class GroupAdminService {
 
     @Path("/enroll-request/{enrollId}")
     public GroupAdminEnrollementRequest enrollment(@PathParam("enrollId") String enrollId) {
-        GroupEnrollmentRequestEntity entity = groupEnrollmentRequestRepository.getEntity(enrollId);
+
+        var entity = groupEnrollmentRequestRepository.getEntity(enrollId);
         if (entity == null) {
             throw new ErrorResponseException("Could not find Group Enrollment Request by id", "Could not find Group Enrollment Request by id", Response.Status.NOT_FOUND);
         }
-        GroupModel group = realm.getGroupById(entity.getGroupEnrollmentConfiguration().getGroup().getId());
+        var group = realm.getGroupById(entity.getGroupEnrollmentConfiguration().getGroup().getId());
         if (group == null) {
             throw new ErrorResponseException("Could not find the group of Group Enrollment Request by id", "Could not find the group of Group Enrollment Request by id", Response.Status.NOT_FOUND);
         }
@@ -205,9 +236,7 @@ public class GroupAdminService {
             throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
 
-        GroupAdminEnrollementRequest service = new GroupAdminEnrollementRequest(session, realm, groupEnrollmentRequestRepository, groupAdmin, entity, userGroupMembershipExtensionRepository, groupAdminRepository);
-        ResteasyProviderFactory.getInstance().injectProperties(service);
-        return service;
+        return new GroupAdminEnrollementRequest(session, realm, groupEnrollmentRequestRepository, groupAdmin, entity, userGroupMembershipExtensionRepository, groupAdminRepository);
     }
 
 }

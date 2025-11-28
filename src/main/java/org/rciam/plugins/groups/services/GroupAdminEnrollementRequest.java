@@ -4,7 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;

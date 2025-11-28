@@ -1,7 +1,6 @@
 package org.rciam.plugins.groups.services;
 
 import jakarta.ws.rs.*;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
 import org.keycloak.models.GroupModel;
@@ -35,7 +34,6 @@ import org.rciam.plugins.groups.representations.GroupEnrollmentRequestPager;
 import org.rciam.plugins.groups.representations.GroupEnrollmentRequestRepresentation;
 import org.rciam.plugins.groups.representations.GroupInvitationRepresentation;
 import org.rciam.plugins.groups.representations.UserGroupMembershipExtensionRepresentationPager;
-import org.keycloak.services.ForbiddenException;
 import org.keycloak.services.ServicesLogger;
 
 import jakarta.ws.rs.core.Context;
@@ -106,9 +104,7 @@ public class UserGroups {
             throw new ErrorResponseException("Could not find group by id", "Could not find group by id", Response.Status.NOT_FOUND);
         }
 
-        UserGroup service = new UserGroup(session, realm, groupEnrollmentConfigurationRepository, user, group);
-        ResteasyProviderFactory.getInstance().injectProperties(service);
-        return service;
+        return new UserGroup(session, realm, groupEnrollmentConfigurationRepository, user, group);
     }
 
     @GET
@@ -140,9 +136,7 @@ public class UserGroups {
             throw new ErrorResponseException("You are not member of this group", "You are not member of this group", Response.Status.NOT_FOUND);
         }
 
-        UserGroupMember service = new UserGroupMember(session, realm, user, entity, userGroupMembershipExtensionRepository, groupAdminRepository, customFreeMarkerEmailTemplateProvider);
-        ResteasyProviderFactory.getInstance().injectProperties(service);
-        return service;
+        return new UserGroupMember(session, realm, user, entity, userGroupMembershipExtensionRepository, groupAdminRepository, customFreeMarkerEmailTemplateProvider);
     }
 
 
@@ -203,9 +197,7 @@ public class UserGroups {
         if (!entity.getUser().getId().equals(user.getId()))
             throw new ErrorResponseException("You do not have access to this group enrollment", "You do not have access to this group enrollment", Response.Status.FORBIDDEN);
 
-        UserGroupEnrollmentRequestAction service = new UserGroupEnrollmentRequestAction(session, realm, groupEnrollmentConfigurationRepository, groupEnrollmentRequestRepository, user, entity);
-        ResteasyProviderFactory.getInstance().injectProperties(service);
-        return service;
+        return new UserGroupEnrollmentRequestAction(session, realm, groupEnrollmentConfigurationRepository, groupEnrollmentRequestRepository, user, entity);
     }
 
     @GET

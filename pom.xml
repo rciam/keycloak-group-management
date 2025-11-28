@@ -3,12 +3,12 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>keycloak-parent</artifactId>
         <groupId>org.keycloak</groupId>
-        <version>22.0.5</version>
+        <artifactId>keycloak-quarkus-parent</artifactId>
+        <version>26.4.5</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
 
+    <modelVersion>4.0.0</modelVersion>
     <artifactId>keycloak-group-management</artifactId>
     <packaging>jar</packaging>
 
@@ -18,14 +18,15 @@
     </organization>
 
     <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <dir.account2>src/main/resources/theme/rciam-group/account/src</dir.account2>
         <args.npm.install>ci --no-optional --ignore-scripts</args.npm.install>
-        <!-- according to Keycloak jackson - quarkus version -->
-        <jackson.version>2.15.2</jackson.version>
-        <quarkus.version>3.2.7.Final</quarkus.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <jackson.version>2.20.1</jackson.version>
+        <quarkus.version>3.27.0</quarkus.version>
         <agm-version>1.10.0</agm-version>
+        <hibernate.validator.version>8.0.1.Final</hibernate.validator.version>
+        <jakarta.validation.version>3.1.1</jakarta.validation.version>
     </properties>
 
     <dependencies>
@@ -89,11 +90,19 @@
             <artifactId>keycloak-model-jpa</artifactId>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <version>${jakarta.validation.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>${hibernate.validator.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
-
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -225,7 +234,5 @@
                 </plugins>
             </build>
         </profile>
-
     </profiles>
-
 </project>

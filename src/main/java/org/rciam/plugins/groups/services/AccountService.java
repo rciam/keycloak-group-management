@@ -1,6 +1,5 @@
 package org.rciam.plugins.groups.services;
 
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -43,16 +42,12 @@ public class AccountService {
 
     @Path("/user")
     public UserGroups userGroups() {
-        UserGroups service = new UserGroups(session, realm, user, userSession);
-        ResteasyProviderFactory.getInstance().injectProperties(service);
-        return service;
+        return new UserGroups(session, realm, user, userSession);
     }
 
     @Path("/group-admin")
     public GroupAdminService groupAdminService() {
-        GroupAdminService service = new GroupAdminService(session, realm, user, adminEvent);
-        ResteasyProviderFactory.getInstance().injectProperties(service);
-        return service;
+        return new GroupAdminService(session, realm, user, adminEvent);
     }
 
 

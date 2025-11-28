@@ -12,8 +12,8 @@ import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.managers.RealmManager;
 import org.keycloak.services.resources.admin.AdminAuth;
-import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
-import org.keycloak.services.resources.admin.permissions.AdminPermissions;
+import org.keycloak.services.resources.admin.fgap.AdminPermissionEvaluator;
+import org.keycloak.services.resources.admin.fgap.AdminPermissions;
 
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.NotFoundException;
@@ -84,7 +84,7 @@ public class AuthenticationHelper {
 
         AuthenticationManager.AuthResult authResult = authenticateUserRequest();
         AdminAuth adminAuth = new AdminAuth(realm, authResult.getToken(), authResult.getUser(), authResult.getClient());
-        AdminPermissionEvaluator realmAuth = AdminPermissions.evaluator(session, realm, adminAuth);
+        var realmAuth = AdminPermissions.evaluator(session, realm, adminAuth);
         return realmAuth;
     }
 

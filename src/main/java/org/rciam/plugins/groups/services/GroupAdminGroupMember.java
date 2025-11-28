@@ -5,10 +5,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import jakarta.persistence.OptimisticLockException;
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -27,7 +25,6 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.services.ErrorResponseException;
-import org.keycloak.services.ForbiddenException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.enums.GroupTypeEnum;
 import org.rciam.plugins.groups.enums.MemberStatusEnum;

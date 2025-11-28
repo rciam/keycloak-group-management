@@ -18,7 +18,6 @@
 package org.rciam.plugins.groups.providers;
 
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -26,7 +25,6 @@ import org.rciam.plugins.groups.helpers.AuthenticationHelper;
 import org.rciam.plugins.groups.services.AccountService;
 import org.rciam.plugins.groups.services.AdminService;
 import org.keycloak.services.resource.RealmResourceProvider;
-import org.keycloak.services.resources.admin.permissions.AdminPermissionEvaluator;
 
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Context;
@@ -58,18 +56,14 @@ public class ResourcesProvider implements RealmResourceProvider {
 
     @Path("account")
     public AccountService getAccountService() {
-        AccountService service = new AccountService(session, realm, clientConnection);
-        ResteasyProviderFactory.getInstance().injectProperties(service);
-        return service;
+        return new AccountService(session, realm, clientConnection);
     }
 
     @Path("admin")
     public AdminService getAdminService() {
         AuthenticationHelper authHelper = new AuthenticationHelper(session);
-        AdminPermissionEvaluator realmAuth = authHelper.authenticateRealmAdminRequest();
-        AdminService service = new AdminService(session, realm, clientConnection, realmAuth);
-        ResteasyProviderFactory.getInstance().injectProperties(service);
-        return service;
+        var realmAuth = authHelper.authenticateRealmAdminRequest();
+        return new AdminService(session, realm, clientConnection, realmAuth);
     }
 
 }

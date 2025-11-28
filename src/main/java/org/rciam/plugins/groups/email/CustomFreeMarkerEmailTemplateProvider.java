@@ -492,7 +492,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
 
             attributes.put("properties", theme.getProperties());
             attributes.put("realmName", getRealmName());
-            attributes.put("user", new ProfileBean(user));
+            attributes.put("user", new ProfileBean(user, session));
 
             String subject = new MessageFormat(messages.getProperty(subjectKey, subjectKey), locale).format(subjectAttributes.toArray());
             String textTemplate = String.format("text/%s", template);

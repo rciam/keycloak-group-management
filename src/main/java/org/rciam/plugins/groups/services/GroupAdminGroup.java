@@ -1,8 +1,6 @@
 package org.rciam.plugins.groups.services;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +8,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -25,7 +22,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.email.EmailException;
 import org.keycloak.events.admin.OperationType;
@@ -36,11 +32,9 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.jpa.UserAdapter;
 import org.keycloak.models.utils.ModelToRepresentation;
-import org.keycloak.services.ForbiddenException;
 import org.rciam.plugins.groups.email.CustomFreeMarkerEmailTemplateProvider;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.enums.GroupTypeEnum;
-import org.rciam.plugins.groups.enums.MemberStatusEnum;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
 import org.rciam.plugins.groups.helpers.Utils;
 import org.rciam.plugins.groups.jpa.GeneralJpaService;
@@ -292,20 +286,18 @@ public class GroupAdminGroup {
 
     @Path("/members")
     public GroupAdminGroupMembers groupMember() {
-        GroupAdminGroupMembers service = new GroupAdminGroupMembers(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, isGroupAdmin);
-        ResteasyProviderFactory.getInstance().injectProperties(service);
-        return service;
+
+        return new GroupAdminGroupMembers(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, isGroupAdmin);
     }
 
     @Path("/member/{memberId}")
     public GroupAdminGroupMember groupMember(@PathParam("memberId") String memberId) {
-        UserGroupMembershipExtensionEntity member = userGroupMembershipExtensionRepository.getEntity(memberId);
+
+        var member = userGroupMembershipExtensionRepository.getEntity(memberId);
         if (member == null) {
             throw new ErrorResponseException("Could not find this group member", "Could not find this group member", Response.Status.NOT_FOUND);
         }
-        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository, isGroupAdmin);
-        ResteasyProviderFactory.getInstance().injectProperties(service);
-        return service;
+        return new GroupAdminGroupMember(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository, isGroupAdmin);
     }
 
     @POST
