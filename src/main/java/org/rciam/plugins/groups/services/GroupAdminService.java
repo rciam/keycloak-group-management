@@ -87,51 +87,20 @@ public class GroupAdminService {
         }
     }
 
-    /**
-     * Flatten a group tree into a stream of all sub-groups (recursive)
-     */
-    private static Stream<GroupModel> flattenGroupTree(GroupModel group) {
-        return Stream.concat(
-                Stream.of(group),
-                group.getSubGroupsStream().flatMap(GroupAdminService::flattenGroupTree)
-        );
-    }
-
     private GroupsPager getAllGroups(String search, Integer first, Integer max, boolean toplevel, boolean exact) {
 
         //TODO You have to fix this method
 
 //        if (Objects.nonNull(search) && toplevel) {
-//
-//            var topGroups = session.groups().getTopLevelGroupsStream(realm, first, max);
-//
-//            var allGroups = topGroups.flatMap(GroupAdminService::flattenGroupTree);
-//
-//            var matched = allGroups
-//                    .filter(g -> g.getName() != null && g.getName().toLowerCase().contains(search.toLowerCase()))
-//                    .toList();
-//
-//            var count = matched.size();
-//
-//            var results =  matched
-//                    .stream()
-//                    .skip(first)
-//                    .limit(max)
-//                    .map(m->org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(m, true))
-//                    .toList();
-//
+//            List<GroupRepresentation> results = ModelToRepresentation.searchForGroupModelByName(session, realm, false, search.trim(), exact, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+//            Long count = ModelToRepresentation.searchForGroupModelByName(session, realm, false, search.trim(), exact, null, null).count();
 //            return new GroupsPager(results, count);
 //        } else if (Objects.nonNull(search)) {
-//
-//            return groupEnrollmentConfigurationRepository.searchForGroupByNameStream(search.trim(), exact, first, max);
-//        } else {
-//
-//            var topGroups = session.groups().getTopLevelGroupsStream(realm, first, max);
+            return groupEnrollmentConfigurationRepository.searchForGroupByNameStream(search.trim(), exact, first, max);
+//        }else {
 //            List<GroupRepresentation> results = ModelToRepresentation.toGroupModelHierarchy(realm, false, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
 //            return new GroupsPager(results, realm.getGroupsCount(true));
 //        }
-
-        return new GroupsPager(null, 0);
     }
 
     @POST
