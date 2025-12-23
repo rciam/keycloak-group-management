@@ -48,8 +48,7 @@ import java.util.stream.Stream;
 
 public class UserGroups {
 
-    @Context
-    private ClientConnection clientConnection;
+    private final ClientConnection clientConnection;
 
     private static final String INVITATION_NOT_EXISTS = "This invitation does not exist or has been expired";
 
@@ -67,7 +66,7 @@ public class UserGroups {
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final UserSessionModel userSession;
 
-    public UserGroups(KeycloakSession session, RealmModel realm, UserModel user, UserSessionModel userSession) {
+    public UserGroups(KeycloakSession session, RealmModel realm, UserModel user, UserSessionModel userSession, ClientConnection clientConnection) {
         this.session = session;
         this.realm = realm;
         this.user = user;
@@ -83,6 +82,7 @@ public class UserGroups {
         this.customFreeMarkerEmailTemplateProvider.setSignatureMessage(memberUserAttribute.getSignatureMessage());
         this.generalJpaService = new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
         this.userSession = userSession;
+        this.clientConnection = clientConnection;
     }
 
 
@@ -136,7 +136,7 @@ public class UserGroups {
             throw new ErrorResponseException("You are not member of this group", "You are not member of this group", Response.Status.NOT_FOUND);
         }
 
-        return new UserGroupMember(session, realm, user, entity, userGroupMembershipExtensionRepository, groupAdminRepository, customFreeMarkerEmailTemplateProvider);
+        return new UserGroupMember(session, realm, user, entity, userGroupMembershipExtensionRepository, groupAdminRepository, customFreeMarkerEmailTemplateProvider, clientConnection);
     }
 
 

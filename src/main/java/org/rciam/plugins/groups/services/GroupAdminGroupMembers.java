@@ -7,7 +7,6 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 
 import org.keycloak.common.ClientConnection;
@@ -43,7 +42,6 @@ import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
-import java.time.temporal.TemporalUnit;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -52,8 +50,7 @@ import java.util.stream.Collectors;
 
 public class GroupAdminGroupMembers {
 
-    @Context
-    private ClientConnection clientConnection;
+    private final ClientConnection clientConnection;
 
     private final KeycloakSession session;
     private final RealmModel realm;
@@ -68,7 +65,7 @@ public class GroupAdminGroupMembers {
     private final GroupRolesRepository groupRolesRepository;
     private final boolean isGroupAdmin;
 
-    public GroupAdminGroupMembers(KeycloakSession session, RealmModel realm, UserModel groupAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider,boolean isGroupAdmin) {
+    public GroupAdminGroupMembers(KeycloakSession session, RealmModel realm, UserModel groupAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider,ClientConnection clientConnection, boolean isGroupAdmin) {
         this.session = session;
         this.realm =  realm;
         this.groupAdmin = groupAdmin;
@@ -81,6 +78,7 @@ public class GroupAdminGroupMembers {
         this.groupEnrollmentConfigurationRulesRepository = new GroupEnrollmentConfigurationRulesRepository(session);
         this.groupRolesRepository = new GroupRolesRepository(session, realm);
         this.isGroupAdmin = isGroupAdmin;
+        this.clientConnection = clientConnection;
     }
 
     // group invitation and process for accept it

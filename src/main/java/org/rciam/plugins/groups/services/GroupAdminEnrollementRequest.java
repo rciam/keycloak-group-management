@@ -37,8 +37,7 @@ public class GroupAdminEnrollementRequest {
 
     private static final String statusErrorMessage = "Enrolment is not in status Pending approval";
 
-    @Context
-    private ClientConnection clientConnection;
+    private final ClientConnection clientConnection;
 
     protected final KeycloakSession session;
     private final RealmModel realm;
@@ -50,7 +49,7 @@ public class GroupAdminEnrollementRequest {
     private final MemberUserAttributeConfigurationRepository memberUserAttributeConfigurationRepository;
     private final GroupAdminRepository groupAdminRepository;
 
-    public GroupAdminEnrollementRequest(KeycloakSession session, RealmModel realm, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserModel groupAdmin, GroupEnrollmentRequestEntity enrollmentEntity, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository) {
+    public GroupAdminEnrollementRequest(KeycloakSession session, RealmModel realm, GroupEnrollmentRequestRepository groupEnrollmentRequestRepository, UserModel groupAdmin, GroupEnrollmentRequestEntity enrollmentEntity, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, ClientConnection clientConnection) {
         this.session = session;
         this.realm = realm;
         this.groupEnrollmentRequestRepository = groupEnrollmentRequestRepository;
@@ -63,6 +62,7 @@ public class GroupAdminEnrollementRequest {
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         MemberUserAttributeConfigurationEntity memberUserAttribute = memberUserAttributeConfigurationRepository.getByRealm(realm.getId());
         this.customFreeMarkerEmailTemplateProvider.setSignatureMessage(memberUserAttribute.getSignatureMessage());
+        this.clientConnection = clientConnection;
     }
 
     @GET

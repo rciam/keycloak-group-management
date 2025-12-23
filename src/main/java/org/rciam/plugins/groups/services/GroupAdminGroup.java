@@ -18,7 +18,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -51,8 +50,8 @@ import org.keycloak.services.resources.admin.AdminEventBuilder;
 import org.keycloak.services.scheduled.ClusterAwareScheduledTaskRunner;
 
 public class GroupAdminGroup {
-    @Context
-    private ClientConnection clientConnection;
+
+    private final ClientConnection clientConnection;
 
     private final KeycloakSession session;
     private final RealmModel realm;
@@ -92,6 +91,7 @@ public class GroupAdminGroup {
         this.generalService = new GeneralJpaService(session, realm, groupEnrollmentConfigurationRepository);
         this.adminEvent = adminEvent;
         this.isGroupAdmin = isGroupAdmin;
+        this.clientConnection = session.getContext().getConnection();
     }
 
     @DELETE
@@ -287,7 +287,7 @@ public class GroupAdminGroup {
     @Path("/members")
     public GroupAdminGroupMembers groupMember() {
 
-        return new GroupAdminGroupMembers(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, isGroupAdmin);
+        return new GroupAdminGroupMembers(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, clientConnection, isGroupAdmin);
     }
 
     @Path("/member/{memberId}")
@@ -297,7 +297,7 @@ public class GroupAdminGroup {
         if (member == null) {
             throw new ErrorResponseException("Could not find this group member", "Could not find this group member", Response.Status.NOT_FOUND);
         }
-        return new GroupAdminGroupMember(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository, isGroupAdmin);
+        return new GroupAdminGroupMember(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository, clientConnection, isGroupAdmin);
     }
 
     @POST

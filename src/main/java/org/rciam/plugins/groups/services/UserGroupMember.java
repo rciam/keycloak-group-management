@@ -27,8 +27,7 @@ import java.util.stream.Collectors;
 
 public class UserGroupMember {
 
-    @Context
-    private ClientConnection clientConnection;
+    private final ClientConnection clientConnection;
 
     private final KeycloakSession session;
     private final RealmModel realm;
@@ -41,7 +40,7 @@ public class UserGroupMember {
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final UserModel user;
 
-    public UserGroupMember(KeycloakSession session, RealmModel realm, UserModel user, UserGroupMembershipExtensionEntity member, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider) {
+    public UserGroupMember(KeycloakSession session, RealmModel realm, UserModel user, UserGroupMembershipExtensionEntity member, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupAdminRepository groupAdminRepository, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, ClientConnection clientConnection) {
         this.session = session;
         this.realm = realm;
         this.userGroupMembershipExtensionRepository = userGroupMembershipExtensionRepository;
@@ -50,7 +49,7 @@ public class UserGroupMember {
         this.memberUserAttributeConfigurationRepository = new MemberUserAttributeConfigurationRepository(session);
         this.groupAdminRepository = groupAdminRepository;
         this.customFreeMarkerEmailTemplateProvider = customFreeMarkerEmailTemplateProvider;
-
+        this.clientConnection = clientConnection;
     }
 
     @GET

@@ -45,8 +45,7 @@ public class AdminGroups {
 
     private static final Logger logger = Logger.getLogger(AdminGroups.class);
 
-    @Context
-    protected ClientConnection clientConnection;
+    protected final ClientConnection clientConnection;
 
     private KeycloakSession session;
     private final RealmModel realm;
@@ -59,7 +58,7 @@ public class AdminGroups {
     private final CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider;
     private final AdminEventBuilder adminEvent;
 
-    public AdminGroups(KeycloakSession session, AdminPermissionEvaluator realmAuth, GroupModel group, RealmModel realm, GeneralJpaService generalJpaService, AdminEventBuilder adminEvent, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, GroupRolesRepository groupRolesRepository) {
+    public AdminGroups(KeycloakSession session, AdminPermissionEvaluator realmAuth, GroupModel group, RealmModel realm, GeneralJpaService generalJpaService, AdminEventBuilder adminEvent, GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository, GroupRolesRepository groupRolesRepository, ClientConnection clientConnection) {
         this.session = session;
         this.realm = realm;
         this.realmAuth = realmAuth;
@@ -73,6 +72,7 @@ public class AdminGroups {
         this.customFreeMarkerEmailTemplateProvider.setRealm(realm);
         MemberUserAttributeConfigurationEntity memberUserAttribute = (new MemberUserAttributeConfigurationRepository(session)).getByRealm(realm.getId());
         this.customFreeMarkerEmailTemplateProvider.setSignatureMessage(memberUserAttribute.getSignatureMessage());
+        this.clientConnection = clientConnection;
         this.adminEvent = adminEvent.resource(ResourceType.GROUP);
     }
 

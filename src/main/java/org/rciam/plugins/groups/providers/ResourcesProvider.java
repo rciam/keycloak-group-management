@@ -33,8 +33,7 @@ public class ResourcesProvider implements RealmResourceProvider {
 
     private static final Logger logger = Logger.getLogger(ResourcesProvider.class);
 
-    @Context
-    protected ClientConnection clientConnection;
+    protected final ClientConnection clientConnection;
 
     private KeycloakSession session;
     private final RealmModel realm;

@@ -12,7 +12,6 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 
 import org.hibernate.StaleObjectStateException;
@@ -44,8 +43,7 @@ import org.keycloak.services.ServicesLogger;
 
 public class GroupAdminGroupMember {
 
-    @Context
-    private ClientConnection clientConnection;
+    private final ClientConnection clientConnection;
 
     private final KeycloakSession session;
     private final RealmModel realm;
@@ -61,7 +59,7 @@ public class GroupAdminGroupMember {
     private final UserGroupMembershipExtensionEntity member;
     private final boolean isGroupAdmin;
 
-    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel groupAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, GroupAdminRepository groupAdminRepository,boolean isGroupAdmin) {
+    public GroupAdminGroupMember(KeycloakSession session, RealmModel realm, UserModel groupAdmin, UserGroupMembershipExtensionRepository userGroupMembershipExtensionRepository, GroupModel group, CustomFreeMarkerEmailTemplateProvider customFreeMarkerEmailTemplateProvider, UserGroupMembershipExtensionEntity member, GroupRolesRepository groupRolesRepository, GroupAdminRepository groupAdminRepository, ClientConnection clientConnection, boolean isGroupAdmin) {
         this.session = session;
         this.realm = realm;
         this.groupAdmin = groupAdmin;
@@ -74,6 +72,7 @@ public class GroupAdminGroupMember {
         this.groupEnrollmentConfigurationRulesRepository = new GroupEnrollmentConfigurationRulesRepository(session);
         this.member = member;
         this.isGroupAdmin = isGroupAdmin;
+        this.clientConnection = clientConnection;
     }
 
     @PUT

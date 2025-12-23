@@ -17,8 +17,7 @@ public class AccountService {
 
     protected KeycloakSession session;
 
-    @Context
-    protected ClientConnection clientConnection;
+    protected final ClientConnection clientConnection;
 
     private AuthenticationHelper authHelper;
     private RealmModel realm;
@@ -42,12 +41,12 @@ public class AccountService {
 
     @Path("/user")
     public UserGroups userGroups() {
-        return new UserGroups(session, realm, user, userSession);
+        return new UserGroups(session, realm, user, userSession, clientConnection);
     }
 
     @Path("/group-admin")
     public GroupAdminService groupAdminService() {
-        return new GroupAdminService(session, realm, user, adminEvent);
+        return new GroupAdminService(session, realm, user, adminEvent, clientConnection);
     }
 
 

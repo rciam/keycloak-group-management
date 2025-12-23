@@ -19,6 +19,7 @@ import jakarta.ws.rs.QueryParam;
 
 import jakarta.ws.rs.core.Response;
 import org.glassfish.jaxb.core.v2.TODO;
+import org.keycloak.common.ClientConnection;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
@@ -48,6 +49,7 @@ import org.keycloak.services.resources.admin.AdminEventBuilder;
 public class GroupAdminService {
 
     private KeycloakSession session;
+    private final ClientConnection clientConnection;
     private final RealmModel realm;
     private final UserModel groupAdmin;
     private final GroupAdminRepository groupAdminRepository;
@@ -59,7 +61,7 @@ public class GroupAdminService {
     private final GroupEnrollmentConfigurationRepository groupEnrollmentConfigurationRepository;
     private final GeneralJpaService generalJpaService;
 
-    public GroupAdminService(KeycloakSession session, RealmModel realm, UserModel user, AdminEventBuilder adminEvent) {
+    public GroupAdminService(KeycloakSession session, RealmModel realm, UserModel user, AdminEventBuilder adminEvent, ClientConnection clientConnection) {
         this.session = session;
         this.realm =  realm;
         this.groupAdmin = user;
@@ -70,6 +72,7 @@ public class GroupAdminService {
         this.groupEnrollmentConfigurationRulesRepository = new GroupEnrollmentConfigurationRulesRepository(session);
         this.groupEnrollmentConfigurationRepository = new GroupEnrollmentConfigurationRepository(session, realm);
         this.generalJpaService = new GeneralJpaService(session, realm, new GroupEnrollmentConfigurationRepository(session, realm));
+        this.clientConnection = clientConnection;
     }
 
 
@@ -205,7 +208,7 @@ public class GroupAdminService {
             throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
 
-        return new GroupAdminEnrollementRequest(session, realm, groupEnrollmentRequestRepository, groupAdmin, entity, userGroupMembershipExtensionRepository, groupAdminRepository);
+        return new GroupAdminEnrollementRequest(session, realm, groupEnrollmentRequestRepository, groupAdmin, entity, userGroupMembershipExtensionRepository, groupAdminRepository, clientConnection);
     }
 
 }

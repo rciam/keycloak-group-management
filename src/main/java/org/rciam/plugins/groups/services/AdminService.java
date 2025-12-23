@@ -50,8 +50,7 @@ public class AdminService {
 
     private static final List<String> realmAttributesNames = Stream.of(Utils.expirationNotificationPeriod, Utils.invitationExpirationPeriod).collect(Collectors.toList());
 
-    @Context
-    protected ClientConnection clientConnection;
+    protected final ClientConnection clientConnection;
 
     private KeycloakSession session;
     private final RealmModel realm;
@@ -162,7 +161,7 @@ public class AdminService {
             throw new ErrorResponseException("Could not find group by id", "Could not find group by id", Response.Status.NOT_FOUND);
         }
         realmAuth.groups().requireView(group);
-        return new AdminGroups(session, realmAuth, group, realm, generalJpaService, adminEvent, groupEnrollmentConfigurationRepository, groupRolesRepository);
+        return new AdminGroups(session, realmAuth, group, realm, generalJpaService, adminEvent, groupEnrollmentConfigurationRepository, groupRolesRepository, clientConnection);
     }
 
     @POST
