@@ -1,10 +1,12 @@
 package org.rciam.plugins.groups.services;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,16 +20,17 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 
 import jakarta.ws.rs.core.Response;
-import org.glassfish.jaxb.core.v2.TODO;
+import org.keycloak.authorization.fgap.AdminPermissionsSchema;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.utils.ModelToRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.keycloak.representations.idm.GroupRepresentation;
 import org.keycloak.services.ErrorResponseException;
+import org.keycloak.services.resources.admin.fgap.AdminPermissionEvaluator;
+import org.keycloak.services.resources.admin.fgap.GroupPermissionEvaluator;
+import org.keycloak.utils.GroupUtils;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.enums.GroupTypeEnum;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
@@ -42,6 +45,7 @@ import org.rciam.plugins.groups.jpa.repositories.GroupRolesRepository;
 import org.rciam.plugins.groups.jpa.repositories.UserGroupMembershipExtensionRepository;
 import org.rciam.plugins.groups.representations.GroupEnrollmentConfigurationRulesRepresentation;
 import org.rciam.plugins.groups.representations.GroupEnrollmentRequestPager;
+import org.rciam.plugins.groups.representations.GroupRepresentation;
 import org.rciam.plugins.groups.representations.GroupsPager;
 import org.rciam.plugins.groups.representations.UserRepresentationPager;
 import org.keycloak.services.resources.admin.AdminEventBuilder;
@@ -92,23 +96,45 @@ public class GroupAdminService {
 
     private GroupsPager getAllGroups(String search, Integer first, Integer max, boolean toplevel, boolean exact) {
 
-        //TODO You have to fix this method
+        if (Objects.nonNull(search) && toplevel) {
+            List<GroupRepresentation> results = populateGroupHierarchyFromSubGroups(session.groups().searchForGroupByNameStream(realm, search.trim(), exact, first, max));
+            Long count = session.groups().searchForGroupByNameStream(realm, search.trim(), exact, null, null).count();
+            return new GroupsPager(results, count);
+        } else if (Objects.nonNull(search)) {
+            List<GroupRepresentation> results = session.groups().searchForGroupByNameStream(realm, search.trim(), exact, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+            Long count = realm.getGroupsCountByNameContaining(search);
+            return new GroupsPager(results, count);
+        } else {
+            List<GroupRepresentation> results = session.groups().getTopLevelGroupsStream(realm, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+            return new GroupsPager(results, realm.getGroupsCount(true));
+        }
+    }
 
-//        if (Objects.nonNull(search) && toplevel) {
-//            List<GroupRepresentation> results = ModelToRepresentation.searchForGroupModelByName(session, realm, false, search.trim(), exact, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
-//            Long count = ModelToRepresentation.searchForGroupModelByName(session, realm, false, search.trim(), exact, null, null).count();
-//            return new GroupsPager(results, count);
-//        } else if (Objects.nonNull(search)) {
-            return groupEnrollmentConfigurationRepository.searchForGroupByNameStream(search.trim(), exact, first, max);
-//        }else {
-//            List<GroupRepresentation> results = ModelToRepresentation.toGroupModelHierarchy(realm, false, first, max).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
-//            return new GroupsPager(results, realm.getGroupsCount(true));
-//        }
+    private List<GroupRepresentation> populateGroupHierarchyFromSubGroups(Stream<GroupModel> groups) {
+        Map<String, GroupRepresentation> groupIdToGroups = new HashMap<>();
+        groups.forEach(group -> {
+
+           GroupRepresentation currGroup = org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(group, true);
+           currGroup.setParentId(group.getParentId());
+           groupIdToGroups.putIfAbsent(currGroup.getId(), currGroup);
+
+            while(currGroup.getParentId() != null) {
+                GroupModel parentModel = session.groups().getGroupById(realm, currGroup.getParentId());
+
+                GroupRepresentation parent = groupIdToGroups.computeIfAbsent(currGroup.getParentId(),
+                        id -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(parentModel, true));
+
+                GroupRepresentation finalCurrGroup = currGroup;
+                groupIdToGroups.remove(currGroup.getId());
+                currGroup = parent;
+            }
+        });
+        return groupIdToGroups.values().stream().sorted(Comparator.comparing(GroupRepresentation::getName)).toList();
     }
 
     @POST
     @Path("/group")
-    public Response createTopLevelGroup(GroupRepresentation rep) {
+    public Response createTopLevelGroup(org.keycloak.representations.idm.GroupRepresentation rep) {
 
         if (!Utils.hasManageGroupsAccountRole(realm, groupAdmin)){
             throw new ForbiddenException("You could not create a top-level group");

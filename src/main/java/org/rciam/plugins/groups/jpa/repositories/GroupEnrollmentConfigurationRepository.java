@@ -182,21 +182,4 @@ public class GroupEnrollmentConfigurationRepository extends GeneralRepository<Gr
         em.createNamedQuery("deleteEnrollmentConfigurationByGroup").setParameter("groupId", groupId).executeUpdate();
     }
 
-    public GroupsPager searchForGroupByNameStream(String search, Boolean exact, Integer first, Integer max) {
-        TypedQuery<String> query;
-        TypedQuery<Long> countQuery;
-        if (Boolean.TRUE.equals(exact)) {
-            query = em.createNamedQuery("getGroupIdsByName", String.class);
-            countQuery = em.createNamedQuery("countGroupIdsByName", Long.class);
-        } else {
-            query = em.createNamedQuery("getGroupIdsByNameContaining", String.class);
-            countQuery = em.createNamedQuery("countGroupIdsByNameContaining", Long.class);
-        }
-        query.setParameter("realm", realm.getId()).setParameter("search", search);
-        countQuery.setParameter("realm", realm.getId()).setParameter("search", search);
-
-        List<GroupRepresentation> results = closing(paginateQuery(query, first, max).getResultStream().map(id -> session.groups().getGroupById(realm, id)).distinct()).map(g -> org.rciam.plugins.groups.helpers.ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
-        return new GroupsPager(results, countQuery.getSingleResult());
-    }
-
 }
