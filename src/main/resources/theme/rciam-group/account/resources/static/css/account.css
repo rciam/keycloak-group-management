@@ -1,574 +1,568 @@
 .top-bottom-margin-10 {
-    margin-top: 10px;
-    margin-bottom: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .centered-text {
-    text-align: center;
+  text-align: center;
 }
 
 .gm_content {
-    background-color: rgb(255, 255, 255);
+  background-color: rgb(255, 255, 255);
 }
 
 .gm_breadcumb {
-    margin-left: 1rem !important;
-    margin-top: 0.5rem !important;
+  margin-left: 1rem !important;
+  margin-top: 0.5rem !important;
 }
 
 .gm_datalist {
-    width: 50%;
+  width: 50%;
 }
 
 .gm_group_desc {
-    font-style: italic;
-    margin: -2rem 0 1rem 1.5rem;
-    padding-right: 1.5rem;
+  font-style: italic;
+  margin: -2rem 0 1rem 1.5rem;
+  padding-right: 1.5rem;
 }
 
 .gm_search-icon-container {
-    background-image: url('../svg/magnifying-glass-solid.svg');
-    background-size: cover;
-    height: 0.8rem;
-    width: 0.8rem;
+  background-image: url("../svg/magnifying-glass-solid.svg");
+  background-size: cover;
+  height: 0.8rem;
+  width: 0.8rem;
 }
 
 .gm_search-input {
-    max-width: 20rem !important;
+  max-width: 20rem !important;
 }
 
 .gm_search-input-double {
-    max-width: 35rem !important;
+  max-width: 35rem !important;
 }
 
 .gm_cancel-icon-container {
-    background-image: url('../svg/xmark-solid.svg');
-    background-size: cover;
-    height: 0.8rem;
-    width: 0.8rem;
-    margin-top: -0.1rem;
+  background-image: url("../svg/xmark-solid.svg");
+  background-size: cover;
+  height: 0.8rem;
+  width: 0.8rem;
+  margin-top: -0.1rem;
 }
 
 .gm_expandable-list a {
-    width: 100%;
+  width: 100%;
 }
 
-.gm_expandable-list-item>.pf-c-data-list__item-row {
-    margin-left: -1.5rem;
-
+.gm_expandable-list-item > .pf-c-data-list__item-row {
+  margin-left: -1.5rem;
 }
 
-.gm_expandable-list-item>.pf-c-data-list__item-row>.pf-c-data-list__item-control {
-    margin-right: -0.5rem !important;
+.gm_expandable-list-item
+  > .pf-c-data-list__item-row
+  > .pf-c-data-list__item-control {
+  margin-right: -0.5rem !important;
 }
 
 .gm_expandable-list .pf-c-data-list__expandable-content-body {
-    padding: 0 !important;
+  padding: 0 !important;
 }
 
 .gm_epxand-toggle {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .gm_epxand-toggle div {
-    height: 1rem;
-    width: 1rem;
+  height: 1rem;
+  width: 1rem;
 }
 
 .gm_epxand-toggle:hover div {
-    opacity: .5;
+  opacity: 0.5;
+}
+.gm_page {
+  background-color: white !important;
+}
+.gm_group-header {
+  padding: 1.5rem;
 }
 
 .gm_epxand-toggle-expanded {
-    background-image: url('../svg/angle-down-solid.svg');
-    background-size: cover;
-    margin: 0.7rem 0.5rem 0 0.4rem;
+  background-image: url("../svg/angle-down-solid.svg");
+  background-size: cover;
+  margin: 0.7rem 0.5rem 0 0.4rem;
 }
 
 .gm_icon {
-    background-size: cover;
-    mask-repeat: no-repeat;
+  background-size: cover;
+  mask-repeat: no-repeat;
 }
 
 .gm_icon-pending-user {
-    -webkit-mask-image: url('../svg/user-clock-solid.svg') !important;
-    background-color: #FFCA00;
-    height: 1rem;
-    width: 1rem;
-    mask-image: url('../svg/user-clock-solid.svg') !important;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
+  -webkit-mask-image: url("../svg/user-clock-solid.svg") !important;
+  background-color: #ffca00;
+  height: 1rem;
+  width: 1rem;
+  mask-image: url("../svg/user-clock-solid.svg") !important;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .gm_icon-suspended-user {
-    -webkit-mask-image: url('../svg/user-lock-solid.svg') !important;
-    background-color: rgb(201, 25, 11);
-    height: 1rem;
-    width: 1rem;
-    mask-image: url('../svg/user-lock-solid.svg') !important;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+  -webkit-mask-image: url("../svg/user-lock-solid.svg") !important;
+  background-color: rgb(201, 25, 11);
+  height: 1rem;
+  width: 1rem;
+  mask-image: url("../svg/user-lock-solid.svg") !important;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .gm_icon-active-user {
-    -webkit-mask-image: url('../svg/user-check-solid.svg') !important;
-    background-color: #228C3A !important;
-    height: 1rem;
-    width: 1rem;
-    mask-image: url('../svg/user-check-solid.svg') !important;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+  -webkit-mask-image: url("../svg/user-check-solid.svg") !important;
+  background-color: #228c3a !important;
+  height: 1rem;
+  width: 1rem;
+  mask-image: url("../svg/user-check-solid.svg") !important;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
-
 .gm_user-status-container {
-    cursor: pointer;
-    height: 1.5rem;
-    width: 1.5rem;
-    position: relative;
+  cursor: pointer;
+  height: 1.5rem;
+  width: 1.5rem;
+  position: relative;
 }
 
 .gm_epxand-toggle-hidden {
-    background-image: url('../svg/angle-right-solid.svg');
-    background-size: cover;
-    margin: 0.6rem 0.8rem 0 0.4rem;
-    width: 0.7rem !important;
-    ;
+  background-image: url("../svg/angle-right-solid.svg");
+  background-size: cover;
+  margin: 0.6rem 0.8rem 0 0.4rem;
+  width: 0.7rem !important;
 }
 
 .gm_datalist-header {
-    margin-left: 1rem !important;
+  margin-left: 1rem !important;
 }
 
 .gm_search-input-container {
-    width: 100%;
-    padding: 0.5rem;
-    height: 3.2rem;
+  width: 100%;
+  padding: 0.5rem;
+  height: 3.2rem;
 }
 
 .gm_helper-text-create-enrollment {
-    margin-top: -1rem;
+  margin-top: -1rem;
 }
 
 .gm_datalist-action-container {
-    width: 100%;
-    padding: 0.5rem;
-    height: 3.2rem;
+  width: 100%;
+  padding: 0.5rem;
+  height: 3.2rem;
 }
 
 .gm_direct-member-checkbox {
-    display: inline-block;
-    margin-left: 0.5rem;
-    padding-top: 0.3rem;
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding-top: 0.3rem;
 }
 
 .gm_direct-member-checkbox input {
-    margin-right: 0.5rem;
+  margin-right: 0.5rem;
 }
 
 .gm_search-input-container .gm_search-input {
-    margin-left: auto;
-    margin-right: 0.5rem;
-    float: right;
+  margin-left: auto;
+  margin-right: 0.5rem;
+  float: right;
+}
+
+.gm_table-action-bar-row {
+  display: flex;
+  align-items: center; /* vertical alignment */
+  justify-content: space-between;
 }
 
 .gm_search-input-action {
-    float: left !important;
+  float: left !important;
 }
 
 .gm_invite-member-button {
-    float: right;
-    display: inline-block;
-    margin-right: 1rem !important;
+  float: right;
+  margin-right: 1rem !important;
 }
 
 .gm_plus-button {
-    background-size: cover;
-    background-color: white;
-    height: 1rem;
-    -webkit-mask-image: url('../svg/plus-solid.svg') !important;
-    mask-image: url('../svg/plus-solid.svg') !important;
-    width: 1rem;
-    mask-repeat: no-repeat;
+  background-size: cover;
+  background-color: white;
+  height: 1rem;
+  -webkit-mask-image: url("../svg/plus-solid.svg") !important;
+  mask-image: url("../svg/plus-solid.svg") !important;
+  width: 1rem;
+  mask-repeat: no-repeat;
 }
 
 .gm_plus-button-small {
-    padding: 0.4rem 0.3rem 0.3rem 0.4rem !important;
+  padding: 0.4rem 0.3rem 0.3rem 0.4rem !important;
 }
 
 .gm_x-button {
-    background-size: cover;
-    background-color: white;
-    height: 1rem;
-    -webkit-mask-image: url('../svg/xmark-solid.svg') !important;
-    mask-image: url('../svg/xmark-solid.svg') !important;
-    width: 0.8rem;
-    mask-repeat: no-repeat;
+  background-size: cover;
+  background-color: white;
+  height: 1rem;
+  -webkit-mask-image: url("../svg/xmark-solid.svg") !important;
+  mask-image: url("../svg/xmark-solid.svg") !important;
+  width: 0.8rem;
+  mask-repeat: no-repeat;
 }
 
 .gm_ban-button {
-    background-size: cover;
-    background-color: white;
-    height: 1rem;
-    -webkit-mask-image: url('../svg/ban-solid.svg') !important;
-    mask-image: url('../svg/ban-solid.svg') !important;
-    width: 1rem;
-    mask-repeat: no-repeat;
+  background-size: cover;
+  background-color: white;
+  height: 1rem;
+  -webkit-mask-image: url("../svg/ban-solid.svg") !important;
+  mask-image: url("../svg/ban-solid.svg") !important;
+  width: 1rem;
+  mask-repeat: no-repeat;
 }
 
 .gm_lock-button {
-    background-size: cover;
-    background-color: white;
-    height: 1rem;
-    -webkit-mask-image: url('../svg/lock-solid.svg') !important;
-    mask-image: url('../svg/lock-solid.svg') !important;
-    width: 1rem;
-    mask-repeat: no-repeat;
+  background-size: cover;
+  background-color: white;
+  height: 1rem;
+  -webkit-mask-image: url("../svg/lock-solid.svg") !important;
+  mask-image: url("../svg/lock-solid.svg") !important;
+  width: 1rem;
+  mask-repeat: no-repeat;
 }
 
 .gm_activate-button {
-    background-size: covers;
-    background-color: white;
-    height: 1rem;
-    -webkit-mask-image: url('../svg/circle-check-solid.svg') !important;
-    mask-image: url('../svg/circle-check-solid.svg') !important;
-    width: 1rem;
-    mask-repeat: no-repeat;
+  background-size: covers;
+  background-color: white;
+  height: 1rem;
+  -webkit-mask-image: url("../svg/circle-check-solid.svg") !important;
+  mask-image: url("../svg/circle-check-solid.svg") !important;
+  width: 1rem;
+  mask-repeat: no-repeat;
 }
 
 .gm_suspend-justification-formgroup {
-    margin: 1rem 0;
+  margin: 1rem 0;
 }
 
 .gm_activate-button-small {
-    background-color: #228C3A !important;
-    padding: 0.3rem 0.3rem 0.3rem 0.3rem !important;
+  background-color: #228c3a !important;
+  padding: 0.3rem 0.3rem 0.3rem 0.3rem !important;
 }
 
 .gm_activate-button-small:hover {
-    background-color: #1B722F
+  background-color: #1b722f;
 }
 
 .gm_x-button-small {
-    padding: 0.3rem 0.4rem 0.3rem 0.4rem !important;
-    margin-right: 0.5rem !important;
+  padding: 0.3rem 0.4rem 0.3rem 0.4rem !important;
+  margin-right: 0.5rem !important;
 }
 
-
 .gm_ban-button-small {
-    padding: 0.3rem 0.3rem 0.3rem 0.4rem !important;
+  padding: 0.3rem 0.3rem 0.3rem 0.4rem !important;
 }
 
 .gm_role-chip span {
-    font-size: 1rem;
-    padding: 0.1rem;
+  font-size: 1rem;
+  padding: 0.1rem;
 }
 
 .gm_role-chip {
-    margin-right: 0.5rem;
+  margin-right: 0.5rem;
 }
 
 .gm_attribute-controls {
-    margin-top: 1rem;
-    margin-left: 1rem;
-    padding-bottom: 1rem;
+  margin-top: 1rem;
+  margin-left: 1rem;
+  padding-bottom: 1rem;
 }
 
 .gm_attribute-controls button {
-    margin-right: 1rem;
-
+  margin-right: 1rem;
 }
 
 .gm_cell-center {
-    width: 7rem;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+  width: 7rem;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .gm_role_add_container div {
-    width: 16rem;
-    display: inline-block;
-    padding-top: 0.3rem;
-    padding-bottom: 0.8rem;
-    margin-right: 1rem;
-    width: 16rem !important;
+  width: 16rem;
+  display: inline-block;
+  padding-top: 0.3rem;
+  padding-bottom: 0.8rem;
+  margin-right: 1rem;
+  width: 16rem !important;
 }
 
 .gm_role_add_container button {
-    display: inline-block;
+  display: inline-block;
 }
 
 .gm_roles-table-popover div {
-    background-color: white !important;
+  background-color: white !important;
 }
 
 .gm_cell-placeholder {
-    width: 5rem;
+  width: 5rem;
 }
 
 .gm_chip-container {
-    margin-top: 1.6rem;
+  margin-top: 1.6rem;
 }
 
-
 .gm_chip-container div {
-    margin-right: 1rem !important;
+  margin-right: 1rem !important;
 }
 
 .gm_edit-icon {
-    background-image: url('../svg/pen-solid.svg');
-    background-size: cover;
-    height: 0.9rem;
-    width: 0.9rem;
-    display: inline-block;
-    margin-left: 0.5rem;
-    margin-bottom: -0.1rem;
+  background-image: url("../svg/pen-solid.svg");
+  background-size: cover;
+  height: 0.9rem;
+  width: 0.9rem;
+  display: inline-block;
+  margin-left: 0.5rem;
+  margin-bottom: -0.1rem;
 }
-
 
 .gm_edit-icon:hover {
-    opacity: .5;
+  opacity: 0.5;
 }
-
 
 .gm_check-button {
-    background-size: cover;
-    background-color: white;
-    height: 1rem;
-    -webkit-mask-image: url('../svg/check-solid.svg') !important;
-    mask-image: url('../svg/check-solid.svg') !important;
-    width: 1rem;
-    mask-repeat: no-repeat;
+  background-size: cover;
+  background-color: white;
+  height: 1rem;
+  -webkit-mask-image: url("../svg/check-solid.svg") !important;
+  mask-image: url("../svg/check-solid.svg") !important;
+  width: 1rem;
+  mask-repeat: no-repeat;
 }
 
-
-
 .gm_cancel-button {
-    background-size: cover;
-    background-color: black;
-    height: 1rem;
-    -webkit-mask-image: url('../svg/xmark-solid.svg') !important;
-    mask-image: url('../svg/xmark-solid.svg') !important;
-    width: 1rem;
-    mask-repeat: no-repeat;
+  background-size: cover;
+  background-color: black;
+  height: 1rem;
+  -webkit-mask-image: url("../svg/xmark-solid.svg") !important;
+  mask-image: url("../svg/xmark-solid.svg") !important;
+  width: 1rem;
+  mask-repeat: no-repeat;
 }
 
 .gm_button-small {
-    padding: 0.3rem 0.3rem 0.3rem 0.5rem !important;
-
+  padding: 0.3rem 0.3rem 0.3rem 0.5rem !important;
 }
 
 .gm_description-input-container {
-    padding: 0 1.5rem;
+  padding: 0 1.5rem;
 }
 
 .gm_description-input-container textarea {
-
-    margin-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .gm_description-input-container button {
-    margin-right: 0.5rem;
+  margin-right: 0.5rem;
 }
 
 .gm_description-input-container {
-    margin-top: -1.5rem;
-    margin-bottom: 1rem;
+  margin-top: -1.5rem;
+  margin-bottom: 1rem;
 }
 
 .gm_direct-checkbox {
-    margin-left: 1.5rem;
+  margin-left: 1.5rem;
 }
 
-
 .gm_vertical_center_cell {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
 }
 
 .gm_role_badge {
-    margin-right: 0.5rem !important;
+  margin-right: 0.5rem !important;
 }
 
 .gm_dark_badge {
-    background-color: #212529!important;
-    color: #ffffff !important;
+  background-color: #212529 !important;
+  color: #ffffff !important;
 }
 
 .gm_email_datalist {
-    color: rgb(106, 110, 115) !important;
-    font-size: 0.8rem !important;
+  color: rgb(106, 110, 115) !important;
+  font-size: 0.8rem !important;
 }
 
 .gm_badge_dropdown ul,
 .gm_add-admin-input ul {
-    max-height: 18.1rem;
-    overflow: auto;
+  max-height: 18.1rem;
+  overflow: auto;
 }
-
 
 .gm_invitation-email-input ul {
-    max-height: 12.6rem;
-    overflow: auto;
+  max-height: 12.6rem;
+  overflow: auto;
 }
 
-
-
 .gm_roles-table {
-    border-collapse: separate;
-    border-spacing: 0;
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid #666;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #666;
 }
 
 .gm_roles-table th,
 .gm_roles-table td {
-    padding: 8px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-    vertical-align: middle;
-    font-weight: bold;
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  vertical-align: middle;
+  font-weight: bold;
 }
 
 .gm_roles-table tbody tr:nth-child(even) {
-    background-color: #f2f2f2;
+  background-color: #f2f2f2;
 }
 
 /* Add hover effect */
 .gm_roles-table tbody tr:hover {
-    background-color: #ddd;
+  background-color: #ddd;
 }
 
 /* Darken the header background */
 .gm_roles-table thead {
-    background-color: #f2f2f2;
+  background-color: #f2f2f2;
 }
 
 /* Add a dark grey border to the table */
 .gm_roles-table {
-    border: 1px solid #666;
+  border: 1px solid #666;
 }
 
-
 .gm_roles-table .gm_roles-delete-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 1.5rem;
-    height: 1.5rem;
-    padding: 0;
-    border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
 }
 
 .gm_roles-table svg {
-    width: 0.8rem;
-    height: 0.8rem;
+  width: 0.8rem;
+  height: 0.8rem;
 }
 
-
 .gm_add-admin-container {
-    padding: 1rem;
+  padding: 1rem;
 }
 
 .gm_add-admin-container h1 {
-    margin-top: 0.5rem;
-    font-size: 1.5rem;
-
+  margin-top: 0.5rem;
+  font-size: 1.5rem;
 }
 
 .gm_add-admin-container p {
-    font-style: italic;
+  font-style: italic;
 }
 
 .gm_add-admin-input {
-    display: flex !important;
-    justify-content: start;
-    margin-top: 1rem;
+  display: flex !important;
+  justify-content: start;
+  margin-top: 1rem;
 }
 
 .gm_admin-button {
-    height: 2rem !important;
-    margin-top: 0.1rem !important;
-    margin-left: 0.5rem !important;
+  height: 2rem !important;
+  margin-top: 0.1rem !important;
+  margin-left: 0.5rem !important;
 }
 
-.gm_add-admin-input>div {
-    max-width: 30rem;
+.gm_add-admin-input > div {
+  max-width: 30rem;
 }
 
 .gm_invitation-button div {
-    background-size: cover;
-    background-color: white;
-    height: 1rem;
-    -webkit-mask-image: url('../svg/paper-plane-solid.svg') !important;
-    mask-image: url('../svg/paper-plane-solid.svg') !important;
-    width: 1rem;
-    mask-repeat: no-repeat;
+  background-size: cover;
+  background-color: white;
+  height: 1rem;
+  -webkit-mask-image: url("../svg/paper-plane-solid.svg") !important;
+  mask-image: url("../svg/paper-plane-solid.svg") !important;
+  width: 1rem;
+  mask-repeat: no-repeat;
 }
 
 .gm_add-admin-button div {
-    background-size: cover;
-    background-color: white;
-    height: 1rem;
-    -webkit-mask-image: url('../svg/user-plus-solid.svg') !important;
-    mask-image: url('../svg/user-plus-solid.svg') !important;
-    width: 1rem;
-    mask-repeat: no-repeat;
+  background-size: cover;
+  background-color: white;
+  height: 1rem;
+  -webkit-mask-image: url("../svg/user-plus-solid.svg") !important;
+  mask-image: url("../svg/user-plus-solid.svg") !important;
+  width: 1rem;
+  mask-repeat: no-repeat;
 }
 
 .gm_edit-member-roles {
-    display: inline-block;
-    cursor: pointer;
+  display: inline-block;
+  cursor: pointer;
 }
 
 .gm_edit-member-roles div {
-    background-size: cover;
-    background-color: black;
-    height: 0.7rem;
-    -webkit-mask-image: url('../svg/pen-solid.svg') !important;
-    mask-image: url('../svg/pen-solid.svg') !important;
-    width: 1rem;
-    mask-repeat: no-repeat;
+  background-size: cover;
+  background-color: black;
+  height: 0.7rem;
+  -webkit-mask-image: url("../svg/pen-solid.svg") !important;
+  mask-image: url("../svg/pen-solid.svg") !important;
+  width: 1rem;
+  mask-repeat: no-repeat;
 }
 
 .gm_table-center {
-    margin: auto;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+  margin: auto;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .gm_placeholder_membership_action {
-    width: 1.7rem !important;
-    display: inline-block;
+  width: 1.7rem !important;
+  display: inline-block;
 }
 
 .gm_small_icon_button {
-    width: 1.6rem;
-    height: 1.6rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+  border-radius: 4px !important;
 }
 
-.gm_actions_container { 
-    gap: 0.5rem;
-    display: flex;
+.gm_actions_container {
+  gap: 0.5rem;
+  display: flex;
 }
 
 .gm_actions_container .pf-c-dropdown {
-    display: none;
+  display: none;
 }
 
 @media (max-width: 768px) {
@@ -577,420 +571,417 @@
   }
 
   .gm_actions_container .gm_small_icon_button {
-    display: none;
+    display: none!important;
   }
 }
 
 .gm_view-groups-header svg {
-    margin-bottom: -0.1rem;
-    margin-left: 0.1rem;
+  margin-bottom: -0.1rem;
+  margin-left: 0.1rem;
 }
 
 .gm_trash-icon {
-    font-size: 1.1rem;
-    margin-left: 0.5rem;
+  font-size: 1.1rem;
+  margin-left: 0.5rem;
 }
 
 .gm_view-groups-header .pf-c-data-list__cell {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .gm_order_by_container {
-    display: inline;
+  display: inline;
 }
 
 .gm_order_by_container .pf-c-data-list__cell:hover svg {
-    opacity: 0.4;
+  opacity: 0.4;
 }
 
 .gm_group-enrollment-inactive {
-    color: #DC3545;
+  color: #dc3545;
 }
 
-
 .gm_group-enrollment-active {
-    color: #4BB563;
+  color: #4bb563;
 }
 
 .gm_invitation-email-input {
-    margin-top: 1rem !important;
-    max-width: 20rem !important;
+  margin-top: 1rem !important;
+  max-width: 20rem !important;
 }
 
 .gm_loader-modal-container {
-    height: 100px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 4.2rem 0;
-    height: 16rem;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4.2rem 0;
+  height: 16rem;
 }
 
-
 .gm_invitation-container {
-    padding: 1.5rem;
+  padding: 1.5rem;
 }
 
 .gm_invitation-landing-title {
-    font-size: 1.5rem;
-    font-weight: bold;
+  font-size: 1.5rem;
+  font-weight: bold;
 }
-
 
 .gm_invitation-container .pf-c-hint {
-    margin: 1.5rem 0;
+  margin: 1.5rem 0;
 }
 
-
 .gm_checkbox-container {
-    padding: 1rem;
-    margin-top: -1rem;;
-    background-color: #d1d1d1;
+  padding: 1rem;
+  margin-top: -1rem;
+  background-color: #d1d1d1;
 }
 
 .gm_invitation-response-container {
-    margin-top: 1rem;
+  margin-top: 1rem;
 }
 
 .gm_invitation-response-button-container {
-    display: inline-block;
-    margin-right: 0.5rem;
+  display: inline-block;
+  margin-right: 0.5rem;
 }
 
 .gm_invitation-purpuse h1 {
-    color: #df834d;
-    font-size: 1.2rem;
-    font-weight: bold;
+  color: #df834d;
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 .gm_invitation-content-container {
-    margin-top: 1rem;
+  margin-top: 1rem;
 }
 
-
 .gm_kebab-menu-cell {
-    font-size: 0.9rem;
+  font-size: 0.9rem;
 }
 
 .gm_group-title svg,
 .gm_modal-title .gm_group-title svg {
-    font-size: 1.1rem;
-    margin-left: 0.5rem;
+  font-size: 1.1rem;
+  margin-left: 0.5rem;
 }
 
 .gm_group-title svg:hover,
 .gm_modal-title svg:hover {
-    opacity: .5;
+  opacity: 0.5;
 }
 
 .gm_group-title {
-    margin-left: 1.5rem !important;
+  margin-left: 1.5rem !important;
 }
 
 .gm_create-button-datalist-header {
-    padding: 0.3rem 0.5rem !important;
-    font-size: 0.8rem !important;
+  padding: 0.3rem 0.5rem !important;
+  font-size: 0.8rem !important;
 }
 
 .corner-ribbon {
-    width: 200px;
-    background: #e43;
-    position: absolute;
-    top: 25px;
-    left: -50px;
-    text-align: center;
-    line-height: 40px;
-    letter-spacing: 1px;
-    color: #f0f0f0;
-    transform: rotate(-45deg);
-    -webkit-transform: rotate(-45deg);
-    z-index: 1000;
+  width: 200px;
+  background: #e43;
+  position: absolute;
+  top: 25px;
+  left: -50px;
+  text-align: center;
+  line-height: 40px;
+  letter-spacing: 1px;
+  color: #f0f0f0;
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  z-index: 1000;
 }
 
 .gm_expiration-warning-label {
-    display: inline-block !important;
-    margin-left: 1rem !important;
-    height: 1.5rem;
-    vertical-align: middle !important;
-    line-height: 1.5rem;
-    color: #795600;
+  display: inline-block !important;
+  margin-left: 1rem !important;
+  height: 1.5rem;
+  vertical-align: middle !important;
+  line-height: 1.5rem;
+  color: #795600;
 }
 
 .gm_expiration-warning-label span {
-    margin-right: 0.3rem;
+  margin-right: 0.3rem;
 }
 
 .gm_number-input-container {
-    margin-top: 1rem;
+  margin-top: 1rem;
 }
 
 .gm_link_plain {
-    text-decoration: none;
-    color: black;
+  text-decoration: none;
+  color: black;
 }
 
 .gm_link_plain:hover {
-    text-decoration: none;
-    color: black;
+  text-decoration: none;
+  color: black;
+}
+
+.gm_fullname_datalist {
+  display: block;
 }
 
 .gm_description-text {
-    font-size: 0.9rem;
+  font-size: 0.9rem;
 }
 
-.gm_enrollment_container {
-    padding: 1rem 2rem;
-}
 
 .gm_form-input {
-    max-width: 30rem
+  max-width: 30rem;
 }
 
 .gm_content-width {
-    width: fit-content;
-    block-size: fit-content;
+  width: fit-content;
+  block-size: fit-content;
 }
 
 .gm_enrollment-request-view-form .pf-c-form__group-control {
-    padding-top: 0.35rem;
+  padding-top: 0.35rem;
 }
 
 .gm_green-button {
-    background-color: #198754 !important;
-    border-color: #198754 !important;
+  background-color: #198754 !important;
+  border-color: #198754 !important;
 }
 
 .gm_green-button:hover {
-    background-color: #157347 !important;
-    border-color: #157347 !important;
+  background-color: #157347 !important;
+  border-color: #157347 !important;
 }
 
 .gm_grey-button {
-    background-color: #6c757d !important;
-    border-color: #6c757d !important;
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
 }
 
 .gm_grey-button:hover {
-    background-color: #5c636a !important;
-    border-color: #5c636a !important;
+  background-color: #5c636a !important;
+  border-color: #5c636a !important;
 }
 
 .gm_button-enrollment-link {
-    margin-left: -1rem !important;
+  margin-left: -1rem !important;
 }
 
 .gm_button-spacer {
-    margin-right: 1rem !important;
+  margin-right: 1rem !important;
 }
 
 .gm_margin-top-1rem {
-    margin-top: 1rem !important;
+  margin-top: 1rem !important;
 }
 
 .gm_normal-text {
-    font-weight: 400 !important;
+  font-weight: 400 !important;
 }
 
 .gm_title-button {
-    margin-left: 1rem !important;
+  margin-left: 1rem !important;
 }
 
 .gm_flex-center {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .expandable-section {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.5s ease-in-out;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease-in-out;
 }
 
 .expandable-section.expanded {
-    max-height: 200px;
-    /* Adjust the desired expanded height */
+  max-height: 200px;
+  /* Adjust the desired expanded height */
 }
 
 .gm_badge-warning {
-    background-color: #FFC107 !important;
-    color: #212529 !important;
+  background-color: #ffc107 !important;
+  color: #212529 !important;
 }
 
 .gm_badge-danger {
-    background-color: #DC3545 !important;
-    color: #FFFFFF !important;
+  background-color: #dc3545 !important;
+  color: #ffffff !important;
 }
 
 .gm_badge-success {
-    background-color: #198754 !important;
-    color: #FFFFFF !important;
+  background-color: #198754 !important;
+  color: #ffffff !important;
 }
 
 .gm_toggle-filters-container {
-    height: 3rem;
-    padding-right: 1rem;
+  height: 3rem;
+  padding-right: 1rem;
 }
 
 .gm_toggle-filters-container button {
-    float: right;
+  float: right;
 }
 
-
 .gm_search-input-container-2 {
-    padding-top: 0.2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+  padding-top: 0.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .gm_search-input-double {
-    display: flex;
-    margin-right: 1rem;
-    gap: 10px;
-    /* Adjust the gap between the text inputs as needed */
+  display: flex;
+  margin-right: 1rem;
+  gap: 10px;
+  /* Adjust the gap between the text inputs as needed */
 }
 
 .gm_search-input-double-controls {
-    height: 2.3rem;
-    margin-right: 1rem;
-    margin-bottom: 0.8rem;
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 10px;
-    /* Adjust the top margin as needed */
+  height: 2.3rem;
+  margin-right: 1rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  /* Adjust the top margin as needed */
 }
 
 .gm_search-input-double-controls .gm_cancel-icon-container {
-    margin-top: 0 !important;
-    height: 1.1rem !important;
+  margin-top: 0 !important;
+  height: 1.1rem !important;
 }
 
 .gm_primary-color {
-    color: #0d6efd !important;
-    ;
+  color: #0d6efd !important;
 }
 
-
 .gm_padding-right {
-    padding-right: 1.5rem;
+  padding-right: 1.5rem;
 }
 
 .horizontal-padding-10 {
-    padding-left: 10px;
-    padding-right: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .pf-c-expandable-section__content .pf-c-form__group {
-    padding-bottom: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
 }
 
 .gm_form-field-group-title {
-    margin-left: -3rem;
+  margin-left: -3rem;
 }
-
 
 .gm_dark_button {
-    background-color: #212529 !important;
-    color: #ffffff !important;
+  background-color: #212529 !important;
+  color: #ffffff !important;
 }
 
-
 .gm_dark_button:hover {
-    background-color: #424649 !important;
+  background-color: #424649 !important;
 }
 
 .gm_dark_button.pf-m-disabled {
-    /* Your styles here */
-    background-color: #26292c !important;
-    color: #4e5052 !important;
+  /* Your styles here */
+  background-color: #26292c !important;
+  color: #4e5052 !important;
 }
 
 .gm_green_button {
-    background-color: #198754 !important;
+  background-color: #198754 !important;
 }
 
 .gm_green_button:hover {
-    background-color: #198754 !important;
+  background-color: #198754 !important;
 }
 
-
 .gm_switch_container {
-    display: block;
-    margin-top: 0.5rem;
-    margin-bottom: 1rem;
+  display: block;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
 }
 
 .gm_popover-info {
-    color: #06c !important;
-    margin-left: 0.2rem !important;
+  color: #06c !important;
+  margin-left: 0.2rem !important;
 }
 
 .gm_group-memberships-more-info {
-    color: #06c !important;
-    display: inline;
+  color: #06c !important;
+  display: inline;
 }
 
 .gm_copy-text-input {
-    max-width: 35rem;
+  max-width: 35rem;
 }
 
 .gm_effective-helper-warning {
-    display: inline-block;
-    margin-left: 0.3rem;
-    color: #f0ab00;
+  display: inline-block;
+  margin-left: 0.3rem;
+  color: #f0ab00;
 }
 
 .gm_warning-text {
-    color: #795600 !important;
-    display: inline-block
+  color: #795600 !important;
+  display: inline-block;
 }
 
 .gm_effective-helper-info {
-    display: inline-block;
-    margin-left: 0.3rem;
-    color: #2b9af3;
+  display: inline-block;
+  margin-left: 0.3rem;
+  color: #2b9af3;
 }
 
 .text-decoration-line {
-    text-decoration-line: underline
+  text-decoration-line: underline;
 }
 
 .gm_effective-expiration-popover-trigger {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .gm_effective-expiration-popover-trigger:hover {
-    opacity: .5;
+  opacity: 0.5;
 }
 
 .gm_popover-expiration-button {
-    margin-top:0.3rem;
+  margin-top: 0.3rem;
 }
 .gm_view-group-action-container {
-    text-align: right;
+  text-align: right;
 }
 .gm_view-group-action-container button {
-    margin-right:1rem;
+  margin-right: 1rem;
 }
 
 .gm_update-membership-button {
-    margin:0 1rem;
+  margin: 0 1rem;
 }
 
 .gm_add-user-action-container {
-    margin-top:1rem;
+  margin-top: 1rem;
 }
 
 .gm_add-user-radio-container {
-    margin-top:0.5rem;
+  margin-top: 0.5rem;
 }
 
 .gm_add-user-radio-container div {
-    margin-bottom:0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .gm_modal-title {
-    font-size: 1.5rem;
-    font-weight: bold;
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
+.gm_content > .pf-v5-c-page__main-section:nth-of-type(2) {
+  padding-left: 0!important;
+}
+
+.gm_enrollment_container {
+  padding-left: 1.5rem;
+}
