@@ -55,3 +55,4 @@ src/main/resources/theme/rciam-group/account/resources/groups-mngnt-service
 src/main/resources/theme/rciam-group/account/resources/widgets
 src/main/resources/theme/rciam-group/account/resources/js
 megalinter-reports/
+.java-version
