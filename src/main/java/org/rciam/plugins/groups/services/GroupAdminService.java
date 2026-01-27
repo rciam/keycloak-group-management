@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,7 +19,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 
 import jakarta.ws.rs.core.Response;
-import org.keycloak.authorization.fgap.AdminPermissionsSchema;
 import org.keycloak.common.ClientConnection;
 import org.keycloak.models.GroupModel;
 import org.keycloak.models.KeycloakSession;
@@ -28,9 +26,6 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.keycloak.services.ErrorResponseException;
-import org.keycloak.services.resources.admin.fgap.AdminPermissionEvaluator;
-import org.keycloak.services.resources.admin.fgap.GroupPermissionEvaluator;
-import org.keycloak.utils.GroupUtils;
 import org.rciam.plugins.groups.enums.EnrollmentRequestStatusEnum;
 import org.rciam.plugins.groups.enums.GroupTypeEnum;
 import org.rciam.plugins.groups.helpers.EntityToRepresentation;
