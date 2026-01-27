@@ -308,6 +308,17 @@ public class GroupAdminGroup {
         return service;
     }
 
+    @Path("/member/user/{userId}")
+    public GroupAdminGroupMember deleteMemberByUserId(@PathParam("userId") String userId) {
+        UserGroupMembershipExtensionEntity member = userGroupMembershipExtensionRepository.getByUserAndGroup(group.getId(), userId);
+        if (member == null) {
+            throw new ErrorResponseException("Could not find this group member", "Could not find this group member", Response.Status.NOT_FOUND);
+        }
+        GroupAdminGroupMember service = new GroupAdminGroupMember(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository, isGroupAdmin);
+        ResteasyProviderFactory.getInstance().injectProperties(service);
+        return service;
+    }
+
     @POST
     @Path("/admin/invite")
     public Response inviteGroupAdmin(UserRepresentation userRep) throws EmailException {
