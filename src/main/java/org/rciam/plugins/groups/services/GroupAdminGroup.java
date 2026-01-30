@@ -300,6 +300,16 @@ public class GroupAdminGroup {
         return new GroupAdminGroupMember(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository, clientConnection, isGroupAdmin);
     }
 
+    @Path("/member/user/{userId}")
+    public GroupAdminGroupMember memberByUserId(@PathParam("userId") String userId) {
+
+        var member = userGroupMembershipExtensionRepository.getByUserAndGroup(group.getId(), userId);
+        if (member == null) {
+            throw new ErrorResponseException("Could not find this group member", "Could not find this group member", Response.Status.NOT_FOUND);
+        }
+        return new GroupAdminGroupMember(session, realm, groupAdmin, userGroupMembershipExtensionRepository, group, customFreeMarkerEmailTemplateProvider, member, groupRolesRepository, groupAdminRepository, clientConnection, isGroupAdmin);
+    }
+
     @POST
     @Path("/admin/invite")
     public Response inviteGroupAdmin(UserRepresentation userRep) throws EmailException {
