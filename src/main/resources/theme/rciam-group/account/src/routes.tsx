@@ -2,12 +2,9 @@ import type { IndexRouteObject, RouteObject } from "react-router-dom";
 import App from "./App";
 import { environment } from "./environment";
 import {
-  Applications,
   DeviceActivity,
-  LinkedAccounts,
   Oid4Vci,
   Resources,
-  SigningIn,
   PersonalInfo,
 } from "@keycloak/keycloak-account-ui";
 import { GroupsPage } from "./groups/GroupsPage";
@@ -17,7 +14,9 @@ import { GroupPage } from "./groups/GroupPage";
 import { EnrollmentDiscovery } from "./enrolments/EnrollmentDiscovery";
 import { EnrollmentRequests } from "./enrolments/EnrollmentRequests";
 import { InvitationLandingPage } from "./enrolments/InvitationLandingPage";
-
+import { LinkedAccounts } from "./account-security/LinkedAccounts";
+import { Applications } from "./applications/Applications";
+import { SigningIn } from "./signing-in/SigningIn";
 // We can define a small extension type for convenience
 export type NavRouteObject = RouteObject & {
   handle?: {
@@ -93,7 +92,6 @@ export const GroupAdminPageRoute: RouteObject = {
     hideFromNav: true,
   },
 };
-
 
 export const ResourcesRoute: NavRouteObject = {
   path: "resources",
