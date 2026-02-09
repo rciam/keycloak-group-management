@@ -1,12 +1,15 @@
-import { Page, EmptyRow, usePromise, getLinkedAccounts } from "@keycloak/keycloak-account-ui";
-import type {
-  LinkedAccountRepresentation,
+import {
+  Page,
+  EmptyRow,
+  usePromise,
+  getLinkedAccounts,
 } from "@keycloak/keycloak-account-ui";
+import type { LinkedAccountRepresentation } from "@keycloak/keycloak-account-ui";
 import { useEnvironment } from "@keycloak/keycloak-account-ui";
 import { DataList, Stack, StackItem, Title } from "@patternfly/react-core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-
+import { useGroupsService } from "../groups-service/GroupsServiceContext";
 import { LinkedAccountsToolbar } from "./LinkedAccountsToolbar";
 import { AccountRow } from "./AccountRow";
 import { AccountEnvironmentExtended } from "../environment";
@@ -21,10 +24,12 @@ type LinkedAccountQueryParams = PaginationParams & {
 };
 export const LinkedAccounts = () => {
   const { t } = useTranslation();
+  const groupsService = useGroupsService();
   const context = useEnvironment<AccountEnvironmentExtended>();
   const [linkedAccounts, setLinkedAccounts] = useState<
     LinkedAccountRepresentation[]
   >([]);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
   const [unlinkedAccounts, setUnlinkedAccounts] = useState<
     LinkedAccountRepresentation[]
   >([]);
@@ -36,6 +41,10 @@ export const LinkedAccounts = () => {
     linked: true,
     search: "",
   });
+
+  useEffect(() => {
+    setUserRoles(groupsService.getUserRoles());
+  }, []);
 
   const [paramsUnlinked, setParamsUnlinked] =
     useState<LinkedAccountQueryParams>({
@@ -59,9 +68,9 @@ export const LinkedAccounts = () => {
     setLinkedAccounts,
     [paramsLinked, key],
   );
+  
 
-
-  const canManageLinks = context.environment.features.manageAccountLinkAllowed;
+  const canManageLinks = userRoles.includes("manage-account-links");
 
   return (
     <Page

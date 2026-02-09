@@ -24,7 +24,7 @@ import {
   ExclamationTriangleIcon,
   InfoAltIcon,
 } from "@patternfly/react-icons";
-import { CSSProperties, Fragment, useState } from "react";
+import { CSSProperties, Fragment, useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import {
   useEnvironment,
@@ -37,6 +37,7 @@ import {
 } from "@keycloak/keycloak-account-ui";
 import { formatDateToString } from "../widgets/Date";
 import { AccountEnvironmentExtended } from "../environment";
+import { useGroupsService } from "../groups-service/GroupsServiceContext";
 
 type MobileLinkProps = {
   title: string;
@@ -86,17 +87,21 @@ export const SigningIn = () => {
   const { t } = useTranslation();
 
   const formatDate = (date: Date) => formatDateToString(date);
-
+  const groupsService = useGroupsService();
   const context = useEnvironment<AccountEnvironmentExtended>();
   const { login } = context.keycloak;
 
   const [credentials, setCredentials] = useState<CredentialContainer[]>();
-
+  const [userRoles, setUserRoles] = useState<string[]>([]);
   usePromise(
     (signal) => getCredentials({ signal, context }),
     setCredentials,
     [],
   );
+
+    useEffect(() => {
+      setUserRoles(groupsService.getUserRoles());
+    }, []);
 
   const credentialRowCells = (
     credMetadata: CredentialMetadataRepresentation,
@@ -218,14 +223,13 @@ export const SigningIn = () => {
 
   return (
     <Page title={t("signingIn")} description={t("signingInDescription")}>
-      {JSON.stringify(context.environment.features)}
+      
       {credentialUniqueCategories.map((category) => {
-        console.log(context.environment.features);
         const isDisabled =
           (category === "basic-authentication" &&
-            !context.environment.features.manageAccountBasicAuthAllowed) ||
+            !userRoles.includes("manage-account-basic-auth")) ||
           (category === "two-factor" &&
-            !context.environment.features?.manageAccount2faAllowed);
+            !userRoles.includes("manage-account-2fa"));
 
         if (isDisabled) {
           return null;
