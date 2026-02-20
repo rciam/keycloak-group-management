@@ -7,11 +7,11 @@
   text-align: center;
 }
 
-.gm_content {
-  background-color: rgb(255, 255, 255);
+.gm_breadcrumb-container {
+  padding:0!important;
 }
 
-.gm_breadcumb {
+.gm_breadcrumb {
   margin-left: 1rem !important;
   margin-top: 0.5rem !important;
 }
@@ -79,9 +79,11 @@
 .gm_epxand-toggle:hover div {
   opacity: 0.5;
 }
+
 .gm_page {
-  background-color: white !important;
+  padding: 0 !important;
 }
+
 .gm_group-header {
   padding: 1.5rem;
 }
@@ -438,18 +440,13 @@
 }
 
 .gm_roles-table tbody tr:nth-child(even) {
-  background-color: #f2f2f2;
+  filter: brightness(0.96);
 }
 
-/* Add hover effect */
 .gm_roles-table tbody tr:hover {
-  background-color: #ddd;
+  filter: brightness(0.9);
 }
 
-/* Darken the header background */
-.gm_roles-table thead {
-  background-color: #f2f2f2;
-}
 
 /* Add a dark grey border to the table */
 .gm_roles-table {

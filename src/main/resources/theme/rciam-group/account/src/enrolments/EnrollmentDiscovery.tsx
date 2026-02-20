@@ -29,7 +29,6 @@ import { kcPath } from "../js/utils";
 import { Page } from "@keycloak/keycloak-account-ui";
 import { FormErrorText } from "@keycloak/keycloak-ui-shared";
 
-
 export const EnrollmentDiscovery: FC = () => {
   const groupsService = useGroupsService();
   const { t } = useTranslation();
@@ -104,7 +103,7 @@ export const EnrollmentDiscovery: FC = () => {
   const fetchGroupEnrollment = async (id: any) => {
     try {
       const response = await groupsService!.doGet<any>(
-        `/user/configuration/${id}`
+        `/user/configuration/${id}`,
       );
       if (response.status === 200 && response.data) {
         return response.data;
@@ -118,7 +117,7 @@ export const EnrollmentDiscovery: FC = () => {
     try {
       const response = await groupsService!.doGet<any>(
         "/user/groups/configurations",
-        { params: { groupPath } }
+        { params: { groupPath } },
       );
       if (response.status === 200 && response.data) {
         return response.data;
@@ -132,15 +131,15 @@ export const EnrollmentDiscovery: FC = () => {
     try {
       const response = await groupsService!.doGet<any>(
         "/user/enroll-requests",
-        { params: { groupId } }
+        { params: { groupId } },
       );
       if (response.status === 200 && response.data) {
         setOpenRequest(
           response?.data?.results?.some(
             (request: any) =>
               request.status === "PENDING_APPROVAL" ||
-              request.status === "WAITING_FOR_REPLY"
-          )
+              request.status === "WAITING_FOR_REPLY",
+          ),
         );
       }
     } catch (error) {
@@ -176,7 +175,7 @@ export const EnrollmentDiscovery: FC = () => {
           setGroup(enrollmentData[0].group);
           setEnrollments(enrollmentData);
           setIsParentGroup(
-            enrollmentData[0].group?.path?.split("/").length === 2
+            enrollmentData[0].group?.path?.split("/").length === 2,
           );
         }
       }
@@ -184,32 +183,30 @@ export const EnrollmentDiscovery: FC = () => {
         fetchGroupEnrollmentRequests(groupId);
         fetchAccountInfo().then((userData) => {
           if (userData && userData.username) {
-            fetchMembership(groupId).then(
-              (membershipData) => {
-                const preselectedEnrollment = enrollmentData.find(
-                  (enrollment: any) => enrollment.id === defaultId
-                )
-                  ? enrollmentData.find(
-                      (enrollment: any) => enrollment.id === defaultId
-                    )
-                  : enrollmentData[0];
-                setSelected(preselectedEnrollment.name);
-                // Set the enrollment request with the default enrollment configuration
-                setEnrollmentRequest((prev) => ({
-                  ...prev,
-                  groupEnrollmentConfiguration: {
-                    id: preselectedEnrollment.id,
-                  },
-                  groupRoles:
-                    preselectedEnrollment?.groupRoles.filter((role: any) =>
-                      membershipData?.groupRoles.includes(role)
-                    ) || [],
-                }));
-                setEnrollment(preselectedEnrollment);
-                setMembership(membershipData);
-                stopLoader();
-              }
-            );
+            fetchMembership(groupId).then((membershipData) => {
+              const preselectedEnrollment = enrollmentData.find(
+                (enrollment: any) => enrollment.id === defaultId,
+              )
+                ? enrollmentData.find(
+                    (enrollment: any) => enrollment.id === defaultId,
+                  )
+                : enrollmentData[0];
+              setSelected(preselectedEnrollment.name);
+              // Set the enrollment request with the default enrollment configuration
+              setEnrollmentRequest((prev) => ({
+                ...prev,
+                groupEnrollmentConfiguration: {
+                  id: preselectedEnrollment.id,
+                },
+                groupRoles:
+                  preselectedEnrollment?.groupRoles.filter((role: any) =>
+                    membershipData?.groupRoles.includes(role),
+                  ) || [],
+              }));
+              setEnrollment(preselectedEnrollment);
+              setMembership(membershipData);
+              stopLoader();
+            });
           }
         });
       } else {
@@ -296,13 +293,13 @@ export const EnrollmentDiscovery: FC = () => {
         const today = new Date();
         const newExp = new Date(today);
         newExp.setDate(
-          today.getDate() + parseInt(enrollment.membershipExpirationDays)
+          today.getDate() + parseInt(enrollment.membershipExpirationDays),
         );
         setNewExpirationDate(formatDate(newExp));
         if (membership.membershipExpiresAt) {
           const currentExp = new Date(membership.membershipExpiresAt);
           let days = Math.floor(
-            (newExp.getTime() - currentExp.getTime()) / (1000 * 60 * 60 * 24)
+            (newExp.getTime() - currentExp.getTime()) / (1000 * 60 * 60 * 24),
           );
           setDaysDiff(days);
           if (days > 0) setExpirationChangeType("extend");
@@ -344,64 +341,66 @@ export const EnrollmentDiscovery: FC = () => {
   };
 
   const rolesToBeLost = (membership?.groupRoles || []).filter(
-    (role: string) => !enrollmentRequest.groupRoles.includes(role)
+    (role: string) => !enrollmentRequest.groupRoles.includes(role),
   );
 
   return (
     <React.Fragment>
       <div className="gm_content">
-        <Breadcrumb className="gm_breadcumb">
-          <BreadcrumbItem
-            to="#"
-            onClick={() => {
-              navigate(kcPath("groups/showgroups"));
-            }}
-          >
-            {t("groupLabel")}
-          </BreadcrumbItem>
-          {group?.path &&
-            (() => {
-              const pathParts = group.path.split("/").filter(Boolean);
-              let accumulatedPath = "";
-              return pathParts.map((part: string, idx: number) => {
-                accumulatedPath += "/" + part;
-                if (idx === pathParts.length - 1) {
+        <div className="pf-v5-c-page__main-section pf-m-light gm_breadcrumb-container">
+          <Breadcrumb className="gm_breadcrumb">
+            <BreadcrumbItem
+              to="#"
+              onClick={() => {
+                navigate(kcPath("groups/showgroups"));
+              }}
+            >
+              {t("groupLabel")}
+            </BreadcrumbItem>
+            {group?.path &&
+              (() => {
+                const pathParts = group.path.split("/").filter(Boolean);
+                let accumulatedPath = "";
+                return pathParts.map((part: string, idx: number) => {
+                  accumulatedPath += "/" + part;
+                  if (idx === pathParts.length - 1) {
+                    return (
+                      <BreadcrumbItem key={part} isActive>
+                        {part}
+                      </BreadcrumbItem>
+                    );
+                  }
                   return (
-                    <BreadcrumbItem key={part} isActive>
+                    <BreadcrumbItem
+                      key={part}
+                      to={`#/enroll?groupPath=${encodeURIComponent(
+                        accumulatedPath,
+                      )}`}
+                      onClick={() => {
+                        navigate(
+                          kcPath(
+                            `enroll?groupPath=${encodeURIComponent(
+                              accumulatedPath,
+                            )}`,
+                          ),
+                        );
+                      }}
+                    >
                       {part}
                     </BreadcrumbItem>
                   );
-                }
-                return (
-                  <BreadcrumbItem
-                    key={part}
-                    to={`#/enroll?groupPath=${encodeURIComponent(
-                      accumulatedPath
-                    )}`}
-                    onClick={() => {
-                      navigate(
-                        kcPath(
-                          `enroll?groupPath=${encodeURIComponent(
-                            accumulatedPath
-                          )}`
-                        )
-                      );
-                    }}
-                  >
-                    {part}
-                  </BreadcrumbItem>
-                );
-              });
-            })()}
-        </Breadcrumb>
+                });
+              })()}
+          </Breadcrumb>
+        </div>
         <ConfirmationModal modalInfo={modalInfo} />
         <Page
           title={
             !group?.name
               ? ""
               : membership
-              ? t("updateMembershipTo") + " " + group?.name
-              : t("requestMembershipTo") + " " + group?.name
+                ? t("updateMembershipTo") + " " + group?.name
+                : t("requestMembershipTo") + " " + group?.name
           }
           description={
             (group?.attributes?.description &&
@@ -443,7 +442,7 @@ export const EnrollmentDiscovery: FC = () => {
                               setEnrollment({});
                             } else {
                               const enrollment = enrollments.find(
-                                (e: any) => e.name === value
+                                (e: any) => e.name === value,
                               );
                               if (enrollment) {
                                 setSelected(value);
@@ -454,7 +453,7 @@ export const EnrollmentDiscovery: FC = () => {
                                   groupRoles:
                                     enrollment?.groupRoles.filter(
                                       (role: string) =>
-                                        membership?.groupRoles.includes(role)
+                                        membership?.groupRoles.includes(role),
                                     ) || [],
                                 });
                                 setEnrollment(enrollment);
@@ -478,7 +477,7 @@ export const EnrollmentDiscovery: FC = () => {
                               <SelectOption
                                 key="placeholder"
                                 value={t(
-                                  "invitationEnrollmentSelectPlaceholder"
+                                  "invitationEnrollmentSelectPlaceholder",
                                 )}
                               >
                                 {t("invitationEnrollmentSelectPlaceholder")}
@@ -493,7 +492,7 @@ export const EnrollmentDiscovery: FC = () => {
                                 >
                                   {enrollment?.name}
                                 </SelectOption>
-                              )
+                              ),
                             )}
                           </SelectList>
                         </Select>
@@ -534,12 +533,12 @@ export const EnrollmentDiscovery: FC = () => {
                               expirationChangeType === "infinite"
                                 ? t("membershipExpirationInfiniteTitle")
                                 : expirationChangeType === "extend"
-                                ? t("membershipExpirationExtendedTitle")
-                                : expirationChangeType === "reduce"
-                                ? t("membershipExpirationReducedTitle")
-                                : expirationChangeType === "tofinite"
-                                ? t("membershipExpirationNowFiniteTitle")
-                                : t("membershipExpirationUnchangedTitle")
+                                  ? t("membershipExpirationExtendedTitle")
+                                  : expirationChangeType === "reduce"
+                                    ? t("membershipExpirationReducedTitle")
+                                    : expirationChangeType === "tofinite"
+                                      ? t("membershipExpirationNowFiniteTitle")
+                                      : t("membershipExpirationUnchangedTitle")
                             }
                           >
                             <div>
@@ -547,7 +546,7 @@ export const EnrollmentDiscovery: FC = () => {
                               <strong>
                                 {membership.membershipExpiresAt
                                   ? formatDate(
-                                      dateParse(membership.membershipExpiresAt)
+                                      dateParse(membership.membershipExpiresAt),
                                     )
                                   : t("never")}
                               </strong>
@@ -766,8 +765,8 @@ export const EnrollmentDiscovery: FC = () => {
                               ? t("enrollmentUpdateRequiresApprovalAlert")
                               : t("enrollmentRequiresApprovalAlert")
                             : membership
-                            ? t("enrollmentUpdateNoApprovalAlert")
-                            : t("enrollmentNoApprovalAlert")
+                              ? t("enrollmentUpdateNoApprovalAlert")
+                              : t("enrollmentNoApprovalAlert")
                         }
                       />
                       <div>
@@ -785,7 +784,7 @@ export const EnrollmentDiscovery: FC = () => {
                                 if (Object.keys(errors).length !== 0) {
                                   setModalInfo({
                                     message: t(
-                                      "enrollmentConfigurationModalSubmitError"
+                                      "enrollmentConfigurationModalSubmitError",
                                     ),
                                     accept_message: t("OK"),
                                     accept: function () {
@@ -797,7 +796,7 @@ export const EnrollmentDiscovery: FC = () => {
                                   });
                                 } else {
                                   createEnrollmentRequest(
-                                    enrollment?.requireApproval
+                                    enrollment?.requireApproval,
                                   );
                                 }
                               }}

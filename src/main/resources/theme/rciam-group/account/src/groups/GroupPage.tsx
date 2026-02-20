@@ -109,10 +109,10 @@ export const GroupPage: FC<GroupsPageProps> = () => {
           parseInt(
             groupMembership.group.attributes[
               "expiration-notification-period"
-            ][0]
-          )
+            ][0],
+          ),
         ),
-        "warning"
+        "warning",
       );
       setExpirationWarning(!!warning);
       if (groupMembership?.effectiveGroupId) {
@@ -123,7 +123,7 @@ export const GroupPage: FC<GroupsPageProps> = () => {
 
   const handleTabClick = (
     _event: React.MouseEvent<any> | React.KeyboardEvent | MouseEvent,
-    tabIndex: string | number
+    tabIndex: string | number,
   ) => {
     setActiveTabKey(tabIndex);
   };
@@ -145,7 +145,7 @@ export const GroupPage: FC<GroupsPageProps> = () => {
   let fetchParentPath = () => {
     groupsService!
       .doGet<any>(
-        "/user/group/" + groupMembership?.effectiveGroupId + "/member"
+        "/user/group/" + groupMembership?.effectiveGroupId + "/member",
       )
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 && response.data) {
@@ -169,24 +169,26 @@ export const GroupPage: FC<GroupsPageProps> = () => {
   return (
     <>
       <div className={"gm_content "}>
-        <Breadcrumb className="gm_breadcumb">
-          <BreadcrumbItem
-            to="#"
-            onClick={() => {
-              navigate(kcPath("groups/showgroups"));
-            }}
-          >
-            {t("groupLabel")}
-          </BreadcrumbItem>
-          {groupMembership?.group?.path
-            .split("/")
-            .filter((item) => item)
-            .map((value) => {
-              return <BreadcrumbItem>{value}</BreadcrumbItem>;
-            })}
-        </Breadcrumb>
+        <div className="pf-v5-c-page__main-section pf-m-light gm_breadcrumb-container">
+          <Breadcrumb className="gm_breadcrumb">
+            <BreadcrumbItem
+              to="#"
+              onClick={() => {
+                navigate(kcPath("groups/showgroups"));
+              }}
+            >
+              {t("groupLabel")}
+            </BreadcrumbItem>
+            {groupMembership?.group?.path
+              .split("/")
+              .filter((item) => item)
+              .map((value) => {
+                return <BreadcrumbItem>{value}</BreadcrumbItem>;
+              })}
+          </Breadcrumb>
+        </div>
         <ConfirmationModal modalInfo={modalInfo} />
-        <Page className="gm_page">
+        <Page className="pf-v5-c-page__main-section pf-m-light gm_page">
           <div className="gm_group-header">
             <Title headingLevel="h1">
               {groupMembership?.group?.name || ""}
@@ -317,7 +319,7 @@ export const GroupPage: FC<GroupsPageProps> = () => {
                                   groupMembership?.effectiveGroupId ? (
                                     <>
                                       {t(
-                                        "membershipExpirationEffectiveNotification"
+                                        "membershipExpirationEffectiveNotification",
                                       )}
                                       <Link
                                         to={
@@ -340,7 +342,7 @@ export const GroupPage: FC<GroupsPageProps> = () => {
                                         to={
                                           kcPath("/enroll?groupPath=") +
                                           encodeURI(
-                                            groupMembership?.group?.path
+                                            groupMembership?.group?.path,
                                           )
                                         }
                                       >
@@ -384,8 +386,8 @@ export const GroupPage: FC<GroupsPageProps> = () => {
                                     {groupMembership?.effectiveMembershipExpiresAt
                                       ? formatDateToString(
                                           dateParse(
-                                            groupMembership?.effectiveMembershipExpiresAt
-                                          )
+                                            groupMembership?.effectiveMembershipExpiresAt,
+                                          ),
                                         )
                                       : t("Never")}
                                   </div>
@@ -404,8 +406,8 @@ export const GroupPage: FC<GroupsPageProps> = () => {
                                     {groupMembership?.effectiveMembershipExpiresAt
                                       ? formatDateToString(
                                           dateParse(
-                                            groupMembership?.effectiveMembershipExpiresAt
-                                          )
+                                            groupMembership?.effectiveMembershipExpiresAt,
+                                          ),
                                         )
                                       : t("Never")}
                                   </div>
@@ -420,8 +422,8 @@ export const GroupPage: FC<GroupsPageProps> = () => {
                               {groupMembership?.effectiveMembershipExpiresAt
                                 ? formatDateToString(
                                     dateParse(
-                                      groupMembership?.effectiveMembershipExpiresAt
-                                    )
+                                      groupMembership?.effectiveMembershipExpiresAt,
+                                    ),
                                   )
                                 : t("Never")}
                             </div>

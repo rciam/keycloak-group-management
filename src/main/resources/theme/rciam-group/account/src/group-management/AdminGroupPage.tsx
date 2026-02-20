@@ -142,7 +142,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
   const groupsService = useGroupsService();
   const { t } = useTranslation();
   const [groupConfiguration, setGroupConfiguration] = useState(
-    {} as GroupConfiguration
+    {} as GroupConfiguration,
   );
   const navigate = useNavigate();
 
@@ -157,7 +157,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
   const { addAlert, addError } = useAlerts();
   const [isGroupAdmin, setIsGroupAdmin] = useState<boolean>(false);
   const [enrollmentRules, setEnrollmentRules] = useState<Record<string, any>>(
-    {}
+    {},
   );
   const { startLoader, stopLoader } = useLoader();
 
@@ -233,7 +233,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
             defaultConfiguration
           ) {
             setDefaultConfiguration(
-              response.data?.attributes?.defaultConfiguration?.[0]
+              response.data?.attributes?.defaultConfiguration?.[0],
             );
           }
           setGroupConfiguration(response.data);
@@ -244,13 +244,13 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
   const updateAttributes = (
     attributes: any,
     success_message = t("updateAttributesSuccess"),
-    error_message = "updateAttributesError"
+    error_message = "updateAttributesError",
   ) => {
     startLoader();
     groupsService!
       .doPost<GroupConfiguration>(
         "/group-admin/group/" + groupId + "/attributes",
-        attributes ? { ...attributes } : {}
+        attributes ? { ...attributes } : {},
       )
       .then((response: any) => {
         stopLoader();
@@ -265,7 +265,6 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
         stopLoader();
         setModalInfo({});
         const response = err?.response ?? err;
-        console.log(getError(response));
         addError(error_message, getError(response));
       });
   };
@@ -314,32 +313,43 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
   return (
     <div className="gm_content">
       <ConfirmationModal modalInfo={modalInfo} />
-      <DeleteSubgroupModal groupId={groupId} active={deleteGroup} afterSuccess={() => { navigate(kcPath('/groups/admingroups')); }} close={() => { setDeleteGroup(false); }} /> 
-      <Breadcrumb className="gm_breadcumb">
-        <BreadcrumbItem
-          to="#"
-          onClick={() => {
-            navigate(kcPath("groups/admingroups"));
-          }}
-        >
-          {t("adminGroupLabel")}
-        </BreadcrumbItem>
-        {groupConfiguration?.parents?.map((group: any, index: number) => {
-          return (
-            <BreadcrumbItem
-              onClick={() => {
-                navigate(kcPath("/groups/admingroups/" + group.id));
-              }}
-              to="#"
-              key={index}
-            >
-              {group.name}
-            </BreadcrumbItem>
-          );
-        })}
-        <BreadcrumbItem isActive>{groupConfiguration?.name}</BreadcrumbItem>
-      </Breadcrumb>
-      <Page className="gm_page">
+      <DeleteSubgroupModal
+        groupId={groupId}
+        active={deleteGroup}
+        afterSuccess={() => {
+          navigate(kcPath("/groups/admingroups"));
+        }}
+        close={() => {
+          setDeleteGroup(false);
+        }}
+      />
+      <div className="pf-v5-c-page__main-section pf-m-light gm_breadcrumb-container">
+        <Breadcrumb className="gm_breadcrumb">
+          <BreadcrumbItem
+            to="#"
+            onClick={() => {
+              navigate(kcPath("groups/admingroups"));
+            }}
+          >
+            {t("adminGroupLabel")}
+          </BreadcrumbItem>
+          {groupConfiguration?.parents?.map((group: any, index: number) => {
+            return (
+              <BreadcrumbItem
+                onClick={() => {
+                  navigate(kcPath("/groups/admingroups/" + group.id));
+                }}
+                to="#"
+                key={index}
+              >
+                {group.name}
+              </BreadcrumbItem>
+            );
+          })}
+          <BreadcrumbItem isActive>{groupConfiguration?.name}</BreadcrumbItem>
+        </Breadcrumb>
+      </div>
+      <Page className="pf-v5-c-page__main-section pf-m-light gm_page">
         <div className="gm_group-header">
           <Title headingLevel="h1">
             {groupConfiguration?.name}{" "}
@@ -379,7 +389,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
                         updateAttributes(
                           groupConfiguration.attributes,
                           t("updateGroupDescriptionSuccess"),
-                          "updateGroupDescriptionError"
+                          "updateGroupDescriptionError",
                         );
                         setEditDescription(false);
                         setModalInfo({});

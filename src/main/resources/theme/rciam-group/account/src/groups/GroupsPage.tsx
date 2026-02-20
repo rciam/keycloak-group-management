@@ -159,9 +159,11 @@ export const GroupsPage: FC<GroupsPageProps> = () => {
 
   return (
     <div className="gm_content">
-      <Breadcrumb className="gm_breadcumb">
+      <div className="pf-v5-c-page__main-section pf-m-light gm_breadcrumb-container">
+      <Breadcrumb className="gm_breadcrumb">
         <BreadcrumbItem isActive>{t("showgroupsSidebarTitle")}</BreadcrumbItem>
       </Breadcrumb>
+      </div>
       <Page
         title={t("showgroupsSidebarTitle")}
         description={t("showgroupsIntroMessage")}
