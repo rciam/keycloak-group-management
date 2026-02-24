@@ -4,9 +4,16 @@ All notable changes in keycloak-group-management will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [2.0.1] - 2026-02-24
+
+### Fixed 
+- Browser Dark Theme UI Fix 
+
 ## [2.0.0]
 
 Migration to support Keycloak version 26.4.x
+
 
 
 ## [1.10.0] - 2025-11-26
