@@ -57,7 +57,9 @@ public class GroupRolesRepository extends GeneralRepository<GroupRolesEntity> {
     }
 
     public void deleteByGroup(String groupId){
-        em.createNamedQuery("deleteRolesByGroup").setParameter("groupId", groupId).executeUpdate();
+        em.createQuery("DELETE FROM GroupRolesEntity m WHERE m.group.id = :groupId")
+                .setParameter("groupId", groupId)
+                .executeUpdate();
     }
 
     @Transactional

@@ -22,8 +22,7 @@ import org.keycloak.models.jpa.entities.GroupEntity;
 @Table(name = "GROUP_ROLES")
 @NamedQueries({
        @NamedQuery(name = "getGroupRolesByGroup", query = "from GroupRolesEntity f where f.group.id = :groupId"),
-       @NamedQuery(name = "getGroupRolesByNameAndGroup", query = "from GroupRolesEntity f where f.group.id = :groupId and f.name = :name"),
-       @NamedQuery(name= "deleteRolesByGroup", query="delete from GroupRolesEntity m where m.group.id = :groupId")
+       @NamedQuery(name = "getGroupRolesByNameAndGroup", query = "from GroupRolesEntity f where f.group.id = :groupId and f.name = :name")
 })
 public class GroupRolesEntity {
 
