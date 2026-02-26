@@ -66,7 +66,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendSuspensionEmail(String groupPath, List<String> subgroupPaths, String justification) throws EmailException {
-        attributes.put("userName", user.getFirstName() + " " + user.getLastName());
+        attributes.put("userName", fullName(user.getFirstName(), user.getLastName()));
         if (justification != null) {
             attributes.put("justification", new StringBuilder("\n\nJustification:\n").append(justification));
             attributes.put("justificationHtml", new StringBuilder("<br><br>Justification:<br>").append(justification).append("</p>"));
@@ -82,7 +82,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendSuspensionEmailToAdmins(String groupPath, List<String> subgroupPaths, String justification, UserModel member, UserModel groupadmin) throws EmailException {
-        attributes.put("userName", user.getFirstName() + " " + user.getLastName());
+        attributes.put("userName", fullName(user.getFirstName(), user.getLastName()));
         if (justification != null) {
             attributes.put("justification", JUSTIFICATION + "\n"+justification);
             attributes.put("justificationHtml", JUSTIFICATION +"<br>" +justification);
@@ -101,7 +101,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendActivationEmail(String groupPath, List<String> subgroupPaths, String justification) throws EmailException {
-        attributes.put("userName", user.getFirstName() + " " + user.getLastName());
+        attributes.put("userName", fullName(user.getFirstName(), user.getLastName()));
         if (justification != null) {
             attributes.put("justification", USER_REACTIVATION_JUSTIFICATION + "\n"+justification);
             attributes.put("justificationHtml", USER_REACTIVATION_JUSTIFICATION +"<br>" +justification);
@@ -117,7 +117,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendActivationEmailToAdmins(String groupPath, List<String> subgroupPaths, String justification, UserModel member, UserModel groupadmin) throws EmailException {
-        attributes.put("userName", user.getFirstName() + " " + user.getLastName());
+        attributes.put("userName", fullName(user.getFirstName(), user.getLastName()));
         if (justification != null) {
             attributes.put("justification", JUSTIFICATION + "\n"+justification);
             attributes.put("justificationHtml", JUSTIFICATION +"<br>" +justification);
@@ -149,7 +149,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendAcceptRejectEnrollmentEmail(boolean isAccepted, String groupPath, String justification) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("groupPath", groupPath);
         attributes.put("action", isAccepted ? "accepted" : "rejected");
         if (justification != null) {
@@ -164,7 +164,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendAcceptRejectEnrollmentAdminInfoEmail(boolean isAccepted, UserModel admin, UserModel memberUser, String groupPath, String groupId, String justification) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("adminFullname", admin.getFirstName() + " " + admin.getLastName());
         attributes.put("memberFullname", memberUser.getFirstName() + " " + memberUser.getLastName());
         attributes.put("groupPath", groupPath);
@@ -183,7 +183,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendGroupAdminEnrollmentCreationEmail(UserModel userRequest, String groupPath, Set<String> groupRoles, String reason, String enrollmentId) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("userName", userRequest.getFirstName() + " " + userRequest.getLastName());
         if (groupRoles != null && !groupRoles.isEmpty()) {
             StringBuilder sb = new StringBuilder("");
@@ -208,7 +208,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendExpiredGroupMemberEmailToAdmin(UserModel userRequest, String groupPath, List<String> subgroupsPaths) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("userName", userRequest.getFirstName() + " " + userRequest.getLastName());
         attributes.put("groupPath", groupPath);
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupsPaths));
@@ -217,7 +217,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendExpiredGroupMemberEmailToUser(String groupPath, List<String> subgroupsPaths, String serverUrl) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("groupPath", groupPath);
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupsPaths));
         attributes.put("urlLink", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentStartUrl.replace("{realmName}", realm.getName()).replace("{path}", groupPath));
@@ -226,7 +226,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendExpiredGroupMembershipNotification(String groupPath, String date, String serverUrl) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("groupPath", groupPath);
         attributes.put("date", date);
         attributes.put("urlLink", (serverUrl != null ? serverUrl : "localhost:8080") + enrollmentStartUrl.replace("{realmName}", realm.getName()).replace("{path}", groupPath));
@@ -262,7 +262,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendAcceptInvitationEmail(UserModel userModel, String groupPath, String groupId, boolean forMember, Set<String> groupRoles) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("userfullname", userModel.getFirstName() + " " + userModel.getLastName());
         attributes.put("email", userModel.getEmail());
         attributes.put("type", forMember ? "join" : "become an administrator of");
@@ -289,7 +289,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendRejectionInvitationEmail(UserModel userModel, String groupPath, String groupId, boolean forMember, Set<String> groupRoles) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("userfullname", userModel.getFirstName() + " " + userModel.getLastName());
         attributes.put("email", userModel.getEmail());
         attributes.put("type", forMember ? "join" : "become an administrator of");
@@ -316,7 +316,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendInvitionAdminInformationEmail(String email, boolean forMember, String groupPath, UserModel admin, Set<String> groupRoles) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("email", email);
         attributes.put("type", forMember ? "a member" : "an administrator");
         if (forMember && groupRoles != null && !groupRoles.isEmpty()) {
@@ -344,7 +344,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendMemberUpdateAdminInformEmail(String groupPath, UserModel userChanged, UserModel admin, LocalDate validFrom, LocalDate membershipExpiresAt, Set<String> roles) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("groupPath", groupPath);
         attributes.put("userFullName", userChanged.getFirstName() + " " + userChanged.getLastName());
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
@@ -356,7 +356,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendMemberUpdateUserInformEmail(String groupPath, UserModel admin, LocalDate validFrom, LocalDate membershipExpiresAt, Set<String> roles) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("groupPath", groupPath);
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
         attributes.put("validFrom", validFrom.format(Utils.dateFormatter));
@@ -367,7 +367,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendMemberCreateAdminInformEmail(String groupId, String groupPath, UserModel userChanged, UserModel admin) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("groupPath", groupPath);
         attributes.put("userFullName", userChanged.getFirstName() + " " + userChanged.getLastName());
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
@@ -378,7 +378,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendMemberCreateUserInformEmail(String groupId, String groupPath, UserModel admin, LocalDate validFrom, LocalDate membershipExpiresAt, Set<String> roles) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("groupPath", groupPath);
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
         attributes.put("validFrom", validFrom.format(Utils.dateFormatter));
@@ -391,7 +391,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendDeleteGroupAdminInformationEmail(String groupPath, UserModel admin) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("groupPath", groupPath);
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
         attributes.put("signatureMessage", signatureMessage);
@@ -399,7 +399,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendRolesChangesUserEmail(String groupPath, Set<String> roles) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("groupPath", groupPath);
         attributes.put("roles", roles.stream().collect(Collectors.joining(",")));
         attributes.put("rolesHtml", rolesHtmlStrCalculation(roles));
@@ -408,7 +408,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendRolesChangesGroupAdminEmail(String groupPath, Set<String> roles, UserModel admin, UserModel userChanged) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("groupPath", groupPath);
         attributes.put("roles", roles.stream().collect(Collectors.joining(",")));
         attributes.put("rolesHtml", rolesHtmlStrCalculation(roles));
@@ -419,7 +419,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendRemoveMemberEmail(String groupPath, UserModel admin) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("groupPath", groupPath);
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
         String groupUrl = session.getContext().getUri().getBaseUri().toString() + SHOW_GROUPS_URL ;
@@ -429,7 +429,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendRemoveMemberAdminInformationEmail(String groupId, String groupPath, UserModel admin, UserModel userChanged) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("groupPath", groupPath);
         attributes.put("userFullName", userChanged.getFirstName() + " " + userChanged.getLastName());
         attributes.put("adminFullName", admin.getFirstName() + " " + admin.getLastName());
@@ -440,7 +440,7 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
     }
 
     public void sendLeaveMemberAdminInformationEmail(String groupId, String groupPath, List<String> subgroupPaths, UserModel member) throws EmailException {
-        attributes.put("fullname", user.getFirstName() + " " + user.getLastName());
+        attributes.put("fullname", fullName(user.getFirstName(), user.getLastName()));
         attributes.put("groupPath", groupPath);
         attributes.put("userFullName", member.getFirstName() + " " + member.getLastName());
         attributes.put("subgroupsStr", subgroupsStrCalculation(subgroupPaths));
@@ -449,6 +449,10 @@ public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTempla
         attributes.put("groupUrl", memberUrl.replace("{realmName}", realm.getName()).replace("{id}", groupId));
         attributes.put("signatureMessage", signatureMessage);
         send("removeMemberAdminInformationSubject", Stream.of(groupPath).collect(Collectors.toList()), "remove-member-admin-inform.ftl", attributes);
+    }
+    
+    private String fullName(String firstName, String lastName){
+        return firstName != null && lastName != null ? firstName + lastName : "Sir/Madam";
     }
 
     private String subgroupsHtmlStrCalculation(List<String> subgroupsPaths) {

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fix problem deleting a group that includes membership [RCIAM-542](https://tts.grnet.gr/jira/browse/RCIAM-542)
+- take into account possible null first or last name
 
 ## [2.0.1] - 2026-02-24
 
