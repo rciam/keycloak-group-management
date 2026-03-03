@@ -8,15 +8,18 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { environment } from "./environment";
 import { i18n } from "./i18n";
 import { routes } from "./routes";
+import { Help } from "@keycloak/keycloak-ui-shared";
 
 const router = createBrowserRouter(routes);
 
 i18n.init().then(() => {
   ReactDOM.createRoot(document.getElementById("app")!).render(
     <React.StrictMode>
-      <KeycloakProvider environment={environment}>
-        <RouterProvider router={router} />
-      </KeycloakProvider>
-    </React.StrictMode>
+      <Help>
+        <KeycloakProvider environment={environment}>
+          <RouterProvider router={router} />
+        </KeycloakProvider>
+      </Help>
+    </React.StrictMode>,
   );
 });

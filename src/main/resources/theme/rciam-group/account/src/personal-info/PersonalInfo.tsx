@@ -7,7 +7,6 @@ import {
   Page,
   useAccountAlerts,
 } from "@keycloak/keycloak-account-ui";
-
 import {
   ActionGroup,
   Alert,
@@ -69,12 +68,11 @@ export const PersonalInfo = () => {
         getSupportedLocales({ signal, context }),
       ]),
     ([personalInfo, locales]) => {
-
       const filteredUserProfileMetadata: UserProfileMetadata = {
         ...personalInfo.userProfileMetadata,
         attributes: personalInfo.userProfileMetadata.attributes
-          .filter((attr:any) => attr.name !== "username")
-          .map((attr:any) =>
+          .filter((attr: any) => attr.name !== "username")
+          .map((attr: any) =>
             attr.validators?.["up-no-editable-attribute"]
               ? { ...attr, readOnly: true }
               : attr,
@@ -159,7 +157,6 @@ export const PersonalInfo = () => {
     <Page title={t("personalInfo")} description={t("personalInfoDescription")}>
       <Form isHorizontal onSubmit={handleSubmit(onSubmit)}>
         <UserProfileFields
-          // 👇 Cast here to bridge the two different react-hook-form type trees
           form={form as any}
           userProfileMetadata={userProfileMetadata}
           supportedLocales={supportedLocales}
