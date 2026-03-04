@@ -71,7 +71,6 @@ export const PersonalInfo = () => {
       const filteredUserProfileMetadata: UserProfileMetadata = {
         ...personalInfo.userProfileMetadata,
         attributes: personalInfo.userProfileMetadata.attributes
-          .filter((attr: any) => attr.name !== "username")
           .map((attr: any) =>
             attr.validators?.["up-no-editable-attribute"]
               ? { ...attr, readOnly: true }
