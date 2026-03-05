@@ -7,8 +7,6 @@ import {
   DataListItemCells,
   DataListItemRow,
   DataListCell,
-  Breadcrumb,
-  BreadcrumbItem,
   Pagination,
   DataListAction,
   // Dropdown,
@@ -147,11 +145,6 @@ export const AdminGroupsPage: FC<AdminGroupsPageProps> = () => {
 
   return (
     <div className="gm_content">
-      <div className="pf-v5-c-page__main-section pf-m-light gm_breadcrumb-container">
-        <Breadcrumb className="gm_breadcrumb">
-          <BreadcrumbItem isActive>{t("adminGroupLabel")}</BreadcrumbItem>
-        </Breadcrumb>
-      </div>
       <Page
         title={t("adminGroupLabel")}
         description={t("adminGroupsIntroMessage")}
