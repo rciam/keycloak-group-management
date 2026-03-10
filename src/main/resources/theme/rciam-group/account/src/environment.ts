@@ -11,5 +11,6 @@ export type ExtendedFeatures = AccountEnvironment["features"] & {
 };
 
 export type AccountEnvironmentExtended = Omit<AccountEnvironment, "features"> & {
+  baseUrl: string;
   features: ExtendedFeatures;
 };

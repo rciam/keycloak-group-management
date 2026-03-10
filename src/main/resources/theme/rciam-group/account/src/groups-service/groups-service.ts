@@ -18,7 +18,7 @@ export interface HttpResponse<T = unknown> extends Response {
 export interface RequestInitWithParams extends RequestInit {
   params?: Record<string, string | number>;
   /** if target === "base_account", send to /account instead of /agm/account */
-  target?: "base_account";
+  target?: "base_account" | "base_realm";
 }
 
 export class GroupsServiceError<T = unknown> extends Error {
@@ -64,14 +64,14 @@ export class GroupsServiceClient {
 
   public async doGet<T>(
     endpoint: string,
-    config?: RequestInitWithParams
+    config?: RequestInitWithParams,
   ): Promise<HttpResponse<T>> {
     return this.doRequest<T>(endpoint, { ...config, method: "GET" });
   }
 
   public async doDelete<T>(
     endpoint: string,
-    config?: RequestInitWithParams
+    config?: RequestInitWithParams,
   ): Promise<HttpResponse<T>> {
     return this.doRequest<T>(endpoint, { ...config, method: "DELETE" });
   }
@@ -79,7 +79,7 @@ export class GroupsServiceClient {
   public async doPost<T>(
     endpoint: string,
     body: unknown,
-    config?: RequestInitWithParams
+    config?: RequestInitWithParams,
   ): Promise<HttpResponse<T>> {
     return this.doRequest<T>(endpoint, {
       ...config,
@@ -91,7 +91,7 @@ export class GroupsServiceClient {
   public async doPut<T>(
     endpoint: string,
     body: unknown,
-    config?: RequestInitWithParams
+    config?: RequestInitWithParams,
   ): Promise<HttpResponse<T>> {
     return this.doRequest<T>(endpoint, {
       ...config,
@@ -109,7 +109,7 @@ export class GroupsServiceClient {
    */
   public async doRequest<T>(
     endpoint: string,
-    config: RequestInitWithParams = {}
+    config: RequestInitWithParams = {},
   ): Promise<HttpResponse<T>> {
     const url = this.makeUrl(endpoint, config);
     const requestConfig = await this.makeConfig(config);
@@ -140,15 +140,18 @@ export class GroupsServiceClient {
     if (endpoint.startsWith("http")) {
       return new URL(endpoint);
     }
-
     const base =
-      config?.target === "base_account" ? this.baseAccountUrl : this.groupsUrl;
+      config?.target === "base_account"
+        ? this.baseAccountUrl
+        : config?.target === "base_realm"
+          ? this.baseRealmUrl
+          : this.groupsUrl;
 
     const url = new URL(base + endpoint);
 
     if (config?.params) {
       Object.entries(config.params).forEach(([key, value]) =>
-        url.searchParams.append(key, String(value))
+        url.searchParams.append(key, String(value)),
       );
     }
 
@@ -156,7 +159,7 @@ export class GroupsServiceClient {
   }
 
   private async makeConfig(
-    init: RequestInitWithParams = {}
+    init: RequestInitWithParams = {},
   ): Promise<RequestInit> {
     const kc = this.ctx.keycloak;
 

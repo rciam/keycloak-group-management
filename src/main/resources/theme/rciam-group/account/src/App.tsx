@@ -5,12 +5,12 @@ import { Outlet } from "react-router-dom";
 import { PageNav } from "./PageNav";
 import {
   AccountEnvironment,
-  Header,
   useEnvironment,
 } from "@keycloak/keycloak-account-ui";
 import { GroupsServiceProvider } from "./groups-service/GroupsServiceContext";
 import { LoaderProvider } from "./widgets/LoaderContext";
 import { AlertProvider } from "@keycloak/keycloak-ui-shared";
+import { Header } from "./Header";
 
 function App() {
   useEnvironment<AccountEnvironment>();
