@@ -368,6 +368,20 @@
 .gm_button-small {
   padding: 0.3rem 0.3rem 0.3rem 0.5rem !important;
 }
+.gm_new-button-small svg {
+
+  width: 0.8rem!important;
+  height: 0.8rem!important; 
+}
+.gm_new-button-small {
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  display: inline-flex!important;
+  align-items: center!important;
+  justify-content: center!important;
+}
+
 
 .gm_description-input-container {
   padding: 0 1.5rem;

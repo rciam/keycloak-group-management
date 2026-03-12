@@ -105,7 +105,7 @@ const UserActionModal: FC<any> = (props) => {
           user.id +
           "/suspend" +
           (justification ? "?justification=" + justification : ""),
-        {}
+        {},
       )
       .then((response: HttpResponse<any>) => {
         close();
@@ -129,7 +129,7 @@ const UserActionModal: FC<any> = (props) => {
           user.id +
           "/activate" +
           (justification ? "?justification=" + justification : ""),
-        {}
+        {},
       )
       .then((response: HttpResponse<any>) => {
         close();
@@ -201,15 +201,7 @@ const UserActionModal: FC<any> = (props) => {
                     </div>
                   }
                 >
-                  <button
-                    type="button"
-                    aria-label="More info for name field"
-                    onClick={(e) => e.preventDefault()}
-                    aria-describedby="simple-form-name-01"
-                    className="pf-c-form__group-label-help"
-                  >
-                    <HelpIcon />
-                  </button>
+                  <HelpIcon />
                 </Popover>
               }
               className="gm_suspend-justification-formgroup"
@@ -255,10 +247,6 @@ export const GroupMembers: FC<any> = (props) => {
   const [selectedUserInfo, setSelectedUserInfo] = useState(null); // State to hold the selected user info
   const { addAlert, addError } = useAlerts();
   const groupsService = useGroupsService();
-
-
-
-
 
   useEffect(() => {
     if (props.groupId !== groupId) {
@@ -309,7 +297,7 @@ export const GroupMembers: FC<any> = (props) => {
 
   const onSetPage = (
     _event: React.MouseEvent | React.KeyboardEvent | MouseEvent,
-    newPage: number
+    newPage: number,
   ) => {
     setPage(newPage);
   };
@@ -317,7 +305,7 @@ export const GroupMembers: FC<any> = (props) => {
   const onPerPageSelect = (
     _event: React.MouseEvent | React.KeyboardEvent | MouseEvent,
     newPerPage: number,
-    newPage: number
+    newPage: number,
   ) => {
     setPerPage(newPerPage);
     setPage(newPage);
@@ -362,7 +350,7 @@ export const GroupMembers: FC<any> = (props) => {
             ...(roleSelection ? { role: roleSelection } : {}),
             ...(!directMembers ? { direct: "false" } : {}),
           },
-        }
+        },
       )
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 && response.data) {
@@ -397,7 +385,7 @@ export const GroupMembers: FC<any> = (props) => {
     groupsService!
       .doPut<any>(
         "/group-admin/group/" + props.groupId + "/member/" + membership?.id,
-        { ...membership }
+        { ...membership },
       )
       .then((response: HttpResponse<any>) => {
         fetchGroupMembers();
@@ -440,13 +428,12 @@ export const GroupMembers: FC<any> = (props) => {
     setSelectedUserInfo(null); // Clear the selected user info
   };
 
-  
   return (
     <React.Fragment>
       <UserInfoModal
         membership={selectedUserInfo}
         onClose={closeUserInfoModal}
-      /> 
+      />
       <ConfirmationModal modalInfo={modalInfo} />
       <UserActionModal
         user={selectedUser}
@@ -458,7 +445,7 @@ export const GroupMembers: FC<any> = (props) => {
         membership={editMembership}
         setMembership={setEditMembership}
         fetchGroupMembers={fetchGroupMembers}
-      /> 
+      />
       <TableActionBar
         childComponent={
           <div className="gm_table-action-bar-row">
@@ -556,7 +543,7 @@ export const GroupMembers: FC<any> = (props) => {
                       name="group-roles"
                       options={Object.keys(props.groupConfiguration.groupRoles)}
                       optionsType="raw"
-                      action={(selection:any) => {
+                      action={(selection: any) => {
                         setRoleSelection(selection);
                       }}
                     />
@@ -594,15 +581,7 @@ export const GroupMembers: FC<any> = (props) => {
                       <div>{t("membershipExpiresAtPopoverDatalist")}</div>
                     }
                   >
-                    <button
-                      type="button"
-                      aria-label="More info for name field"
-                      onClick={(e) => e.preventDefault()}
-                      aria-describedby="simple-form-name-01"
-                      className="pf-c-form__group-label-help gm_popover-info"
-                    >
-                      <HelpIcon />
-                    </button>
+                    <HelpIcon />
                   </Popover>
                 </DataListCell>,
                 <DataListCell
@@ -616,7 +595,7 @@ export const GroupMembers: FC<any> = (props) => {
                       default={statusSelection}
                       name="group-status"
                       options={["ENABLED", "SUSPENDED", "PENDING"]}
-                      action={(selection:string) => {
+                      action={(selection: string) => {
                         setStatusSelection(selection);
                       }}
                     />
@@ -676,10 +655,10 @@ export const GroupMembers: FC<any> = (props) => {
                   parseInt(
                     member?.group?.attributes[
                       "expiration-notification-period"
-                    ][0]
-                  )
+                    ][0],
+                  ),
                 ),
-                "warning"
+                "warning",
               );
 
             let notificationWarningDirect =
@@ -692,10 +671,10 @@ export const GroupMembers: FC<any> = (props) => {
                   parseInt(
                     member?.group?.attributes[
                       "expiration-notification-period"
-                    ][0]
-                  )
+                    ][0],
+                  ),
                 ),
-                "warning"
+                "warning",
               );
 
             return (
@@ -732,10 +711,10 @@ export const GroupMembers: FC<any> = (props) => {
                             <strong>Effective: </strong>
                             {notificationWarningEffective ? (
                               <Popover
-                                bodyContent={(hide:any) => (
+                                bodyContent={(hide: any) => (
                                   <div>
                                     {t(
-                                      "membershipExpirationEffectiveNotification"
+                                      "membershipExpirationEffectiveNotification",
                                     )}
                                     <Button
                                       className="gm_popover-expiration-button"
@@ -746,11 +725,11 @@ export const GroupMembers: FC<any> = (props) => {
                                           if (member.group.id !== groupId) {
                                             const searchParams =
                                               new URLSearchParams(
-                                                location.hash.split("?")[1]
+                                                location.hash.split("?")[1],
                                               );
                                             searchParams.set(
                                               "membership",
-                                              member?.id || ""
+                                              member?.id || "",
                                             );
                                             props.history.push({
                                               search: searchParams.toString()
@@ -759,7 +738,7 @@ export const GroupMembers: FC<any> = (props) => {
                                             });
                                             setDirectMembers(true);
                                             setSearchString(
-                                              member.user.username
+                                              member.user.username,
                                             );
                                           } else {
                                             setEditMembership(member);
@@ -821,7 +800,7 @@ export const GroupMembers: FC<any> = (props) => {
                           <strong>Direct: </strong>
                           {notificationWarningDirect ? (
                             <Popover
-                              bodyContent={(hide:any) => (
+                              bodyContent={(hide: any) => (
                                 <div>
                                   {t("membershipExpirationNotification")}
                                   <Button
@@ -863,10 +842,10 @@ export const GroupMembers: FC<any> = (props) => {
                               {member.status === "ENABLED"
                                 ? t("adminGroupMemberUserActiveTooltip")
                                 : member.status === "SUSPENDED"
-                                ? t("adminGroupMemberUserSuspendedTooltip")
-                                : member.status === "PENDING"
-                                ? t("adminGroupMemberUserPendingTooltip")
-                                : ""}
+                                  ? t("adminGroupMemberUserSuspendedTooltip")
+                                  : member.status === "PENDING"
+                                    ? t("adminGroupMemberUserPendingTooltip")
+                                    : ""}
                             </div>
                           }
                         >
@@ -876,10 +855,10 @@ export const GroupMembers: FC<any> = (props) => {
                                 member.status === "ENABLED"
                                   ? "gm_icon gm_icon-active-user"
                                   : member.status === "SUSPENDED"
-                                  ? "gm_icon gm_icon-suspended-user"
-                                  : member.status === "PENDING"
-                                  ? "gm_icon gm_icon-pending-user"
-                                  : ""
+                                    ? "gm_icon gm_icon-suspended-user"
+                                    : member.status === "PENDING"
+                                      ? "gm_icon gm_icon-pending-user"
+                                      : ""
                               }
                             ></div>
                           </div>
@@ -982,12 +961,12 @@ export const GroupMembers: FC<any> = (props) => {
                                   accept_message: t("YES"),
                                   cancel_message: t("NO"),
                                   message: t(
-                                    "adminGroupMemberRemoveConfirmation"
+                                    "adminGroupMemberRemoveConfirmation",
                                   ),
                                   accept: function () {
                                     deleteGroupMember(
                                       member.id,
-                                      member.group.id
+                                      member.group.id,
                                     );
                                     setModalInfo({});
                                   },
@@ -1037,8 +1016,8 @@ export const GroupMembers: FC<any> = (props) => {
                               {member.status === "ENABLED"
                                 ? t("adminGroupMemberSuspendTooltip")
                                 : member.status === "SUSPENDED"
-                                ? t("adminGroupMemberActivateTooltip")
-                                : t("adminGroupMemberActivatePendingTooltip")}
+                                  ? t("adminGroupMemberActivateTooltip")
+                                  : t("adminGroupMemberActivatePendingTooltip")}
                             </div>
                           }
                         >
@@ -1056,7 +1035,7 @@ export const GroupMembers: FC<any> = (props) => {
                                   accept_message: t("YES"),
                                   cancel_message: t("NO"),
                                   message: t(
-                                    "Do you want to activate this membership?"
+                                    "Do you want to activate this membership?",
                                   ),
                                   accept: function () {
                                     activatePendingMembership(member);

@@ -742,7 +742,7 @@ export const EnrollmentDiscovery: FC = () => {
                             </a>{" "}
                             {t("invitationAUPMessage3")}
                           </p>
-                          <div className="gm_checkbox-container gm_content-width">
+                          <div className="gm_checkbox-container pf-m-info pf-v5-c-alert gm_content-width">
                             <Checkbox
                               onClick={() => {
                                 setAcceptAup(!acceptAup);

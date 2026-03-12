@@ -72,8 +72,8 @@ export const EnrollmentModal: FC<any> = (props) => {
     return new Date(
       `${year.padStart(4, "0")}-${month.padStart(2, "0")}-${day.padStart(
         2,
-        "0"
-      )}T00:00:00`
+        "0",
+      )}T00:00:00`,
     );
   };
 
@@ -215,9 +215,9 @@ export const EnrollmentModal: FC<any> = (props) => {
             t(
               enrollment?.id
                 ? "updateDefaultEnrollmentSuccess"
-                : "createEnrollmentSuccess"
+                : "createEnrollmentSuccess",
             ),
-            AlertVariant.success
+            AlertVariant.success,
           );
           props.refresh();
         } else {
@@ -225,9 +225,9 @@ export const EnrollmentModal: FC<any> = (props) => {
             t(
               enrollment?.id
                 ? "updateDefaultEnrollmentError"
-                : "createEnrollmentError"
+                : "createEnrollmentError",
             ),
-            getError(response)
+            getError(response),
           );
         }
       })
@@ -236,9 +236,9 @@ export const EnrollmentModal: FC<any> = (props) => {
           t(
             enrollment?.id
               ? "updateDefaultEnrollmentError"
-              : "createEnrollmentError"
+              : "createEnrollmentError",
           ),
-          getError(t("unexpectedError"))
+          getError(t("unexpectedError")),
         );
       })
       .finally(() => {
@@ -251,7 +251,7 @@ export const EnrollmentModal: FC<any> = (props) => {
     startLoader();
     groupsService!
       .doDelete<any>(
-        "/group-admin/group/" + props.groupId + "/configuration/" + id
+        "/group-admin/group/" + props.groupId + "/configuration/" + id,
       )
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
@@ -302,12 +302,12 @@ export const EnrollmentModal: FC<any> = (props) => {
     const currentDateWithoutTime = new Date(
       currentDate.getFullYear(),
       currentDate.getMonth(),
-      currentDate.getDate()
+      currentDate.getDate(),
     );
     const selectedDateWithoutTime = new Date(
       date.getFullYear(),
       date.getMonth(),
-      date.getDate()
+      date.getDate(),
     );
 
     // Check if the selected date is in the past and not the same as the validFrom date
@@ -456,7 +456,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                 content={
                   <div>
                     {t(
-                      "enrollmentConfigurationExpirationSwitchDisabledTooltip"
+                      "enrollmentConfigurationExpirationSwitchDisabledTooltip",
                     )}
                   </div>
                 }
@@ -467,19 +467,19 @@ export const EnrollmentModal: FC<any> = (props) => {
                   isDisabled={
                     props.validationRules?.membershipExpirationDays?.max &&
                     isIntegerOrNumericString(
-                      enrollment?.membershipExpirationDays
+                      enrollment?.membershipExpirationDays,
                     ) &&
                     enrollment.membershipExpirationDays !== 0
                   }
                   isChecked={
                     isIntegerOrNumericString(
-                      enrollment?.membershipExpirationDays
+                      enrollment?.membershipExpirationDays,
                     ) && enrollment.membershipExpirationDays !== 0
                   }
                   onChange={() => {
                     if (
                       isIntegerOrNumericString(
-                        enrollment?.membershipExpirationDays
+                        enrollment?.membershipExpirationDays,
                       ) &&
                       enrollment.membershipExpirationDays !== 0
                     ) {
@@ -491,11 +491,11 @@ export const EnrollmentModal: FC<any> = (props) => {
                           ?.defaultValue &&
                         isIntegerOrNumericString(
                           props.validationRules?.membershipExpirationDays
-                            ?.defaultValue
+                            ?.defaultValue,
                         )
                           ? parseInt(
                               props.validationRules.membershipExpirationDays
-                                .defaultValue
+                                .defaultValue,
                             )
                           : 32;
                       setEnrollment({ ...enrollment });
@@ -553,15 +553,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                     <div>{t("enrollmentConfigurationTooltipValidFrom")} .</div>
                   }
                 >
-                  <button
-                    type="button"
-                    aria-label="More info for name field"
-                    onClick={(e) => e.preventDefault()}
-                    aria-describedby="simple-form-name-01"
-                    className="pf-c-form__group-label-help"
-                  >
-                    <HelpIcon />
-                  </button>
+                  <HelpIcon />
                 </Popover>
               }
             >
@@ -655,15 +647,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                       </div>
                     }
                   >
-                    <button
-                      type="button"
-                      aria-label="More info for name field"
-                      onClick={(e) => e.preventDefault()}
-                      aria-describedby="simple-form-name-01"
-                      className="pf-c-form__group-label-help"
-                    >
-                      <HelpIcon />
-                    </button>
+                    <HelpIcon />
                   </Popover>
                 }
               >
@@ -797,7 +781,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                   validated={
                     errors.aup_url && touched.aup_url ? "error" : "default"
                   }
-                  onChange={(_event,value) => {
+                  onChange={(_event, value) => {
                     enrollment.aup.url = value;
                     setEnrollment({ ...enrollment });
                   }}
@@ -844,7 +828,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                                 id={`role-${index}`}
                                 name={`role-${index}`}
                                 isChecked={enrollment?.groupRoles?.includes(
-                                  role
+                                  role,
                                 )}
                                 aria-label={`checkbox-role-${role}`}
                                 onChange={() => roleHandler(role)}
@@ -870,15 +854,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                       </div>
                     }
                   >
-                    <button
-                      type="button"
-                      aria-label="More info for name field"
-                      onClick={(e) => e.preventDefault()}
-                      aria-describedby="simple-form-name-01"
-                      className="pf-c-form__group-label-help"
-                    >
                       <HelpIcon />
-                    </button>
                   </Popover>
                 }
               >
@@ -900,15 +876,7 @@ export const EnrollmentModal: FC<any> = (props) => {
                     <div>{t("enrollmentConfigurationHideConfTooltip")}</div>
                   }
                 >
-                  <button
-                    type="button"
-                    aria-label="More info for name field"
-                    onClick={(e) => e.preventDefault()}
-                    aria-describedby="simple-form-name-01"
-                    className="pf-c-form__group-label-help"
-                  >
                     <HelpIcon />
-                  </button>
                 </Popover>
               }
               // helperText=""

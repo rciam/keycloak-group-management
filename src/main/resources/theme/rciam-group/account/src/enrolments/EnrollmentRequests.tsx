@@ -22,6 +22,8 @@ import {
   FilterIcon,
   LongArrowAltDownIcon,
   LongArrowAltUpIcon,
+  SearchIcon,
+  TimesIcon
 } from "@patternfly/react-icons";
 import { TableActionBar } from "../widgets/TableActionBar";
 import { useLoader } from "../widgets/LoaderContext";
@@ -262,7 +264,7 @@ export const EnrollmentRequests: FC<any> = (props) => {
                         aria-label="popover for input"
                         onClick={() => search()}
                       >
-                        <div className="gm_search-icon-container"></div>
+                        <SearchIcon />
                       </Button>
                     </Tooltip>
                     <Tooltip
@@ -278,7 +280,7 @@ export const EnrollmentRequests: FC<any> = (props) => {
                           fetchEnrollmentRequests();
                         }}
                       >
-                        <div className="gm_cancel-icon-container"></div>
+                        <TimesIcon />
                       </Button>
                     </Tooltip>
                   </div>

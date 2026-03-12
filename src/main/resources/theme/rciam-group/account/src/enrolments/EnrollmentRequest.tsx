@@ -333,15 +333,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                 headerContent={<div>{t("enrollmentUserDetails")}</div>}
                 bodyContent={undefined}
               >
-                <button
-                  type="button"
-                  aria-label="More info for name field"
-                  onClick={(e) => e.preventDefault()}
-                  aria-describedby="simple-form-name-02"
-                  className="pf-c-form__group-label-help"
-                >
                   <HelpIcon />
-                </button>
               </Popover>
             </div>
             <FormGroup
@@ -692,15 +684,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                       </div>
                     }
                   >
-                    <button
-                      type="button"
-                      aria-label="More info for name field"
-                      onClick={(e) => e.preventDefault()}
-                      aria-describedby="simple-form-name-01"
-                      className="pf-c-form__group-label-help"
-                    >
                       <HelpIcon />
-                    </button>
                   </Popover>
                 }
               >

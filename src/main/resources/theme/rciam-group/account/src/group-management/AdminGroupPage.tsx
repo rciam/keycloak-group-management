@@ -23,7 +23,7 @@ import {
 // import { GroupSubGroups } from '../../group-widgets/GroupAdminPage/GroupSubgroups';
 // import { GroupEnrollment } from '../../group-widgets/GroupAdminPage/GroupEnrollment';
 import { useNavigate } from "react-router-dom";
-import { TrashIcon } from "@patternfly/react-icons";
+import { TrashIcon, EditIcon, TimesIcon, CheckIcon } from "@patternfly/react-icons";
 import { RoutableTabs, useRoutableTab } from "../widgets/RoutableTabs";
 // import { ContentPage } from '../ContentPage';
 // import { ContentAlert } from '../ContentAlert';
@@ -374,7 +374,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
                 aria-label="text area example"
               />
               <Button
-                className={"gm_button-small"}
+                className={"gm_new-button-small"}
                 onClick={() => {
                   setModalInfo({
                     title: t("confirmation"),
@@ -402,29 +402,32 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
                   });
                 }}
               >
-                <div className={"gm_check-button"}></div>
+                <div>
+                                  <CheckIcon/>
+                  </div>
               </Button>
               <Button
                 variant="tertiary"
-                className={"gm_button-small"}
+                className={"gm_new-button-small"}
                 onClick={() => {
                   setEditDescription(false);
                 }}
               >
-                <div className={"gm_cancel-button"}></div>
+                <div>
+
+                <TimesIcon />
+                                </div>
+
               </Button>
             </div>
           ) : (
-            <p>
+            <p onClick={()=>{
+                setEditDescription(true);
+              }} style={{ cursor: "pointer" }}>
               {(groupConfiguration?.attributes?.description &&
                 groupConfiguration?.attributes?.description[0]) ||
                 t("noDescription")}
-              <div
-                className="gm_edit-icon"
-                onClick={() => {
-                  setEditDescription(true);
-                }}
-              ></div>
+              <EditIcon />
             </p>
           )}
         </div>

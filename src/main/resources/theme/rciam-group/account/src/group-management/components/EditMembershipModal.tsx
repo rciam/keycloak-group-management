@@ -45,7 +45,7 @@ interface Membership {
 }
 
 export const EditMembershipModal: React.FC<EditMembershipModalProps> = (
-  props
+  props,
 ) => {
   const touchDefault = {
     groupRoles: false,
@@ -130,7 +130,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (
       const selectedDateWithoutTime = new Date(
         date.getFullYear(),
         date.getMonth(),
-        date.getDate()
+        date.getDate(),
       );
       if (
         props.membership["validFrom"] !== dateFormat(selectedDateWithoutTime)
@@ -145,7 +145,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (
         let expirationError = isFirstDateBeforeSecond(
           dateParse(membership.membershipExpiresAt),
           date,
-          t("validateFromMembershipError1")
+          t("validateFromMembershipError1"),
         );
         return expirationError || "";
       }
@@ -158,7 +158,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (
       const selectedDateWithoutTime = new Date(
         date.getFullYear(),
         date.getMonth(),
-        date.getDate()
+        date.getDate(),
       );
       if (
         props.membership["membershipExpiresAt"] !==
@@ -175,7 +175,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (
         let expirationError = isFirstDateBeforeSecond(
           date,
           dateParse(membership.validFrom),
-          "You cannot set the membership expiration date before the date the membership starts."
+          "You cannot set the membership expiration date before the date the membership starts.",
         );
         if (expirationError) {
           return expirationError;
@@ -187,22 +187,22 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (
         const currentDateWithoutTime = new Date(
           currentDate.getFullYear(),
           currentDate.getMonth(),
-          currentDate.getDate()
+          currentDate.getDate(),
         );
         const rulesValidationError = isFirstDateBeforeSecond(
           isPastDate(dateParse(membership.validFrom))
             ? addDays(
                 currentDateWithoutTime,
-                parseInt(enrollmentRules.membershipExpirationDays.max)
+                parseInt(enrollmentRules.membershipExpirationDays.max),
               )
             : addDays(
                 dateParse(membership.validFrom),
-                parseInt(enrollmentRules.membershipExpirationDays.max)
+                parseInt(enrollmentRules.membershipExpirationDays.max),
               ),
           date,
           t("validateMembershipExpiresErrorMax", {
             param_0: enrollmentRules.membershipExpirationDays.max,
-          })
+          }),
         );
         if (rulesValidationError) {
           return rulesValidationError;
@@ -229,7 +229,10 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (
     if (Object.keys(errors).length === 0) {
       updateMembership();
     } else {
-      addError("enrollmentConfigurationModalSubmitError", getError("Please fix the errors in the form."));
+      addError(
+        "enrollmentConfigurationModalSubmitError",
+        getError("Please fix the errors in the form."),
+      );
     }
   };
 
@@ -246,7 +249,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (
           props.membership.group.id +
           "/member/" +
           props.membership?.id,
-        { ...membership }
+        { ...membership },
       )
       .then((response: HttpResponse<any>) => {
         // Fetch updated group members after the request
@@ -277,7 +280,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (
     let membershipExpiresAtError = validateMembershipExpiresAt(
       membership.membershipExpiresAt
         ? dateParse(membership.membershipExpiresAt)
-        : null
+        : null,
     );
     !(membership?.groupRoles?.length > 0) &&
       (errors.groupRoles = t("groupRolesFormError"));
@@ -428,15 +431,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (
                   </div>
                 }
               >
-                <button
-                  type="button"
-                  aria-label="More info for name field"
-                  onClick={(e) => e.preventDefault()}
-                  aria-describedby="simple-form-name-01"
-                  className="pf-c-form__group-label-help"
-                >
-                  <HelpIcon />
-                </button>
+                <HelpIcon />
               </Popover>
             }
           >
@@ -448,7 +443,7 @@ export const EditMembershipModal: React.FC<EditMembershipModalProps> = (
                 content={
                   <div>
                     {t(
-                      "enrollmentConfigurationExpirationDateSwitchDisabledTooltip"
+                      "enrollmentConfigurationExpirationDateSwitchDisabledTooltip",
                     )}
                   </div>
                 }
