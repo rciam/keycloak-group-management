@@ -39,6 +39,7 @@ import { AccountEnvironmentExtended } from "../environment";
 type Application = ClientRepresentation & {
   open: boolean;
   country?: string;
+  contacts?: string;
   account?: string;
 };
 
@@ -54,7 +55,6 @@ export const Applications = () => {
   const refresh = () => setKey((k) => k + 1);
 
   const formatDate = (date: Date) => formatDateToString(date);
-
 
   usePromise(
     (signal) => getApplications({ signal, context }),
@@ -89,7 +89,10 @@ export const Applications = () => {
   return (
     <Page title={t("application")} description={t("applicationsIntroMessage")}>
       <DataList id="applications-list" aria-label={t("application")}>
-        <DataListItem id="applications-list-header" aria-labelledby="Columns names">
+        <DataListItem
+          id="applications-list-header"
+          aria-labelledby="Columns names"
+        >
           <DataListItemRow>
             <span style={{ visibility: "hidden", height: 55 }}>
               <DataListToggle
@@ -151,16 +154,29 @@ export const Applications = () => {
                         variant="link"
                         onClick={() => window.open(application.effectiveUrl)}
                       >
-                        {label(t, application.clientName || application.clientId)}{" "}
+                        {label(
+                          t,
+                          application.clientName || application.clientId,
+                        )}{" "}
                         <ExternalLinkAltIcon />
                       </Button>
                     ) : (
-                      <>{label(t, application.clientName || application.clientId)}</>
+                      <>
+                        {label(
+                          t,
+                          application.clientName || application.clientId,
+                        )}
+                      </>
                     )}
                   </DataListCell>,
 
-                  <DataListCell width={2} key={`internal${application.clientId}`}>
-                    {application.userConsentRequired ? t("thirdPartyApp") : t("internalApp")}
+                  <DataListCell
+                    width={2}
+                    key={`internal${application.clientId}`}
+                  >
+                    {application.userConsentRequired
+                      ? t("thirdPartyApp")
+                      : t("internalApp")}
                     {application.offlineAccess ? ", " + t("offlineAccess") : ""}
                   </DataListCell>,
 
@@ -174,19 +190,27 @@ export const Applications = () => {
             <DataListContent
               id={`content-${application.clientId}`}
               className="pf-v5-u_pl-4xl"
-              aria-label={t("applicationDetails", { clientId: application.clientId })}
+              aria-label={t("applicationDetails", {
+                clientId: application.clientId,
+              })}
               isHidden={!application.open}
             >
               <DescriptionList>
                 <DescriptionListGroup>
                   <DescriptionListTerm>{t("client")}</DescriptionListTerm>
-                  <DescriptionListDescription>{application.clientId}</DescriptionListDescription>
+                  <DescriptionListDescription>
+                    {application.clientId}
+                  </DescriptionListDescription>
                 </DescriptionListGroup>
 
                 {application.description && (
                   <DescriptionListGroup>
-                    <DescriptionListTerm>{t("description")}</DescriptionListTerm>
-                    <DescriptionListDescription>{application.description}</DescriptionListDescription>
+                    <DescriptionListTerm>
+                      {t("description")}
+                    </DescriptionListTerm>
+                    <DescriptionListDescription>
+                      {application.description}
+                    </DescriptionListDescription>
                   </DescriptionListGroup>
                 )}
 
@@ -202,7 +226,9 @@ export const Applications = () => {
                 {application.consent && (
                   <>
                     <DescriptionListGroup>
-                      <DescriptionListTerm>{t("hasAccessTo")}</DescriptionListTerm>
+                      <DescriptionListTerm>
+                        {t("hasAccessTo")}
+                      </DescriptionListTerm>
                       {application.consent.grantedScopes.map((scope) => (
                         <DescriptionListDescription key={`scope${scope.id}`}>
                           <CheckIcon />{" "}
@@ -214,32 +240,61 @@ export const Applications = () => {
 
                     {application.tosUri && (
                       <DescriptionListGroup>
-                        <DescriptionListTerm>{t("termsOfService")}</DescriptionListTerm>
-                        <DescriptionListDescription>{application.tosUri}</DescriptionListDescription>
+                        <DescriptionListTerm>
+                          {t("termsOfService")}
+                        </DescriptionListTerm>
+                        <DescriptionListDescription>
+                          {application.tosUri}
+                        </DescriptionListDescription>
                       </DescriptionListGroup>
                     )}
 
                     {application.policyUri && (
                       <DescriptionListGroup>
-                        <DescriptionListTerm>{t("privacyPolicy")}</DescriptionListTerm>
-                        <DescriptionListDescription>{application.policyUri}</DescriptionListDescription>
+                        <DescriptionListTerm>
+                          {t("privacyPolicy")}
+                        </DescriptionListTerm>
+                        <DescriptionListDescription>
+                          {application.policyUri}
+                        </DescriptionListDescription>
                       </DescriptionListGroup>
                     )}
 
                     {application.account && (
                       <DescriptionListGroup>
-                        <DescriptionListTerm>{t("privacyPolicy")}</DescriptionListTerm>
-                        <DescriptionListDescription>{application.account}</DescriptionListDescription>
+                        <DescriptionListTerm>
+                          {t("privacyPolicy")}
+                        </DescriptionListTerm>
+                        <DescriptionListDescription>
+                          {application.account}
+                        </DescriptionListDescription>
                       </DescriptionListGroup>
                     )}
 
                     {application.country && (
                       <DescriptionListGroup>
-                        <DescriptionListTerm>{t("privacyPolicy")}</DescriptionListTerm>
-                        <DescriptionListDescription>{application.country}</DescriptionListDescription>
+                        <DescriptionListTerm>
+                          {t("privacyPolicy")}
+                        </DescriptionListTerm>
+                        <DescriptionListDescription>
+                          {application.country}
+                        </DescriptionListDescription>
                       </DescriptionListGroup>
                     )}
-
+                    {application.contacts && (
+                      <DescriptionListGroup>
+                        <DescriptionListTerm>
+                          {t("contacts")}
+                        </DescriptionListTerm>
+                        {application.contacts
+                          .split(",")
+                          .map((contact, index) => (
+                            <DescriptionListDescription key={`contact${index}`}>
+                              {contact}
+                            </DescriptionListDescription>
+                          ))}
+                      </DescriptionListGroup>
+                    )}
                     {application.logoUri && (
                       <DescriptionListGroup>
                         <DescriptionListTerm>{t("logo")}</DescriptionListTerm>
@@ -250,7 +305,9 @@ export const Applications = () => {
                     )}
 
                     <DescriptionListGroup>
-                      <DescriptionListTerm>{t("accessGrantedOn")}</DescriptionListTerm>
+                      <DescriptionListTerm>
+                        {t("accessGrantedOn")}
+                      </DescriptionListTerm>
                       <DescriptionListDescription>
                         {formatDate(new Date(application.consent.createdDate))}
                       </DescriptionListDescription>
