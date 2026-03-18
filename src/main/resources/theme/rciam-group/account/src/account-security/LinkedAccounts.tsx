@@ -37,7 +37,7 @@ export const LinkedAccounts = () => {
   // ✅ Typed params include `search?: string`
   const [paramsLinked, setParamsLinked] = useState<LinkedAccountQueryParams>({
     first: 0,
-    max: 6,
+    max: 11,
     linked: true,
     search: "",
   });
@@ -49,7 +49,7 @@ export const LinkedAccounts = () => {
   const [paramsUnlinked, setParamsUnlinked] =
     useState<LinkedAccountQueryParams>({
       first: 0,
-      max: 6,
+      max: 11,
       linked: false,
       search: "",
     });
