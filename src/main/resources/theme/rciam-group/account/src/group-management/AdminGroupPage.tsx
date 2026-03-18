@@ -23,7 +23,12 @@ import {
 // import { GroupSubGroups } from '../../group-widgets/GroupAdminPage/GroupSubgroups';
 // import { GroupEnrollment } from '../../group-widgets/GroupAdminPage/GroupEnrollment';
 import { useNavigate } from "react-router-dom";
-import { TrashIcon, EditIcon, TimesIcon, CheckIcon } from "@patternfly/react-icons";
+import {
+  TrashIcon,
+  PencilAltIcon,
+  TimesIcon,
+  CheckIcon,
+} from "@patternfly/react-icons";
 import { RoutableTabs, useRoutableTab } from "../widgets/RoutableTabs";
 // import { ContentPage } from '../ContentPage';
 // import { ContentAlert } from '../ContentAlert';
@@ -403,8 +408,8 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
                 }}
               >
                 <div>
-                                  <CheckIcon/>
-                  </div>
+                  <CheckIcon />
+                </div>
               </Button>
               <Button
                 variant="tertiary"
@@ -414,20 +419,22 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
                 }}
               >
                 <div>
-
-                <TimesIcon />
-                                </div>
-
+                  <TimesIcon />
+                </div>
               </Button>
             </div>
           ) : (
-            <p onClick={()=>{
+            <p
+              onClick={() => {
                 setEditDescription(true);
-              }} style={{ cursor: "pointer" }}>
+              }}
+              style={{ cursor: "pointer" }}
+              className="gm_group-description"
+            >
               {(groupConfiguration?.attributes?.description &&
                 groupConfiguration?.attributes?.description[0]) ||
                 t("noDescription")}
-              <EditIcon />
+              <PencilAltIcon/>
             </p>
           )}
         </div>

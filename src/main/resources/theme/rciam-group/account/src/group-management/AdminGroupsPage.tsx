@@ -35,7 +35,11 @@ import { Spinner } from "@patternfly/react-core";
 import { useGroupsService } from "../groups-service/GroupsServiceContext";
 import { Page } from "@keycloak/keycloak-account-ui";
 import { kcPath } from "../js/utils";
-import { EllipsisVIcon } from "@patternfly/react-icons";
+import {
+  AngleRightIcon,
+  AngleDownIcon,
+  EllipsisVIcon,
+} from "@patternfly/react-icons";
 import { CreateGroupModal, DeleteSubgroupModal } from "./components/Modals";
 
 export interface AdminGroupsPageProps {
@@ -328,22 +332,16 @@ export const GroupListItem: FC<GroupListItemProps> = ({
               2 + depth + (group?.extraSubGroups.length > 0 ? 0 : 2) + "rem",
           }}
         >
-          {group?.extraSubGroups.length > 0 ? (
+          {group?.extraSubGroups.length > 0 && (
             <div
               className={"gm_epxand-toggle"}
               onClick={() => {
                 setExpanded(!expanded);
               }}
             >
-              <div
-                className={
-                  expanded
-                    ? "gm_epxand-toggle-expanded"
-                    : "gm_epxand-toggle-hidden"
-                }
-              ></div>
+              {expanded ? <AngleDownIcon /> : <AngleRightIcon />}
             </div>
-          ) : null}
+          )}
           <Link to={kcPath("/groups/admingroups/" + group.id)}>
             <DataListItemCells
               dataListCells={[
