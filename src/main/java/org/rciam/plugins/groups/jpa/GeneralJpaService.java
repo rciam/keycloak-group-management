@@ -76,6 +76,9 @@ public class GeneralJpaService {
             UserModel user = session.users().getUserById(realm, member.getUser().getId());
             userGroupMembershipExtensionRepository.deleteMember(member, group, user, clientConnection, groupAdmin.getId(), memberUserAttribute, isRealmRemove);
         });
+        EntityManager em = session.getProvider(JpaConnectionProvider.class).getEntityManager();
+        em.flush();
+        em.clear();
         groupEnrollmentConfigurationRepository.deleteByGroup(group.getId());
         groupAdminRepository.deleteByGroup(group.getId());
         groupRolesRepository.deleteByGroup(group.getId());
