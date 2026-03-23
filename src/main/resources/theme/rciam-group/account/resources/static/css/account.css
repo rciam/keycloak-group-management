@@ -78,6 +78,7 @@
 }
 .gm_group-description svg {
   margin-left:0.3rem;
+  display:inline-block;
 }
 .gm_epxand-toggle:hover div {
   opacity: 0.5;
@@ -156,6 +157,17 @@
   padding: 0.5rem;
   height: 3.2rem;
 }
+.gm_group-header svg:hover {
+  opacity:0.5;
+}
+
+.gm_group-header svg {
+  cursor: pointer;
+}
+
+.gm_group-description:hover svg {
+  opacity: 0.5;
+}
 
 .gm_helper-text-create-enrollment {
   margin-top: -1rem;
@@ -168,9 +180,7 @@
 }
 
 .gm_direct-member-checkbox {
-  display: inline-block;
   margin-left: 0.5rem;
-  padding-top: 0.3rem;
 }
 
 .gm_direct-member-checkbox input {

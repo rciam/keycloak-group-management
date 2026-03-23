@@ -23,12 +23,14 @@ import {
   dateParse,
   isFirstDateBeforeSecond,
 } from "../../widgets/Date";
+import { useAlerts } from "@keycloak/keycloak-ui-shared";
 
 export const DeleteSubgroupModal: React.FC<any> = (props) => {
   const groupsService = useGroupsService();
   const { t } = useTranslation();
   const [modalInfo, setModalInfo] = useState({});
   const { startLoader, stopLoader } = useLoader();
+  const { addAlert, addError } = useAlerts();
 
   useEffect(() => {
     if (props.active) {
@@ -56,37 +58,20 @@ export const DeleteSubgroupModal: React.FC<any> = (props) => {
         stopLoader();
         props.close();
         if (response.status === 200 || response.status === 204) {
-          setModalInfo({
-            message: t("deleteGroupSuccess"),
-            accept_message: t("OK"),
-            accept: function () {
-              props.afterSuccess();
-              setModalInfo({});
-            },
-            cancel: function () {
-              props.afterSuccess();
-              setModalInfo({});
-            },
-          });
+          props.afterSuccess();
+          setModalInfo({});
+          addAlert("deleteGroupSuccess");
         } else {
-          setModalInfo({
-            message: t("deleteGroupError", getError(response)),
-            accept_message: t("OK"),
-            accept: function () {
-              props.afterSuccess();
-              setModalInfo({});
-            },
-            cancel: function () {
-              props.afterSuccess();
-              setModalInfo({});
-            },
-          });
+          props.afterSuccess();
+          setModalInfo({});
+          addError("deleteGroupError", getError(response));
         }
       })
       .catch((err) => {
         props.close();
+        console.log(t(getError(err)));
+        addError("deleteGroupError", t(getError(err)));
         stopLoader();
-        console.log(err);
       });
   };
 
@@ -120,7 +105,7 @@ export const CreateGroupModal: React.FC<any> = (props) => {
   useEffect(() => {
     setIsValid(
       groupConfig.name.length > 0 &&
-        groupConfig.attributes.description[0].length > 0
+        groupConfig.attributes.description[0].length > 0,
     );
   }, [groupConfig]);
 
@@ -130,7 +115,7 @@ export const CreateGroupModal: React.FC<any> = (props) => {
       .doPost<any>(
         "/group-admin/group" +
           (props.groupId ? "/" + props.groupId + "/children" : ""),
-        { ...groupConfig }
+        { ...groupConfig },
       )
       .then((response: any) => {
         // stopLoader();
@@ -234,7 +219,7 @@ export const CreateGroupModal: React.FC<any> = (props) => {
               name="simple-form-name-01"
               aria-describedby="simple-form-name-01-helper"
               value={groupConfig.name}
-              onChange={(_event:any, value: string) => {
+              onChange={(_event: any, value: string) => {
                 groupConfig.name = value;
                 setGroupConfig({ ...groupConfig });
               }}
@@ -251,7 +236,7 @@ export const CreateGroupModal: React.FC<any> = (props) => {
               id="simple-form-email-01"
               name="simple-form-email-01"
               value={groupConfig.attributes.description[0]}
-              onChange={(_event:any, value:string) => {
+              onChange={(_event: any, value: string) => {
                 groupConfig.attributes.description[0] = value;
                 setGroupConfig({ ...groupConfig });
               }}
@@ -278,10 +263,10 @@ export const UserInfoModal: React.FC<{
       addDays(
         new Date(new Date().setHours(0, 0, 0, 0)),
         parseInt(
-          membership?.group?.attributes["expiration-notification-period"]?.[0]
-        )
+          membership?.group?.attributes["expiration-notification-period"]?.[0],
+        ),
       ),
-      "warning"
+      "warning",
     );
 
   return (
@@ -366,7 +351,7 @@ export const UserInfoModal: React.FC<{
         </FormGroup>
         <FormGroup label="Group Roles" fieldId="membership-roles">
           <div>
-            {membership.groupRoles.map((role:string, index:number) => (
+            {membership.groupRoles.map((role: string, index: number) => (
               <Badge key={index} className="gm_role_badge" isRead>
                 {role}
               </Badge>
@@ -383,10 +368,10 @@ export const UserInfoModal: React.FC<{
                 {membership.status === "ENABLED"
                   ? t("adminGroupMemberUserActiveTooltip")
                   : membership.status === "SUSPENDED"
-                  ? t("adminGroupMemberUserSuspendedTooltip")
-                  : membership.status === "PENDING"
-                  ? t("adminGroupMemberUserPendingTooltip")
-                  : ""}
+                    ? t("adminGroupMemberUserSuspendedTooltip")
+                    : membership.status === "PENDING"
+                      ? t("adminGroupMemberUserPendingTooltip")
+                      : ""}
               </div>
             }
           >
@@ -396,10 +381,10 @@ export const UserInfoModal: React.FC<{
                   membership.status === "ENABLED"
                     ? "gm_icon gm_icon-active-user"
                     : membership.status === "SUSPENDED"
-                    ? "gm_icon gm_icon-suspended-user"
-                    : membership.status === "PENDING"
-                    ? "gm_icon gm_icon-pending-user"
-                    : ""
+                      ? "gm_icon gm_icon-suspended-user"
+                      : membership.status === "PENDING"
+                        ? "gm_icon gm_icon-pending-user"
+                        : ""
                 }
               ></div>
             </div>
