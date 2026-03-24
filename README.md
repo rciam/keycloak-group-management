@@ -1,5 +1,5 @@
 # keycloak-group-management
-A keycloak plugin to support advanced group management features:
+A keycloak extension to support advanced group management features:
 
 * User-driven group enrollment flows:
   * Users can request membership in groups:
@@ -13,16 +13,23 @@ A keycloak plugin to support advanced group management features:
 
 * Roles within groups
 
+> **Note:**
+> This extension requires [RCIAM Keycloak](https://github.com/eosc-kc/keycloak) and is not supported with upstream Keycloak distributions.
+
 ## Keycloak compatibility matrix
-| Group management version | Keycloak version |
-|--------------------------|------------------|
-| 0.9.0                    | 18.0.1-2.17      |
-| 0.10.0                   | 22.0.5-1.1 +     |
-| 0.13.0                   | 22.0.5-1.2 +     |
-| 0.18.0                   | 22.0.10-1.4 +    |
-| 0.19.0                   | 22.0.10-1.8 +    |
-| 0.19.0                   | 22.0.10-1.8 +    |
-| 1.7.0                    | 22.0.13-1.17 +   |
+
+RCIAM Keycloak releases follow the format:
+`<UPSTREAM-KC-VERSION>-<RCIAM-VERSION>` (e.g. `26.5.5-1.0`)
+
+| Group management release | Minimum RCIAM Keycloak release |
+|--------------------------|--------------------------------|
+| 0.9.0                    | 18.0.1-2.17                    |
+| 0.10.0                   | 22.0.5-1.1                     |
+| 0.13.0                   | 22.0.5-1.2                     |
+| 0.18.0                   | 22.0.10-1.4                    |
+| 0.19.0                   | 22.0.10-1.8                    |
+| 1.7.0                    | 22.0.13-1.17                   |
+| 2.0.0                    | 26.5.5-1.0                     |
 
 
 ## General configuration options 
