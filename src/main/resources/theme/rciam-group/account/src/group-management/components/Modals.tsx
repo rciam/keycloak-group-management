@@ -60,7 +60,7 @@ export const DeleteSubgroupModal: React.FC<any> = (props) => {
         if (response.status === 200 || response.status === 204) {
           props.afterSuccess();
           setModalInfo({});
-          addAlert("deleteGroupSuccess");
+          addAlert(t("deleteGroupSuccess"));
         } else {
           props.afterSuccess();
           setModalInfo({});
@@ -69,7 +69,6 @@ export const DeleteSubgroupModal: React.FC<any> = (props) => {
       })
       .catch((err) => {
         props.close();
-        console.log(t(getError(err)));
         addError("deleteGroupError", t(getError(err)));
         stopLoader();
       });
