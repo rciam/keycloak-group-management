@@ -1,7 +1,7 @@
 # keycloak-group-management
-A keycloak plugin to support advanced group management features:
+A keycloak extension to support advanced group management features:
 
-* User-driven group enrollment flows:
+* User-driven group enrolment flows:
   * Users can request membership in groups:
     * Accept group Terms & Conditions
     * Provide comment/justification
@@ -13,16 +13,23 @@ A keycloak plugin to support advanced group management features:
 
 * Roles within groups
 
+> **Note:**
+> This extension requires [RCIAM Keycloak](https://github.com/eosc-kc/keycloak) and is not supported with upstream Keycloak distributions.
+
 ## Keycloak compatibility matrix
-| Group management version | Keycloak version |
-|--------------------------|------------------|
-| 0.9.0                    | 18.0.1-2.17      |
-| 0.10.0                   | 22.0.5-1.1 +     |
-| 0.13.0                   | 22.0.5-1.2 +     |
-| 0.18.0                   | 22.0.10-1.4 +    |
-| 0.19.0                   | 22.0.10-1.8 +    |
-| 0.19.0                   | 22.0.10-1.8 +    |
-| 1.7.0                    | 22.0.13-1.17 +   |
+
+RCIAM Keycloak releases follow the format:
+`<UPSTREAM-KC-VERSION>-<RCIAM-VERSION>` (e.g. `26.5.5-1.0`)
+
+| Group management release | Minimum RCIAM Keycloak release |
+|--------------------------|--------------------------------|
+| 0.9.0                    | 18.0.1-2.17                    |
+| 0.10.0                   | 22.0.5-1.1                     |
+| 0.13.0                   | 22.0.5-1.2                     |
+| 0.18.0                   | 22.0.10-1.4                    |
+| 0.19.0                   | 22.0.10-1.8                    |
+| 1.7.0                    | 22.0.13-1.17                   |
+| 2.0.0                    | 26.5.5-1.0                     |
 
 
 ## General configuration options 
@@ -33,20 +40,22 @@ All web services to be executed needs realm management rights role.
  - 'AgmUserAssuranceForEnrollment' = User assurance (default 'assurance'), from version 1.9.4
  - 'AgmUserIdentifierForEnrollment' = User identifier (default 'username'), from version 1.9.4
  - 'AgmMaxExpiredMembersToDelete' = Max memberships to be deleted daily (default 100), from version 1.9.4 in master realm
-2. You could create account roles 'manage-groups' and 'manage-groups-extended' for managing groups.
-   'manage-groups' is a special role that can manage all groups in a same way as group admins. 
-   Actions that can not be done with this role are:
+2. You can create the account roles `manage-groups` and `manage-groups-extended` for managing groups.
+
+   `manage-groups` is a special role that can manage all groups in the same way as group admininstrators. 
+   The following actions are not permitted with this role:
      - delete group
      - delete role
      - invite a user
      - add group member role
      - delete group member role
-   Among others users with this role can also: 
+   
+   Users with this role can also: 
      - create top level group
      - create group configuration
      - can view all realm users
-   'manage-groups-extended' is a role for comanage to Keycloak migration. 
-   User with this role has the same rigths plus some rules in creating a group member does not take into account with this role.
+   
+   `manage-groups-extended` is a role with the same permissions as `manage-groups`, providing relaxed rules for creating group members (useful in migration scenarios).
 3. (optional) For general group management configuration options execute following web service (necessary during first time deployed):
 
 `curl --request PUT \
@@ -174,7 +183,7 @@ Main url : {server_url}/realms/{realm}/agm
 | /account/group-admin/group/{groupId}/admin                         | DELETE | delete group admin using user id or username                                  | GroupAdminService            |
 | /account/group-admin/enroll-requests                               | GET    | get all group admin enrollment requests                                       | GroupAdminService            |
 | /account/group-admin/enroll-request/{enrollId}                     | GET    | get enrollment request                                                        | GroupAdminEnrollementRequest |
-| /account/group-admin/enroll-request/{enrollId}/extra-info          | POST   | request extra infrormation from user                                          | GroupAdminEnrollementRequest |
+| /account/group-admin/enroll-request/{enrollId}/extra-info          | POST   | request extra information from user                                          | GroupAdminEnrollementRequest |
 | /account/group-admin/enroll-request/{enrollId}/accept              | POST   | accept group enrollment request                                               | GroupAdminEnrollementRequest |
 | /account/group-admin/enroll-request/{enrollId}/reject              | POST   | reject group enrollment request                                               | GroupAdminEnrollementRequest |
 
