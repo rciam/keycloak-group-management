@@ -2,6 +2,7 @@ package org.rciam.plugins.groups.jpa.repositories;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,10 +66,10 @@ public class GroupAdminRepository extends GeneralRepository<GroupAdminEntity> {
 
     public GroupsPager getAdminGroups(String userId, String search, Integer first, Integer max, boolean exact) {
         if (search == null) {
-            List<GroupRepresentation> groups = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).setFirstResult(first).setMaxResults(max).getResultStream().map(realm::getGroupById).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+            List<GroupRepresentation> groups = em.createNamedQuery("getGroupsForAdmin", String.class).setParameter("userId", userId).setFirstResult(first).setMaxResults(max).getResultStream().map(realm::getGroupById).filter(Objects::nonNull).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
             return new GroupsPager(groups, em.createNamedQuery("countGroupsForAdmin", Long.class).setParameter("userId", userId).getSingleResult());
         } else {
-            List<GroupRepresentation> groups = em.createNamedQuery("searchGroupsForAdmin", String.class).setParameter("userId", userId).setParameter("search", exact ? search.toLowerCase() : "%" + search.toLowerCase() + "%").setFirstResult(first).setMaxResults(max).getResultStream().map(realm::getGroupById).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
+            List<GroupRepresentation> groups = em.createNamedQuery("searchGroupsForAdmin", String.class).setParameter("userId", userId).setParameter("search", exact ? search.toLowerCase() : "%" + search.toLowerCase() + "%").setFirstResult(first).setMaxResults(max).getResultStream().map(realm::getGroupById).filter(Objects::nonNull).map(g -> ModelToRepresentation.toSimpleGroupHierarchy(g, true)).collect(Collectors.toList());
             return new GroupsPager(groups, em.createNamedQuery("countSearchGroupsForAdmin", Long.class).setParameter("userId", userId).setParameter("search", exact ? search.toLowerCase() : "%" + search.toLowerCase() + "%").getSingleResult());
         }
     }
