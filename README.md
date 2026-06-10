@@ -30,6 +30,7 @@ RCIAM Keycloak releases follow the format:
 | 0.19.0                   | 22.0.10-1.8                    |
 | 1.7.0                    | 22.0.13-1.17                   |
 | 2.0.0                    | 26.5.5-1.0                     |
+| 2.1.0                    | 26.6.3-1.0                     |
 
 
 ## General configuration options 
