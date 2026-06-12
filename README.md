@@ -82,6 +82,7 @@ Parameter explanation:
    --data '{
    "userAttribute" : "entitlements",
    "urnNamespace" : "urn%3Amace%3Aexample.org",
+5. "signatureMessage": "Support team",
    "authority" : "rciam.example.org" // Optional. It will be omitted from the group entitlements if not specified
    }'`
 
