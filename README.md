@@ -209,7 +209,7 @@ Role name can be changed in database( column GROUP_ROLE_NAME of table GROUP_MANA
  /admin/configuration-rules                  | POST    | create group enrollment configuration rule                            | AdminEnrollmentConfigurationRules  |
  /admin/configuration-rules/{id}             | GET     | get group enrollment configuration rule by id                         | AdminEnrollmentConfigurationRules  |
  /admin/configuration-rules/{id}             | PUT     | update group enrollment configuration rule                            | AdminEnrollmentConfigurationRules  |
- /admin/configuration-rules/{id}             | DELETE  | delete group enrollment configuration rule                            | AdminEnrollmentConfigurationRules  |
+ /admin/configuration-rules/{id}             | DELETE  | delete group enrollment configuration rule                            | AdminEnrollAdminServicementConfigurationRules  |
  /admin/memberUserAttribute/calculation      | POST    | update member user attribute value for all users                      | AdminService                       |
  /admin/effective-expiration-date/calculation| POST    | update user group membership effective expiration date for all realms | AdminService                       | 
  /admin/user/{id}                            | DELETE  | delete user                                                           | AdminService                       |
@@ -219,3 +219,5 @@ Role name can be changed in database( column GROUP_ROLE_NAME of table GROUP_MANA
  /admin/group/{groupId}/admin/{userId}       | POST    | create group admin                                                    | AdminGroups                        |
  /admin/group/{groupId}/admin/{userId}       | DELETE  | delete group admin                                                    | AdminGroups                        |
  /admin/group/{groupId}/children             | POST    | create child group                                                    | AdminGroups                        |
+
+**OpenAPI REST API documentation is available at folder *src/main/resources/openapi*.**

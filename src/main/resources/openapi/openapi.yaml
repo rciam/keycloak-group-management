@@ -1,0 +1,3779 @@
+---
+openapi: 3.0.3
+info:
+  title: Generated API
+  version: "1.0"
+paths:
+  /:
+    get:
+      parameters:
+      - name: asc
+        in: query
+        schema:
+          default: true
+          type: boolean
+      - name: direct
+        in: query
+        schema:
+          default: true
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: order
+        in: query
+        schema:
+          default: "f.user.lastName, f.user.firstName, f.user.email"
+          type: string
+      - name: role
+        in: query
+        schema:
+          type: string
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: status
+        in: query
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+      responses:
+        "200":
+          description: OK
+    post:
+      summary: Create a new group member
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+      responses:
+        "200":
+          description: OK
+    delete:
+      responses:
+        "204":
+          description: No Content
+        "200":
+          description: OK
+  /accept:
+    post:
+      parameters:
+      - name: adminJustification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /account/group-admin/configuration-rules:
+    get:
+      parameters:
+      - name: type
+        in: query
+        schema:
+          default: TOP_LEVEL
+          type: object
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRulesRepresentation'
+  /account/group-admin/enroll-request/{enrollId}:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentRequestRepresentation'
+    parameters:
+    - name: enrollId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/enroll-request/{enrollId}/accept:
+    post:
+      parameters:
+      - name: adminJustification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: enrollId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/enroll-request/{enrollId}/extra-info:
+    post:
+      parameters:
+      - name: comment
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: enrollId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/enroll-request/{enrollId}/reject:
+    post:
+      parameters:
+      - name: adminJustification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: enrollId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/enroll-requests:
+    get:
+      parameters:
+      - name: asc
+        in: query
+        schema:
+          default: false
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: groupName
+        in: query
+        schema:
+          type: string
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: order
+        in: query
+        schema:
+          default: submittedDate
+          type: string
+      - name: status
+        in: query
+        schema:
+          type: object
+      - name: userSearch
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentRequestPager'
+  /account/group-admin/group:
+    post:
+      responses:
+        "200":
+          description: OK
+  /account/group-admin/group/{groupId}:
+    delete:
+      responses:
+        "204":
+          description: No Content
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/admin:
+    post:
+      parameters:
+      - name: userId
+        in: query
+        schema:
+          type: string
+      - name: username
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    delete:
+      parameters:
+      - name: userId
+        in: query
+        schema:
+          type: string
+      - name: username
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/admin/invite:
+    post:
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/all:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupRepresentation'
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/attributes:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/children:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupRepresentation'
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/configuration:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/configuration/all:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/configuration/{id}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+    delete:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/default-configuration:
+    post:
+      parameters:
+      - name: configurationId
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/member/{memberId}:
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+      responses:
+        "200":
+          description: OK
+    delete:
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/member/{memberId}/activate:
+    post:
+      parameters:
+      - name: justification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/member/{memberId}/role:
+    post:
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/member/{memberId}/role/{name}:
+    delete:
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/member/{memberId}/suspend:
+    post:
+      parameters:
+      - name: justification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/members:
+    get:
+      parameters:
+      - name: asc
+        in: query
+        schema:
+          default: true
+          type: boolean
+      - name: direct
+        in: query
+        schema:
+          default: true
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: order
+        in: query
+        schema:
+          default: "f.user.lastName, f.user.firstName, f.user.email"
+          type: string
+      - name: role
+        in: query
+        schema:
+          type: string
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: status
+        in: query
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentationPager'
+    post:
+      summary: Create a new group member
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/members/invitation:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupInvitationInitialRepresentation'
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/role/{id}:
+    put:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/role/{name}:
+    delete:
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/group/{groupId}/roles:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+    post:
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/group-admin/groupids/all:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+  /account/group-admin/groups:
+    get:
+      parameters:
+      - name: exact
+        in: query
+        schema:
+          default: false
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: toplevel
+        in: query
+        schema:
+          default: true
+          type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/GroupsPager'
+  /account/group-admin/groups/members:
+    get:
+      parameters:
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: groups
+        in: query
+        schema:
+          type: string
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: serviceAccountClientLink
+        in: query
+        schema:
+          default: true
+          type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRepresentationPager'
+  /account/user/configuration/{id}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+  /account/user/enroll-request:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupEnrollmentRequestRepresentation'
+      responses:
+        "200":
+          description: OK
+  /account/user/enroll-request/{id}:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentRequestRepresentation'
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/user/enroll-request/{id}/respond:
+    post:
+      parameters:
+      - name: comment
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/user/enroll-requests:
+    get:
+      parameters:
+      - name: asc
+        in: query
+        schema:
+          default: false
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: groupId
+        in: query
+        schema:
+          type: string
+      - name: groupName
+        in: query
+        schema:
+          type: string
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: order
+        in: query
+        schema:
+          default: submittedDate
+          type: string
+      - name: status
+        in: query
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentRequestPager'
+  /account/user/group/{groupId}/configurations:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/user/group/{groupId}/member:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+    delete:
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /account/user/groups:
+    get:
+      parameters:
+      - name: asc
+        in: query
+        schema:
+          default: true
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: order
+        in: query
+        schema:
+          default: group.name
+          type: string
+      - name: search
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentationPager'
+  /account/user/groups/configurations:
+    get:
+      parameters:
+      - name: groupPath
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+  /account/user/invitation/{id}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupInvitationRepresentation'
+  /account/user/invitation/{id}/accept:
+    post:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /account/user/invitation/{id}/reject:
+    post:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /activate:
+    post:
+      parameters:
+      - name: justification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /admin:
+    post:
+      parameters:
+      - name: userId
+        in: query
+        schema:
+          type: string
+      - name: username
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    delete:
+      parameters:
+      - name: userId
+        in: query
+        schema:
+          type: string
+      - name: username
+        in: query
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "200":
+          description: OK
+  /admin/configuration:
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+      responses:
+        "200":
+          description: OK
+  /admin/configuration-rules:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRulesRepresentation'
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupEnrollmentConfigurationRulesRepresentation'
+      responses:
+        "200":
+          description: OK
+  /admin/configuration-rules/{id}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentConfigurationRulesRepresentation'
+    put:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupEnrollmentConfigurationRulesRepresentation'
+      responses:
+        "200":
+          description: OK
+    delete:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /admin/effective-expiration-date/calculation:
+    post:
+      responses:
+        "200":
+          description: OK
+  /admin/group:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: OK
+  /admin/group/{groupId}:
+    delete:
+      responses:
+        "204":
+          description: No Content
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /admin/group/{groupId}/admin/{userId}:
+    post:
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    delete:
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /admin/group/{groupId}/children:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /admin/group/{groupId}/configuration:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /admin/group/{groupId}/configuration/{id}}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /admin/invite:
+    post:
+      responses:
+        "200":
+          description: OK
+  /admin/member-user-attribute/configuration:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberUserAttributeConfigurationRepresentation'
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberUserAttributeConfigurationRepresentation'
+      responses:
+        "200":
+          description: OK
+  /admin/memberUserAttribute/calculation:
+    post:
+      responses:
+        "200":
+          description: OK
+  /admin/user/{id}:
+    delete:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /admin/{userId}:
+    post:
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    delete:
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /all:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupRepresentation'
+  /attributes:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+      responses:
+        "200":
+          description: OK
+  /children:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupRepresentation'
+      responses:
+        "200":
+          description: OK
+  /configuration:
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+      responses:
+        "200":
+          description: OK
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+      responses:
+        "200":
+          description: OK
+  /configuration-rules:
+    get:
+      parameters:
+      - name: type
+        in: query
+        schema:
+          default: TOP_LEVEL
+          type: object
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRulesRepresentation'
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupEnrollmentConfigurationRulesRepresentation'
+      responses:
+        "200":
+          description: OK
+  /configuration-rules/{id}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentConfigurationRulesRepresentation'
+    put:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupEnrollmentConfigurationRulesRepresentation'
+      responses:
+        "200":
+          description: OK
+    delete:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /configuration/all:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+  /configuration/{id}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+    delete:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /configuration/{id}}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+  /configurations:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+  /default-configuration:
+    post:
+      parameters:
+      - name: configurationId
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /effective-expiration-date/calculation:
+    post:
+      responses:
+        "200":
+          description: OK
+  /enroll-request:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupEnrollmentRequestRepresentation'
+      responses:
+        "200":
+          description: OK
+  /enroll-request/{enrollId}:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentRequestRepresentation'
+    parameters:
+    - name: enrollId
+      in: path
+      required: true
+      schema:
+        type: string
+  /enroll-request/{enrollId}/accept:
+    post:
+      parameters:
+      - name: adminJustification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: enrollId
+      in: path
+      required: true
+      schema:
+        type: string
+  /enroll-request/{enrollId}/extra-info:
+    post:
+      parameters:
+      - name: comment
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: enrollId
+      in: path
+      required: true
+      schema:
+        type: string
+  /enroll-request/{enrollId}/reject:
+    post:
+      parameters:
+      - name: adminJustification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: enrollId
+      in: path
+      required: true
+      schema:
+        type: string
+  /enroll-request/{id}:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentRequestRepresentation'
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /enroll-request/{id}/respond:
+    post:
+      parameters:
+      - name: comment
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /enroll-requests:
+    get:
+      parameters:
+      - name: asc
+        in: query
+        schema:
+          default: false
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: groupName
+        in: query
+        schema:
+          type: string
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: order
+        in: query
+        schema:
+          default: submittedDate
+          type: string
+      - name: status
+        in: query
+        schema:
+          type: object
+      - name: userSearch
+        in: query
+        schema:
+          type: string
+      - name: groupId
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentRequestPager'
+  /extra-info:
+    post:
+      parameters:
+      - name: comment
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /group:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: OK
+  /group-admin/configuration-rules:
+    get:
+      parameters:
+      - name: type
+        in: query
+        schema:
+          default: TOP_LEVEL
+          type: object
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRulesRepresentation'
+  /group-admin/enroll-request/{enrollId}:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentRequestRepresentation'
+    parameters:
+    - name: enrollId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/enroll-request/{enrollId}/accept:
+    post:
+      parameters:
+      - name: adminJustification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: enrollId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/enroll-request/{enrollId}/extra-info:
+    post:
+      parameters:
+      - name: comment
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: enrollId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/enroll-request/{enrollId}/reject:
+    post:
+      parameters:
+      - name: adminJustification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: enrollId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/enroll-requests:
+    get:
+      parameters:
+      - name: asc
+        in: query
+        schema:
+          default: false
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: groupName
+        in: query
+        schema:
+          type: string
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: order
+        in: query
+        schema:
+          default: submittedDate
+          type: string
+      - name: status
+        in: query
+        schema:
+          type: object
+      - name: userSearch
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentRequestPager'
+  /group-admin/group:
+    post:
+      responses:
+        "200":
+          description: OK
+  /group-admin/group/{groupId}:
+    delete:
+      responses:
+        "204":
+          description: No Content
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/admin:
+    post:
+      parameters:
+      - name: userId
+        in: query
+        schema:
+          type: string
+      - name: username
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    delete:
+      parameters:
+      - name: userId
+        in: query
+        schema:
+          type: string
+      - name: username
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/admin/invite:
+    post:
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/all:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupRepresentation'
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/attributes:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/children:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupRepresentation'
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/configuration:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/configuration/all:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/configuration/{id}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+    delete:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/default-configuration:
+    post:
+      parameters:
+      - name: configurationId
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/member/{memberId}:
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+      responses:
+        "200":
+          description: OK
+    delete:
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/member/{memberId}/activate:
+    post:
+      parameters:
+      - name: justification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/member/{memberId}/role:
+    post:
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/member/{memberId}/role/{name}:
+    delete:
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/member/{memberId}/suspend:
+    post:
+      parameters:
+      - name: justification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/members:
+    get:
+      parameters:
+      - name: asc
+        in: query
+        schema:
+          default: true
+          type: boolean
+      - name: direct
+        in: query
+        schema:
+          default: true
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: order
+        in: query
+        schema:
+          default: "f.user.lastName, f.user.firstName, f.user.email"
+          type: string
+      - name: role
+        in: query
+        schema:
+          type: string
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: status
+        in: query
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentationPager'
+    post:
+      summary: Create a new group member
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/members/invitation:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupInvitationInitialRepresentation'
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/role/{id}:
+    put:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/role/{name}:
+    delete:
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/group/{groupId}/roles:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+    post:
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group-admin/groupids/all:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+  /group-admin/groups:
+    get:
+      parameters:
+      - name: exact
+        in: query
+        schema:
+          default: false
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: toplevel
+        in: query
+        schema:
+          default: true
+          type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/GroupsPager'
+  /group-admin/groups/members:
+    get:
+      parameters:
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: groups
+        in: query
+        schema:
+          type: string
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: serviceAccountClientLink
+        in: query
+        schema:
+          default: true
+          type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRepresentationPager'
+  /group/{groupId}:
+    delete:
+      responses:
+        "204":
+          description: No Content
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/admin:
+    post:
+      parameters:
+      - name: userId
+        in: query
+        schema:
+          type: string
+      - name: username
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    delete:
+      parameters:
+      - name: userId
+        in: query
+        schema:
+          type: string
+      - name: username
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/admin/invite:
+    post:
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/admin/{userId}:
+    post:
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    delete:
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/all:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupRepresentation'
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/attributes:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/children:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupRepresentation'
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/configuration:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/configuration/all:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/configuration/{id}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+    delete:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/configuration/{id}}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/configurations:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/default-configuration:
+    post:
+      parameters:
+      - name: configurationId
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/member:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+    delete:
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/member/{memberId}:
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+      responses:
+        "200":
+          description: OK
+    delete:
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/member/{memberId}/activate:
+    post:
+      parameters:
+      - name: justification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/member/{memberId}/role:
+    post:
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/member/{memberId}/role/{name}:
+    delete:
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/member/{memberId}/suspend:
+    post:
+      parameters:
+      - name: justification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/members:
+    get:
+      parameters:
+      - name: asc
+        in: query
+        schema:
+          default: true
+          type: boolean
+      - name: direct
+        in: query
+        schema:
+          default: true
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: order
+        in: query
+        schema:
+          default: "f.user.lastName, f.user.firstName, f.user.email"
+          type: string
+      - name: role
+        in: query
+        schema:
+          type: string
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: status
+        in: query
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentationPager'
+    post:
+      summary: Create a new group member
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/members/invitation:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupInvitationInitialRepresentation'
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/role/{id}:
+    put:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/role/{name}:
+    delete:
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /group/{groupId}/roles:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+    post:
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /groupids/all:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+  /groups:
+    get:
+      parameters:
+      - name: exact
+        in: query
+        schema:
+          default: false
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: toplevel
+        in: query
+        schema:
+          default: true
+          type: boolean
+      - name: asc
+        in: query
+        schema:
+          default: true
+          type: boolean
+      - name: order
+        in: query
+        schema:
+          default: group.name
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/GroupsPager'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentationPager'
+  /groups/configurations:
+    get:
+      parameters:
+      - name: groupPath
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+  /groups/members:
+    get:
+      parameters:
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: groups
+        in: query
+        schema:
+          type: string
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: serviceAccountClientLink
+        in: query
+        schema:
+          default: true
+          type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRepresentationPager'
+  /invitation:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupInvitationInitialRepresentation'
+      responses:
+        "200":
+          description: OK
+  /invitation/{id}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupInvitationRepresentation'
+  /invitation/{id}/accept:
+    post:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /invitation/{id}/reject:
+    post:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /member-user-attribute/configuration:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberUserAttributeConfigurationRepresentation'
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberUserAttributeConfigurationRepresentation'
+      responses:
+        "200":
+          description: OK
+  /member/{memberId}:
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+      responses:
+        "200":
+          description: OK
+    delete:
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /member/{memberId}/activate:
+    post:
+      parameters:
+      - name: justification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /member/{memberId}/role:
+    post:
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /member/{memberId}/role/{name}:
+    delete:
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /member/{memberId}/suspend:
+    post:
+      parameters:
+      - name: justification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+  /memberUserAttribute/calculation:
+    post:
+      responses:
+        "200":
+          description: OK
+  /members:
+    get:
+      parameters:
+      - name: asc
+        in: query
+        schema:
+          default: true
+          type: boolean
+      - name: direct
+        in: query
+        schema:
+          default: true
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: order
+        in: query
+        schema:
+          default: "f.user.lastName, f.user.firstName, f.user.email"
+          type: string
+      - name: role
+        in: query
+        schema:
+          type: string
+      - name: search
+        in: query
+        schema:
+          type: string
+      - name: status
+        in: query
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentationPager'
+    post:
+      summary: Create a new group member
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+      responses:
+        "200":
+          description: OK
+  /members/invitation:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupInvitationInitialRepresentation'
+      responses:
+        "200":
+          description: OK
+  /reject:
+    post:
+      parameters:
+      - name: adminJustification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /respond:
+    post:
+      parameters:
+      - name: comment
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /role:
+    post:
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /role/{id}:
+    put:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /role/{name}:
+    delete:
+      parameters:
+      - name: name
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /roles:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+    post:
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /suspend:
+    post:
+      parameters:
+      - name: justification
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /user/configuration/{id}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+  /user/enroll-request:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupEnrollmentRequestRepresentation'
+      responses:
+        "200":
+          description: OK
+  /user/enroll-request/{id}:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentRequestRepresentation'
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /user/enroll-request/{id}/respond:
+    post:
+      parameters:
+      - name: comment
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  /user/enroll-requests:
+    get:
+      parameters:
+      - name: asc
+        in: query
+        schema:
+          default: false
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: groupId
+        in: query
+        schema:
+          type: string
+      - name: groupName
+        in: query
+        schema:
+          type: string
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: order
+        in: query
+        schema:
+          default: submittedDate
+          type: string
+      - name: status
+        in: query
+        schema:
+          type: object
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentRequestPager'
+  /user/group/{groupId}/configurations:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /user/group/{groupId}/member:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+    delete:
+      responses:
+        "200":
+          description: OK
+    parameters:
+    - name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+  /user/groups:
+    get:
+      parameters:
+      - name: asc
+        in: query
+        schema:
+          default: true
+          type: boolean
+      - name: first
+        in: query
+        schema:
+          format: int32
+          default: "0"
+          type: integer
+      - name: max
+        in: query
+        schema:
+          format: int32
+          default: "10"
+          type: integer
+      - name: order
+        in: query
+        schema:
+          default: group.name
+          type: string
+      - name: search
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentationPager'
+  /user/groups/configurations:
+    get:
+      parameters:
+      - name: groupPath
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+  /user/invitation/{id}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupInvitationRepresentation'
+  /user/invitation/{id}/accept:
+    post:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /user/invitation/{id}/reject:
+    post:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /user/{id}:
+    delete:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /{id}:
+    get:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupEnrollmentConfigurationRulesRepresentation'
+    put:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupEnrollmentConfigurationRulesRepresentation'
+      responses:
+        "200":
+          description: OK
+    delete:
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    GroupAdminRepresentation:
+      type: object
+      properties:
+        user:
+          type: object
+        direct:
+          type: boolean
+    GroupAupRepresentation:
+      type: object
+      properties:
+        type:
+          type: object
+        mimeType:
+          type: string
+        content: {}
+        url:
+          type: string
+    GroupEnrollmentConfigurationRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        group:
+          type: object
+        name:
+          type: string
+        active:
+          type: boolean
+        requireApprovalForExtension:
+          type: boolean
+        requireApproval:
+          type: boolean
+        validFrom:
+          format: date
+          type: string
+          example: 2022-03-10
+        membershipExpirationDays:
+          format: int64
+          type: integer
+        aup:
+          $ref: '#/components/schemas/GroupAupRepresentation'
+        enrollmentIntroduction:
+          type: string
+        invitationIntroduction:
+          type: string
+        enrollmentConclusion:
+          type: string
+        invitationConclusion:
+          type: string
+        visibleToNotMembers:
+          type: boolean
+        multiselectRole:
+          type: boolean
+        groupRoles:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        commentsNeeded:
+          type: boolean
+        commentsLabel:
+          type: string
+        commentsDescription:
+          type: string
+    GroupEnrollmentConfigurationRulesRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        field:
+          type: string
+        type:
+          type: object
+        defaultValue:
+          type: string
+        max:
+          type: string
+        required:
+          type: boolean
+    GroupEnrollmentRequestPager:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupEnrollmentRequestRepresentation'
+        count:
+          format: int64
+          type: integer
+    GroupEnrollmentRequestRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        user:
+          type: object
+        checkAdmin:
+          type: object
+        groupEnrollmentConfiguration:
+          $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+        status:
+          type: object
+        comments:
+          type: string
+        adminJustification:
+          type: string
+        reviewComments:
+          type: string
+        userFirstName:
+          type: string
+        userLastName:
+          type: string
+        userEmail:
+          type: string
+        userIdentifier:
+          type: string
+        userAssurance:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        userAuthnAuthorities:
+          type: string
+        groupRoles:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        submittedDate:
+          format: date-time
+          type: string
+          example: 2022-03-10T12:15:50
+        approvedDate:
+          format: date-time
+          type: string
+          example: 2022-03-10T12:15:50
+    GroupInvitationInitialRepresentation:
+      type: object
+      properties:
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        withoutAcceptance:
+          type: boolean
+        groupEnrollmentConfiguration:
+          $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+        groupRoles:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+    GroupInvitationRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        creationDate:
+          format: date-time
+          type: string
+          example: 2022-03-10T12:15:50
+        forMember:
+          type: boolean
+        checkAdmin:
+          type: object
+        groupEnrollmentConfiguration:
+          $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+        group:
+          type: object
+        groupRoles:
+          type: array
+          items:
+            type: string
+    GroupRepresentation:
+      type: object
+      properties:
+        subGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRepresentation'
+        parents:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRepresentation'
+        groupRoles:
+          type: object
+          additionalProperties:
+            type: string
+        enrollmentConfigurationList:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+        admins:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupAdminRepresentation'
+        extraSubGroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupRepresentation'
+    GroupsPager:
+      type: object
+      properties:
+        results:
+          type: array
+          items: {}
+        count:
+          format: int64
+          type: integer
+    MemberUserAttributeConfigurationRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        userAttribute:
+          type: string
+        urnNamespace:
+          type: string
+        authority:
+          type: string
+        signatureMessage:
+          type: string
+    UserGroupMembershipExtensionRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        group:
+          type: object
+        user:
+          type: object
+        status:
+          type: object
+        changedByUserId:
+          type: string
+        validFrom:
+          format: date
+          description: Only during member creation
+          type: string
+          example: 2022-03-10
+        membershipExpiresAt:
+          format: date
+          type: string
+          example: 2022-03-10
+        effectiveMembershipExpiresAt:
+          format: date
+          type: string
+          example: 2022-03-10
+        effectiveGroupId:
+          type: string
+        justification:
+          type: string
+        groupEnrollmentConfiguration:
+          $ref: '#/components/schemas/GroupEnrollmentConfigurationRepresentation'
+        groupRoles:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        direct:
+          type: boolean
+    UserGroupMembershipExtensionRepresentationPager:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserGroupMembershipExtensionRepresentation'
+        count:
+          format: int64
+          type: integer
+    UserRepresentationPager:
+      type: object
+      properties:
+        results:
+          type: array
+          items: {}
+        count:
+          format: int64
+          type: integer
