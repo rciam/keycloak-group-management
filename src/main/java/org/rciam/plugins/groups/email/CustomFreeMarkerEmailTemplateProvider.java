@@ -27,13 +27,13 @@ import org.rciam.plugins.groups.helpers.Utils;
 public class CustomFreeMarkerEmailTemplateProvider extends FreeMarkerEmailTemplateProvider {
 
     //must be changed to a ui ( account console url)
-    private static final String enrollmentUrl = "realms/{realmName}/account/#/groups/groupenrollments?id={id}";
-    private static final String SHOW_GROUPS_URL = "realms/{realmName}/account/#/groups/showgroups";
-    private static final String MEMBER_URL = "realms/{realmName}/account/#/groups/showgroups/{id}";
+    private static final String enrollmentUrl = "/realms/{realmName}/account/#/groups/groupenrollments?id={id}";
+    private static final String SHOW_GROUPS_URL = "/realms/{realmName}/account/#/groups/showgroups";
+    private static final String MEMBER_URL = "/realms/{realmName}/account/#/groups/showgroups/{id}";
     private static final String enrollmentStartUrl = "/realms/{realmName}/account/#/enroll?groupPath={path}";
-    private static final String finishGroupInvitation = "realms/{realmName}/account/#/invitation/{id}";
-    private static final String adminGroupPageUrl = "realms/{realmName}/account/#/groups/admingroups/{id}?tab=admins";
-    private static final String membersGroupPageUrl = "realms/{realmName}/account/#/groups/admingroups/{id}?tab=members";
+    private static final String finishGroupInvitation = "/realms/{realmName}/account/#/invitation/{id}";
+    private static final String adminGroupPageUrl = "/realms/{realmName}/account/#/groups/admingroups/{id}?tab=admins";
+    private static final String membersGroupPageUrl = "/realms/{realmName}/account/#/groups/admingroups/{id}?tab=members";
 
     private static final String subgroupsStr = " and its subgroups: ";
     private static final String subgroupsHtmlStr = " and its subgroups:<br>";
