@@ -15,9 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Support for Keycloak version 26.6.x
 
-## [2.0.11] - 2026-04-24
+## [2.0.12] - 2026-06-18
 
 ### Fixed
+- Fix email urls
 - Fix possible errors in get groups of admin
 
 ## [2.0.10] - 2026-03-24
