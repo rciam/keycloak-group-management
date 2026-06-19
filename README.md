@@ -162,6 +162,7 @@ Main url : {server_url}/realms/{realm}/agm
 | /account/group-admin/groups/members                                | GET    | get all groups members given the groupids as comma-separated string           | GroupAdminService            |
 | /account/group-admin/group/{groupId}                               | DELETE | delete group                                                                  | GroupAdminGroup              |
 | /account/group-admin/group/{groupId}/all                           | GET    | get all group information                                                     | GroupAdminGroup              |
+| /account/group-admin/group/{groupId}/attributes                    | POST   | save group attributes                                                         | GroupAdminGroup              |
 | /account/group-admin/group/{groupId}/children                      | POST   | create child group                                                            | GroupAdminGroup              |
 | /account/group-admin/group/{groupId}/configuration/all             | GET    | get all group enrollment configurations                                       | GroupAdminGroup              |
 | /account/group-admin/group/{groupId}/configuration/{id}            | GET    | get group enrollment configuration                                            | GroupAdminGroup              |
@@ -185,7 +186,7 @@ Main url : {server_url}/realms/{realm}/agm
 | /account/group-admin/group/{groupId}/admin                         | DELETE | delete group admin using user id or username                                  | GroupAdminService            |
 | /account/group-admin/enroll-requests                               | GET    | get all group admin enrollment requests                                       | GroupAdminService            |
 | /account/group-admin/enroll-request/{enrollId}                     | GET    | get enrollment request                                                        | GroupAdminEnrollementRequest |
-| /account/group-admin/enroll-request/{enrollId}/extra-info          | POST   | request extra information from user                                          | GroupAdminEnrollementRequest |
+| /account/group-admin/enroll-request/{enrollId}/extra-info          | POST   | request extra information from user                                           | GroupAdminEnrollementRequest |
 | /account/group-admin/enroll-request/{enrollId}/accept              | POST   | accept group enrollment request                                               | GroupAdminEnrollementRequest |
 | /account/group-admin/enroll-request/{enrollId}/reject              | POST   | reject group enrollment request                                               | GroupAdminEnrollementRequest |
 
