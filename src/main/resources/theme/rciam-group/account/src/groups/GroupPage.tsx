@@ -134,7 +134,7 @@ export const GroupPage: FC<GroupsPageProps> = () => {
       .doDelete<any>("/user/group/" + groupId + "/member")
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
-          navigate("/groups/showgroups");
+          navigate(kcPath("/groups/showgroups"));
         } else {
           addError("leaveGroupError", getError(response));
         }
