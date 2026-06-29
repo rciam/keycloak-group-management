@@ -18,10 +18,7 @@ import {
   useLinkClickHandler,
   useLocation,
 } from "react-router-dom";
-import { routes, NavRouteObject } from "./routes";      // 🔴 import NavRouteObject
-import { environment } from "./environment";
-
-// --------- Types derived from routes ------------------------------------
+import { routes, NavRouteObject } from "./routes";
 
 type LeafItem = {
   path: string;
@@ -34,34 +31,25 @@ type GroupItem = {
   children: LeafItem[];
 };
 
-// --------- URL + match helpers ------------------------------------------
-
-function getFullUrl(path: string) {
-  return `${new URL(environment.baseUrl).pathname}${path}`;
+function getRouteUrl(path: string) {
+  return path === "" ? "/" : `/${path}`;
 }
 
 function isPathActive(currentPath: string, routePath: string): boolean {
-  const pattern = getFullUrl(routePath);
-
   return !!matchPath(
     {
-      path: pattern,
-      // index route ("") should only match exactly baseUrl,
-      // everything else can match as a prefix (for child URLs)
+      path: getRouteUrl(routePath),
       end: routePath === "",
     },
     currentPath,
   );
 }
 
-// --------- Label helpers -------------------------------------------------
-
 function kebabToCamel(str: string) {
   return str.replace(/-([a-z])/g, (_, char) => char.toUpperCase());
 }
 
 function labelForNav(groupId: string): string {
-  // e.g. "group-management" -> "groupManagementSidebarTitle"
   return kebabToCamel(groupId) + "SidebarTitle";
 }
 
@@ -70,43 +58,31 @@ function labelForLeaf(path: string): string {
   return kebabToCamel(last) + "SidebarTitle";
 }
 
-// --------- Build menu structure from routes -----------------------------
-
 function buildMenuFromRoutes(
-  childRoutes: NavRouteObject[]
+  childRoutes: NavRouteObject[],
 ): { singles: LeafItem[]; groups: GroupItem[] } {
   const singlesMap = new Map<string, LeafItem>();
   const groupsMap = new Map<string, GroupItem>();
 
   for (const route of childRoutes) {
-    // optional: allow routes to be hidden from nav
     if (route.handle?.hideFromNav) {
       continue;
     }
 
     const rawPath =
-      (route.path as string | undefined) ??
-      (route.index ? "" : undefined);
+      (route.path as string | undefined) ?? (route.index ? "" : undefined);
 
-    if (rawPath === undefined) {
+    if (rawPath === undefined || singlesMap.has(rawPath)) {
       continue;
     }
 
-    // de-dupe paths
-    if (singlesMap.has(rawPath)) {
-      continue;
-    }
+    const segments = rawPath.split("/").filter(Boolean);
 
-    const path = rawPath;
-    const segments = path.split("/").filter(Boolean);
-
-    // ---- Top-level (no expandable group) ----
     if (segments.length <= 1) {
-      const item: LeafItem = {
-        path,
-        labelKey: route.handle?.navItemLabelKey ?? labelForLeaf(path),
-      };
-      singlesMap.set(path, item);
+      singlesMap.set(rawPath, {
+        path: rawPath,
+        labelKey: route.handle?.navItemLabelKey ?? labelForLeaf(rawPath),
+      });
       continue;
     }
 
@@ -117,16 +93,15 @@ function buildMenuFromRoutes(
     if (!group) {
       group = {
         id: groupId,
-        labelKey:
-          route.handle?.navGroupLabelKey ?? labelForNav(groupId),
+        labelKey: route.handle?.navGroupLabelKey ?? labelForNav(groupId),
         children: [],
       };
       groupsMap.set(groupId, group);
     }
 
     group.children.push({
-      path,
-      labelKey: route.handle?.navItemLabelKey ?? labelForLeaf(path),
+      path: rawPath,
+      labelKey: route.handle?.navItemLabelKey ?? labelForLeaf(rawPath),
     });
   }
 
@@ -135,8 +110,6 @@ function buildMenuFromRoutes(
     groups: Array.from(groupsMap.values()),
   };
 }
-
-// --------- NavLink ------------------------------------------------------
 
 type NavLinkProps = {
   path: string;
@@ -148,27 +121,23 @@ const NavLink = ({
   isActive,
   children,
 }: PropsWithChildren<NavLinkProps>) => {
-  const menuItemPath = getFullUrl(path) + window.location.search;
-  const href = useHref(menuItemPath);
-  const handleClick = useLinkClickHandler(menuItemPath);
+  const routeUrl = getRouteUrl(path);
+  const href = useHref(routeUrl);
+  const handleClick = useLinkClickHandler(routeUrl);
 
   return (
     <NavItem
-      data-testid={path}
+      data-testid={path || "_index"}
       to={href}
       isActive={isActive}
       onClick={(event) =>
-        handleClick(
-          event as unknown as ReactMouseEvent<HTMLAnchorElement>
-        )
+        handleClick(event as unknown as ReactMouseEvent<HTMLAnchorElement>)
       }
     >
       {children}
     </NavItem>
   );
 };
-
-// --------- PageNav ------------------------------------------------------
 
 export const PageNav = () => {
   const { t } = useTranslation();
@@ -179,7 +148,7 @@ export const PageNav = () => {
 
   const { singles, groups } = useMemo(
     () => buildMenuFromRoutes(childRoutes),
-    [childRoutes]
+    [childRoutes],
   );
 
   return (
@@ -187,24 +156,19 @@ export const PageNav = () => {
       <PageSidebarBody>
         <Nav>
           <NavList>
-            {/* Top-level items (no group) */}
-            {singles.map((item) => {
-              const active = isPathActive(pathname, item.path);
-              return (
-                <NavLink
-                  key={item.path || "_index"}
-                  path={item.path}
-                  isActive={active}
-                >
-                  {t(item.labelKey)}
-                </NavLink>
-              );
-            })}
+            {singles.map((item) => (
+              <NavLink
+                key={item.path || "_index"}
+                path={item.path}
+                isActive={isPathActive(pathname, item.path)}
+              >
+                {t(item.labelKey)}
+              </NavLink>
+            ))}
 
-            {/* Expandable groups */}
             {groups.map((group) => {
               const anyActive = group.children.some((child) =>
-                isPathActive(pathname, child.path)
+                isPathActive(pathname, child.path),
               );
 
               return (
@@ -215,18 +179,15 @@ export const PageNav = () => {
                   isActive={anyActive}
                   isExpanded={anyActive}
                 >
-                  {group.children.map((child) => {
-                    const active = isPathActive(pathname, child.path);
-                    return (
-                      <NavLink
-                        key={child.path}
-                        path={child.path}
-                        isActive={active}
-                      >
-                        {t(child.labelKey)}
-                      </NavLink>
-                    );
-                  })}
+                  {group.children.map((child) => (
+                    <NavLink
+                      key={child.path}
+                      path={child.path}
+                      isActive={isPathActive(pathname, child.path)}
+                    >
+                      {t(child.labelKey)}
+                    </NavLink>
+                  ))}
                 </NavExpandable>
               );
             })}

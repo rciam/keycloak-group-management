@@ -34,7 +34,6 @@ import { TableActionBar } from "../widgets/TableActionBar";
 import { Spinner } from "@patternfly/react-core";
 import { useGroupsService } from "../groups-service/GroupsServiceContext";
 import { Page } from "@keycloak/keycloak-account-ui";
-import { kcPath } from "../js/utils";
 import {
   AngleRightIcon,
   AngleDownIcon,
@@ -289,7 +288,7 @@ export const GroupListItem: FC<GroupListItemProps> = ({
     disapearingTooltip();
     let link =
       groupsService.getBaseUrl() +
-      "/account/enroll?groupPath=" +
+      "/account/#/enroll?groupPath=" +
       encodeURI(group.path);
     navigator.clipboard.writeText(link);
   };
@@ -342,7 +341,7 @@ export const GroupListItem: FC<GroupListItemProps> = ({
               {expanded ? <AngleDownIcon /> : <AngleRightIcon />}
             </div>
           )}
-          <Link to={kcPath("/groups/admingroups/" + group.id)}>
+          <Link to={"/groups/admingroups/" + group.id}>
             <DataListItemCells
               dataListCells={[
                 <DataListCell

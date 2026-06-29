@@ -24,7 +24,7 @@ import {
 } from "@patternfly/react-icons";
 import { EnrollmentModal } from "../components/EnrollmentModal";
 import { Link } from "react-router-dom";
-import { isIntegerOrNumericString, kcPath } from "../../js/utils.js";
+import { isIntegerOrNumericString } from "../../js/utils.js";
 import { useLoader } from "../../widgets/LoaderContext.js";
 import { useTranslation } from "react-i18next";
 import { useGroupsService } from "../../groups-service/GroupsServiceContext.js";
@@ -99,7 +99,7 @@ export const GroupEnrollment: FC<any> = (props) => {
           isIntegerOrNumericString(props.enrollmentRules[field].defaultValue)
         ) {
           defaultConfig[field] = parseInt(
-            props.enrollmentRules[field].defaultValue
+            props.enrollmentRules[field].defaultValue,
           );
         } else {
           defaultConfig[field] = props.enrollmentRules[field].defaultValue;
@@ -282,7 +282,7 @@ const GroupEnrollmentItem: FC<GroupEnrollmentItemProps> = ({
     updateAttributes(
       { ...groupConfiguration.attributes },
       t("updateDefaultEnrollmentSuccess"),
-      t("updateDefaultEnrollmentError")
+      t("updateDefaultEnrollmentError"),
     );
   };
 
@@ -290,11 +290,10 @@ const GroupEnrollmentItem: FC<GroupEnrollmentItemProps> = ({
     disapearingTooltip();
     let link =
       groupsService.getBaseUrl() +
-      "/account/enroll?id=" +
+      "/account/#/enroll?id=" +
       encodeURI(enrollment.id);
     navigator.clipboard.writeText(link);
   };
-
 
   return (
     <DataListItem aria-labelledby={"enrollment-" + index}>
@@ -321,11 +320,7 @@ const GroupEnrollmentItem: FC<GroupEnrollmentItemProps> = ({
                 setEnrollmentModal(enrollment);
               }}
             >
-              <Link
-                to={kcPath(
-                  "/groups/admingroups/" + groupId + "?tab=enrollments"
-                )}
-              >
+              <Link to={"/groups/admingroups/" + groupId + "?tab=enrollments"}>
                 {enrollment.name || t("notAvailable")}
               </Link>
             </DataListCell>,
@@ -412,7 +407,6 @@ const GroupEnrollmentItem: FC<GroupEnrollmentItemProps> = ({
                 </DropdownItem>
               </DropdownList>
             </Dropdown>
-
           </Tooltip>
         </DataListAction>
       </DataListItemRow>

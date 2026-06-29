@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.1.3] 
 
 ### Fixed
-- Fix broken rediect when leaving a group
-
+- Fix broken redirect when leaving a group
+- Restored legacy hash-based (/#/) routing compatibility for the Account Console.  
 
 ## [2.1.2] - 2026-06-18
 

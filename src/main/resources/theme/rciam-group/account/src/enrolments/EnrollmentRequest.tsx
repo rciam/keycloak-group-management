@@ -33,7 +33,7 @@ import { useLoader } from "../widgets/LoaderContext.js";
 import { useGroupsService } from "../groups-service/GroupsServiceContext.js";
 import { HttpResponse } from "../groups-service/groups-service.js";
 import { dateParse, formatDateToString } from "../widgets/Date.js";
-import { getError, kcPath } from "../js/utils.js";
+import { getError } from "../js/utils.js";
 import { useTranslation } from "react-i18next";
 import { useAlerts } from "@keycloak/keycloak-ui-shared";
 import { useNavigate } from "react-router-dom";
@@ -673,7 +673,7 @@ export const EnrollmentRequest: FC<any> = (props) => {
                             {t("membershipExpiresAtMemberHelperText")}{" "}
                             <a
                               onClick={() => {
-                                navigate(kcPath("/groups/showgroups"));
+                                navigate("/groups/showgroups");
                               }}
                             >
                               My Groups

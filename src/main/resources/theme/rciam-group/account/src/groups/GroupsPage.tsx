@@ -34,7 +34,7 @@ import {
   isFirstDateBeforeSecond,
   formatDateToString,
 } from "../widgets/Date";
-import { getError, kcPath } from "../js/utils";
+import { getError } from "../js/utils";
 // @ts-ignore
 // import { ContentPage } from '../ContentPage';
 // import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
@@ -95,7 +95,7 @@ export const GroupsPage: FC<GroupsPageProps> = () => {
 
   const onSetPage = (
     _event: React.MouseEvent | React.KeyboardEvent | MouseEvent,
-    newPage: number
+    newPage: number,
   ) => {
     setPage(newPage);
   };
@@ -103,7 +103,7 @@ export const GroupsPage: FC<GroupsPageProps> = () => {
   const onPerPageSelect = (
     _event: React.MouseEvent | React.KeyboardEvent | MouseEvent,
     newPerPage: number,
-    newPage: number
+    newPage: number,
   ) => {
     setPerPage(newPerPage);
     setPage(newPage);
@@ -315,10 +315,10 @@ const MembershipDatalistItem = (props: any) => {
           parseInt(
             props.membership.group.attributes[
               "expiration-notification-period"
-            ][0]
-          )
+            ][0],
+          ),
         ),
-        "warning"
+        "warning",
       );
       setExpirationWarning(!!warning); // Set warning as true or false
     }
@@ -386,9 +386,7 @@ const MembershipDatalistItem = (props: any) => {
               width={2}
               key={"name-" + props.appIndex}
             >
-              <Link
-                to={kcPath("/groups/showgroups/" + props.membership.group.id)}
-              >
+              <Link to={"/groups/showgroups/" + props.membership.group.id}>
                 {props.membership.group.name}
               </Link>
             </DataListCell>,
@@ -429,9 +427,7 @@ const MembershipDatalistItem = (props: any) => {
                       <>
                         {t("membershipExpirationEffectiveNotification")}
                         <Link
-                          to={kcPath(
-                            `/enroll?groupPath=${encodeURI(effectiveGroupPath)}`
-                          )}
+                          to={`/enroll?groupPath=${encodeURI(effectiveGroupPath)}`}
                         >
                           <Button className="gm_popover-expiration-button">
                             Extend
@@ -442,11 +438,9 @@ const MembershipDatalistItem = (props: any) => {
                       <>
                         {t("membershipExpirationNotification")}
                         <Link
-                          to={kcPath(
-                            `/enroll?groupPath=${encodeURI(
-                              props.membership.group.path
-                            )}`
-                          )}
+                          to={`/enroll?groupPath=${encodeURI(
+                            props.membership.group.path,
+                          )}`}
                         >
                           <Button className="gm_popover-expiration-button">
                             Extend
@@ -457,9 +451,7 @@ const MembershipDatalistItem = (props: any) => {
                       <>
                         {t("effectiveExpirationHelp")}
                         <Link
-                          to={kcPath(
-                            `/groups/showgroups/${props.membership?.effectiveGroupId}`
-                          )}
+                          to={`/groups/showgroups/${props.membership?.effectiveGroupId}`}
                         >
                           <Button className="gm_popover-expiration-button">
                             View
@@ -479,8 +471,8 @@ const MembershipDatalistItem = (props: any) => {
                       {props.membership.effectiveMembershipExpiresAt
                         ? formatDateToString(
                             dateParse(
-                              props.membership.effectiveMembershipExpiresAt
-                            )
+                              props.membership.effectiveMembershipExpiresAt,
+                            ),
                           )
                         : t("Never")}
                     </div>
@@ -497,8 +489,8 @@ const MembershipDatalistItem = (props: any) => {
                       {props.membership.effectiveMembershipExpiresAt
                         ? formatDateToString(
                             dateParse(
-                              props.membership.effectiveMembershipExpiresAt
-                            )
+                              props.membership.effectiveMembershipExpiresAt,
+                            ),
                           )
                         : t("Never")}
                     </div>
@@ -512,8 +504,8 @@ const MembershipDatalistItem = (props: any) => {
                       {props.membership.effectiveMembershipExpiresAt
                         ? formatDateToString(
                             dateParse(
-                              props.membership.effectiveMembershipExpiresAt
-                            )
+                              props.membership.effectiveMembershipExpiresAt,
+                            ),
                           )
                         : t("Never")}
                     </div>
@@ -552,9 +544,7 @@ const MembershipDatalistItem = (props: any) => {
           >
             <DropdownList>
               <Link
-                to={kcPath(
-                  `/enroll?groupPath=${encodeURI(props.membership.group.path)}`
-                )}
+                to={`/enroll?groupPath=${encodeURI(props.membership.group.path)}`}
               >
                 <DropdownItem key="link">
                   {t("enrollmentDiscoveryPageLink")}

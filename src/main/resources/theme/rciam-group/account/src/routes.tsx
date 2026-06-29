@@ -128,7 +128,7 @@ export const InvitationLandingRoute: NavRouteObject = {
 };
 
 export const RootRoute: NavRouteObject = {
-  path: decodeURIComponent(new URL(environment.baseUrl).pathname),
+  path: "/",
   element: <App />,
   errorElement: <>Error</>,
   children: [

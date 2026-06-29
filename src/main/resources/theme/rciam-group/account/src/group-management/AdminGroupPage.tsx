@@ -37,7 +37,7 @@ import { RoutableTabs, useRoutableTab } from "../widgets/RoutableTabs";
 import { useTranslation } from "react-i18next";
 import { useGroupsService } from "../groups-service/GroupsServiceContext";
 import { useParams } from "react-router-dom";
-import { getError, kcPath } from "../js/utils";
+import { getError } from "../js/utils";
 import { GroupDetails } from "./tabs/GroupDetailsTab";
 import { useLoader } from "../widgets/LoaderContext";
 import { useAlerts } from "@keycloak/keycloak-ui-shared";
@@ -322,7 +322,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
         groupId={groupId}
         active={deleteGroup}
         afterSuccess={() => {
-          navigate(kcPath("/groups/admingroups"));
+          navigate("/groups/admingroups");
         }}
         close={() => {
           setDeleteGroup(false);
@@ -332,8 +332,9 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
         <Breadcrumb className="gm_breadcrumb">
           <BreadcrumbItem
             to="#"
-            onClick={() => {
-              navigate(kcPath("groups/admingroups"));
+            onClick={(event) => {
+              event.preventDefault();
+              navigate("/groups/admingroups");
             }}
           >
             {t("adminGroupLabel")}
@@ -341,8 +342,9 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
           {groupConfiguration?.parents?.map((group: any, index: number) => {
             return (
               <BreadcrumbItem
-                onClick={() => {
-                  navigate(kcPath("/groups/admingroups/" + group.id));
+                onClick={(event) => {
+                  event.preventDefault();
+                  navigate("/groups/admingroups/" + group.id);
                 }}
                 to="#"
                 key={index}

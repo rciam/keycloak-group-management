@@ -1,5 +1,3 @@
-import { environment } from "../environment";
-
 export const getError = (response: any) => {
   let error = response?.data?.error_description
     ? response.data.error_description
@@ -9,9 +7,6 @@ export const getError = (response: any) => {
   return error;
 };
 
-export function kcPath(path: string): string {
-  return `${new URL(environment.baseUrl).pathname}${path}`;
-}
 
 export function ValidateEmail(value: string) {
   var validRegex =

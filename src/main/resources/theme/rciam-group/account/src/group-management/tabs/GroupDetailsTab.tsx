@@ -16,7 +16,7 @@ import {
 import { ConfirmationModal } from "../../widgets/Modals.js";
 import { MinusIcon, PlusIcon } from "@patternfly/react-icons";
 import { Link } from "react-router-dom";
-import { getError, kcPath } from "../../js/utils.js";
+import { getError } from "../../js/utils.js";
 import { useTranslation } from "react-i18next";
 import { useGroupsService } from "../../groups-service/GroupsServiceContext.js";
 import { useLoader } from "../../widgets/LoaderContext.js";
@@ -104,7 +104,7 @@ export const GroupDetails: FC<any> = (props) => {
                     {props.groupConfiguration?.parents?.map((group: any) => {
                       return (
                         <React.Fragment key={group.id}>
-                          <Link to={kcPath("/groups/admingroups/" + group.id)}>
+                          <Link to={"/groups/admingroups/" + group.id}>
                             {group.name}
                           </Link>
                           {"/"}
@@ -135,7 +135,7 @@ export const GroupDetails: FC<any> = (props) => {
                     className="gm_copy-text-input"
                   >
                     {groupsService.getBaseUrl() +
-                      "/account/enroll?groupPath=" +
+                      "/account/#/enroll?groupPath=" +
                       encodeURI(props.groupConfiguration.path)}
                   </ClipboardCopy>
                 </DataListCell>,

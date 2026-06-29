@@ -29,7 +29,7 @@ import {
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@patternfly/react-core";
 import { ConfirmationModal } from "../widgets/Modals";
-import { getError, kcPath } from "../js/utils.js";
+import { getError } from "../js/utils.js";
 import { useLoader } from "../widgets/LoaderContext";
 import { useTranslation } from "react-i18next";
 import { useGroupsService } from "../groups-service/GroupsServiceContext";
@@ -134,7 +134,7 @@ export const GroupPage: FC<GroupsPageProps> = () => {
       .doDelete<any>("/user/group/" + groupId + "/member")
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 || response.status === 204) {
-          navigate(kcPath("/groups/showgroups"));
+          navigate("/groups/showgroups");
         } else {
           addError("leaveGroupError", getError(response));
         }
@@ -173,8 +173,9 @@ export const GroupPage: FC<GroupsPageProps> = () => {
           <Breadcrumb className="gm_breadcrumb">
             <BreadcrumbItem
               to="#"
-              onClick={() => {
-                navigate(kcPath("groups/showgroups"));
+              onClick={(event) => {
+                event.preventDefault();
+                navigate("/groups/showgroups");
               }}
             >
               {t("groupLabel")}
@@ -203,7 +204,7 @@ export const GroupPage: FC<GroupsPageProps> = () => {
           <div className="gm_view-group-action-container">
             <Link
               to={
-                kcPath("/enroll?groupPath=") +
+                "/enroll?groupPath=" +
                 encodeURI(groupMembership?.group?.path)
               }
             >
@@ -323,7 +324,7 @@ export const GroupPage: FC<GroupsPageProps> = () => {
                                       )}
                                       <Link
                                         to={
-                                          kcPath("/enroll?groupPath=") +
+                                          "/enroll?groupPath=" +
                                           encodeURI(effectiveGroupPath)
                                         }
                                       >
@@ -340,7 +341,7 @@ export const GroupPage: FC<GroupsPageProps> = () => {
                                       {t("membershipExpirationNotification")}
                                       <Link
                                         to={
-                                          kcPath("/enroll?groupPath=") +
+                                          "/enroll?groupPath=" +
                                           encodeURI(
                                             groupMembership?.group?.path,
                                           )
