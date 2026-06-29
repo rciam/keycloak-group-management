@@ -5,16 +5,14 @@ All notable changes in keycloak-group-management will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
-## [2.1.3] 
 
-### Fixed
-- Fix broken redirect when leaving a group
-- Restored legacy hash-based (/#/) routing compatibility for the Account Console.  
-
-## [2.1.2] - 2026-06-18
+## [2.1.2] - 2026-06-29
 
 ### Fixed
 - Fix email urls
+- Fix broken redirect when leaving a group
+- Restored legacy hash-based (/#/) routing compatibility for the Account Console.: RCIAM-813  
+
 
 ## [2.1.0] - 2026-06-10
 
