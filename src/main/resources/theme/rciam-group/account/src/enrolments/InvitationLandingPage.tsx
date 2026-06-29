@@ -15,7 +15,6 @@ import { useLoader } from "../widgets/LoaderContext";
 import { useTranslation } from "react-i18next";
 import { useGroupsService } from "../groups-service/GroupsServiceContext";
 import { HttpResponse } from "../groups-service/groups-service";
-import { kcPath } from "../js/utils";
 import { useNavigate, useParams } from "react-router-dom";
 
 
@@ -68,9 +67,9 @@ export const InvitationLandingPage: FC<any> = () => {
         stopLoader();
         if (response.status === 200 || response.status === 204) {
           if (invitationData?.forMember) {
-            navigate(kcPath("/groups/showgroups"));
+            navigate("/groups/showgroups");
           } else {
-            navigate(kcPath("/groups/admingroups"));
+            navigate("/groups/admingroups");
           }
         } else {
           setActionBlocked(true);
@@ -90,9 +89,9 @@ export const InvitationLandingPage: FC<any> = () => {
         stopLoader();
         if (response.status === 200 || response.status === 204) {
           if (invitationData?.forMember) {
-            navigate(kcPath("/groups/showgroups"));
+            navigate("/groups/showgroups");
           } else {
-            navigate(kcPath("/groups/admingroups"));
+            navigate("/groups/admingroups");
           }
         } else {
           setActionBlocked(true);
@@ -113,9 +112,9 @@ export const InvitationLandingPage: FC<any> = () => {
           close={() => {
             setActionBlocked(false);
             if (invitationData?.forMember) {
-              navigate(kcPath("/groups/showgroups"));
+              navigate("/groups/showgroups");
             } else {
-              navigate(kcPath("/groups/admingroups"));
+              navigate("/groups/admingroups");
             }
           }}
           active={actionBlocked}
@@ -223,7 +222,7 @@ export const InvitationLandingPage: FC<any> = () => {
                           {t("invitationExpirationInfo")}{" "}
                           <a
                             onClick={() => {
-                              navigate(kcPath("/groups/showgroups"));
+                              navigate("/groups/showgroups");
                             }}
                           >
                             My Groups

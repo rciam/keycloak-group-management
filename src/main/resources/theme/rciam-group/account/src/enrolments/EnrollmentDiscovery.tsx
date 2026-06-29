@@ -25,7 +25,6 @@ import { useGroupsService } from "../groups-service/GroupsServiceContext";
 import { useLoader } from "../widgets/LoaderContext";
 import { HttpResponse } from "../groups-service/groups-service";
 import { ConfirmationModal } from "../widgets/Modals";
-import { kcPath } from "../js/utils";
 import { Page } from "@keycloak/keycloak-account-ui";
 import { FormErrorText } from "@keycloak/keycloak-ui-shared";
 
@@ -247,9 +246,9 @@ export const EnrollmentDiscovery: FC = () => {
         stopLoader();
         if (response.status === 200 || response.status === 204) {
           if (requiresApproval) {
-            navigate(kcPath("/groups/mygroupenrollments"));
+            navigate("/groups/mygroupenrollments");
           } else {
-            navigate(kcPath("/groups/showgroups"));
+            navigate("/groups/showgroups");
           }
         }
       })
@@ -351,8 +350,9 @@ export const EnrollmentDiscovery: FC = () => {
           <Breadcrumb className="gm_breadcrumb">
             <BreadcrumbItem
               to="#"
-              onClick={() => {
-                navigate(kcPath("groups/showgroups"));
+              onClick={(event) => {
+                event.preventDefault();
+                navigate("groups/showgroups");
               }}
             >
               {t("groupLabel")}
@@ -376,13 +376,12 @@ export const EnrollmentDiscovery: FC = () => {
                       to={`#/enroll?groupPath=${encodeURIComponent(
                         accumulatedPath,
                       )}`}
-                      onClick={() => {
+                      onClick={(event) => {
+                        event.preventDefault();
                         navigate(
-                          kcPath(
-                            `enroll?groupPath=${encodeURIComponent(
-                              accumulatedPath,
-                            )}`,
-                          ),
+                          `enroll?groupPath=${encodeURIComponent(
+                            accumulatedPath,
+                          )}`,
                         );
                       }}
                     >
