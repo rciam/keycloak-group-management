@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix email urls
 - Fix broken redirect when leaving a group
 - Restored legacy hash-based (/#/) routing compatibility for the Account Console.: RCIAM-813  
+- Send appropriate full name in email
 
 
 ## [2.1.0] - 2026-06-10
