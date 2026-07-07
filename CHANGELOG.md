@@ -5,10 +5,11 @@ All notable changes in keycloak-group-management will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
-## [2.1.3] - 2026-07-01
+## [2.1.3] - 2026-07-07
 
 ### Changed
 - Allow Delete group roles for Manage-Groups Users
+- Fix email urls
 
 ## [2.1.2] - 2026-06-29
 
