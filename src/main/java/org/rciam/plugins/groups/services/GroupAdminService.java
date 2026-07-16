@@ -142,13 +142,14 @@ public class GroupAdminService {
     public GroupAdminGroup group(@PathParam("groupId") String groupId) {
 
         var group = realm.getGroupById(groupId);
+        if (group == null) {
+            throw new ErrorResponseException("Could not find group by id", "Could not find group by id", Response.Status.NOT_FOUND);
+        }
         boolean isGroupAdmin = groupAdminRepository.isGroupAdmin(groupAdmin.getId(), group);
         if (!isGroupAdmin && !Utils.hasManageGroupsAccountRole(realm, groupAdmin)){
             throw new ErrorResponseException(Utils.NOT_ALLOWED, Utils.NOT_ALLOWED, Response.Status.FORBIDDEN);
         }
-        if (group == null) {
-            throw new ErrorResponseException("Could not find group by id", "Could not find group by id", Response.Status.NOT_FOUND);
-        }
+
 
         return new GroupAdminGroup(session, realm, groupAdmin, group, userGroupMembershipExtensionRepository, groupAdminRepository, groupEnrollmentRequestRepository, groupEnrollmentConfigurationRulesRepository, adminEvent, isGroupAdmin);
     }

@@ -5,6 +5,12 @@ All notable changes in keycloak-group-management will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+
+## [2.1.4] - 2026-07-16
+
+### Fixed
+- Return 404 when group does not exist in group management REST API
+
 ## [2.1.3] - 2026-07-07
 
 ### Changed
