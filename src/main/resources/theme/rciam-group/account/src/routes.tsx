@@ -146,7 +146,7 @@ export const RootRoute: NavRouteObject = {
     EnrollmentDiscoveryRoute,
     GroupEnrollmentsRoute,
     PersonalInfoRoute, // duplicated index is a bit odd but leaving as you had
-    ResourcesRoute,
+    ...(environment.features.isMyResourcesEnabled ? [ResourcesRoute] : []),
     ...(environment.features.isOid4VciEnabled ? [Oid4VciRoute] : []),
   ],
 };

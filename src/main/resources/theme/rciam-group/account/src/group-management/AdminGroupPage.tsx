@@ -12,6 +12,12 @@ import {
   Tab,
   TabTitleText,
   AlertVariant,
+  Modal,
+  ModalVariant,
+  EmptyState,
+  EmptyStateBody,
+  EmptyStateHeader,
+  EmptyStateIcon,
 } from "@patternfly/react-core";
 // @ts-ignore
 // import { HttpResponse, GroupsServiceClient } from '../../groups-mngnt-service/groups.service';
@@ -28,6 +34,7 @@ import {
   PencilAltIcon,
   TimesIcon,
   CheckIcon,
+  ExclamationCircleIcon,
 } from "@patternfly/react-icons";
 import { RoutableTabs, useRoutableTab } from "../widgets/RoutableTabs";
 // import { ContentPage } from '../ContentPage';
@@ -164,6 +171,8 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
   const [enrollmentRules, setEnrollmentRules] = useState<Record<string, any>>(
     {},
   );
+  const [groupFetchError, setGroupFetchError] = useState(false);
+  const [groupNotFound, setGroupNotFound] = useState(false);
   const { startLoader, stopLoader } = useLoader();
 
   useEffect(() => {
@@ -221,28 +230,53 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
   };
 
   const fetchGroupConfiguration = () => {
+    setGroupFetchError(false);
+    setGroupNotFound(false);
+
     return groupsService!
-      .doGet<GroupConfiguration>("/group-admin/group/" + groupId + "/all")
+      .doGet<GroupConfiguration>(`/group-admin/group/${groupId}/all`)
       .then((response: any) => {
         if (response.status === 200 && response.data) {
           if (!Object.keys(enrollmentRules ?? {}).length) {
             fetchGroupEnrollmentRules(getGroupType(response.data));
           }
-          if (
-            response.data?.attributes?.description?.[0] !== descriptionInput
-          ) {
-            setDescriptionInput(response.data?.attributes?.description?.[0]);
+
+          const description = response.data?.attributes?.description?.[0] ?? "";
+
+          if (description !== descriptionInput) {
+            setDescriptionInput(description);
           }
-          if (
-            response.data?.attributes?.defaultConfiguration?.[0] !==
-            defaultConfiguration
-          ) {
-            setDefaultConfiguration(
-              response.data?.attributes?.defaultConfiguration?.[0],
-            );
+
+          const defaultConfig =
+            response.data?.attributes?.defaultConfiguration?.[0] ?? "";
+
+          if (defaultConfig !== defaultConfiguration) {
+            setDefaultConfiguration(defaultConfig);
           }
+
           setGroupConfiguration(response.data);
+          return response.data;
         }
+
+        if (response.status === 404) {
+          setGroupNotFound(true);
+          return null;
+        }
+
+        setGroupFetchError(true);
+        return null;
+      })
+      .catch((error: any) => {
+        const status = error?.response?.status ?? error?.status;
+
+        if (status === 404) {
+          setGroupNotFound(true);
+          return null;
+        }
+
+        // Do not expose error_description from the server.
+        setGroupFetchError(true);
+        return null;
       });
   };
 
@@ -315,8 +349,53 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
       });
   };
 
+  if (groupNotFound) {
+    return (
+      <Page className="pf-v5-c-page__main-section pf-m-light gm_page">
+        <EmptyState>
+          <EmptyStateHeader
+            titleText={t("groupNotFound")}
+            icon={<EmptyStateIcon icon={ExclamationCircleIcon} />}
+            headingLevel="h1"
+          />
+          <EmptyStateBody>{t("groupNotFoundDescription")}</EmptyStateBody>
+          <Button
+            style={{ marginTop: "1rem" }}
+            variant="primary"
+            onClick={() => navigate("/groups/admingroups", { replace: true })}
+          >
+            {t("returnToManageGroups")}
+          </Button>
+        </EmptyState>
+      </Page>
+    );
+  }
+
   return (
     <div className="gm_content">
+      <Modal
+        variant={ModalVariant.small}
+        title={t("unableToLoadGroup")}
+        isOpen={groupFetchError}
+        onClose={() => {
+          setGroupFetchError(false);
+          navigate("/groups/admingroups", { replace: true });
+        }}
+        actions={[
+          <Button
+            key="return"
+            variant="primary"
+            onClick={() => {
+              setGroupFetchError(false);
+              navigate("/groups/admingroups", { replace: true });
+            }}
+          >
+            {t("returnToManageGroups")}
+          </Button>,
+        ]}
+      >
+        {t("unableToLoadGroupGenericMessage")}
+      </Modal>
       <ConfirmationModal modalInfo={modalInfo} />
       <DeleteSubgroupModal
         groupId={groupId}
@@ -436,7 +515,7 @@ export const AdminGroupPage: FC<AdminGroupPageProps> = () => {
               {(groupConfiguration?.attributes?.description &&
                 groupConfiguration?.attributes?.description[0]) ||
                 t("noDescription")}
-              <PencilAltIcon/>
+              <PencilAltIcon />
             </p>
           )}
         </div>

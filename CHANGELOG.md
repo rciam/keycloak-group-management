@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.1.4] - 2026-07-16
 
 ### Fixed
+- Hide Resources page when User-Managed Access is disabled in Realm settings
+- Introduced fallback error handling for both the Group Admin and Group pages, displaying a generic error modal that redirects users when an unexpected loading error occurs.
 - Return 404 when group does not exist in group management REST API
 
 ## [2.1.3] - 2026-07-07

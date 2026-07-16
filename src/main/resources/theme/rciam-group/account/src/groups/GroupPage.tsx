@@ -15,8 +15,15 @@ import {
   Badge,
   Popover,
   Title,
+  EmptyState,
+  EmptyStateHeader,
+  EmptyStateIcon,
+  EmptyStateBody,
+  Modal,
+  ModalVariant,
 } from "@patternfly/react-core";
 import {
+  ExclamationCircleIcon,
   ExclamationTriangleIcon,
   InfoCircleIcon,
 } from "@patternfly/react-icons";
@@ -91,6 +98,8 @@ export const GroupPage: FC<GroupsPageProps> = () => {
   const [modalInfo, setModalInfo] = useState({});
   const { startLoader, stopLoader } = useLoader();
   const { addError } = useAlerts();
+  const [groupFetchError, setGroupFetchError] = useState(false);
+  const [groupNotFound, setGroupNotFound] = useState(false);
 
   useEffect(() => {
     fetchGroups();
@@ -154,21 +163,89 @@ export const GroupPage: FC<GroupsPageProps> = () => {
       });
   };
 
-  let fetchGroups = () => {
+  const fetchGroups = () => {
     startLoader();
+    setGroupFetchError(false);
+    setGroupNotFound(false);
+
     groupsService!
-      .doGet<GroupMembership>("/user/group/" + groupId + "/member")
+      .doGet<GroupMembership>(`/user/group/${groupId}/member`)
       .then((response: HttpResponse<GroupMembership>) => {
         stopLoader();
+
         if (response.status === 200 && response.data) {
           setGroupMembership(response.data);
+          return;
+        }
+
+        if (response.status === 404) {
+          setGroupNotFound(true);
+          return;
+        }
+
+        setGroupFetchError(true);
+      })
+      .catch((error: any) => {
+        stopLoader();
+
+        const status = error?.response?.status ?? error?.status;
+
+        if (status === 404) {
+          setGroupNotFound(true);
+        } else {
+          setGroupFetchError(true);
         }
       });
   };
-
+  if (groupNotFound) {
+    return (
+      <Page className="pf-v5-c-page__main-section pf-m-light gm_page">
+        <div className="gm_empty-state-container">
+          <EmptyState>
+            <EmptyStateHeader
+              titleText={t("groupNotFound")}
+              icon={<EmptyStateIcon icon={ExclamationCircleIcon} />}
+              headingLevel="h1"
+            />
+            <EmptyStateBody>{t("groupNotFoundDescription")}</EmptyStateBody>
+            <Button
+              variant="primary"
+              style={{ marginTop: "1rem" }}
+              onClick={() => navigate("/groups/showgroups", { replace: true })}
+            >
+              {t("returnToGroups")}
+            </Button>
+          </EmptyState>
+        </div>
+      </Page>
+    );
+  }
   return (
     <>
       <div className={"gm_content "}>
+        <Modal
+          variant={ModalVariant.small}
+          title={t("unableToLoadGroup")}
+          isOpen={groupFetchError}
+          onClose={() => {
+            setGroupFetchError(false);
+            navigate("/groups/showgroups", { replace: true });
+          }}
+          actions={[
+            <Button
+              key="return"
+              variant="primary"
+              onClick={() => {
+                setGroupFetchError(false);
+                navigate("/groups/showgroups", { replace: true });
+              }}
+            >
+              {t("returnToGroups")}
+            </Button>,
+          ]}
+        >
+          {t("unableToLoadGroupGenericMessage")}
+        </Modal>
         <div className="pf-v5-c-page__main-section pf-m-light gm_breadcrumb-container">
           <Breadcrumb className="gm_breadcrumb">
             <BreadcrumbItem
@@ -204,8 +281,7 @@ export const GroupPage: FC<GroupsPageProps> = () => {
           <div className="gm_view-group-action-container">
             <Link
               to={
-                "/enroll?groupPath=" +
-                encodeURI(groupMembership?.group?.path)
+                "/enroll?groupPath=" + encodeURI(groupMembership?.group?.path)
               }
             >
               <Button>Update Membership</Button>
