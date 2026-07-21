@@ -198,6 +198,12 @@ Role name can be changed in database( column GROUP_ROLE_NAME of table GROUP_MANA
 |----------------------------|-----------|----------------------------------------------|--------------------| 
 | /account/group-admin/group | POST      | create top level group                       | GroupAdminService  |
 
+Moreover, user with this role does not have the rights to execute the following group endpoints without being group admin:
+- /account/group-admin/group/{groupId} DELETE
+- /account/group-admin/group/{groupId}/members/invitation POST
+- /account/group-admin/group/{groupId}/roles POST
+- /account/group-admin/group/{groupId}/role/{name} DELETE
+
 **Admin web services**
 
 | Path                                       | Method  | Description                                                           | Classes                            |
