@@ -14,7 +14,6 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -144,16 +143,17 @@ public class AdminService {
     @POST
     @Path("/memberUserAttribute/calculation")
     public Response calculateMemberUserAttribute(){
+        realmAuth.groups().requireManage();
         AgmTimerProvider timer = session.getProvider(AgmTimerProvider.class);
         timer.scheduleOnce(new ClusterAwareScheduledTaskRunner(session.getKeycloakSessionFactory(), new MemberUserAttributeCalculatorTask(realm.getId()), 1000),  1000, "MemberUserAttributeCalculator_"+ KeycloakModelUtils.generateId());
         return Response.noContent().build();
     }
 
-
     @Path("/configuration-rules")
     public AdminEnrollmentConfigurationRules adminEnrollmentConfigurationRules() {
         return new AdminEnrollmentConfigurationRules(realm, session, adminEvent, realmAuth);
     }
+
     @Path("/group/{groupId}")
     public AdminGroups adminGroups(@PathParam("groupId") String groupId) {
         GroupModel group = realm.getGroupById(groupId);
@@ -195,6 +195,7 @@ public class AdminService {
     @POST
     @Path("/effective-expiration-date/calculation")
     public Response calculateEffectiveExpirationDate() {
+        realmAuth.groups().requireManage();
         userGroupMembershipExtensionRepository.migrateEffectiveExpiresAt();
         return Response.noContent().build();
     }
