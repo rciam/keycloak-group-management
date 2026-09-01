@@ -1,0 +1,12 @@
+diff --git a/node_modules/@keycloak/keycloak-ui-shared/dist/keycloak-ui-shared.js b/node_modules/@keycloak/keycloak-ui-shared/dist/keycloak-ui-shared.js
+index 295c0de..ce55381 100644
+--- a/node_modules/@keycloak/keycloak-ui-shared/dist/keycloak-ui-shared.js
++++ b/node_modules/@keycloak/keycloak-ui-shared/dist/keycloak-ui-shared.js
+@@ -1122,6 +1122,7 @@ const zr = "_title_180i0_2", Jr = {
+     addButtonLabel: e("addMultivaluedLabel", {
+       fieldLabel: He(e, r)
+     }),
++    isDisabled: r.readOnly,
+     ...l
+   }
+ ) }), ia = ({
