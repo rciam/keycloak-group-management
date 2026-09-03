@@ -36,6 +36,13 @@ function getRouteUrl(path: string) {
 }
 
 function isPathActive(currentPath: string, routePath: string): boolean {
+  if (
+    routePath === "personal-info" &&
+    (currentPath === "/" || currentPath === "/personal-info")
+  ) {
+    return true;
+  }
+
   return !!matchPath(
     {
       path: getRouteUrl(routePath),
