@@ -28,17 +28,17 @@ export type NavRouteObject = RouteObject & {
 };
 
 export const DeviceActivityRoute: NavRouteObject = {
-  path: "account/device-activity",
+  path: "security/device-activity",
   element: <DeviceActivity />,
 };
 
 export const LinkedAccountsRoute: NavRouteObject = {
-  path: "account/linked-accounts",
+  path: "security/linked-accounts",
   element: <LinkedAccounts />,
 };
 
 export const SigningInRoute: NavRouteObject = {
-  path: "account/signing-in",
+  path: "security/signing-in",
   element: <SigningIn />,
 };
 
@@ -151,12 +151,13 @@ export const RootRoute: NavRouteObject = {
     MyGroupsRoute,
     MyGroupRoute,
     InvitationLandingRoute,
+    PersonalInfoIndexRoute,
     MyGroupEnrollmentsRoute,
     GroupAdminPageRoute,
     GroupManagementRoute,
     EnrollmentDiscoveryRoute,
     GroupEnrollmentsRoute,
-    PersonalInfoRoute, // duplicated index is a bit odd but leaving as you had
+    // duplicated index is a bit odd but leaving as you had
     ...(environment.features.isMyResourcesEnabled ? [ResourcesRoute] : []),
     ...(environment.features.isOid4VciEnabled ? [Oid4VciRoute] : []),
   ],

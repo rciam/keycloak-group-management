@@ -22,7 +22,6 @@ export const i18n = createInstance({
     loadPath: `${environment.serverBaseUrl}/resources/${environment.realm}/account/{{lng}}`,
     parse: (data: string) => {
       const messages = JSON.parse(data);
-      console.log("i18n messages:", messages);
       const result: Record<string, string> = {};
       messages.forEach((v: KeyValue) => (result[v.key] = v.value));
       return result;

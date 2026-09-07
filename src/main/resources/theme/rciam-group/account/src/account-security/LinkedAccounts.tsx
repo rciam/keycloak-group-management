@@ -65,7 +65,6 @@ export const LinkedAccounts = () => {
         if (signal.aborted) {
           return [];
         }
-        console.log("this iss");
         addAlert(t("failedToFetchLinkedAccounts"), AlertVariant.danger);
 
         return [];

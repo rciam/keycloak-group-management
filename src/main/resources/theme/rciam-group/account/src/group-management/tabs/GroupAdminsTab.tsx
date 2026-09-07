@@ -174,7 +174,6 @@ export const GroupAdmins: FC<any> = (props) => {
       .catch((err) => {
         stopLoader();
         const response = err?.response ?? err;
-        console.log(getError(response));
         addError("addAdminError", getError(response));
       });
   };
@@ -197,7 +196,6 @@ export const GroupAdmins: FC<any> = (props) => {
       .catch((err) => {
         stopLoader();
         const response = err?.response ?? err;
-        console.log(getError(response));
         addError("removeAdminError", getError(response));
       });
   };
@@ -220,7 +218,6 @@ export const GroupAdmins: FC<any> = (props) => {
       .catch((err) => {
         stopLoader();
         const response = err?.response ?? err;
-        console.log(getError(response));
         addError("adminInvitationError", getError(response));
       });
   };

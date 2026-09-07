@@ -9,6 +9,10 @@ import { environment } from "./environment";
 import { i18n } from "./i18n";
 import { routes } from "./routes";
 import { Help } from "@keycloak/keycloak-ui-shared";
+import { normalizeAccountConsoleUrl } from "./utils";
+
+
+normalizeAccountConsoleUrl();
 
 const router = createHashRouter(routes);
 

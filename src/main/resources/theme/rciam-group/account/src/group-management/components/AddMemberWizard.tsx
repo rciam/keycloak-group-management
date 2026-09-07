@@ -191,14 +191,12 @@ export const AddMemberWizard: React.FC<any> = (props) => {
   };
 
   let fetchGroupEnrollments = () => {
-    console.log("fetchGroupEnrollments called");
     groupsService!
       .doGet<any>("/group-admin/group/" + props.groupId + "/configuration/all")
       .then((response: HttpResponse<any>) => {
         if (response.status === 200 && response.data) {
           setEnrollmentConfigurations(response.data);
         }
-        console.log(response.data);
       });
   };
 
